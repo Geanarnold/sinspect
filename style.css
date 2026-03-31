@@ -1,0 +1,65 @@
+/* =============================================
+   SInspect – Custom Styles
+   ============================================= */
+
+:root {
+  --primary:       #E8520A;
+  --primary-dark:  #C44409;
+  --secondary:     #1B3A6B;
+  --secondary-dark:#142B52;
+  --success:       #16a34a;
+  --warning:       #d97706;
+  --danger:        #dc2626;
+}
+
+/* ---- Base ---- */
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+body { overscroll-behavior: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+#app { position: relative; }
+
+/* ---- Inputs ---- */
+input, textarea, select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* ---- Buttons ---- */
+button { cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+button:active { transform: scale(0.97); opacity: 0.85; }
+
+/* ---- Checklist item status buttons ---- */
+.status-btn { transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.status-btn.active-ok          { background: #16a34a !important; border-color: #16a34a !important; color: white !important; }
+.status-btn.active-revisar     { background: #d97706 !important; border-color: #d97706 !important; color: white !important; }
+.status-btn.active-interditar  { background: #dc2626 !important; border-color: #dc2626 !important; color: white !important; }
+
+/* ---- Scrollbar (webkit) ---- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* ---- Fade-in animation ---- */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.25s ease-out; }
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  color: white; padding: 12px 24px; border-radius: 10px;
+  z-index: 9999; font-weight: 700; font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+/* ---- Print styles ---- */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { margin: 0; background: white; }
+  .no-print { display: none !important; }
+  @page { margin: 15mm; size: A4; }
+}
