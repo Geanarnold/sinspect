@@ -134,3 +134,12 @@ Quantidades (DR-IN):
 7. Código SA de cada peça deve constar no BOM.
 
 Pendente `[CONFIRMAR]`: altura da zona de interferência dos braços/longarinas ao redor da emenda; tabela de SA por altura; se o acréscimo de 8% permanece no peso total.
+
+---
+
+## 9. Dados de produto (decisão de arquitetura)
+
+- Todos os dados de produto (aço, espessura, dimensões, peso usado, quantidade por conjunto, custo) ficam na aba **Produtos** de `catalogo/CATALOGO.xlsx`. O app lê dela; nenhum valor de produto é fixo no código, porque eles podem mudar.
+- Sapatas: peso da **planilha** (1,25 / 1,30 / 1,35 / 1,65 kg), por decisão do responsável técnico. Base em 4,75 mm e perfil U em 2,65 mm, sempre Civil 300.
+- Placa niveladora: COL 80 e 101 usam a mesma peça (SA041463, 155x155, 1,4 mm, 0,223 kg); COL 122 usa outra (SA041649, 155x160, 1,4 mm, 0,231 kg).
+- Dados errados da planilha antiga são desconsiderados (não entram como regra).
