@@ -1,0 +1,4 @@
+modelo,face_frontal_mm,codigo_desenho,rev,sliter_mm,aco,sa_no_desenho,peso_desenho_kg,area_sup_m2,obs
+AMPP COL 80 C/ABA,80,0004.0001.03.001,REV.25,246,CIVIL 300 (SLITER BQ),SA040053,4.167,0.488,SA define altura+modelo; espessura escolhida pelo usuario
+AMPP COL 101 C/ABA,101,0004.0001.03.003,REV.46,273,CIVIL 300,(sem SA no desenho),4.136,0.542,SA define altura+modelo; espessura escolhida pelo usuario
+AMPP COL 122 C/ABA,122,0004.0001.03.005,REV.29,298.5,CIVIL 300 (SLITER LQ ACO0493),SA040132,6.005,0.597,SA define altura+modelo; espessura escolhida pelo usuario

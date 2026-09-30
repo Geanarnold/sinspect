@@ -120,3 +120,17 @@ Quantidades (DR-IN):
 6. Regra de conjuntos: `C = R+1` (Drive-Thru) vale para Drive-In com várias ruas, ou é sempre 1?
 7. Quais limites de altura, níveis, carga e perfil devem gerar alerta/recusa (além dos 3 já existentes)?
 8. Qual constante de aço adotar (7,85 ou 7,86)?
+
+---
+
+## 8. Emenda de coluna (regras CONFIRMADAS pelo responsável técnico)
+
+1. Altura da coluna em múltiplos de 50 mm; **máximo 8500 mm por peça** (cabine de pintura).
+2. **No máximo UMA emenda por estrutura** (2 peças). Proibido 3 ou mais trechos (ex.: 5000+2000+3000 ou 8000+8000+8000).
+3. Emenda com **2 talas SA040045** (0,448 kg cada, 0,896 kg por emenda). A tala fica **metade na coluna de baixo e metade na de cima**.
+4. Fixadores por emenda: 16× INT0648, 16× INT0650, 32× INT0812 (8/8/16 por tala; 4 parafusos por metade de tala). Fixadores **sem peso**; custo unitário em aba própria (a criar).
+5. **Posição da emenda**: desviar de interferência com braços e longarinas, mantendo-a **o mais alta possível** (estabilidade).
+6. O código **SA da coluna define só altura + modelo (80/101/122)**; a espessura é escolhida pelo usuário.
+7. Código SA de cada peça deve constar no BOM.
+
+Pendente `[CONFIRMAR]`: altura da zona de interferência dos braços/longarinas ao redor da emenda; tabela de SA por altura; se o acréscimo de 8% permanece no peso total.
