@@ -143,3 +143,15 @@ Pendente `[CONFIRMAR]`: altura da zona de interferência dos braços/longarinas 
 - Sapatas: peso da **planilha** (1,25 / 1,30 / 1,35 / 1,65 kg), por decisão do responsável técnico. Base em 4,75 mm e perfil U em 2,65 mm, sempre Civil 300.
 - Placa niveladora: COL 80 e 101 usam a mesma peça (SA041463, 155x155, 1,4 mm, 0,223 kg); COL 122 usa outra (SA041649, 155x160, 1,4 mm, 0,231 kg).
 - Dados errados da planilha antiga são desconsiderados (não entram como regra).
+
+---
+
+## 10. Definições confirmadas e lembretes
+
+- **Altura da estrutura:** medida da **parte inferior da sapata até o final do contraventamento superior**. A placa niveladora (2 × 1,4 mm, entre sapata e piso) é **desprezada** na altura.
+- Sapata completa por coluna: 1 base + 1 perfil U + 2 placas niveladoras + 4 chumbadores (INT0654) + 4 parafusos (INT0648) + 4 porcas (INT0650) + 8 arruelas (INT0812).
+
+### LEMBRETES (avisar o responsável técnico ao iniciar o código do app)
+1. **COL 80:** sapata (CO) e perfil U (SA) ainda **sem código**. Decisão: seguem sem código por enquanto.
+2. Altura da coluna sem SA cadastrado (COL 80 de 7550 a 8450 mm; COL 101 de 8550 a 9850 mm; demais alturas em amarelo na aba Colunas): o app deve exibir "SEM CÓDIGO".
+3. Peças da estrutura ainda não levantadas: travessa, diagonais, braços, LG-UE, viga túnel, protetores.
