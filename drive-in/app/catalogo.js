@@ -1,4 +1,4 @@
-// Gerado de ../catalogo/CATALOGO.xlsx — não editar à mão.
+// Gerado de ../catalogo/CATALOGO.xlsx por gerar_catalogo_js.py — não editar à mão.
 window.CATALOGO = {
  "versao": "2026-10-01",
  "colunas": {
@@ -831,6 +831,36 @@ window.CATALOGO = {
    "total": 3064.5
   }
  ],
+ "uniao": [
+  {
+   "nome": "PP TRAVESSA UNIAO 0,70 LATERAL TRIPLA COL 80",
+   "col": 80,
+   "co": "CO040458",
+   "peso": 1.134,
+   "total": 696.5
+  },
+  {
+   "nome": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 101",
+   "col": 101,
+   "co": "CO040432",
+   "peso": 1.793,
+   "total": 1017.8
+  },
+  {
+   "nome": "PP TRAVESSA UNIAO 0,76 LATERAL TRIPLA COL 101",
+   "col": 101,
+   "co": "CO040755",
+   "peso": 1.434,
+   "total": 791.8
+  },
+  {
+   "nome": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 122",
+   "col": 122,
+   "co": "CO040543",
+   "peso": 2.059,
+   "total": 1017.8
+  }
+ ],
  "produtos": {
   "SAP-80": {
    "tipo": "Sapata (conjunto)",
@@ -1135,6 +1165,62 @@ window.CATALOGO = {
    "peso": null,
    "unid": "kg",
    "aco": ""
+  },
+  "UNIAO-80-1_05": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 1,05 LATERAL TRIPLA COL 80",
+   "codigo": "CO040165",
+   "peso": 1.499,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-80-1_08": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 1,08 LATERAL TRIPLA COL 80",
+   "codigo": "CO040425",
+   "peso": 1.493,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-80-0_70": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 0,70 LATERAL TRIPLA COL 80",
+   "codigo": "CO040458",
+   "peso": 1.134,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-101-1_03": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 1,03 LATERAL TRIPLA COL 101",
+   "codigo": "CO040356",
+   "peso": 1.793,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-101-1_02": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 101",
+   "codigo": "CO040432",
+   "peso": 1.793,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-101-0_76": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 0,76 LATERAL TRIPLA COL 101",
+   "codigo": "CO040755",
+   "peso": 1.434,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
+  },
+  "UNIAO-122-1_02": {
+   "tipo": "Travessa união",
+   "desc": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 122",
+   "codigo": "CO040543",
+   "peso": 2.059,
+   "unid": "kg",
+   "aco": "(não especificado no desenho)"
   }
  },
  "composicao": [
@@ -1341,6 +1427,18 @@ window.CATALOGO = {
    "item": "TUBO-122",
    "qtd": 2,
    "contagem": "por travessa horizontal, menos 1 por diagonal que chega (mín. 0)"
+  },
+  {
+   "pai": "UNIAO (por peça)",
+   "item": "INT0648",
+   "qtd": 6,
+   "contagem": "por travessa união"
+  },
+  {
+   "pai": "UNIAO (por peça)",
+   "item": "INT0650",
+   "qtd": 6,
+   "contagem": "por travessa união"
   }
  ]
 };

@@ -245,3 +245,9 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Variantes cadastradas (aba "Travessa união"): COL 80: 0,70 (CO040458), 1,05 (CO040165), 1,08 (CO040425); COL 101: 0,76 (CO040755), 1,02 (CO040432), 1,03 (CO040356); COL 122: 1,02 (CO040543). Peso do desenho.
 - Cotas lidas: 0,70 → 664,7 / 696,5; 0,76 → 760 / 791,8; 1,02 → 986 / 1017,8 (interna / total; diferença fixa 31,8). **A relação entre o nome (0,70 / 0,76 / 1,02), as cotas e o passo A da coluna solteira não é consistente e precisa ser definida** `[CONFIRMAR]`.
 - Fixadores: 6× INT0648 + 6× INT0650 (só na folha 0,70 COL 80) `[CONFIRMAR para as demais]`.
+
+### 13.3 Travessa união — regra confirmada
+- Uma união por nível de travessa horizontal (acompanha as horizontais), sem diagonal.
+- **Comprimento total = A1 − 69,8 mm** (A1 = passo da coluna solteira). Ex.: 820 → 750,2; 1025 → 955,2. Busca do CO no cadastro a ±3 mm; sem cadastro → `COXXXXXX`.
+- **A coluna solteira fica sempre à esquerda** na vista lateral (1º passo = A1).
+- Exportação DXF da vista lateral implementada (`app/dxf.js`): layers MONTANTE / Contraventamento / COTAS / texto, cotas A1..An, A, B, C e tabela de valores. Perfis reais (furos, blocos do gabarito) não são reproduzidos.

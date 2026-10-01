@@ -78,7 +78,7 @@
     xs.forEach((x) => { g += `<rect x="${X(x + col / 2) - cw / 2}" y="${Y(H)}" width="${cw}" height="${H * s}" fill="#6b7280"/>`; });
     for (let i = 0; i < n; i++) {
       const x0 = X(xs[i] + col / 2) + cw / 2, x1 = X(xs[i + 1] + col / 2) - cw / 2;
-      const quadro = i % 2 === 0 && !(solteira && i === n - 1), uniao = solteira && i === n - 1;
+      const uniao = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
       if (quadro || uniao) ys.forEach((y) => { g += `<line x1="${x0}" y1="${Y(y)}" x2="${x1}" y2="${Y(y)}" stroke="${uniao ? '#059669' : '#E8520A'}" stroke-width="2"/>`; });
       if (quadro) for (let k = 0; k < r.lateral.nD; k++) g += `<line x1="${x0}" y1="${Y(ys[k])}" x2="${x1}" y2="${Y(ys[k + 1])}" stroke="#2563eb" stroke-width="1.5"/>`;
       g += `<line x1="${x0}" y1="${Y(H)}" x2="${x1}" y2="${Y(H)}" stroke="#374151" stroke-width="3"/>`; // elemento de topo em todos os passos
@@ -177,6 +177,12 @@
   $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
   $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
   $('btnPng').addEventListener('click', baixarPng);
+  $('btnDxf').addEventListener('click', () => {
+    if (!last) return;
+    const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
+    const txt = DXF.dxfLateral(last, `CORTE A - VISTA LATERAL - ${$('projeto').value || ''}`.trim());
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `vista-lateral-${nome}.dxf`; a.click();
+  });
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
   $('espacamentos').addEventListener('input', montarEspacos);

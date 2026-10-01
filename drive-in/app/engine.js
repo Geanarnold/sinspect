@@ -71,9 +71,9 @@
     const profundidade = espacos.reduce((s, v) => s + v, 0) + col; // passos eixo a eixo + 1 coluna [CONFIRMAR]
     // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
     const quadros = Math.floor((n + 1) / 2);
-    const solteira = n % 2 === 0;
-    const passosQuadro = espacos.filter((_, i) => i % 2 === 0 && !(solteira && i === n - 1));
-    const passoSolteira = solteira ? espacos[n - 1] : null;
+    const solteira = n % 2 === 0;           // coluna solteira sempre à ESQUERDA (1º passo) na vista lateral
+    const passoSolteira = solteira ? espacos[0] : null;
+    const passosQuadro = espacos.filter((_, i) => solteira ? i % 2 === 1 : i % 2 === 0);
     const posicoes = R * P * N;
 
     // ---- colunas (+ emenda)
@@ -125,9 +125,12 @@
     const tb = prodOf(cat, TUBO[col]);
     add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal (1ª e última horizontais)');
     if (solteira) {
-      const a = passoSolteira, totU = a - 78.6;
-      add('Coluna solteira', 'UNIAO', `Travessa união (coluna solteira) – passo ${a} mm`, SEM.SA, nH * laterais, r1(totU), KG_M_TRAVESSA * totU / 1000, 'uma por nível de horizontal, sem diagonal; SA, comprimento e fixadores a confirmar');
-      pend.push('Coluna solteira: travessa união calculada com a geometria da horizontal (a confirmar SA, comprimento e fixadores).');
+      const a = passoSolteira, totU = r1(a - 69.8);
+      const itU = (cat.uniao || []).filter((u) => u.col === col).find((u) => Math.abs(u.total - totU) <= TOL_SA);
+      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais, totU, itU ? itU.peso : null, itU ? itU.nome : 'sem CO cadastrado para este comprimento (±3 mm); peso não estimado');
+      const q = nH * laterais;
+      add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
+      add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
     }
     add('Topo', 'TOPO', `Elemento de topo ("Travessa Sup Drive In") – 1 por passo`, SEM.SA, n * laterais, null, null, 'peça, SA e peso a confirmar');
     const nPar = 2 * nH * vaosQuadro;
