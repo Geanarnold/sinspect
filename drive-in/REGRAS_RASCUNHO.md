@@ -197,8 +197,8 @@ A travessa horizontal é a mesma para as 3 colunas; mudam só os fixadores e o t
 |---|---|---|---|
 | 80 | INT0993 (5/16" x 2.1/2" ZNC) | INT0650 | SA040047 |
 | 101 | INT0958 (GR2 5/16" x 3.1/4" zinc.) | INT0650 | SA040018 |
-| 122 | `[CONFIRMAR]` INT0958 ou INT0654 | INT0650 | SA040046 |
+| 122 | INT0973 (5/16" x 4" ZNC) | INT0650 | SA040046 |
 
-**Regra do nó:** em cada ponta (nó) da travessa horizontal, se **chega uma diagonal**, **não** se usa tubo complemento; se não chega, usa-se 1 tubo complemento. Nº de tubos = `nós sem diagonal`.
-Contagem proposta `[CONFIRMAR]`: com as diagonais em paralelo (como no desenho da lateral), nenhum nó recebe duas diagonais, então `tubos = 2 × nº de horizontais − 2 × nº de diagonais` (ex.: 12 horizontais e 10 diagonais → 4 tubos por lateral).
+**Regra do nó (confirmada; vale para COL 80, 101 e 122):** em cada ponta da travessa horizontal, se chega uma diagonal **não** se usa tubo complemento. Logo, por travessa horizontal: `tubos = 2 − nº de diagonais que chegam a ela` (mín. 0): 0 tubos (chegam 2 diagonais), 1 tubo (chega 1) ou 2 tubos (não chega nenhuma).
+Cada diagonal chega a duas travessas (a de baixo e a de cima do vão). Com N diagonais nos vãos 1..N: a 1ª e a (N+1)ª horizontais recebem 1 diagonal; da 2ª à N-ésima recebem 2; as demais, 0. Total de tubos por lateral = `2 × nº de horizontais − 2 × nº de diagonais` (ex.: 12 horizontais e 10 diagonais → 4 tubos).
 Pendente: peso, aço e dimensões do tubo complemento; fixadores das diagonais.
