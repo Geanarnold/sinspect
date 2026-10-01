@@ -202,3 +202,7 @@ A travessa horizontal é a mesma para as 3 colunas; mudam só os fixadores e o t
 **Regra do nó (confirmada; vale para COL 80, 101 e 122):** em cada ponta da travessa horizontal, se chega uma diagonal **não** se usa tubo complemento. Logo, por travessa horizontal: `tubos = 2 − nº de diagonais que chegam a ela` (mín. 0): 0 tubos (chegam 2 diagonais), 1 tubo (chega 1) ou 2 tubos (não chega nenhuma).
 Cada diagonal chega a duas travessas (a de baixo e a de cima do vão). Com N diagonais nos vãos 1..N: a 1ª e a (N+1)ª horizontais recebem 1 diagonal; da 2ª à N-ésima recebem 2; as demais, 0. Total de tubos por lateral = `2 × nº de horizontais − 2 × nº de diagonais` (ex.: 12 horizontais e 10 diagonais → 4 tubos).
 Pendente: peso, aço e dimensões do tubo complemento; fixadores das diagonais.
+
+### 11.4 Tubo complemento e fixação das diagonais (confirmado)
+- Tubo complemento (desenho 0004.0001.03.010 REV.05), material TUB0134 tubo redondo Ø12,7 x 1,2 mm: COL 80 = 42 mm, 0,014 kg (SA040047); COL 101 = 62 mm, 0,021 kg (SA040018); COL 122 = 80 mm, 0,027 kg (SA040046). Peso do desenho.
+- **Diagonais não recebem fixadores próprios:** são fixadas pelo mesmo parafuso da travessa horizontal.
