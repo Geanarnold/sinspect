@@ -239,3 +239,9 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Profundidade = Σ passos + 1 coluna (sem o +100). `[CONFIRMAR]`
 - Altura continua variável (fórmula + múltiplo de 50 + manual).
 - Adiado pelo responsável técnico: vista lateral de vigas/longarinas, posição da emenda, demais elementos (contraventamento, viga túnel, protetor, sapata em detalhe).
+
+### 13.2 Travessa união (coluna solteira) — desenho 0004.0001.02.011 REV.08
+- Conjunto **CO** soldado: 1 "PP TRAVESSA x,xx MONTANTE TRIPLO COL n" + 1 "PP PERFIL TRAVAMENTO POSTERIOR COL n" (perfil que abraça a coluna: largura 84,6 / 106,6 / 126,6 para COL 80 / 101 / 122). Específica por coluna.
+- Variantes cadastradas (aba "Travessa união"): COL 80: 0,70 (CO040458), 1,05 (CO040165), 1,08 (CO040425); COL 101: 0,76 (CO040755), 1,02 (CO040432), 1,03 (CO040356); COL 122: 1,02 (CO040543). Peso do desenho.
+- Cotas lidas: 0,70 → 664,7 / 696,5; 0,76 → 760 / 791,8; 1,02 → 986 / 1017,8 (interna / total; diferença fixa 31,8). **A relação entre o nome (0,70 / 0,76 / 1,02), as cotas e o passo A da coluna solteira não é consistente e precisa ser definida** `[CONFIRMAR]`.
+- Fixadores: 6× INT0648 + 6× INT0650 (só na folha 0,70 COL 80) `[CONFIRMAR para as demais]`.
