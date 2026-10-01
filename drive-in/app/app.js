@@ -35,7 +35,8 @@
 
     $('alertas').innerHTML = r.alertas.length ? `<div class="alerta"><b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '';
 
-    renderPecas(r); renderDesenho(r); renderPend(r);
+    renderVista(r);
+    if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); }
   }
 
   function renderPecas(r) {
@@ -93,12 +94,27 @@
     g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} × ${D} mm</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
-  function renderDesenho(r) {
-    $('tab-desenho').innerHTML = `<div class="vistas">
-      <div><h3>Vista lateral (1 pórtico)</h3><div class="s">${r.lateral.nH} horizontais (laranja) e ${r.lateral.nD} diagonais (azul) por vão · ${r.lateral.tubosPorVao} tubos complemento por vão</div>${svgLateral(r)}</div>
-      <div><h3>Vista frontal</h3><div class="s">níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${Number(r.entradas.alturaPalete) + 200} mm (braços ainda não levantados)</div>${svgFrontal(r)}</div>
-      <div><h3>Planta</h3><div class="s">colunas em preto; vigas túnel e contraventamentos não levantados</div>${svgPlanta(r)}</div>
-    </div><p class="nota">Esquemático. O DXF com cotas e carimbo é uma fase posterior.</p>`;
+  const VISTAS = {
+    lateral: (r) => ({ t: 'Vista lateral (1 pórtico)', s: `${r.lateral.nH} horizontais (laranja) e ${r.lateral.nD} diagonais (azul) por vão · ${r.lateral.tubosPorVao} tubos complemento por vão`, svg: svgLateral(r) }),
+    frontal: (r) => ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${Number(r.entradas.alturaPalete) + 200} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
+    planta: (r) => ({ t: 'Planta', s: 'colunas em preto; vigas túnel e contraventamentos não levantados', svg: svgPlanta(r) }),
+  };
+  let vistaAtual = 'lateral';
+  function renderVista(r) {
+    const v = VISTAS[vistaAtual](r);
+    $('vista').innerHTML = `<h3>${v.t}</h3><div class="s">${v.s}</div>${v.svg}<p class="nota">Esquemático, atualizado conforme o preenchimento. O DXF com cotas e carimbo é uma fase posterior.</p>`;
+  }
+  function baixarPng() {
+    const svg = $('vista').querySelector('svg'); if (!svg) return;
+    const vb = svg.viewBox.baseVal, scale = 3;
+    const xml = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = vb.width * scale; c.height = vb.height * scale;
+      const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+      const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = `${vistaAtual}-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.png`; a.click();
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   }
 
   function renderPend(r) {
@@ -121,10 +137,28 @@
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.csv`; a.click();
   }
 
-  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
-    ['pecas', 'desenho', 'pend'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
+  document.querySelectorAll('.painel .tab').forEach((t) => t.addEventListener('click', () => {
+    const grupo = t.closest('.painel');
+    grupo.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
+    if (VISTAS[t.dataset.tab]) { vistaAtual = t.dataset.tab; if (last) renderVista(last); }
+    else ['pecas', 'pend'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
   }));
+  const PASSOS = ['projeto', 'estrutura', 'lateral'];
+  let passo = 0;
+  function mostrarPasso(i) {
+    passo = Math.max(0, Math.min(PASSOS.length - 1, i));
+    PASSOS.forEach((p, k) => { $('passo-' + p).classList.toggle('hidden', k !== passo); });
+    document.querySelectorAll('.passo').forEach((el, k) => { el.classList.toggle('active', k === passo); el.classList.toggle('feito', k < passo); });
+    $('btnVoltar').disabled = passo === 0;
+    $('btnAvancar').classList.toggle('hidden', passo === PASSOS.length - 1);
+    $('btnBom').classList.toggle('hidden', passo !== PASSOS.length - 1);
+  }
+  document.querySelectorAll('.passo').forEach((el, k) => el.addEventListener('click', () => mostrarPasso(k)));
+  $('btnVoltar').addEventListener('click', () => mostrarPasso(passo - 1));
+  $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
+  $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
+  $('btnPng').addEventListener('click', baixarPng);
+  mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());

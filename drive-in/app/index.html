@@ -10,44 +10,66 @@
   <header><div class="wrap hdr">
     <div class="logo">DI</div>
     <div><h1>Configurador Drive-In</h1><div class="sub">Levantamento de peso e lista de peças · protótipo · catálogo <span id="catVersao"></span></div></div>
-    <div class="acoes"><button id="btnCsv">Exportar lista (CSV)</button><button id="btnPrint" class="primario">Imprimir / PDF</button></div>
+    
   </div></header>
 
   <main class="wrap">
-    <!-- Entradas -->
     <aside class="card">
-      <h2>Configuração</h2>
-      <div class="form">
+      <div class="passos">
+        <div class="passo active" data-passo="projeto">1 · Projeto</div>
+        <div class="passo" data-passo="estrutura">2 · Estrutura</div>
+        <div class="passo" data-passo="lateral">3 · Coluna e lateral</div>
+      </div>
+      <div id="passo-projeto" class="form">
         <div class="full"><label>Projeto / cliente</label><input id="projeto" type="text" placeholder="Ex.: SUPRA260407 – Bloco A"/></div>
-        <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
-        <div><label>Espessura (mm)</label><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select></div>
+        <div><label>Revisão</label><input id="revisao" type="text" value="REV.00"/></div>
+        <div><label>Responsável</label><input id="responsavel" type="text" placeholder="Nome"/></div>
+        <div class="full"><label>Observações</label><input id="obs" type="text" placeholder="Opcional"/></div>
+      </div>
+      <div id="passo-estrutura" class="form hidden">
         <div><label>Ruas</label><input id="ruas" type="number" min="1" value="1"/></div>
         <div><label>Paletes por rua</label><input id="paletesPorRua" type="number" min="1" value="4"/></div>
         <div><label>Níveis (chão + níveis)</label><input id="niveis" type="number" min="2" value="5"/></div>
-        <div><label>Espaçamentos (profund.)</label><input id="espacamentos" type="number" min="1" value="5"/></div>
-        <div><label>Largura da lateral (mm)</label><input id="largura" type="number" step="1" value="820"/></div>
         <div><label>Largura da rua (mm)</label><input id="larguraRua" type="number" value="1400"/></div>
         <div><label>Carga do palete (kg)</label><input id="cargaPalete" type="number" value="1000"/></div>
         <div><label>Altura do palete (mm)</label><input id="alturaPalete" type="number" value="1600"/></div>
         <div><label>Altura 1º nível (mm)</label><input id="alt1Nivel" type="number" value="2000"/></div>
         <div><label>Altura manual (mm)</label><input id="alturaManual" type="number" step="50" placeholder="auto"/></div>
+        <p class="nota full">Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
       </div>
-      <p class="nota">A altura é calculada por <span class="code">1º nível + (níveis − 2) × (palete + 200) + 1400</span>, arredondada para 50 mm. Preencha “Altura manual” para forçar outro valor.</p>
-      <p class="nota">Altura medida da parte inferior da sapata ao contraventamento superior (placa niveladora desprezada).</p>
+      <div id="passo-lateral" class="form hidden">
+        <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
+        <div><label>Espessura (mm)</label><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select></div>
+        <div><label>Espaçamentos (profund.)</label><input id="espacamentos" type="number" min="1" value="5"/></div>
+        <div><label>Largura da lateral (mm)</label><input id="largura" type="number" step="1" value="820"/></div>
+        <p class="nota full">Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal. Códigos SA buscados a ±3 mm.</p>
+      </div>
+      <div class="rodape-form">
+        <button id="btnVoltar">Voltar</button>
+        <button id="btnAvancar" class="primario">Avançar</button>
+        <button id="btnBom" class="primario hidden">Gerar lista de peças</button>
+      </div>
     </aside>
 
-    <!-- Resultados -->
     <section>
       <div id="kpis" class="kpis"></div>
       <div id="alertas"></div>
       <div class="card painel">
         <div class="tabs">
+          <div class="tab active" data-tab="lateral">Vista lateral</div>
+          <div class="tab" data-tab="frontal">Vista frontal</div>
+          <div class="tab" data-tab="planta">Planta</div>
+          <div class="acoes-tab"><button id="btnPng">Baixar imagem (PNG)</button></div>
+        </div>
+        <div id="vista" class="vista"></div>
+      </div>
+      <div id="bom" class="card painel hidden">
+        <div class="tabs">
           <div class="tab active" data-tab="pecas">Lista de peças</div>
-          <div class="tab" data-tab="desenho">Desenho</div>
           <div class="tab" data-tab="pend">Pendências e regras</div>
+          <div class="acoes-tab"><button id="btnCsv">Exportar CSV</button><button id="btnPrint" class="primario">Imprimir / PDF</button></div>
         </div>
         <div id="tab-pecas"></div>
-        <div id="tab-desenho" class="hidden"></div>
         <div id="tab-pend" class="hidden"></div>
       </div>
     </section>
