@@ -155,3 +155,20 @@ Pendente `[CONFIRMAR]`: altura da zona de interferência dos braços/longarinas 
 1. **COL 80:** sapata (CO) e perfil U (SA) ainda **sem código**. Decisão: seguem sem código por enquanto.
 2. Altura da coluna sem SA cadastrado (COL 80 de 7550 a 8450 mm; COL 101 de 8550 a 9850 mm; demais alturas em amarelo na aba Colunas): o app deve exibir "SEM CÓDIGO".
 3. Peças da estrutura ainda não levantadas: travessa, diagonais, braços, LG-UE, viga túnel, protetores.
+
+---
+
+## 11. Lateral (pórtico): travessas e diagonais (regras CONFIRMADAS)
+
+Fonte: desenho 0004.0001.01.055 "PP LATERAL CABA 2,50 x 1,00 80 C ABA" (código de produto `PA****`, ainda sem cadastro; 26,609 kg; operações: 01 corte laser, 02 viradeira). Os valores das cotas A, B e C não vêm no PDF; só os rótulos.
+
+- **Cota A:** largura da lateral (de fora a fora das colunas). `[CONFIRMAR]` se A = "espaçamento entre colunas" (D10 da planilha antiga).
+- **Cota B:** centro a centro da furação da travessa horizontal. `B = A − 109,1 mm`.
+- **Travessa horizontal, comprimento total:** `B + 30,5 mm` (= `A − 78,6 mm`).
+- **Cota C:** centro a centro da diagonal. É a hipotenusa do triângulo formado por `B` (horizontal) e `V` (distância vertical, centro a centro, entre duas travessas horizontais): `C = √(B² + V²)`.
+- **Diagonal, comprimento total:** `C + 30,5 mm`.
+- **Cadastro (SA):** para cada travessa e diagonal calculada, procurar na tabela de SA do **mesmo modelo de montante (80/101/122, pelo nome)** o item de **cota mais aproximada**. Se não houver, marcar "SEM CÓDIGO" e informar a medida.
+
+Comparação com a planilha antiga (A = 820, V = 900): travessa 741,4 mm (antes 736); diagonal 1177,4 mm (antes 1175,4).
+
+`[CONFIRMAR]`: tolerância de aproximação para aceitar um SA existente; regra de posição vertical das travessas (valores de V); desenho/tabela de travessa e diagonal (aço, espessura, desenvolvimento).
