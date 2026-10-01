@@ -206,3 +206,11 @@ Pendente: peso, aço e dimensões do tubo complemento; fixadores das diagonais.
 ### 11.4 Tubo complemento e fixação das diagonais (confirmado)
 - Tubo complemento (desenho 0004.0001.03.010 REV.05), material TUB0134 tubo redondo Ø12,7 x 1,2 mm: COL 80 = 42 mm, 0,014 kg (SA040047); COL 101 = 62 mm, 0,021 kg (SA040018); COL 122 = 80 mm, 0,027 kg (SA040046). Peso do desenho.
 - **Diagonais não recebem fixadores próprios:** são fixadas pelo mesmo parafuso da travessa horizontal.
+
+---
+
+## 12. Protótipo do configurador (`drive-in/app/`)
+- `index.html` + `style.css` + `app.js` (interface, sem dependência externa) · `engine.js` (motor; roda no navegador e no Node) · `catalogo.js` (gerado do `CATALOGO.xlsx`).
+- Abrir `index.html` no navegador. Para regenerar `catalogo.js` após editar o Excel: ver o script usado no commit (a automatizar).
+- Implementado: colunas (SA por altura, kg/m), emenda, sapata completa, placa niveladora, travessas e diagonais (posições, SA ±3 mm), tubo complemento, parafusos das travessas; KPIs, lista de peças com códigos (provisório `SA04XXXX`), CSV, impressão, desenho esquemático (lateral, frontal, planta).
+- Não implementado (pendências exibidas no app): braços, LG-UE, viga túnel, protetores, stop; posição da emenda por interferência; profundidade (passo vs largura total da lateral).
