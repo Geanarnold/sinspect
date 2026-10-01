@@ -214,3 +214,20 @@ Pendente: peso, aço e dimensões do tubo complemento; fixadores das diagonais.
 - Abrir `index.html` no navegador. Para regenerar `catalogo.js` após editar o Excel: ver o script usado no commit (a automatizar).
 - Implementado: colunas (SA por altura, kg/m), emenda, sapata completa, placa niveladora, travessas e diagonais (posições, SA ±3 mm), tubo complemento, parafusos das travessas; KPIs, lista de peças com códigos (provisório `SA04XXXX`), CSV, impressão, desenho esquemático (lateral, frontal, planta).
 - Não implementado (pendências exibidas no app): braços, LG-UE, viga túnel, protetores, stop; posição da emenda por interferência; profundidade (passo vs largura total da lateral).
+
+---
+
+## 13. Leitura do projeto de referência `DRIVE_IN.dxf` (cortes A e B, vista lateral)
+
+Fatos lidos do arquivo (não são decisões):
+- Dois cortes, ambos com **altura B = 8800**, passo entre colunas **A1..A5 = 820** (eixo a eixo). Corte B: 5 passos (A = 4100, 6 colunas). Corte A: 6 passos (A = 4920, 7 colunas).
+- A lateral é formada por **quadros de 2 colunas** (bloco "Montante Drive In", passo entre quadros 1640 = 2 × 820). Dentro do quadro: travessas horizontais + diagonais. **No vão entre quadros não há travessa nem diagonal**; só o elemento de topo.
+- Corte A (6 passos, 7 colunas): 3 quadros + **1 coluna solteira** na ponta, ligada aos quadros por **"TRAVESSA UNIÃO"** em cada nível de horizontal (11 peças), **sem diagonal**. Isso confirma a regra da planilha: nº de passos par → coluna solteira; qtd de travessa união = horizontais − 1 (contando o topo).
+- Horizontais (do pé da coluna): **100, 700, 1300, 1900, 2800, 3700, 4600, 5500, 6400, 7300, 8200** (11 peças por quadro). Cota C = 600 (1ª → 2ª horizontal). **Não há horizontal a 100 mm do topo**: a última fica no último passo de 900 que cabe (8200), e o vão 8200→8800 fecha com o elemento de topo.
+- Topo: bloco **"Travessa Sup Drive In"** (layer Contraventamento) a 8800, uma peça por passo de 820, **inclusive nos vãos entre quadros** (blocos alternados: sobre o quadro / sobre o vão).
+- Diagonais por quadro: 3 (vãos de 600) + 7 (vãos de 900) = **10**, todas no mesmo sentido (paralelas). Confirma `T110 = 10` da planilha. Vão de topo (8200→8800) sem diagonal.
+- Coluna desenhada como **peça única de 8800** (sem emenda representada) com sapata e piso de concreto (bloco "Piso Concreto").
+- Cotas com texto sobrescrito (A1..A5, A, B, C): o desenho é um gabarito cujas letras são preenchidas por tabela.
+- Layers: `MONTANTE` (cor 170), `Contraventamento` (cor 9), `4 - TEXTO DE ESCALA E VISTA` (cor 2), `0`, `Defpoints`, `01 INUTILIZADO`.
+
+Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas + coluna solteira quando passos par; vão entre quadros sem travessa/diagonal; (2) retirar a horizontal "a 100 mm do topo"; (3) elemento de topo por passo (todos os passos); (4) travessa união nos níveis da coluna solteira, sem diagonal.
