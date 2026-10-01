@@ -160,7 +160,7 @@ Pendente `[CONFIRMAR]`: altura da zona de interferência dos braços/longarinas 
 
 ## 11. Lateral (pórtico): travessas e diagonais (regras CONFIRMADAS)
 
-Fonte: desenho 0004.0001.01.055 "PP LATERAL CABA 2,50 x 1,00 80 C ABA" (código de produto `PA****`, ainda sem cadastro; 26,609 kg; operações: 01 corte laser, 02 viradeira). Os valores das cotas A, B e C não vêm no PDF; só os rótulos.
+Fonte: desenho 0004.0001.01.055 "PP LATERAL CABA 2,50 x 1,00 80 C ABA" (usado só para entender a geometria; não é cadastrado). Os valores das cotas A, B e C não vêm no PDF; só os rótulos.
 
 - **Cota A:** largura da lateral (de fora a fora das colunas). `[CONFIRMAR]` se A = "espaçamento entre colunas" (D10 da planilha antiga).
 - **Cota B:** centro a centro da furação da travessa horizontal. `B = A − 109,1 mm`.
@@ -172,3 +172,12 @@ Fonte: desenho 0004.0001.01.055 "PP LATERAL CABA 2,50 x 1,00 80 C ABA" (código 
 Comparação com a planilha antiga (A = 820, V = 900): travessa 741,4 mm (antes 736); diagonal 1177,4 mm (antes 1175,4).
 
 `[CONFIRMAR]`: tolerância de aproximação para aceitar um SA existente; regra de posição vertical das travessas (valores de V); desenho/tabela de travessa e diagonal (aço, espessura, desenvolvimento).
+
+### 11.1 Confirmações posteriores (travessa e diagonal)
+- **A = largura total da lateral** (nome das peças em metros: "TRAVESSA HORIZONTAL 1,00" = lateral de 1000 mm).
+- Tabela de SA: coluna A = centro a centro; coluna B = comprimento total (B = A + 30,5). Validado: A = largura − 109,1.
+- **Tolerância ±3 mm** para aceitar um SA existente. Busca pelo **comprimento**, em todos os itens cadastrados (as diagonais de V = 600 só existem cadastradas como "ESP").
+- **V entre horizontais:** padrão = primeiras 3 horizontais a 600 mm, a partir da 3ª a 900 mm. Pode ser alterado por projeto. `[CONFIRMAR]` se "3 primeiras" são 3 vãos (como na planilha antiga: 4 horizontais) ou 3 horizontais (2 vãos) e a altura da 1ª horizontal.
+- Validação da regra C = √(B²+V²) contra o cadastro: nas 19 diagonais padrão, V implícito ≈ 900 mm (898,8 a 903,4; um caso em 907,5); a diagonal "1,00 ESP 1,08 MT" confere com V = 600.
+- Peças soltas no BOM, nível SA. Item sem código no BOM: **"SAXXXX"**.
+- Material de travessa e diagonal: ACO0602 SLITER FF 1,40 x 80 GI (kg/m teórico = 80 x 1,4 x 7,85e-6 x 1000 = 0,8792). O peso da tabela do SolidWorks **não é usado**.
