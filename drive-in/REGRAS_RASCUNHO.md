@@ -189,3 +189,16 @@ Comparação com a planilha antiga (A = 820, V = 900): travessa 741,4 mm (antes 
   - H = altura da coluna (do pé da sapata ao contraventamento superior, placa desprezada).
 - **Excluídos da busca de SA** (cadastro suspeito): horizontais `SA041091`, `SA041029` e `SA041443`. As 4 diagonais com V entre 903 e 907 mm ficam na busca (sinalizadas "CONFERIR"; o filtro de ±3 mm só as aceita se o comprimento calculado bater).
 - **Códigos do ERP:** `PK000000`, `PA000000`, `CO000000`, `SA000000`. Sem cadastro no BOM: `SA04XXXX`, `COXXXXXX`, `PAXXXXXX` ou `PKXXXXXX` (isso significa que o item ainda não existe). Isso substitui o "SAXXXX" citado antes.
+
+### 11.3 Fixadores da travessa horizontal e tubo complemento
+A travessa horizontal é a mesma para as 3 colunas; mudam só os fixadores e o tubo complemento (por modelo de coluna). Por travessa horizontal (1 fixação em cada ponta):
+
+| Coluna | Parafuso (2) | Porca (2) | Tubo complemento |
+|---|---|---|---|
+| 80 | INT0993 (5/16" x 2.1/2" ZNC) | INT0650 | SA040047 |
+| 101 | INT0958 (GR2 5/16" x 3.1/4" zinc.) | INT0650 | SA040018 |
+| 122 | `[CONFIRMAR]` INT0958 ou INT0654 | INT0650 | SA040046 |
+
+**Regra do nó:** em cada ponta (nó) da travessa horizontal, se **chega uma diagonal**, **não** se usa tubo complemento; se não chega, usa-se 1 tubo complemento. Nº de tubos = `nós sem diagonal`.
+Contagem proposta `[CONFIRMAR]`: com as diagonais em paralelo (como no desenho da lateral), nenhum nó recebe duas diagonais, então `tubos = 2 × nº de horizontais − 2 × nº de diagonais` (ex.: 12 horizontais e 10 diagonais → 4 tubos por lateral).
+Pendente: peso, aço e dimensões do tubo complemento; fixadores das diagonais.
