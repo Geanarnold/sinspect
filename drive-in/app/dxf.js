@@ -6,7 +6,7 @@
   const f = (v) => (Math.round(v * 100) / 100).toString();
   function dxfLateral(r, titulo) {
     const { ys, espacos, solteira, nD } = r.lateral, H = r.dimensoes.altura, n = espacos.length, col = Number(r.entradas.coluna);
-    const prof = 102; // profundidade da coluna na vista lateral [aprox.; o gabarito usa o perfil real]
+    const prof = { 80: 67.5, 101: 69, 122: 70 }[col] || 70; // profundidade da coluna na vista lateral (cota B dos desenhos)
     const xs = [0]; espacos.forEach((a) => xs.push(xs[xs.length - 1] + a));
     const out = [];
     const line = (x1, y1, x2, y2, layer) => out.push('0', 'LINE', '8', layer, '10', f(x1), '20', f(y1), '30', '0', '11', f(x2), '21', f(y2), '31', '0');
@@ -19,7 +19,16 @@
     };
     const base = 0, esp = 30; // travessas desenhadas com 30 mm de altura (perfil 30x22)
     // colunas (eixo em xs[i]; retângulo de 'prof' centrado) + sapata
-    xs.forEach((x) => { rect(x - prof / 2, base, prof, H, 'MONTANTE'); rect(x - 77, base - 10, 155, 10, 'MONTANTE'); });
+    const circ = (x, y, rr, layer) => out.push('0', 'CIRCLE', '8', layer, '10', f(x), '20', f(y), '30', '0', '40', f(rr));
+    xs.forEach((x, i) => {
+      // coluna em vista lateral: faces externas + dobras internas (como no gabarito) e furação Ø9 a cada 50 mm, a 17 mm da face interna
+      rect(x - prof / 2, base + 5, prof, H - 5, 'MONTANTE');
+      line(x - prof / 2 + 26, base + 65, x - prof / 2 + 26, H, 'MONTANTE'); line(x + prof / 2 - 26, base + 65, x + prof / 2 - 26, H, 'MONTANTE');
+      const faceInterna = (solteira ? i === 0 : i % 2 === 0) ? x + prof / 2 : x - prof / 2; // furos voltados para o vão com travessas
+      const hx = faceInterna + (faceInterna > x ? -17 : 17);
+      for (let y = base + 54.2; y < H - 20; y += 50) circ(hx, y, 4.5, 'MONTANTE');
+      rect(x - 77.5, base - 10, 155, 15, 'MONTANTE'); // sapata (155 x 155 em planta)
+    });
     for (let i = 0; i < n; i++) {
       const x0 = xs[i] + prof / 2, x1 = xs[i + 1] - prof / 2;
       const uniao = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
