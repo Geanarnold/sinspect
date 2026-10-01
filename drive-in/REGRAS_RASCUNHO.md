@@ -231,3 +231,11 @@ Fatos lidos do arquivo (não são decisões):
 - Layers: `MONTANTE` (cor 170), `Contraventamento` (cor 9), `4 - TEXTO DE ESCALA E VISTA` (cor 2), `0`, `Defpoints`, `01 INUTILIZADO`.
 
 Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas + coluna solteira quando passos par; vão entre quadros sem travessa/diagonal; (2) retirar a horizontal "a 100 mm do topo"; (3) elemento de topo por passo (todos os passos); (4) travessa união nos níveis da coluna solteira, sem diagonal.
+
+### 13.1 Decisões aplicadas no app após o DXF
+- Lateral = quadros de 2 colunas nos passos ímpares (1º, 3º, 5º…); nº **par** de espaços → **coluna solteira** no último passo, ligada por **travessa união** em cada nível de horizontal, sem diagonal ("união tripla").
+- Espaços de profundidade informados pelo operador (1 a 30). Caixa "medidas diferentes": se marcada, informa A1..An; senão todos iguais. Cotas no desenho: A1..An, A (soma), B (altura), C (1ª→2ª horizontal).
+- Última horizontal no último passo de 900 que cabe; vão até o topo fecha com o **elemento de topo**, 1 por passo (SA a definir). Diagonais todas no mesmo sentido.
+- Profundidade = Σ passos + 1 coluna (sem o +100). `[CONFIRMAR]`
+- Altura continua variável (fórmula + múltiplo de 50 + manual).
+- Adiado pelo responsável técnico: vista lateral de vigas/longarinas, posição da emenda, demais elementos (contraventamento, viga túnel, protetor, sapata em detalhe).

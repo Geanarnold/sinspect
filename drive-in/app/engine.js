@@ -40,15 +40,16 @@
     const ys = [100];
     for (let i = 0; i < 3 && ys[ys.length - 1] + 600 <= H - 100; i++) ys.push(ys[ys.length - 1] + 600);
     while (ys[ys.length - 1] + 900 <= H - 100) ys.push(ys[ys.length - 1] + 900);
-    if (H - 100 - ys[ys.length - 1] > 1) ys.push(H - 100); // travessa de topo [CONFIRMAR posição]
-    return ys;
+    return ys; // a última fica no último passo que cabe; o vão até o topo fecha com o elemento de topo (DXF de referência)
   }
 
   function calcular(inp, cat) {
     const col = Number(inp.coluna);
     const esp = String(inp.espessura);
     const R = Number(inp.ruas), P = Number(inp.paletesPorRua), N = Number(inp.niveis);
-    const n = Number(inp.espacamentos), A = Number(inp.largura);
+    const n = Number(inp.espacamentos);
+    const espacos = (inp.espacos && inp.espacos.length === n ? inp.espacos : Array(n).fill(inp.largura)).map(Number);
+    const A = espacos[0];
     const alertas = [], pend = [], pecas = [];
     const add = (grupo, id, desc, codigo, qtd, compr, pesoUnit, obs) =>
       pecas.push({ grupo, id, desc, codigo: codigo || '', qtd, compr: compr || null, pesoUnit: pesoUnit == null ? null : pesoUnit, pesoTotal: pesoUnit == null ? null : qtd * pesoUnit, obs: obs || '' });
@@ -67,7 +68,12 @@
     const colPorLateral = n + 1;
     const colunas = laterais * colPorLateral;
     const largura = R * LARGURA_RUA + laterais * col;
-    const profundidade = n * A + 100;       // [CONFIRMAR] planilha antiga: A tratado como passo entre colunas; +100 sem origem
+    const profundidade = espacos.reduce((s, v) => s + v, 0) + col; // passos eixo a eixo + 1 coluna [CONFIRMAR]
+    // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
+    const quadros = Math.floor((n + 1) / 2);
+    const solteira = n % 2 === 0;
+    const passosQuadro = espacos.filter((_, i) => i % 2 === 0 && !(solteira && i === n - 1));
+    const passoSolteira = solteira ? espacos[n - 1] : null;
     const posicoes = R * P * N;
 
     // ---- colunas (+ emenda)
@@ -97,30 +103,40 @@
     const sap = prodOf(cat, SAPATA[col]);
     add('Sapatas', SAPATA[col], sap.desc + ' (conjunto)', sap.codigo || SEM.CO, colunas, null, sap.peso, 'peso do conjunto (componentes acima sem peso próprio)');
 
-    // ---- laterais: travessas, diagonais, tubos, parafusos
+    // ---- laterais: travessas, diagonais, tubos, parafusos (por quadro de 2 colunas)
     const ys = posicoesHorizontais(H);
-    const nH = ys.length, nD = nH - 1 - 1; // todos os vãos menos o de topo
-    const vaos = laterais * n;
-    const ccH = A - 109.1, totH = A - 78.6;
-    const itH = buscaSA(cat.travessas, totH);
-    add('Travessas', 'TRAV-H', `Travessa horizontal – lateral ${A} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * vaos, r1(totH), KG_M_TRAVESSA * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
-    const diagPorV = {};
-    for (let i = 0; i < nD; i++) { const V = ys[i + 1] - ys[i]; diagPorV[V] = (diagPorV[V] || 0) + 1; }
-    for (const [V, q] of Object.entries(diagPorV)) {
-      const cc = Math.hypot(ccH, Number(V)), tot = cc + 30.5;
-      const it = buscaSA(cat.diagonais, tot);
-      add('Travessas', `TRAV-D-${V}`, `Travessa diagonal – vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, q * vaos, r1(tot), KG_M_TRAVESSA * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
+    const nH = ys.length, nD = nH - 1; // diagonais em todos os vãos entre horizontais; vão de topo (última → topo) sem diagonal
+    const porPasso = {};
+    for (const a of passosQuadro) porPasso[a] = (porPasso[a] || 0) + 1;
+    for (const [aStr, q] of Object.entries(porPasso)) {
+      const a = Number(aStr), vaos = q * laterais, ccH = a - 109.1, totH = a - 78.6;
+      const itH = buscaSA(cat.travessas, totH);
+      add('Travessas', `TRAV-H-${a}`, `Travessa horizontal – passo ${a} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * vaos, r1(totH), KG_M_TRAVESSA * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
+      const diagPorV = {};
+      for (let i = 0; i < nD; i++) { const V = ys[i + 1] - ys[i]; diagPorV[V] = (diagPorV[V] || 0) + 1; }
+      for (const [V, qd] of Object.entries(diagPorV)) {
+        const cc = Math.hypot(ccH, Number(V)), tot = cc + 30.5;
+        const it = buscaSA(cat.diagonais, tot);
+        add('Travessas', `TRAV-D-${a}-${V}`, `Travessa diagonal – passo ${a}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, qd * vaos, r1(tot), KG_M_TRAVESSA * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
+      }
     }
-    const tubos = (2 * nH - 2 * nD) * vaos;
+    const vaosQuadro = passosQuadro.length * laterais;
+    const tubos = (2 * nH - 2 * nD) * vaosQuadro;
     const tb = prodOf(cat, TUBO[col]);
-    add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal');
-    const nPar = 2 * nH * vaos;
+    add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal (1ª e última horizontais)');
+    if (solteira) {
+      const a = passoSolteira, totU = a - 78.6;
+      add('Coluna solteira', 'UNIAO', `Travessa união (coluna solteira) – passo ${a} mm`, SEM.SA, nH * laterais, r1(totU), KG_M_TRAVESSA * totU / 1000, 'uma por nível de horizontal, sem diagonal; SA, comprimento e fixadores a confirmar');
+      pend.push('Coluna solteira: travessa união calculada com a geometria da horizontal (a confirmar SA, comprimento e fixadores).');
+    }
+    add('Topo', 'TOPO', `Elemento de topo ("Travessa Sup Drive In") – 1 por passo`, SEM.SA, n * laterais, null, null, 'peça, SA e peso a confirmar');
+    const nPar = 2 * nH * vaosQuadro;
     const par = prodOf(cat, PARAFUSO_TRAV[col]), porca = prodOf(cat, 'INT0650');
     add('Fixadores das travessas', par.id, par.desc, par.codigo, nPar, null, null);
     add('Fixadores das travessas', 'INT0650', porca.desc, porca.codigo, nPar, null, null, 'diagonais usam o mesmo parafuso da horizontal');
 
     // ---- ainda não levantado
-    pend.push(`Profundidade usa a fórmula da planilha antiga (espaçamentos × ${A} + 100), que trata ${A} mm como passo entre colunas. Se ${A} for a largura total da lateral (face a face), a profundidade seria ${n * (A - col) + col} mm. A confirmar.`);
+    pend.push('Profundidade = soma dos passos (eixo a eixo) + largura de 1 coluna; o "+100" da planilha antiga foi retirado. A confirmar.');
     pend.push('Braços (simples/duplo 180/230), contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
 
@@ -129,7 +145,7 @@
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
-      lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, ccH: r1(ccH), totH: r1(totH), A },
+      lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       pecas, alertas, pendencias: pend,
     };
   }

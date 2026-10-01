@@ -40,8 +40,11 @@
       <div id="passo-lateral" class="form hidden">
         <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
         <div><label>Espessura (mm)</label><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select></div>
-        <div><label>Espaçamentos (profund.)</label><input id="espacamentos" type="number" min="1" value="5"/></div>
-        <div><label>Largura da lateral (mm)</label><input id="largura" type="number" step="1" value="820"/></div>
+        <div><label>Espaços de profundidade</label><input id="espacamentos" type="number" min="1" max="30" value="5"/></div>
+        <div><label>Medida do espaço (mm)</label><input id="largura" type="number" step="1" value="820"/></div>
+        <div class="full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
+        <div id="espacos" class="full espacos hidden"></div>
+        <p class="nota full" id="notaQuadros"></p>
         <p class="nota full">Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal. Códigos SA buscados a ±3 mm.</p>
       </div>
       <div class="rodape-form">

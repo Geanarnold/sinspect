@@ -44,3 +44,7 @@ svg{width:100%;max-height:520px;display:block}
 .acoes-tab{margin-left:auto;display:flex;gap:8px;align-items:center;padding:6px 8px}
 .vista{padding:16px}.vista h3{font-size:13px;margin:0 0 2px}.vista .s{font-size:11px;color:var(--cinza);margin-bottom:8px}
 .vista svg{max-height:560px;background:#fff}
+
+label.chk{display:flex;align-items:center;gap:6px;text-transform:none;font-size:12px;font-weight:500;color:#111827;margin-top:4px}
+label.chk input{width:auto}
+.espacos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.espacos label{font-size:10px}

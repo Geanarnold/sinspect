@@ -12,7 +12,17 @@
   function entradas() {
     const o = {};
     for (const id of IDS) { const v = $(id).value; o[id] = v === '' ? null : v; }
+    const n = Math.max(1, Math.min(30, Number(o.espacamentos) || 1));
+    o.espacamentos = n;
+    o.espacos = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].map((i) => Number(i.value) || Number(o.largura)) : Array(n).fill(Number(o.largura));
     return o;
+  }
+  function montarEspacos() {
+    const n = Math.max(1, Math.min(30, Number($('espacamentos').value) || 1)), box = $('espacos');
+    const atuais = [...box.querySelectorAll('input')].map((i) => i.value);
+    box.innerHTML = Array.from({ length: n }, (_, i) => `<div><label>A${i + 1}</label><input type="number" step="1" value="${atuais[i] || $('largura').value}"/></div>`).join('');
+    box.querySelectorAll('input').forEach((i) => i.addEventListener('input', render));
+    box.classList.toggle('hidden', !$('diferentes').checked);
   }
 
   function kpi(label, value, sub) {
@@ -28,13 +38,15 @@
       kpi('Posições de palete', fmt0(r.posicoes), `${inp.ruas} ruas × ${inp.paletesPorRua} paletes × ${inp.niveis} níveis`),
       kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
       kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
-      kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `${inp.espacamentos} × ${inp.largura} + 100 (a confirmar)`),
+      kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} + coluna (a confirmar)`),
       kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem braços, LG-UE, vigas, protetores'),
       kpi('kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
     ].join('');
 
     $('alertas').innerHTML = r.alertas.length ? `<div class="alerta"><b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '';
 
+    const L = r.lateral;
+    $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
     renderVista(r);
     if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); }
   }
@@ -57,21 +69,27 @@
 
   // ---- desenho (SVG): vista lateral de um pórtico, vista frontal e planta
   function svgLateral(r) {
-    const { A, ys } = r.lateral, H = r.dimensoes.altura, n = Number(r.entradas.espacamentos), col = r.entradas.coluna;
-    const W = n * A + col, s = 420 / Math.max(H, W), pad = 30, w = W * s + 2 * pad, h = H * s + 2 * pad;
-    const X = (x) => pad + x * s, Y = (y) => pad + (H - y) * s;
+    const { ys, espacos, solteira } = r.lateral, H = r.dimensoes.altura, n = espacos.length, col = r.entradas.coluna;
+    const xs = [0]; espacos.forEach((a) => xs.push(xs[xs.length - 1] + a));
+    const W = xs[n] + col, s = 420 / Math.max(H, W), pad = 34, w = W * s + 2 * pad, h = H * s + 2 * pad + 40;
+    const X = (x) => pad + x * s, Y = (y) => pad + 32 + (H - y) * s;
     const cw = Math.max(col * s, 2);
     let g = '';
-    for (let i = 0; i <= n; i++) g += `<rect x="${X(i * A + col / 2) - cw / 2}" y="${Y(H)}" width="${cw}" height="${H * s}" fill="#6b7280"/>`;
+    xs.forEach((x) => { g += `<rect x="${X(x + col / 2) - cw / 2}" y="${Y(H)}" width="${cw}" height="${H * s}" fill="#6b7280"/>`; });
     for (let i = 0; i < n; i++) {
-      const x0 = X(i * A + col / 2) + cw / 2, x1 = X((i + 1) * A + col / 2) - cw / 2;
-      ys.forEach((y) => { g += `<line x1="${x0}" y1="${Y(y)}" x2="${x1}" y2="${Y(y)}" stroke="#E8520A" stroke-width="2"/>`; });
-      for (let k = 0; k < r.lateral.nD; k++) g += `<line x1="${x0}" y1="${Y(ys[k])}" x2="${x1}" y2="${Y(ys[k + 1])}" stroke="#2563eb" stroke-width="1.5"/>`;
+      const x0 = X(xs[i] + col / 2) + cw / 2, x1 = X(xs[i + 1] + col / 2) - cw / 2;
+      const quadro = i % 2 === 0 && !(solteira && i === n - 1), uniao = solteira && i === n - 1;
+      if (quadro || uniao) ys.forEach((y) => { g += `<line x1="${x0}" y1="${Y(y)}" x2="${x1}" y2="${Y(y)}" stroke="${uniao ? '#059669' : '#E8520A'}" stroke-width="2"/>`; });
+      if (quadro) for (let k = 0; k < r.lateral.nD; k++) g += `<line x1="${x0}" y1="${Y(ys[k])}" x2="${x1}" y2="${Y(ys[k + 1])}" stroke="#2563eb" stroke-width="1.5"/>`;
+      g += `<line x1="${x0}" y1="${Y(H)}" x2="${x1}" y2="${Y(H)}" stroke="#374151" stroke-width="3"/>`; // elemento de topo em todos os passos
+      const yc = Y(H) - 10 - (i % 2) * 11;
+      g += `<line x1="${X(xs[i] + col / 2)}" y1="${yc}" x2="${X(xs[i + 1] + col / 2)}" y2="${yc}" stroke="#111"/><text x="${X((xs[i] + xs[i + 1]) / 2 + col / 2)}" y="${yc - 2}" font-size="8" text-anchor="middle">A${i + 1}=${espacos[i]}</text>`;
     }
     if (r.dimensoes.emendas) g += `<line x1="${X(0) - 8}" y1="${Y(8500)}" x2="${X(W) + 8}" y2="${Y(8500)}" stroke="#dc2626" stroke-dasharray="4 3"/><text x="${X(W) + 10}" y="${Y(8500) + 4}" font-size="10" fill="#dc2626">emenda 8500</text>`;
-    g += `<line x1="${X(0)}" y1="${h - 10}" x2="${X(W)}" y2="${h - 10}" stroke="#111"/><text x="${X(W / 2)}" y="${h - 2}" font-size="10" text-anchor="middle">${n} × ${A} mm (passo entre colunas) + coluna ${col}</text>`;
-    g += `<line x1="${w - 10}" y1="${Y(0)}" x2="${w - 10}" y2="${Y(H)}" stroke="#111"/><text x="${w - 2}" y="${Y(H / 2)}" font-size="10" text-anchor="middle" transform="rotate(90 ${w - 2} ${Y(H / 2)})">${H} mm</text>`;
-    return `<svg viewBox="0 0 ${w + 20} ${h + 10}">${g}</svg>`;
+    g += `<line x1="${X(col / 2)}" y1="${h - 10}" x2="${X(xs[n] + col / 2)}" y2="${h - 10}" stroke="#111"/><text x="${X(W / 2)}" y="${h - 1}" font-size="10" text-anchor="middle">A = ${xs[n]} mm (eixo a eixo)</text>`;
+    g += `<line x1="${w - 10}" y1="${Y(0)}" x2="${w - 10}" y2="${Y(H)}" stroke="#111"/><text x="${w - 2}" y="${Y(H / 2)}" font-size="10" text-anchor="middle" transform="rotate(90 ${w - 2} ${Y(H / 2)})">B = ${H} mm</text>`;
+    g += `<line x1="${X(col / 2) - 14}" y1="${Y(ys[0])}" x2="${X(col / 2) - 14}" y2="${Y(ys[1])}" stroke="#111"/><text x="${X(col / 2) - 17}" y="${Y((ys[0] + ys[1]) / 2)}" font-size="9" text-anchor="end">C = ${ys[1] - ys[0]}</text>`;
+    return `<svg viewBox="0 0 ${w + 20} ${h + 6}">${g}</svg>`;
   }
   function svgFrontal(r) {
     const R = Number(r.entradas.ruas), col = r.entradas.coluna, H = r.dimensoes.altura, N = Number(r.entradas.niveis), Wt = r.dimensoes.largura;
@@ -85,17 +103,18 @@
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
   function svgPlanta(r) {
-    const R = Number(r.entradas.ruas), col = r.entradas.coluna, n = Number(r.entradas.espacamentos), A = r.lateral.A, Wt = r.dimensoes.largura, D = r.dimensoes.profundidade;
+    const R = Number(r.entradas.ruas), col = r.entradas.coluna, espacos = r.lateral.espacos, Wt = r.dimensoes.largura, D = r.dimensoes.profundidade;
+    const ysc = [0]; espacos.forEach((a) => ysc.push(ysc[ysc.length - 1] + a));
     const s = 420 / Math.max(D, Wt), pad = 30, w = Wt * s + 2 * pad, h = D * s + 2 * pad;
     const X = (x) => pad + x * s, Y = (y) => pad + y * s;
     let g = `<rect x="${X(0)}" y="${Y(0)}" width="${Wt * s}" height="${D * s}" fill="none" stroke="#9ca3af" stroke-dasharray="3 3"/>`;
-    for (let i = 0; i <= R; i++) for (let j = 0; j <= n; j++) g += `<rect x="${X(i * (1400 + col))}" y="${Y(50 + j * A)}" width="${Math.max(col * s, 3)}" height="${Math.max(col * s, 3)}" fill="#111"/>`;
+    for (let i = 0; i <= R; i++) ysc.forEach((yv) => { g += `<rect x="${X(i * (1400 + col))}" y="${Y(yv)}" width="${Math.max(col * s, 3)}" height="${Math.max(col * s, 3)}" fill="#111"/>`; });
     for (let i = 0; i < R; i++) g += `<text x="${X(i * (1400 + col) + col + 700)}" y="${Y(D / 2)}" font-size="10" text-anchor="middle" fill="#E8520A">rua ${i + 1}</text>`;
     g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} × ${D} mm</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
   const VISTAS = {
-    lateral: (r) => ({ t: 'Vista lateral (1 pórtico)', s: `${r.lateral.nH} horizontais (laranja) e ${r.lateral.nD} diagonais (azul) por vão · ${r.lateral.tubosPorVao} tubos complemento por vão`, svg: svgLateral(r) }),
+    lateral: (r) => ({ t: 'Vista lateral (corte)', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira (travessa união em verde)' : ''} · ${r.lateral.nH} horizontais (laranja) e ${r.lateral.nD} diagonais (azul) por quadro · elemento de topo em cinza`, svg: svgLateral(r) }),
     frontal: (r) => ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${Number(r.entradas.alturaPalete) + 200} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
     planta: (r) => ({ t: 'Planta', s: 'colunas em preto; vigas túnel e contraventamentos não levantados', svg: svgPlanta(r) }),
   };
@@ -160,6 +179,10 @@
   $('btnPng').addEventListener('click', baixarPng);
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
+  $('espacamentos').addEventListener('input', montarEspacos);
+  $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
+  $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });
+  montarEspacos();
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = cat.versao;
