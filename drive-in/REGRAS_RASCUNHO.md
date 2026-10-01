@@ -181,3 +181,11 @@ Comparação com a planilha antiga (A = 820, V = 900): travessa 741,4 mm (antes 
 - Validação da regra C = √(B²+V²) contra o cadastro: nas 19 diagonais padrão, V implícito ≈ 900 mm (898,8 a 903,4; um caso em 907,5); a diagonal "1,00 ESP 1,08 MT" confere com V = 600.
 - Peças soltas no BOM, nível SA. Item sem código no BOM: **"SAXXXX"**.
 - Material de travessa e diagonal: ACO0602 SLITER FF 1,40 x 80 GI (kg/m teórico = 80 x 1,4 x 7,85e-6 x 1000 = 0,8792). O peso da tabela do SolidWorks **não é usado**.
+
+### 11.2 Decisões de travessa/diagonal e padrão de códigos
+- **Posição vertical das travessas horizontais (regra da planilha antiga, confirmada):** a 1ª horizontal a **100 mm** do pé da coluna; as 3 primeiras distâncias de **600 mm** (até 1900 mm); depois, de **900 mm** em 900 mm (padrão, alterável por projeto).
+  - Nº de horizontais = `ROUNDUP(1 + (1900−100)/600 + (H−1900)/900)`.
+  - Nº de diagonais = `ROUNDUP((1900−100)/600 + (H−1900)/900 − 1)` (um vão a menos que as horizontais: o vão de topo não leva diagonal).
+  - H = altura da coluna (do pé da sapata ao contraventamento superior, placa desprezada).
+- **Excluídos da busca de SA** (cadastro suspeito): horizontais `SA041091`, `SA041029` e `SA041443`. As 4 diagonais com V entre 903 e 907 mm ficam na busca (sinalizadas "CONFERIR"; o filtro de ±3 mm só as aceita se o comprimento calculado bater).
+- **Códigos do ERP:** `PK000000`, `PA000000`, `CO000000`, `SA000000`. Sem cadastro no BOM: `SA04XXXX`, `COXXXXXX`, `PAXXXXXX` ou `PKXXXXXX` (isso significa que o item ainda não existe). Isso substitui o "SAXXXX" citado antes.
