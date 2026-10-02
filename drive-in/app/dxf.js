@@ -40,23 +40,38 @@
     return r;
   }
 
-  // coluna na vista frontal (com sapata): estica as linhas longas até H e replica o módulo de 50 mm da furação
+  // coluna na vista frontal (com sapata), conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
+  // base da sapata em y = 0 e topo da coluna em H; furação oblonga a cada 50 mm com o 1º furo a 25 mm do topo
+  // (como a coluna é cortada em múltiplos de 50, os furos ficam a 25 mm das duas pontas)
+  const FR_TOPO_FURO = 25;
+  const yrq = (q) => { const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; return [Math.min(...ys), Math.max(...ys)]; };
+  const longq = (q) => q.p && yrq(q)[1] - yrq(q)[0] > 500;
+  function geoFrontal(src) {
+    return { Y0: -Math.min(...src.map((q) => yrq(q)[0])),                  // sapata abaixo da origem do bloco
+      Ht: Math.max(...src.filter(longq).map((q) => yrq(q)[1])),           // topo da coluna no bloco
+      Hb: Math.min(...src.filter(longq).map((q) => yrq(q)[0])) };         // pé da coluna (acima da sapata)
+  }
   function colunaFrontal(c, H) {
     const src = B()['DI_COLUNA_FRONTAL_' + c]; if (!src) return [];
-    const isLong = (q) => q.p && Math.max(...q.p.map((v) => v[1])) - Math.min(...q.p.map((v) => v[1])) > 500;
-    const yr = (q) => { const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; return [Math.min(...ys), Math.max(...ys)]; };
-    const Ht = Math.max(...src.filter(isLong).map((q) => yr(q)[1])), dH = H - Ht, out = [];
-    const W0 = 400; // janela de 50 mm usada como módulo
+    const { Y0, Ht, Hb } = geoFrontal(src), T = H - Y0, dH = T - Ht, out = [];
+    const m0 = Ht - FR_TOPO_FURO - 50;                                    // furo-modelo: 2º de cima no bloco
     for (const q of src) {
-      if (isLong(q)) { const cq = clone([q])[0]; cq.p = cq.p.map((v) => [v[0], v[1] > Ht - 1 ? v[1] + dH : v[1]]); out.push(cq); continue; }
-      const [y0, y1] = yr(q);
-      if (y1 <= 140) { out.push(clone([q])[0]); continue; }            // base + sapata
-      if (y0 >= Ht - 30) { out.push(translate(clone([q]), 0, dH)[0]); continue; } // topo
-      if (y0 >= W0 && y0 < W0 + 50) {                                      // módulo: replica de 50 em 50
-        for (let k = Math.ceil((140 - y0) / 50); y0 + 50 * k + (y1 - y0) <= H - 30; k++) out.push(translate(clone([q]), 0, 50 * k)[0]);
+      if (longq(q)) { const cq = clone([q])[0]; cq.p = cq.p.map((v) => [v[0], v[1] > Ht - 1 ? v[1] + dH : v[1]]); out.push(cq); continue; }
+      const [y0, y1] = yrq(q);
+      if (y1 < Hb + 12) { out.push(clone([q])[0]); continue; }             // sapata + pé
+      if (y0 > Ht - 1) { out.push(translate(clone([q]), 0, dH)[0]); continue; } // tampa do topo
+      if (y0 >= m0 - 25 && y1 <= m0 + 25) {                                 // módulo do furo: replica do topo para baixo
+        for (let k = 0; ; k++) { const cy = T - FR_TOPO_FURO - 50 * k; if (cy < Hb + FR_TOPO_FURO - 1) break; out.push(translate(clone([q]), 0, cy - m0)[0]); }
       }
     }
-    return out;
+    return translate(out, 0, Y0);
+  }
+  // centros dos furos frontais em y global, de baixo para cima
+  function furosFrontal(c, H) {
+    const src = B()['DI_COLUNA_FRONTAL_' + c], ys = []; if (!src) return ys;
+    const { Y0, Hb } = geoFrontal(src);
+    for (let cy = H - FR_TOPO_FURO; cy >= Hb + Y0 + FR_TOPO_FURO - 1; cy -= 50) ys.unshift(cy);
+    return ys;
   }
   const HOLE_DX = 17.9; // furo a 17,9 mm do eixo (32,9 - 15)
   function travessaH(ccNovo) {
@@ -145,7 +160,6 @@
 
   // ---- vista frontal (olhando para dentro das ruas)
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
-  const holeYs = (H) => { const ys = []; for (let k = 0; 29.76 + 50 * k + 9 <= H - 30; k++) ys.push(29.76 + 50 * k); return ys; };
   function montarFrontal(r, titulo) {
     const col = Number(r.entradas.coluna), H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const prims = [], linhas = [], textos = [], faltam = new Set();
@@ -157,13 +171,15 @@
       else { line(x1, y1, x1 - off, y1, 'COTAS'); line(x2, y2, x2 - off, y2, 'COTAS'); line(x1 - off, y1, x2 - off, y2, 'COTAS'); text(x1 - off - 20, (y1 + y2) / 2, 60, label, 'COTAS', 90); }
     };
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2); // eixos das colunas (rua = vão livre entre faces)
-    const hy = holeYs(H), hx = HOLE_FX[col] || col / 2 - 18;
+    const hy = furosFrontal(col, H), hx = HOLE_FX[col] || col / 2 - 18;
+    const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
     const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
     xs.forEach((x, i) => {
       put(colunaFrontal(col, H), x, 0, 'MONTANTE');
       // caneleira 700 mm (sobre a sapata)
       const w = col / 2 + 6; [[x - w, 105], [x + w, 105]].forEach(() => {}); 
-      line(x - w, 105, x + w, 105, 'CANELEIRA'); line(x + w, 105, x + w, 805, 'CANELEIRA'); line(x + w, 805, x - w, 805, 'CANELEIRA'); line(x - w, 805, x - w, 105, 'CANELEIRA');
+      const c0 = pe, c1 = pe + 700;
+      line(x - w, c0, x + w, c0, 'CANELEIRA'); line(x + w, c0, x + w, c1, 'CANELEIRA'); line(x + w, c1, x - w, c1, 'CANELEIRA'); line(x - w, c1, x - w, c0, 'CANELEIRA');
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
       for (const yNivel of F.niveis) {
@@ -179,12 +195,14 @@
         }
       }
     });
-    // longarina superior em cada rua: ponto base no 3º furo de cima para baixo da coluna esquerda
-    const yTopo = hy[hy.length - 1] - 100;
+    // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
+    // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
+    // e 2,23 mm além do centro do oblongo; o bloco é esticado pelo meio para acompanhar a largura da rua
+    const LG_DX = 2.23, LG_DY = 8.46, LG_VAO0 = 1931.73;
     for (let i = 0; i < R; i++) {
       const src = B().DI_LGTOPO; if (!src) { faltam.add('DI_LGTOPO'); break; }
-      const vao = (xs[i + 1] - hx) - (xs[i] + hx), vao0 = 1931.8; // vão de fixação do bloco (desenhado para rua 1900) [CONFIRMAR]
-      put(stretchX(clone(src), 965.9, vao - vao0), xs[i] + hx, yTopo, 'LONGARINA');
+      const yLg = H - FR_TOPO_FURO - 100 + LG_DY, x1 = xs[i] + hx + LG_DX, x2 = xs[i + 1] - hx - LG_DX;
+      put(stretchX(clone(src), LG_VAO0 / 2, (x2 - x1) - LG_VAO0), x1, yLg, 'LONGARINA');
       cota(xs[i] + col / 2, H + 80, xs[i + 1] - col / 2, H + 80, 150, `${rua}`, false);
     }
     const W = xs[R] + col / 2;

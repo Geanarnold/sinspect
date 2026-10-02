@@ -306,3 +306,4 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - DXF exportado com as duas vistas lado a lado (lateral + frontal). Textos com acento gravados no padrão \U+XXXX do AutoCAD.
 - BOM: caneleira (1 por lateral, 2,5 kg provisório) e longarina superior (1 por rua) `[CONFIRMAR quantidades]`.
 - Blocos faltantes aparecem escritos no desenho (ex.: braços duplos, braços das colunas 101/122).
+- Topo da vista frontal (VISTA_FRONTAL_COM_DI_LGTOPO.dxf, vale para COL 80/101/122): base da sapata em y = 0, topo da coluna em H; furos oblongos a cada 50 mm com o 1º a 25 mm do topo (e a 25 mm do pé). DI_LGTOPO: furo de fixação 8,46 mm acima do centro do 3º furo de cima e 2,23 mm além do centro do oblongo (34,63 mm do eixo na COL 101); topo da longarina 4,65 mm abaixo do topo da coluna; esticada pelo meio conforme a largura da rua (vão de furos 1931,73 para rua 1900 na COL 101). Caneleira 700 mm a partir do pé da coluna.
