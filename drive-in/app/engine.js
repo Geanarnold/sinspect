@@ -132,7 +132,13 @@
       add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
       add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
     }
-    add('Topo', 'TOPO', `Elemento de topo ("Travessa Sup Drive In") – 1 por passo`, SEM.SA, n * laterais, null, null, 'peça, SA e peso a confirmar');
+    // elemento de topo: dois modelos, um para o passo dentro do quadro e outro para o passo entre quadros (inclui o passo da solteira [CONFIRMAR])
+    const porPassoTopo = (lista, rotulo, id) => {
+      const c = {}; for (const a of lista) c[a] = (c[a] || 0) + 1;
+      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais, Number(a), null, 'SA e peso a confirmar');
+    };
+    porPassoTopo(passosQuadro, 'da montante (dentro do quadro)', 'TOPO-Q');
+    porPassoTopo(espacos.filter((_, i) => solteira ? i % 2 === 0 : i % 2 === 1), 'entre montantes', 'TOPO-E');
     const nPar = 2 * nH * vaosQuadro;
     const par = prodOf(cat, PARAFUSO_TRAV[col]), porca = prodOf(cat, 'INT0650');
     add('Fixadores das travessas', par.id, par.desc, par.codigo, nPar, null, null);
