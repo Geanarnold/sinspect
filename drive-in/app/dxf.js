@@ -3,6 +3,9 @@
 (function (root) {
   'use strict';
   const LAYERS = { MONTANTE: 170, Contraventamento: 9, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
+  const LAYER_DXF = { MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
 
@@ -60,11 +63,11 @@
   // ---- escrita DXF
   function emit(out, prims, dx, dy, layerDefault) {
     for (const q of prims) {
-      const lay = q.l && q.l !== '0' ? q.l : layerDefault;
+      const lay = ld(q.l && q.l !== '0' ? q.l : layerDefault);
       if (q.t === 'l') out.push('0', 'LINE', '8', lay, '10', f(q.p[0][0] + dx), '20', f(q.p[0][1] + dy), '30', '0', '11', f(q.p[1][0] + dx), '21', f(q.p[1][1] + dy), '31', '0');
       else if (q.t === 'c') out.push('0', 'CIRCLE', '8', lay, '10', f(q.c[0] + dx), '20', f(q.c[1] + dy), '30', '0', '40', f(q.r));
       else if (q.t === 'p') {
-        out.push('0', 'POLYLINE', '8', lay, '66', '1', '70', '0');
+        out.push('0', 'POLYLINE', '8', lay, '66', '1', '10', '0', '20', '0', '30', '0', '70', '0');
         for (const v of q.p) out.push('0', 'VERTEX', '8', lay, '10', f(v[0] + dx), '20', f(v[1] + dy), '30', '0');
         out.push('0', 'SEQEND');
       }
@@ -109,11 +112,15 @@
   function dxfLateral(r, titulo) {
     const m = montarLateral(r, titulo), out = [];
     emit(out, m.prims, 0, 0, '0');
-    for (const q of m.linhas) out.push('0', 'LINE', '8', q.l, '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
-    for (const t of m.textos) out.push('0', 'TEXT', '8', t.l, '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', t.s, '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
-    const layers = Object.entries(LAYERS).flatMap(([name, c]) => ['0', 'LAYER', '2', name, '70', '0', '62', String(c), '6', 'CONTINUOUS']);
-    return ['0', 'SECTION', '2', 'HEADER', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
-      '0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(LAYERS).length), ...layers, '0', 'ENDTAB', '0', 'ENDSEC',
+    for (const q of m.linhas) out.push('0', 'LINE', '8', ld(q.l), '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
+    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', t.s, '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
+    const layers = Object.entries(LAYERS).filter(([n]) => n !== '0').flatMap(([name, c]) => ['0', 'LAYER', '2', ld(name), '70', '0', '62', String(c), '6', 'CONTINUOUS']);
+    return ['0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
+      '0', 'SECTION', '2', 'TABLES',
+      '0', 'TABLE', '2', 'LTYPE', '70', '1', '0', 'LTYPE', '2', 'CONTINUOUS', '70', '0', '3', 'Solid line', '72', '65', '73', '0', '40', '0', '0', 'ENDTAB',
+      '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(LAYERS).length), '0', 'LAYER', '2', '0', '70', '0', '62', '7', '6', 'CONTINUOUS', ...layers, '0', 'ENDTAB',
+      '0', 'TABLE', '2', 'STYLE', '70', '1', '0', 'STYLE', '2', 'STANDARD', '70', '0', '40', '0', '41', '1', '50', '0', '71', '0', '42', '2.5', '3', 'txt', '4', '', '0', 'ENDTAB',
+      '0', 'ENDSEC',
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
