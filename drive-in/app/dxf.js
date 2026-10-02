@@ -58,7 +58,11 @@
   }
   function topo(A) { const src = clone(B().DI_TOPO), A0 = 820; return stretchX(src, 340, A - A0); } // [CONFIRMAR A0 = 820]
   const sapata = () => clone(B().DI_SAPATA);
-  const piso = () => clone(B().DI_PISO);
+  // piso de 1000 em 1000: remove as bordas verticais internas para não aparecer emenda entre trechos
+  const piso = (primeiro, ultimo) => clone(B().DI_PISO).filter((q) => {
+    if (q.t !== 'l' || Math.abs(q.p[0][0] - q.p[1][0]) > 0.01) return true;
+    const x = q.p[0][0]; if (Math.abs(x) < 0.01) return primeiro; if (Math.abs(x - 1000) < 0.01) return ultimo; return true;
+  });
 
   // ---- escrita DXF
   function emit(out, prims, dx, dy, layerDefault) {
@@ -103,7 +107,8 @@
     cota(xs[0], H + 60, xs[n], H + 60, 420, 'A', false);
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
-    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) put(piso(), x, 0, '0'); // topo do concreto (y local 0) na base da sapata (chapa de 0 a 4,75)
+    const x0p = xs[0] - 1500, nP = Math.ceil((xs[n] + 1500 - x0p) / 1000);
+    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0'); // topo do concreto (y local 0) na base da sapata
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', xs[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
