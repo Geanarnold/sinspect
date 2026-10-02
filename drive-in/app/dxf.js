@@ -1,56 +1,111 @@
-// Exporta a vista lateral em DXF (R12/AC1009, texto puro), no padrão do gabarito DRIVE_IN.dxf:
-// layers MONTANTE (cor 170, colunas), Contraventamento (cor 9, travessas/diagonais/topo), COTAS (cor 7), TEXTO (cor 2).
+// Exporta a vista lateral em DXF R12 usando os blocos DI_* do responsável técnico (blocos.js).
+// Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const L = { MONTANTE: 170, Contraventamento: 9, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2 };
+  const LAYERS = { MONTANTE: 170, Contraventamento: 9, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   const f = (v) => (Math.round(v * 100) / 100).toString();
+  const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
+
+  // ---- utilitários de geometria sobre primitivas {t:'l'|'c'|'p', l:layer, p:[[x,y]..], c:[x,y], r}
+  const clone = (prims) => prims.map((q) => ({ t: q.t, l: q.l, p: q.p ? q.p.map((v) => [v[0], v[1]]) : undefined, c: q.c ? [q.c[0], q.c[1]] : undefined, r: q.r }));
+  const mapPts = (prims, fn) => { for (const q of prims) { if (q.p) q.p = q.p.map((v) => fn(v)); if (q.c) q.c = fn(q.c); } return prims; };
+  const translate = (prims, dx, dy) => mapPts(prims, (v) => [v[0] + dx, v[1] + dy]);
+  const mirrorX = (prims) => mapPts(prims, (v) => [-v[0], v[1]]);
+  const rotate = (prims, ang) => { const c = Math.cos(ang), s = Math.sin(ang); return mapPts(prims, (v) => [v[0] * c - v[1] * s, v[0] * s + v[1] * c]); };
+  // estica ao longo de X: pontos com x > xMid deslocam delta
+  const stretchX = (prims, xMid, delta) => mapPts(prims, (v) => [v[0] > xMid ? v[0] + delta : v[0], v[1]]);
+  const circles = (prims) => prims.filter((q) => q.t === 'c').map((q) => q.c);
+
+  // ---- peças paramétricas
+  function coluna(H, holesRight) {
+    // DI_COLUNA: 1000 mm (linhas 4,75..1004,75), furos a cada 50 a partir de 54,75, largura -19,85..49,9 (eixo em x = 15)
+    const src = B().DI_COLUNA, out = [];
+    const H0 = 1000, dH = H - H0;
+    for (const q of src) {
+      const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; const y0 = Math.min(...ys), y1 = Math.max(...ys);
+      if (y1 - y0 > 500) { const c = clone([q])[0]; c.p = c.p.map((v) => [v[0], v[1] > 500 ? v[1] + dH : v[1]]); out.push(c); continue; } // linhas longas
+      if (y0 > 990) { out.push(translate(clone([q]), 0, dH)[0]); continue; } // topo
+      if (y0 < 40) { out.push(clone([q])[0]); continue; } // base
+      if (y0 >= 40 && y1 <= 120) { // módulo periódico de 50 mm (furo + detalhe): replica
+        for (let k = 0; k * 50 + y1 <= H - 10; k++) out.push(translate(clone([q]), 0, k * 50)[0]);
+        continue;
+      }
+      // demais módulos já cobertos pela replicação do primeiro; ignora
+    }
+    let r = translate(out, -15, 0); // eixo da coluna em x = 0
+    if (!holesRight) r = mirrorX(r);
+    return r;
+  }
+  const HOLE_DX = 17.9; // furo a 17,9 mm do eixo (32,9 - 15)
+  function travessaH(ccNovo) {
+    const src = clone(B().DI_TRAVESSA_H), [c1, c2] = circles(src), cc0 = c2[0] - c1[0];
+    return translate(stretchX(src, (c1[0] + c2[0]) / 2, ccNovo - cc0), -c1[0], -c1[1]); // origem no 1º furo
+  }
+  function travessaD(p1, p2) {
+    const src = clone(B().DI_TRAVESSA_D), [c1, c2] = circles(src);
+    const a0 = Math.atan2(c2[1] - c1[1], c2[0] - c1[0]), L0 = Math.hypot(c2[0] - c1[0], c2[1] - c1[1]);
+    const L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), a = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
+    let r = translate(src, -c1[0], -c1[1]); r = rotate(r, -a0); r = stretchX(r, L0 / 2, L - L0); r = rotate(r, a);
+    return translate(r, p1[0], p1[1]);
+  }
+  function uniao(distFuros) {
+    // ancorada nos furos: 1º furo na coluna solteira, parafusos da chapa posterior (x = 1007,5) na fileira de furos da coluna do quadro
+    const src = clone(B().DI_UNIAO), c1 = circles(src)[0], xPlaca = 1007.5;
+    return translate(stretchX(src, 500, distFuros - (xPlaca - c1[0])), -c1[0], -c1[1]);
+  }
+  function topo(A) { const src = clone(B().DI_TOPO), A0 = 820; return stretchX(src, 340, A - A0); } // [CONFIRMAR A0 = 820]
+  const sapata = () => clone(B().DI_SAPATA);
+  const piso = () => clone(B().DI_PISO);
+
+  // ---- escrita DXF
+  function emit(out, prims, dx, dy, layerDefault) {
+    for (const q of prims) {
+      const lay = q.l && q.l !== '0' ? q.l : layerDefault;
+      if (q.t === 'l') out.push('0', 'LINE', '8', lay, '10', f(q.p[0][0] + dx), '20', f(q.p[0][1] + dy), '30', '0', '11', f(q.p[1][0] + dx), '21', f(q.p[1][1] + dy), '31', '0');
+      else if (q.t === 'c') out.push('0', 'CIRCLE', '8', lay, '10', f(q.c[0] + dx), '20', f(q.c[1] + dy), '30', '0', '40', f(q.r));
+      else if (q.t === 'p') {
+        out.push('0', 'POLYLINE', '8', lay, '66', '1', '70', '0');
+        for (const v of q.p) out.push('0', 'VERTEX', '8', lay, '10', f(v[0] + dx), '20', f(v[1] + dy), '30', '0');
+        out.push('0', 'SEQEND');
+      }
+    }
+  }
   function dxfLateral(r, titulo) {
-    const { ys, espacos, solteira, nD } = r.lateral, H = r.dimensoes.altura, n = espacos.length, col = Number(r.entradas.coluna);
-    const prof = { 80: 67.5, 101: 69, 122: 70 }[col] || 70; // profundidade da coluna na vista lateral (cota B dos desenhos)
+    const { ys, espacos, solteira, nD } = r.lateral, H = r.dimensoes.altura, n = espacos.length;
     const xs = [0]; espacos.forEach((a) => xs.push(xs[xs.length - 1] + a));
     const out = [];
     const line = (x1, y1, x2, y2, layer) => out.push('0', 'LINE', '8', layer, '10', f(x1), '20', f(y1), '30', '0', '11', f(x2), '21', f(y2), '31', '0');
-    const rect = (x, y, w, h, layer) => { line(x, y, x + w, y, layer); line(x + w, y, x + w, y + h, layer); line(x + w, y + h, x, y + h, layer); line(x, y + h, x, y, layer); };
     const text = (x, y, h, s, layer, rot = 0, just = 1) => out.push('0', 'TEXT', '8', layer, '10', f(x), '20', f(y), '30', '0', '40', f(h), '1', s, '50', f(rot), '72', String(just), '11', f(x), '21', f(y), '31', '0');
     const cota = (x1, y1, x2, y2, off, label, vertical) => {
-      // linha de cota com extensões e texto (sem entidade DIMENSION, para compatibilidade)
       if (!vertical) { line(x1, y1, x1, y1 + off, 'COTAS'); line(x2, y2, x2, y2 + off, 'COTAS'); line(x1, y1 + off, x2, y2 + off, 'COTAS'); text((x1 + x2) / 2, y1 + off + 20, 60, label, 'COTAS'); }
       else { line(x1, y1, x1 - off, y1, 'COTAS'); line(x2, y2, x2 - off, y2, 'COTAS'); line(x1 - off, y1, x2 - off, y2, 'COTAS'); text(x1 - off - 20, (y1 + y2) / 2, 60, label, 'COTAS', 90); }
     };
-    const base = 0, esp = 30; // travessas desenhadas com 30 mm de altura (perfil 30x22)
-    // colunas (eixo em xs[i]; retângulo de 'prof' centrado) + sapata
-    const circ = (x, y, rr, layer) => out.push('0', 'CIRCLE', '8', layer, '10', f(x), '20', f(y), '30', '0', '40', f(rr));
-    xs.forEach((x, i) => {
-      // coluna em vista lateral: faces externas + dobras internas (como no gabarito) e furação Ø9 a cada 50 mm, a 17 mm da face interna
-      rect(x - prof / 2, base + 5, prof, H - 5, 'MONTANTE');
-      line(x - prof / 2 + 26, base + 65, x - prof / 2 + 26, H, 'MONTANTE'); line(x + prof / 2 - 26, base + 65, x + prof / 2 - 26, H, 'MONTANTE');
-      const faceInterna = (solteira ? i === 0 : i % 2 === 0) ? x + prof / 2 : x - prof / 2; // furos voltados para o vão com travessas
-      const hx = faceInterna + (faceInterna > x ? -17 : 17);
-      for (let y = base + 54.2; y < H - 20; y += 50) circ(hx, y, 4.5, 'MONTANTE');
-      rect(x - 77.5, base - 10, 155, 15, 'MONTANTE'); // sapata (155 x 155 em planta)
-    });
+    const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50); // furo mais próximo do nível
+    // colunas + sapatas: furos voltados para o vão com travessas
+    const holesRight = (i) => (solteira ? i === 0 || i % 2 === 1 : i % 2 === 0) && i < n;
+    xs.forEach((x, i) => { const hr = holesRight(i); emit(out, coluna(H, hr), x, 0, 'MONTANTE'); emit(out, sapata(), x, 0, 'MONTANTE'); });
     for (let i = 0; i < n; i++) {
-      const x0 = xs[i] + prof / 2, x1 = xs[i + 1] - prof / 2;
-      const uniao = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
-      if (quadro || uniao) ys.forEach((y) => rect(x0, y - esp / 2, x1 - x0, esp, 'Contraventamento'));
-      if (quadro) for (let k = 0; k < nD; k++) { // diagonal como perfil de 30 mm (duas linhas paralelas)
-        const ax = x0, ay = ys[k] + esp / 2, bx = x1, by = ys[k + 1] - esp / 2, len = Math.hypot(bx - ax, by - ay), nx = -(by - ay) / len * esp, ny = (bx - ax) / len * esp;
-        line(ax, ay, bx, by, 'Contraventamento'); line(ax + nx, ay + ny, bx + nx, by + ny, 'Contraventamento'); line(ax, ay, ax + nx, ay + ny, 'Contraventamento'); line(bx, by, bx + nx, by + ny, 'Contraventamento');
+      const uni = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
+      const hxL = xs[i] + HOLE_DX, hxR = xs[i + 1] - HOLE_DX; // furos das duas colunas do vão
+      if (quadro) {
+        ys.forEach((y) => emit(out, travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
+        for (let k = 0; k < nD; k++) emit(out, travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
       }
-      rect(x0, H - 26, x1 - x0, 48, 'Contraventamento'); // elemento de topo (Travessa Sup)
-      cota(xs[i], H + 60, xs[i + 1], H + 60, 300, `A${i + 1}`, false);
+      if (uni) ys.forEach((y) => emit(out, uniao((xs[i + 1] + HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE')); // [CONFIRMAR: BOM usa A−69,8]
+      emit(out, topo(espacos[i]), xs[i], H, 'Contraventamento');
+      const yc = H + 120 + (i % 2) * 90;
+      cota(xs[i], H + 60, xs[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
     }
-    cota(xs[0], H + 60, xs[n], H + 60, 700, 'A', false);
-    cota(xs[0] - prof / 2 - 60, base, xs[0] - prof / 2 - 60, H, 900, 'B', true);
-    cota(xs[0] - prof / 2 - 60, ys[0], xs[0] - prof / 2 - 60, ys[1], 300, 'C', true);
-    line(xs[0] - 2000, base - 10, xs[n] + 2000, base - 10, 'MONTANTE'); // piso
-    text((xs[0] + xs[n]) / 2, base - 500, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
-    // tabela de cotas
+    cota(xs[0], H + 60, xs[n], H + 60, 420, 'A', false);
+    cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
+    cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
+    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) emit(out, piso(), x, -110, '0'); // [CONFIRMAR nível do piso]
+    text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', xs[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
-    const layers = Object.entries(L).flatMap(([name, c]) => ['0', 'LAYER', '2', name, '70', '0', '62', String(c), '6', 'CONTINUOUS']);
+    const layers = Object.entries(LAYERS).flatMap(([name, c]) => ['0', 'LAYER', '2', name, '70', '0', '62', String(c), '6', 'CONTINUOUS']);
     return ['0', 'SECTION', '2', 'HEADER', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
-      '0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(L).length), ...layers, '0', 'ENDTAB', '0', 'ENDSEC',
+      '0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(LAYERS).length), ...layers, '0', 'ENDTAB', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   const DXF = { dxfLateral };

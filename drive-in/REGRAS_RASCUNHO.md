@@ -251,3 +251,9 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - **Comprimento total = A1 − 69,8 mm** (A1 = passo da coluna solteira). Ex.: 820 → 750,2; 1025 → 955,2. Busca do CO no cadastro a ±3 mm; sem cadastro → `COXXXXXX`.
 - **A coluna solteira fica sempre à esquerda** na vista lateral (1º passo = A1).
 - Exportação DXF da vista lateral implementada (`app/dxf.js`): layers MONTANTE / Contraventamento / COTAS / texto, cotas A1..An, A, B, C e tabela de valores. Perfis reais (furos, blocos do gabarito) não são reproduzidos.
+
+### 13.4 Blocos DI_* recebidos (DXF gerado com os desenhos reais)
+- Recebidos: DI_COLUNA (1000 mm, furos Ø9 a cada 50 a partir de 54,75, fileira a 17,9 mm do eixo; eixo do bloco em x = 15, compensado no app), DI_TRAVESSA_H (furos c/c 714,5), DI_TRAVESSA_D (furos c/c 714,5 a 45°), DI_SAPATA (155 mm, chumbadores 80 mm abaixo da base), DI_PISO (trecho de 1000), DI_TOPO (775 mm, suposto para passo 820 `[CONFIRMAR]`), DI_UNIAO (modelo 1,02: furos em 15 e 971, chapa posterior em 1007,5). Coluna solteira = mesma coluna.
+- `extrair_blocos.py` → `app/blocos.js` (primitivas flattenadas). `dxf.js` monta: coluna por altura (módulo de 50 replicado), travessa/diagonal esticadas pela distância entre furos, união ancorada nos furos das duas colunas, topo esticado por passo, sapata e piso.
+- Travessas alinhadas aos furos: nível y → furo mais próximo (y + 4,75). Diagonal: furo inferior da coluna esquerda → furo superior da direita.
+- Pendência: no desenho a união é ancorada nos furos (chapa posterior na coluna do quadro); a regra de comprimento para o BOM (A − 69,8) dá outro valor. `[CONFIRMAR]` qual cota é A − 69,8.
