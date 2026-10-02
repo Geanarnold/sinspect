@@ -288,3 +288,13 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Um bloco por coluna (80/101/122) por modelo: S180, D180, S230, D230 → 12 blocos.
 - **Regras dos braços (paletes padronizados):** simples nas montantes das pontas, duplo nas demais (o app lê "pontas" como as laterais externas da estrutura: 1ª e última; internas = duplo `[CONFIRMAR]`). Nível ≤ 2500 mm → braço 180; acima de 2500 o operador escolhe 180 ou 230. 1 braço por coluna por nível de armazenagem (níveis acima do chão). Fixadores por braço: 8× INT0648 (5/16" × 3/4"), 8× INT0650, 16× INT0812. Peso provisório = tabela da planilha antiga; SA a definir.
 - Paletes especiais: tratados depois, em módulo próprio.
+
+## 16. Vista frontal — leitura do Drawing1.dxf (referência)
+- 3 ruas, colunas de 122 (cota "Modelo de coluna" = 122), **largura da rua 1900** (vão livre) → a largura da rua passa a ser entrada do operador (1400 era só a da planilha antiga).
+- **1º braço = altura do palete + 100 mm** (cota 1454,9 com palete 1350), editável pelo operador. Demais níveis: + (palete + 200) = 1550.
+- Braço **simples nas colunas externas** (voltado para dentro), **duplo nas internas** (bloco "Suporte Braço Duplo", 590 mm) → confirma a leitura de "pontas".
+- Em cada nível e rua: "Bloco Longarina Fundo Drive In" (verde), com batentes nas pontas; no chão e no topo, a mesma peça mais longa.
+- Topo de cada rua: "Travessa Sup Drive In" (1847 mm).
+- Caneleira (protetor 700 mm) na base de todas as colunas.
+- Contraventamento em zigue-zague ("Bloco Contraventamento ZigZag") nas ruas 2 e 3.
+- Palete desenhado (bloco PALLET com atributos P4 / 600 kg) apoiado nos braços.

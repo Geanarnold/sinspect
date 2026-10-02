@@ -8,7 +8,7 @@
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
   const PASSO_COLUNA = 50;    // altura da coluna em múltiplos de 50 mm
   const TOL_SA = 3;           // ±3 mm para aceitar um SA de travessa/diagonal
-  const LARGURA_RUA = 1400;   // única largura cadastrada
+  const LARGURA_RUA = 1400;   // padrão quando o operador não informa (vão livre entre colunas)
 
   const SEM = { SA: 'SA04XXXX', CO: 'COXXXXXX', PA: 'PAXXXXXX', PK: 'PKXXXXXX' };
 
@@ -55,18 +55,21 @@
       pecas.push({ grupo, id, desc, codigo: codigo || '', qtd, compr: compr || null, pesoUnit: pesoUnit == null ? null : pesoUnit, pesoTotal: pesoUnit == null ? null : qtd * pesoUnit, obs: obs || '' });
 
     // ---- geometria
-    const Hcalc = Number(inp.alt1Nivel) + (N - 2) * (Number(inp.alturaPalete) + 200) + 1400;
+    // 1º braço: padrão = altura do palete + 100 mm (o operador pode informar outro valor)
+    const alt1 = inp.alt1Nivel ? Number(inp.alt1Nivel) : Number(inp.alturaPalete) + 100;
+    inp = { ...inp, alt1Nivel: alt1 };
+    const Hcalc = alt1 + (N - 2) * (Number(inp.alturaPalete) + 200) + 1400;
     const H = inp.alturaManual ? r50(Number(inp.alturaManual)) : r50(Hcalc);
     if (!inp.alturaManual && H !== Hcalc) alertas.push(`Altura calculada ${Hcalc} mm arredondada para ${H} mm (múltiplo de 50).`);
     if (H > 2 * MAX_PECA) alertas.push(`Altura ${H} mm excede o máximo de ${2 * MAX_PECA} mm (uma emenda, peças de até ${MAX_PECA} mm).`);
     if (Number(inp.alt1Nivel) > 2005) alertas.push('1º nível acima de 2005 mm: a planilha antiga exigia análise de engenharia.');
     if (H > MAX_PECA) alertas.push('Altura acima de 8500 mm: a planilha antiga exigia análise de engenharia. Emenda incluída.');
-    if (Number(inp.larguraRua || LARGURA_RUA) !== LARGURA_RUA) alertas.push('Largura de rua diferente de 1400 mm: sem regra cadastrada.');
 
     const laterais = R + 1;                 // [CONFIRMAR] laterais compartilhadas entre ruas
     const colPorLateral = n + 1;
     const colunas = laterais * colPorLateral;
-    const largura = R * LARGURA_RUA + laterais * col;
+    const larguraRua = Number(inp.larguraRua || LARGURA_RUA);
+    const largura = R * larguraRua + laterais * col;
     const profundidade = espacos.reduce((s, v) => s + v, 0); // A1..An são medidas face a face (externas), como no DRIVE_IN.dxf: o total já inclui as colunas
     // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
     const quadros = Math.floor((n + 1) / 2);
