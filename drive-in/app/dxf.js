@@ -70,45 +70,72 @@
       }
     }
   }
-  function dxfLateral(r, titulo) {
+  // ---- montagem da vista (primitivas em coordenadas de mundo + cotas/textos), usada pelo DXF e pela tela
+  function montarLateral(r, titulo) {
     const { ys, espacos, solteira, nD } = r.lateral, H = r.dimensoes.altura, n = espacos.length;
     const xs = [0]; espacos.forEach((a) => xs.push(xs[xs.length - 1] + a));
-    const out = [];
-    const line = (x1, y1, x2, y2, layer) => out.push('0', 'LINE', '8', layer, '10', f(x1), '20', f(y1), '30', '0', '11', f(x2), '21', f(y2), '31', '0');
-    const text = (x, y, h, s, layer, rot = 0, just = 1) => out.push('0', 'TEXT', '8', layer, '10', f(x), '20', f(y), '30', '0', '40', f(h), '1', s, '50', f(rot), '72', String(just), '11', f(x), '21', f(y), '31', '0');
+    const prims = [], linhas = [], textos = [];
+    const put = (ps, dx, dy, layerDefault) => { for (const q of ps) { q.l = q.l && q.l !== '0' ? q.l : layerDefault; prims.push(translate([q], dx, dy)[0]); } };
+    const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
+    const text = (x, y, h, s, layer, rot = 0, just = 1) => textos.push({ x, y, h, s, l: layer, rot, just });
     const cota = (x1, y1, x2, y2, off, label, vertical) => {
       if (!vertical) { line(x1, y1, x1, y1 + off, 'COTAS'); line(x2, y2, x2, y2 + off, 'COTAS'); line(x1, y1 + off, x2, y2 + off, 'COTAS'); text((x1 + x2) / 2, y1 + off + 20, 60, label, 'COTAS'); }
       else { line(x1, y1, x1 - off, y1, 'COTAS'); line(x2, y2, x2 - off, y2, 'COTAS'); line(x1 - off, y1, x2 - off, y2, 'COTAS'); text(x1 - off - 20, (y1 + y2) / 2, 60, label, 'COTAS', 90); }
     };
-    const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50); // furo mais próximo do nível
-    // colunas + sapatas: furos voltados para o vão com travessas
+    const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50);
     const holesRight = (i) => (solteira ? i === 0 || i % 2 === 1 : i % 2 === 0) && i < n;
-    // sapata: centro a 27,5 mm da face externa da coluna (= eixo − 7,35), espelhada quando os furos olham para a esquerda (DXF "posição da sapata certa")
-    xs.forEach((x, i) => { const hr = holesRight(i); emit(out, coluna(H, hr), x, 0, 'MONTANTE'); emit(out, hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE'); });
+    xs.forEach((x, i) => { const hr = holesRight(i); put(coluna(H, hr), x, 0, 'MONTANTE'); put(hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE'); });
     for (let i = 0; i < n; i++) {
       const uni = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
-      const hxL = xs[i] + HOLE_DX, hxR = xs[i + 1] - HOLE_DX; // furos das duas colunas do vão
+      const hxL = xs[i] + HOLE_DX, hxR = xs[i + 1] - HOLE_DX;
       if (quadro) {
-        ys.forEach((y) => emit(out, travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
-        for (let k = 0; k < nD; k++) emit(out, travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
+        ys.forEach((y) => put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
+        for (let k = 0; k < nD; k++) put(travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
       }
-      if (uni) ys.forEach((y) => emit(out, uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE')); // chapa posterior em eixo − 17,9 [CONFIRMAR: BOM usa A−69,8]
-      emit(out, topo(espacos[i]), xs[i], H, 'Contraventamento');
+      if (uni) ys.forEach((y) => put(uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE'));
+      put(topo(espacos[i]), xs[i], H, 'Contraventamento');
       const yc = H + 120 + (i % 2) * 90;
       cota(xs[i], H + 60, xs[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
     }
     cota(xs[0], H + 60, xs[n], H + 60, 420, 'A', false);
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
-    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) emit(out, piso(), x, -110, '0'); // [CONFIRMAR nível do piso]
+    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) put(piso(), x, -110, '0');
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', xs[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
+    return { prims, linhas, textos, bbox: [xs[0] - 1500, -800, xs[n] + 3200, H + 700] };
+  }
+  function dxfLateral(r, titulo) {
+    const m = montarLateral(r, titulo), out = [];
+    emit(out, m.prims, 0, 0, '0');
+    for (const q of m.linhas) out.push('0', 'LINE', '8', q.l, '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
+    for (const t of m.textos) out.push('0', 'TEXT', '8', t.l, '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', t.s, '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
     const layers = Object.entries(LAYERS).flatMap(([name, c]) => ['0', 'LAYER', '2', name, '70', '0', '62', String(c), '6', 'CONTINUOUS']);
     return ['0', 'SECTION', '2', 'HEADER', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(LAYERS).length), ...layers, '0', 'ENDTAB', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
-  const DXF = { dxfLateral };
+  // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
+  const COR = { MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  function svgLateral(r, titulo) {
+    const m = montarLateral(r, titulo), [x0, y0, x1, y1] = m.bbox, W = x1 - x0, Hh = y1 - y0;
+    const X = (x) => (x - x0).toFixed(1), Y = (y) => (y1 - y).toFixed(1);
+    const parts = [];
+    const byLayer = {};
+    for (const q of m.prims.concat(m.linhas)) (byLayer[q.l] = byLayer[q.l] || []).push(q);
+    for (const [l, qs] of Object.entries(byLayer)) {
+      const sw = l === 'MONTANTE' ? 2.2 : 1.6;
+      let path = '';
+      for (const q of qs) {
+        if (q.t === 'c') parts.push(`<circle cx="${X(q.c[0])}" cy="${Y(q.c[1])}" r="${q.r.toFixed(1)}" fill="none" stroke="${COR[l] || '#fff'}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/>`);
+        else path += 'M' + q.p.map((v, i) => (i ? 'L' : '') + X(v[0]) + ' ' + Y(v[1])).join('');
+      }
+      if (path) parts.push(`<path d="${path}" fill="none" stroke="${COR[l] || '#fff'}" stroke-width="${sw}" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`);
+    }
+    for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
+    return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
+  }
+  const DXF = { dxfLateral, svgLateral, montarLateral };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);

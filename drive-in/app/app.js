@@ -114,7 +114,8 @@
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
   const VISTAS = {
-    lateral: (r) => ({ t: 'Vista lateral (corte)', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira (travessa união em verde)' : ''} · ${r.lateral.nH} horizontais (laranja) e ${r.lateral.nD} diagonais (azul) por quadro · elemento de topo em cinza`, svg: svgLateral(r) }),
+    lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, `CORTE A - VISTA LATERAL - ${$('projeto').value || ''}`.trim()) : svgLateral(r) }),
+    esquema: (r) => ({ t: 'Esquema', s: `${r.lateral.quadros} quadro(s)${r.lateral.solteira ? ' + coluna solteira (verde)' : ''} · horizontais (laranja), diagonais (azul), topo (cinza)`, svg: svgLateral(r) }),
     frontal: (r) => ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${Number(r.entradas.alturaPalete) + 200} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
     planta: (r) => ({ t: 'Planta', s: 'colunas em preto; vigas túnel e contraventamentos não levantados', svg: svgPlanta(r) }),
   };

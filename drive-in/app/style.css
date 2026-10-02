@@ -48,3 +48,5 @@ svg{width:100%;max-height:520px;display:block}
 label.chk{display:flex;align-items:center;gap:6px;text-transform:none;font-size:12px;font-weight:500;color:#111827;margin-top:4px}
 label.chk input{width:auto}
 .espacos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.espacos label{font-size:10px}
+
+.vista svg{max-height:640px}
