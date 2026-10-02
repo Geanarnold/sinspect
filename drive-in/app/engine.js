@@ -151,8 +151,34 @@
     add('Fixadores das travessas', par.id, par.desc, par.codigo, nPar, null, null);
     add('Fixadores das travessas', 'INT0650', porca.desc, porca.codigo, nPar, null, null, 'diagonais usam o mesmo parafuso da horizontal');
 
+    // ---- braços (paletes padronizados)
+    // simples nas laterais das pontas (1ª e última), duplo nas laterais internas (entre duas ruas) [CONFIRMAR leitura de "montantes das pontas"]
+    // 1 braço por coluna por nível de armazenagem (níveis acima do chão); nível ≤ 2500 mm → 180; acima → escolha do operador (180 ou 230)
+    const passoNivel = Number(inp.alturaPalete) + 200;
+    const niveisArm = []; for (let k = 0; k < N - 1; k++) niveisArm.push(Number(inp.alt1Nivel) + k * passoNivel);
+    const modeloAlto = String(inp.bracoAcima || '230');
+    const lateraisPonta = Math.min(laterais, 2), lateraisInternas = Math.max(laterais - 2, 0);
+    const pesoBraco = { S180: { 80: 1.4654, 101: 1.5135, 122: 1.5616 }, S230: { 80: 1.58, 101: 1.6281, 122: 1.6762 }, D180: { 80: 1.878, 101: 1.9261, 122: 1.9742 }, D230: { 80: 2.1072, 101: 2.1553, 122: 2.2035 } };
+    const contBraco = {};
+    for (const y of niveisArm) {
+      const mod = y <= 2500 ? '180' : modeloAlto;
+      if (lateraisPonta) contBraco['S' + mod] = (contBraco['S' + mod] || 0) + lateraisPonta * colPorLateral;
+      if (lateraisInternas) contBraco['D' + mod] = (contBraco['D' + mod] || 0) + lateraisInternas * colPorLateral;
+    }
+    let totBracos = 0;
+    for (const [m, q] of Object.entries(contBraco)) {
+      totBracos += q;
+      add('Braços', `BRACO-${m}-${col}`, `Braço ${m[0] === 'S' ? 'simples' : 'duplo'} ${m.slice(1)} – COL ${col}`, SEM.SA, q, null, (pesoBraco[m] || {})[col] ?? null, 'peso da planilha antiga (a confirmar); SA a definir');
+    }
+    if (totBracos) {
+      add('Fixadores dos braços', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 8 * totBracos, null, null, '8 por braço');
+      add('Fixadores dos braços', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 8 * totBracos, null, null, '8 por braço');
+      add('Fixadores dos braços', 'INT0812', prodOf(cat, 'INT0812').desc, 'INT0812', 16 * totBracos, null, null, '16 por braço');
+    }
+    if (niveisArm.some((y) => y > 2500)) pend.push(`Níveis acima de 2500 mm usando braço ${modeloAlto} (escolha do operador).`);
+
     // ---- ainda não levantado
-    pend.push('Braços (simples/duplo 180/230), contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
+    pend.push('Contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);

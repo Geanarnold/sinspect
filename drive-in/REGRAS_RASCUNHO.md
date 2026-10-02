@@ -286,3 +286,5 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Recebidos DI_BRACO_S180_COL80_ESQ e _DIR. O DIR é o **espelho exato** do ESQ (furos em ±22,5 / 15 e 165, Ø20; base no eixo da coluna) → o app gera o lado direito espelhando; basta enviar o ESQ.
 - Guardado em `app/blocos.js` como `DI_BRACO_S180_COL80` (lado esquerdo).
 - Um bloco por coluna (80/101/122) por modelo: S180, D180, S230, D230 → 12 blocos.
+- **Regras dos braços (paletes padronizados):** simples nas montantes das pontas, duplo nas demais (o app lê "pontas" como as laterais externas da estrutura: 1ª e última; internas = duplo `[CONFIRMAR]`). Nível ≤ 2500 mm → braço 180; acima de 2500 o operador escolhe 180 ou 230. 1 braço por coluna por nível de armazenagem (níveis acima do chão). Fixadores por braço: 8× INT0648 (5/16" × 3/4"), 8× INT0650, 16× INT0812. Peso provisório = tabela da planilha antiga; SA a definir.
+- Paletes especiais: tratados depois, em módulo próprio.

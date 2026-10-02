@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'niveis', 'espacamentos', 'largura', 'larguraRua', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'bracoAcima', 'niveis', 'espacamentos', 'largura', 'larguraRua', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
