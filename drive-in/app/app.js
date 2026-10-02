@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'paletesPorRua', 'niveis', 'espacamentos', 'largura', 'larguraRua', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'niveis', 'espacamentos', 'largura', 'larguraRua', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -35,7 +35,7 @@
     last = r;
     const d = r.dimensoes;
     $('kpis').innerHTML = [
-      kpi('Posições de palete', fmt0(r.posicoes), `${inp.ruas} ruas × ${inp.paletesPorRua} paletes × ${inp.niveis} níveis`),
+      kpi('Posições de palete', fmt0(r.posicoes), `${inp.ruas} ruas × ${r.paletesPorRua} paletes × ${inp.niveis} níveis · ${r.paletesPorRua} × ${r.ocupPalete} = ${r.paletesPorRua * r.ocupPalete} mm (sobra ${fmt0(r.sobraProfundidade)})`),
       kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
       kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
       kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} (medidas externas)`),

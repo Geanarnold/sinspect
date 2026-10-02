@@ -46,7 +46,7 @@
   function calcular(inp, cat) {
     const col = Number(inp.coluna);
     const esp = String(inp.espessura);
-    const R = Number(inp.ruas), P = Number(inp.paletesPorRua), N = Number(inp.niveis);
+    const R = Number(inp.ruas), N = Number(inp.niveis);
     const n = Number(inp.espacamentos);
     const espacos = (inp.espacos && inp.espacos.length === n ? inp.espacos : Array(n).fill(inp.largura)).map(Number);
     const A = espacos[0];
@@ -62,7 +62,6 @@
     if (Number(inp.alt1Nivel) > 2005) alertas.push('1º nível acima de 2005 mm: a planilha antiga exigia análise de engenharia.');
     if (H > MAX_PECA) alertas.push('Altura acima de 8500 mm: a planilha antiga exigia análise de engenharia. Emenda incluída.');
     if (Number(inp.larguraRua || LARGURA_RUA) !== LARGURA_RUA) alertas.push('Largura de rua diferente de 1400 mm: sem regra cadastrada.');
-    if (n !== P + 1) alertas.push(`Espaçamentos (${n}) ≠ paletes por rua + 1 (${P + 1}). Relação a confirmar (pergunta 2 das regras).`);
 
     const laterais = R + 1;                 // [CONFIRMAR] laterais compartilhadas entre ruas
     const colPorLateral = n + 1;
@@ -74,6 +73,11 @@
     const solteira = n % 2 === 0;           // coluna solteira sempre à ESQUERDA (1º passo) na vista lateral
     const passoSolteira = solteira ? espacos[0] : null;
     const passosQuadro = espacos.filter((_, i) => solteira ? i % 2 === 1 : i % 2 === 0);
+    // paletes por rua: profundidade do palete + 25 mm de folga; o último palete deve terminar dentro da profundidade da estrutura
+    const ocupPalete = Number(inp.profPalete || 1000) + 25;
+    const P = Math.floor(profundidade / ocupPalete);
+    if (P < 1) alertas.push(`A profundidade da estrutura (${profundidade} mm) não comporta um palete de ${ocupPalete} mm (palete + 25).`);
+    const sobra = profundidade - P * ocupPalete;
     const posicoes = R * P * N;
 
     // ---- colunas (+ emenda)
@@ -152,7 +156,7 @@
     return {
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
-      posicoes, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
+      posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       pecas, alertas, pendencias: pend,
     };

@@ -29,14 +29,14 @@
       </div>
       <div id="passo-estrutura" class="form hidden">
         <div><label>Ruas</label><input id="ruas" type="number" min="1" value="1"/></div>
-        <div><label>Paletes por rua</label><input id="paletesPorRua" type="number" min="1" value="4"/></div>
+        <div><label>Profundidade do palete (mm)</label><input id="profPalete" type="number" min="1" value="1000"/></div>
         <div><label>Níveis (chão + níveis)</label><input id="niveis" type="number" min="2" value="5"/></div>
         <div><label>Largura da rua (mm)</label><input id="larguraRua" type="number" value="1400"/></div>
         <div><label>Carga do palete (kg)</label><input id="cargaPalete" type="number" value="1000"/></div>
         <div><label>Altura do palete (mm)</label><input id="alturaPalete" type="number" value="1600"/></div>
         <div><label>Altura 1º nível (mm)</label><input id="alt1Nivel" type="number" value="2000"/></div>
         <div><label>Altura manual (mm)</label><input id="alturaManual" type="number" step="50" placeholder="auto"/></div>
-        <p class="nota full">Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
+        <p class="nota full">Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
       </div>
       <div id="passo-lateral" class="form hidden">
         <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>

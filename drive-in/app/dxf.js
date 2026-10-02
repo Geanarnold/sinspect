@@ -101,7 +101,9 @@
     xs.forEach((x, i) => { const hr = holesRight(i); put(coluna(H, hr), x, 0, 'MONTANTE'); put(hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE'); });
     for (let i = 0; i < n; i++) {
       const uni = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
-      const hxL = xs[i] + HOLE_DX, hxR = xs[i + 1] - HOLE_DX;
+      // travessa: furos c/c = A − 109,1 (regra do cadastro), centrada no quadro
+      const ccQ = espacos[i] - 109.1, xm = (xs[i] + xs[i + 1]) / 2;
+      const hxL = quadro ? xm - ccQ / 2 : xs[i] + HOLE_DX, hxR = quadro ? xm + ccQ / 2 : xs[i + 1] - HOLE_DX;
       if (quadro) {
         ys.forEach((y) => put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
         for (let k = 0; k < nD; k++) put(travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');

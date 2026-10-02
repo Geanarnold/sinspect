@@ -272,3 +272,10 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - **Profundidade = Σ A1..An** (sem coluna extra, sem +100). Ex.: 5 × 820 = 4100; 6 × 820 = 4920.
 - 69,8 = largura da coluna na vista lateral (DI_COLUNA).
 - Pendente: o bloco DI_TRAVESSA_H tem furos c/c 714,5 para A = 820 (= A − 105,5), e a regra/cadastro usa A − 109,1 (= 710,9). Diferença de 3,6 mm `[CONFIRMAR]`.
+
+### 13.6 Decisões (02/10)
+- Travessa horizontal: vale a **regra A − 109,1** (c/c dos furos) para lista e desenho; no desenho a travessa fica centrada no quadro.
+- DI_TOPO: o 820 foi só o modelo; o bloco é esticado conforme cada espaço (quadro e entre quadros).
+- Laterais = ruas + 1: **confirmado**.
+- **Paletes por rua = ⌊ profundidade da estrutura ÷ (profundidade do palete + 25) ⌋**: o último palete termina dentro (≤) da profundidade. Ex.: palete 1000 → 1025; 900 → 925. O operador informa a profundidade do palete; paletes por rua deixou de ser entrada.
+- Parafusos específicos da união e braços: depois.
