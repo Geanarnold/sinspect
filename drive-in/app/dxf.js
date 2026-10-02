@@ -39,6 +39,25 @@
     if (!holesRight) r = mirrorX(r);
     return r;
   }
+
+  // coluna na vista frontal (com sapata): estica as linhas longas até H e replica o módulo de 50 mm da furação
+  function colunaFrontal(c, H) {
+    const src = B()['DI_COLUNA_FRONTAL_' + c]; if (!src) return [];
+    const isLong = (q) => q.p && Math.max(...q.p.map((v) => v[1])) - Math.min(...q.p.map((v) => v[1])) > 500;
+    const yr = (q) => { const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; return [Math.min(...ys), Math.max(...ys)]; };
+    const Ht = Math.max(...src.filter(isLong).map((q) => yr(q)[1])), dH = H - Ht, out = [];
+    const W0 = 400; // janela de 50 mm usada como módulo
+    for (const q of src) {
+      if (isLong(q)) { const cq = clone([q])[0]; cq.p = cq.p.map((v) => [v[0], v[1] > Ht - 1 ? v[1] + dH : v[1]]); out.push(cq); continue; }
+      const [y0, y1] = yr(q);
+      if (y1 <= 140) { out.push(clone([q])[0]); continue; }            // base + sapata
+      if (y0 >= Ht - 30) { out.push(translate(clone([q]), 0, dH)[0]); continue; } // topo
+      if (y0 >= W0 && y0 < W0 + 50) {                                      // módulo: replica de 50 em 50
+        for (let k = Math.ceil((140 - y0) / 50); y0 + 50 * k + (y1 - y0) <= H - 30; k++) out.push(translate(clone([q]), 0, 50 * k)[0]);
+      }
+    }
+    return out;
+  }
   const HOLE_DX = 17.9; // furo a 17,9 mm do eixo (32,9 - 15)
   function travessaH(ccNovo) {
     const src = clone(B().DI_TRAVESSA_H), [c1, c2] = circles(src), cc0 = c2[0] - c1[0];
@@ -157,6 +176,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { dxfLateral, svgLateral, montarLateral };
+  const DXF = { dxfLateral, svgLateral, montarLateral, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);

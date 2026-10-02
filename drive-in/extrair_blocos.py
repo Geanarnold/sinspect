@@ -32,7 +32,7 @@ def prim(b):
             except Exception: pts=[[v.x,v.y] for v in e.control_points]
             P.append({'t':'p','l':lay,'p':pts})
         elif t=='HATCH': pass
-        elif t=='INSERT': pass
+        elif t=='INSERT': P+=prim(list(e.virtual_entities()))  # inserts aninhados (arrays de furos)
     return P
 def rnd(P):
     for q in P:

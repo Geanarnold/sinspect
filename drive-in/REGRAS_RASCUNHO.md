@@ -298,3 +298,5 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Caneleira (protetor 700 mm) na base de todas as colunas.
 - Contraventamento em zigue-zague ("Bloco Contraventamento ZigZag") nas ruas 2 e 3.
 - Palete desenhado (bloco PALLET com atributos P4 / 600 kg) apoiado nos braços.
+- **Colunas frontais recebidas** (DI_COLUNA_FRONTAL_80/101/122, com sapata): furação de 50 em 50 mm, replicada pelo app na altura do projeto (`colunaFrontal` em `dxf.js`). O arquivo da 122 veio com a geometria solta no model space (sem bloco nomeado) e a 101 com os furos num array interno; ambos foram normalizados (centro da sapata em x = 0, base em y = 0).
+- Longarina superior (DI_LGTOPO): comprimento = largura da rua; ponto base no 3º furo de cima para baixo da coluna.
