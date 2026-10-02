@@ -49,9 +49,9 @@
     return translate(r, p1[0], p1[1]);
   }
   function uniao(distFuros) {
-    // ancorada nos furos: 1º furo na coluna solteira, parafusos da chapa posterior (x = 1007,5) na fileira de furos da coluna do quadro
-    const src = clone(B().DI_UNIAO), c1 = circles(src)[0], xPlaca = 1007.5;
-    return translate(stretchX(src, 500, distFuros - (xPlaca - c1[0])), -c1[0], -c1[1]);
+    // ancorada nos furos: 1º furo na coluna solteira; parafusos da chapa posterior na face de trás da coluna do quadro (eixo − 17,9), como no DXF "vista lateral com união"
+    const src = clone(B().DI_UNIAO), cs = circles(src), c1 = cs[0], xPlaca = Math.max(...cs.map((c) => c[0]));
+    return translate(stretchX(src, (c1[0] + xPlaca) / 2, distFuros - (xPlaca - c1[0])), -c1[0], -c1[1]);
   }
   function topo(A) { const src = clone(B().DI_TOPO), A0 = 820; return stretchX(src, 340, A - A0); } // [CONFIRMAR A0 = 820]
   const sapata = () => clone(B().DI_SAPATA);
@@ -92,7 +92,7 @@
         ys.forEach((y) => emit(out, travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
         for (let k = 0; k < nD; k++) emit(out, travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
       }
-      if (uni) ys.forEach((y) => emit(out, uniao((xs[i + 1] + HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE')); // [CONFIRMAR: BOM usa A−69,8]
+      if (uni) ys.forEach((y) => emit(out, uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE')); // chapa posterior em eixo − 17,9 [CONFIRMAR: BOM usa A−69,8]
       emit(out, topo(espacos[i]), xs[i], H, 'Contraventamento');
       const yc = H + 120 + (i % 2) * 90;
       cota(xs[i], H + 60, xs[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
