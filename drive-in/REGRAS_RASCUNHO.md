@@ -279,3 +279,5 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Laterais = ruas + 1: **confirmado**.
 - **Paletes por rua = ⌊ profundidade da estrutura ÷ (profundidade do palete + 25) ⌋**: o último palete termina dentro (≤) da profundidade. Ex.: palete 1000 → 1025; 900 → 925. O operador informa a profundidade do palete; paletes por rua deixou de ser entrada.
 - Parafusos específicos da união e braços: depois.
+- **Alertas de palete:** vermelho (erro) quando nº de paletes × (palete + 25) > profundidade, sem tolerância; amarelo quando sobra estrutura > 50 mm, informando a sobra. Campo opcional "Paletes por rua" para o operador conferir uma quantidade; em branco, o app usa o máximo que cabe.
+- SA dos itens: tratado depois, na vista superior.

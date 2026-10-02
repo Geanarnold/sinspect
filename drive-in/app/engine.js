@@ -50,7 +50,7 @@
     const n = Number(inp.espacamentos);
     const espacos = (inp.espacos && inp.espacos.length === n ? inp.espacos : Array(n).fill(inp.largura)).map(Number);
     const A = espacos[0];
-    const alertas = [], pend = [], pecas = [];
+    const alertas = [], erros = [], pend = [], pecas = [];
     const add = (grupo, id, desc, codigo, qtd, compr, pesoUnit, obs) =>
       pecas.push({ grupo, id, desc, codigo: codigo || '', qtd, compr: compr || null, pesoUnit: pesoUnit == null ? null : pesoUnit, pesoTotal: pesoUnit == null ? null : qtd * pesoUnit, obs: obs || '' });
 
@@ -75,9 +75,12 @@
     const passosQuadro = espacos.filter((_, i) => solteira ? i % 2 === 1 : i % 2 === 0);
     // paletes por rua: profundidade do palete + 25 mm de folga; o último palete deve terminar dentro da profundidade da estrutura
     const ocupPalete = Number(inp.profPalete || 1000) + 25;
-    const P = Math.floor(profundidade / ocupPalete);
-    if (P < 1) alertas.push(`A profundidade da estrutura (${profundidade} mm) não comporta um palete de ${ocupPalete} mm (palete + 25).`);
+    const Pauto = Math.floor(profundidade / ocupPalete);
+    const P = inp.paletesInformados ? Number(inp.paletesInformados) : Pauto; // operador pode informar a quantidade para conferência
     const sobra = profundidade - P * ocupPalete;
+    if (sobra < 0) erros.push(`Palete ultrapassa a estrutura: ${P} × ${ocupPalete} = ${P * ocupPalete} mm > profundidade ${profundidade} mm (excede ${-sobra} mm). Máximo que cabe: ${Pauto} palete(s).`);
+    else if (sobra > 50) alertas.push(`Sobra de estrutura: ${sobra} mm além dos paletes (${P} × ${ocupPalete} = ${P * ocupPalete} mm de ${profundidade} mm).`);
+    if (P < 1) erros.push(`A profundidade da estrutura (${profundidade} mm) não comporta nenhum palete de ${ocupPalete} mm (palete + 25).`);
     const posicoes = R * P * N;
 
     // ---- colunas (+ emenda)
@@ -158,7 +161,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      pecas, alertas, pendencias: pend,
+      pecas, alertas, erros, pendencias: pend,
     };
   }
 
