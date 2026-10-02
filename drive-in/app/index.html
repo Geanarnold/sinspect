@@ -11,9 +11,10 @@
     <div class="logo">DI</div>
     <div><h1>Configurador Drive-In</h1><div class="sub">Levantamento de peso e lista de peças · protótipo · catálogo <span id="catVersao"></span></div></div>
     
+    <nav class="nav"><a href="#" id="navConfig" class="active">Configurador</a><a href="#" id="navCad">Cadastro de produtos</a></nav>
   </div></header>
 
-  <main class="wrap">
+  <main class="wrap" id="paginaConfig">
     <aside class="card">
       <div class="passos">
         <div class="passo active" data-passo="projeto">1 · Projeto</div>
@@ -79,10 +80,31 @@
     </section>
   </main>
 
+  <section id="paginaCad" class="wrap hidden">
+    <div class="card painel" style="margin-top:16px">
+      <div class="tabs" id="cadAbas"></div>
+      <div class="cad-barra">
+        <input id="cadBusca" type="text" placeholder="Buscar..."/>
+        <span id="cadInfo" class="nota"></span>
+        <span style="flex:1"></span>
+        <button id="cadNovo">+ Nova linha</button>
+        <button id="cadSalvar" class="primario">Salvar</button>
+        <button id="cadCsv">Exportar CSV</button>
+        <button id="cadJson">Exportar catálogo (JSON)</button>
+        <label class="btn-arquivo">Importar JSON<input id="cadImportar" type="file" accept=".json" hidden/></label>
+        <button id="cadRestaurar">Restaurar padrão</button>
+      </div>
+      <p class="nota" style="padding:0 16px">Código em branco = item sem cadastro (o BOM mostra SA04XXXX / COXXXXXX). As edições ficam salvas neste navegador; use "Exportar catálogo" para guardar ou levar para outro computador.</p>
+      <div id="cadMsg" class="nota" style="padding:0 16px 8px"></div>
+      <div id="cadTabela" class="cad-tabela"></div>
+    </div>
+  </section>
+
   <script src="catalogo.js"></script>
   <script src="engine.js"></script>
   <script src="blocos.js"></script>
   <script src="dxf.js"></script>
+  <script src="cadastro.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

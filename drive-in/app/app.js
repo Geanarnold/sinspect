@@ -193,5 +193,10 @@
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = cat.versao;
+  window.recalcular = () => { $('catVersao').textContent = cat.versao; render(); };
+  const mostrarPagina = (cad) => { $('paginaConfig').classList.toggle('hidden', cad); $('paginaCad').classList.toggle('hidden', !cad); $('navConfig').classList.toggle('active', !cad); $('navCad').classList.toggle('active', cad); };
+  $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(false); });
+  $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(true); });
+  if (window.Cadastro) Cadastro.init();
   render();
 })();

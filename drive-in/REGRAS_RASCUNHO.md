@@ -258,3 +258,8 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Travessas alinhadas aos furos: nível y → furo mais próximo (y + 4,75). Diagonal: furo inferior da coluna esquerda → furo superior da direita.
 - Pendência: no desenho a união é ancorada nos furos (chapa posterior na coluna do quadro); a regra de comprimento para o BOM (A − 69,8) dá outro valor. `[CONFIRMAR]` qual cota é A − 69,8.
 - **DI_TOPO (confirmado):** acompanha o comprimento do passo; há **dois modelos**: um para o passo da montante (dentro do quadro) e outro para o passo entre duas montantes. O app lista os dois separadamente por passo (SA e peso a informar). Passo da coluna solteira: tratado como "entre montantes" `[CONFIRMAR]`.
+
+## 14. Cadastro de produtos no app
+- Página "Cadastro de produtos" (`app/cadastro.js`): edita Produtos, Colunas (SA por altura e kg/m), Travessas, Diagonais, Travessa união e Composição. Salva no navegador (localStorage) e o configurador recalcula na hora. Exporta CSV por tabela e o catálogo inteiro em JSON; importa JSON; "Restaurar padrão" volta ao catálogo gerado do `CATALOGO.xlsx`.
+- Atenção: o kg/m usado no cálculo das colunas é o da aba "Colunas: kg/m por espessura"; as linhas COL-* da aba Produtos são só referência.
+- Fase com login/banco (Supabase): o mesmo cadastro passa a ser compartilhado entre usuários.
