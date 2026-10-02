@@ -68,7 +68,7 @@
     const colPorLateral = n + 1;
     const colunas = laterais * colPorLateral;
     const largura = R * LARGURA_RUA + laterais * col;
-    const profundidade = espacos.reduce((s, v) => s + v, 0) + col; // passos eixo a eixo + 1 coluna [CONFIRMAR]
+    const profundidade = espacos.reduce((s, v) => s + v, 0); // A1..An são medidas face a face (externas), como no DRIVE_IN.dxf: o total já inclui as colunas
     // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
     const quadros = Math.floor((n + 1) / 2);
     const solteira = n % 2 === 0;           // coluna solteira sempre à ESQUERDA (1º passo) na vista lateral
@@ -145,7 +145,6 @@
     add('Fixadores das travessas', 'INT0650', porca.desc, porca.codigo, nPar, null, null, 'diagonais usam o mesmo parafuso da horizontal');
 
     // ---- ainda não levantado
-    pend.push('Profundidade = soma dos passos (eixo a eixo) + largura de 1 coluna; o "+100" da planilha antiga foi retirado. A confirmar.');
     pend.push('Braços (simples/duplo 180/230), contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
 

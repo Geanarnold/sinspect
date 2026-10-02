@@ -80,7 +80,14 @@
   // ---- montagem da vista (primitivas em coordenadas de mundo + cotas/textos), usada pelo DXF e pela tela
   function montarLateral(r, titulo) {
     const { ys, espacos, solteira, nD } = r.lateral, H = r.dimensoes.altura, n = espacos.length;
-    const xs = [0]; espacos.forEach((a) => xs.push(xs[xs.length - 1] + a));
+    // A1..An são medidas face a face (externas), como no DRIVE_IN.dxf:
+    //  quadro = face externa a face externa das 2 colunas; vão entre quadros = vão livre entre faces;
+    //  coluna solteira = face esquerda da solteira até a face esquerda da 1ª coluna do quadro.
+    const CW = 69.8; // largura da coluna na vista lateral (DI_COLUNA)
+    const cum = [0]; espacos.forEach((a) => cum.push(cum[cum.length - 1] + a)); // cotas A1..An
+    const lf = [0];
+    espacos.forEach((a, i) => { const quadroI = solteira ? i % 2 === 1 : i % 2 === 0; lf.push(lf[i] + (solteira && i === 0 ? a : quadroI ? a - CW : a + CW)); });
+    const xs = lf.map((v) => v + CW / 2); // eixos das colunas
     const prims = [], linhas = [], textos = [];
     const put = (ps, dx, dy, layerDefault) => { for (const q of ps) { q.l = q.l && q.l !== '0' ? q.l : layerDefault; prims.push(translate([q], dx, dy)[0]); } };
     const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
@@ -100,17 +107,17 @@
         for (let k = 0; k < nD; k++) put(travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
       }
       if (uni) ys.forEach((y) => put(uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE'));
-      put(topo(espacos[i]), xs[i], H, 'Contraventamento');
+      put(topo(xs[i + 1] - xs[i] + CW), xs[i], H, 'Contraventamento'); // DI_TOPO desenhado para quadro de 820 externo [CONFIRMAR]
       const yc = H + 120 + (i % 2) * 90;
-      cota(xs[i], H + 60, xs[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
+      cota(cum[i], H + 60, cum[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
     }
-    cota(xs[0], H + 60, xs[n], H + 60, 420, 'A', false);
+    cota(cum[0], H + 60, cum[n], H + 60, 420, 'A', false);
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
     const x0p = xs[0] - 1500, nP = Math.ceil((xs[n] + 1500 - x0p) / 1000);
     for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0'); // topo do concreto (y local 0) na base da sapata
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
-    const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', xs[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
+    const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', cum[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
     return { prims, linhas, textos, bbox: [xs[0] - 1500, -800, xs[n] + 3200, H + 700] };
   }

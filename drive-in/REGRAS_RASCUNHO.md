@@ -263,3 +263,12 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Página "Cadastro de produtos" (`app/cadastro.js`): edita Produtos, Colunas (SA por altura e kg/m), Travessas, Diagonais, Travessa união e Composição. Salva no navegador (localStorage) e o configurador recalcula na hora. Exporta CSV por tabela e o catálogo inteiro em JSON; importa JSON; "Restaurar padrão" volta ao catálogo gerado do `CATALOGO.xlsx`.
 - Atenção: o kg/m usado no cálculo das colunas é o da aba "Colunas: kg/m por espessura"; as linhas COL-* da aba Produtos são só referência.
 - Fase com login/banco (Supabase): o mesmo cadastro passa a ser compartilhado entre usuários.
+
+### 13.5 Medidas A1..An externas (face a face) — decisão do responsável técnico
+- O operador informa medidas **externas**, não eixo a eixo. Conferido com o DRIVE_IN.dxf (posições das colunas batem ao 0,1 mm):
+  - **quadro:** face externa da 1ª coluna até face externa da 2ª (eixo a eixo = A − 69,8);
+  - **vão entre quadros:** vão livre entre faces (eixo a eixo = A + 69,8);
+  - **coluna solteira:** face esquerda da solteira até face esquerda da 1ª coluna do quadro (eixo a eixo = A); vão livre = A − 69,8 = comprimento da união.
+- **Profundidade = Σ A1..An** (sem coluna extra, sem +100). Ex.: 5 × 820 = 4100; 6 × 820 = 4920.
+- 69,8 = largura da coluna na vista lateral (DI_COLUNA).
+- Pendente: o bloco DI_TRAVESSA_H tem furos c/c 714,5 para A = 820 (= A − 105,5), e a regra/cadastro usa A − 109,1 (= 710,9). Diferença de 3,6 mm `[CONFIRMAR]`.

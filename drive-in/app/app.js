@@ -38,7 +38,7 @@
       kpi('Posições de palete', fmt0(r.posicoes), `${inp.ruas} ruas × ${inp.paletesPorRua} paletes × ${inp.niveis} níveis`),
       kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
       kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
-      kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} + coluna (a confirmar)`),
+      kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} (medidas externas)`),
       kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem braços, LG-UE, vigas, protetores'),
       kpi('kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
     ].join('');
@@ -141,7 +141,7 @@
     $('tab-pend').innerHTML = `<h3>Pendências</h3><ul>${r.pendencias.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
       <h3 style="margin-top:16px">Regras aplicadas neste cálculo</h3><ul>
       <li>Altura = 1º nível + (níveis − 2) × (altura do palete + 200) + 1400, em múltiplos de 50 mm; máximo 8500 mm por peça, uma emenda por estrutura (2 talas SA040045 + 16 INT0648 + 16 INT0650 + 32 INT0812).</li>
-      <li>Laterais = ruas + 1 <b>[a confirmar]</b>; colunas por lateral = espaçamentos + 1; profundidade = espaçamentos × largura da lateral + 100 <b>[a confirmar]</b>.</li>
+      <li>Laterais = ruas + 1 <b>[a confirmar]</b>; colunas por lateral = espaçamentos + 1; A1..An são medidas face a face (externas): quadro = face externa a face externa; vão = vão livre; profundidade = Σ A.</li>
       <li>Travessas horizontais: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm, última no topo; comprimento total = largura − 78,6 mm; diagonal = √((largura − 109,1)² + vão²) + 30,5 mm; vão de topo sem diagonal.</li>
       <li>SA de travessa/diagonal: item do cadastro com comprimento total a ±3 mm; senão <span class="code semcod">SA04XXXX</span>. Tubo complemento = 2 − diagonais que chegam ao nó. Parafuso por travessa: 2 (+2 porcas); diagonais sem fixador próprio.</li>
       <li>Sapata por coluna: base + perfil U + 2 placas niveladoras + 4 chumbadores INT0654 + 4 INT0648 + 4 INT0650 + 8 INT0812. Peso da sapata = planilha (1,25 / 1,30 / 1,35 kg).</li>
