@@ -281,3 +281,8 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Parafusos específicos da união e braços: depois.
 - **Alertas de palete:** vermelho (erro) quando nº de paletes × (palete + 25) > profundidade, sem tolerância; amarelo quando sobra estrutura > 50 mm, informando a sobra. Campo opcional "Paletes por rua" para o operador conferir uma quantidade; em branco, o app usa o máximo que cabe.
 - SA dos itens: tratado depois, na vista superior.
+
+## 15. Braços — blocos
+- Recebidos DI_BRACO_S180_COL80_ESQ e _DIR. O DIR é o **espelho exato** do ESQ (furos em ±22,5 / 15 e 165, Ø20; base no eixo da coluna) → o app gera o lado direito espelhando; basta enviar o ESQ.
+- Guardado em `app/blocos.js` como `DI_BRACO_S180_COL80` (lado esquerdo).
+- Um bloco por coluna (80/101/122) por modelo: S180, D180, S230, D230 → 12 blocos.
