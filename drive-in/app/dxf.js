@@ -83,7 +83,8 @@
     const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50); // furo mais próximo do nível
     // colunas + sapatas: furos voltados para o vão com travessas
     const holesRight = (i) => (solteira ? i === 0 || i % 2 === 1 : i % 2 === 0) && i < n;
-    xs.forEach((x, i) => { const hr = holesRight(i); emit(out, coluna(H, hr), x, 0, 'MONTANTE'); emit(out, sapata(), x, 0, 'MONTANTE'); });
+    // sapata: centro a 27,5 mm da face externa da coluna (= eixo − 7,35), espelhada quando os furos olham para a esquerda (DXF "posição da sapata certa")
+    xs.forEach((x, i) => { const hr = holesRight(i); emit(out, coluna(H, hr), x, 0, 'MONTANTE'); emit(out, hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE'); });
     for (let i = 0; i < n; i++) {
       const uni = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
       const hxL = xs[i] + HOLE_DX, hxR = xs[i + 1] - HOLE_DX; // furos das duas colunas do vão
