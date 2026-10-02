@@ -103,7 +103,7 @@
     cota(xs[0], H + 60, xs[n], H + 60, 420, 'A', false);
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
-    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) put(piso(), x, -110, '0');
+    for (let x = xs[0] - 1500; x < xs[n] + 1500; x += 1000) put(piso(), x, 0, '0'); // topo do concreto (y local 0) na base da sapata (chapa de 0 a 4,75)
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', xs[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
