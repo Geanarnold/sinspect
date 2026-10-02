@@ -300,3 +300,9 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Palete desenhado (bloco PALLET com atributos P4 / 600 kg) apoiado nos braços.
 - **Colunas frontais recebidas** (DI_COLUNA_FRONTAL_80/101/122, com sapata): furação de 50 em 50 mm, replicada pelo app na altura do projeto (`colunaFrontal` em `dxf.js`). O arquivo da 122 veio com a geometria solta no model space (sem bloco nomeado) e a 101 com os furos num array interno; ambos foram normalizados (centro da sapata em x = 0, base em y = 0).
 - Longarina superior (DI_LGTOPO): comprimento = largura da rua; ponto base no 3º furo de cima para baixo da coluna.
+
+## 17. Vista frontal no app (1ª versão)
+- Colunas frontais com sapata, caneleira 700 mm em todas as colunas, braços nos níveis (simples nas externas espelhado para dentro; duplo nas internas quando o bloco existir), longarina superior por rua no 3º furo de cima, piso, cotas (ruas, L, B, 1º braço, passo). Braço posicionado pelos furos (furos da coluna a 29,76 + 50k; furo inferior do braço a 15 mm da base).
+- DXF exportado com as duas vistas lado a lado (lateral + frontal). Textos com acento gravados no padrão \U+XXXX do AutoCAD.
+- BOM: caneleira (1 por lateral, 2,5 kg provisório) e longarina superior (1 por rua) `[CONFIRMAR quantidades]`.
+- Blocos faltantes aparecem escritos no desenho (ex.: braços duplos, braços das colunas 101/122).

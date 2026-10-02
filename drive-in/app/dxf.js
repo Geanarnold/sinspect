@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE: 170, Contraventamento: 9, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -142,11 +142,75 @@
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
     return { prims, linhas, textos, bbox: [xs[0] - 1500, -800, xs[n] + 3200, H + 700] };
   }
-  function dxfLateral(r, titulo) {
-    const m = montarLateral(r, titulo), out = [];
+
+  // ---- vista frontal (olhando para dentro das ruas)
+  const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
+  const holeYs = (H) => { const ys = []; for (let k = 0; 29.76 + 50 * k + 9 <= H - 30; k++) ys.push(29.76 + 50 * k); return ys; };
+  function montarFrontal(r, titulo) {
+    const col = Number(r.entradas.coluna), H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    const prims = [], linhas = [], textos = [], faltam = new Set();
+    const put = (ps, dx, dy, layerDefault) => { for (const q of ps) { q.l = q.l && q.l !== '0' ? q.l : layerDefault; prims.push(translate([q], dx, dy)[0]); } };
+    const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
+    const text = (x, y, h, s, layer, rot = 0, just = 1) => textos.push({ x, y, h, s, l: layer, rot, just });
+    const cota = (x1, y1, x2, y2, off, label, vertical) => {
+      if (!vertical) { line(x1, y1, x1, y1 + off, 'COTAS'); line(x2, y2, x2, y2 + off, 'COTAS'); line(x1, y1 + off, x2, y2 + off, 'COTAS'); text((x1 + x2) / 2, y1 + off + 20, 60, label, 'COTAS'); }
+      else { line(x1, y1, x1 - off, y1, 'COTAS'); line(x2, y2, x2 - off, y2, 'COTAS'); line(x1 - off, y1, x2 - off, y2, 'COTAS'); text(x1 - off - 20, (y1 + y2) / 2, 60, label, 'COTAS', 90); }
+    };
+    const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2); // eixos das colunas (rua = vão livre entre faces)
+    const hy = holeYs(H), hx = HOLE_FX[col] || col / 2 - 18;
+    const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
+    xs.forEach((x, i) => {
+      put(colunaFrontal(col, H), x, 0, 'MONTANTE');
+      // caneleira 700 mm (sobre a sapata)
+      const w = col / 2 + 6; [[x - w, 105], [x + w, 105]].forEach(() => {}); 
+      line(x - w, 105, x + w, 105, 'CANELEIRA'); line(x + w, 105, x + w, 805, 'CANELEIRA'); line(x + w, 805, x - w, 805, 'CANELEIRA'); line(x - w, 805, x - w, 105, 'CANELEIRA');
+      // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
+      const externa = i === 0 || i === R;
+      for (const yNivel of F.niveis) {
+        const mod = yNivel <= 2500 ? '180' : F.modeloAlto, yb = snapBraco(yNivel);
+        if (externa) {
+          const nome = `DI_BRACO_S${mod}_COL${col}`, blk = B()[nome];
+          if (!blk) { faltam.add(nome); continue; }
+          put(i === 0 ? clone(blk) : mirrorX(clone(blk)), x, yb, 'BRACO');
+        } else {
+          const nome = `DI_BRACO_D${mod}_COL${col}`, blk = B()[nome];
+          if (!blk) { faltam.add(nome); continue; }
+          put(clone(blk), x, yb, 'BRACO');
+        }
+      }
+    });
+    // longarina superior em cada rua: ponto base no 3º furo de cima para baixo da coluna esquerda
+    const yTopo = hy[hy.length - 1] - 100;
+    for (let i = 0; i < R; i++) {
+      const src = B().DI_LGTOPO; if (!src) { faltam.add('DI_LGTOPO'); break; }
+      const vao = (xs[i + 1] - hx) - (xs[i] + hx), vao0 = 1931.8; // vão de fixação do bloco (desenhado para rua 1900) [CONFIRMAR]
+      put(stretchX(clone(src), 965.9, vao - vao0), xs[i] + hx, yTopo, 'LONGARINA');
+      cota(xs[i] + col / 2, H + 80, xs[i + 1] - col / 2, H + 80, 150, `${rua}`, false);
+    }
+    const W = xs[R] + col / 2;
+    const x0p = -1500, nP = Math.ceil((W + 3000) / 1000);
+    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0');
+    cota(0, H + 80, W, H + 80, 450, `L = ${Math.round(W)}`, false);
+    cota(-200, 0, -200, H, 600, `B = ${H}`, true);
+    if (F.niveis.length) cota(-200, 0, -200, snapBraco(F.niveis[0]), 300, `1º braço ${Math.round(snapBraco(F.niveis[0]))}`, true);
+    if (F.niveis.length > 1) cota(W + 400, F.niveis[0], W + 400, F.niveis[1], -300, `passo ${F.niveis[1] - F.niveis[0]}`, true);
+    text(W / 2, -600, 120, titulo || 'VISTA FRONTAL', '4 - TEXTO DE ESCALA E VISTA');
+    if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
+    return { prims, linhas, textos, bbox: [-1500, -1000, W + 1600, H + 700], faltam: [...faltam] };
+  }
+  function shiftModel(m, dx) {
+    for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1]]); if (q.c) q.c = [q.c[0] + dx, q.c[1]]; }
+    for (const q of m.linhas) q.p = q.p.map((v) => [v[0] + dx, v[1]]);
+    for (const t of m.textos) t.x += dx;
+    m.bbox = [m.bbox[0] + dx, m.bbox[1], m.bbox[2] + dx, m.bbox[3]];
+    return m;
+  }
+  function dxfLateral(r, titulo, modelo) {
+    const m = modelo || montarLateral(r, titulo), out = [];
     emit(out, m.prims, 0, 0, '0');
     for (const q of m.linhas) out.push('0', 'LINE', '8', ld(q.l), '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
-    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', t.s, '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
+    const asc = (s) => String(s).replace(/[^\x00-\x7F]/g, (c) => '\\U+' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')); // acentos no padrão do AutoCAD
+    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
     const layers = Object.entries(LAYERS).filter(([n]) => n !== '0').flatMap(([name, c]) => ['0', 'LAYER', '2', ld(name), '70', '0', '62', String(c), '6', 'CONTINUOUS']);
     return ['0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'TABLES',
@@ -157,9 +221,17 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
-  function svgLateral(r, titulo) {
-    const m = montarLateral(r, titulo), [x0, y0, x1, y1] = m.bbox, W = x1 - x0, Hh = y1 - y0;
+  const COR = { MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  function dxfCompleto(r, titulo) {
+    const mL = montarLateral(r, `CORTE - VISTA LATERAL ${titulo || ''}`.trim()), mF = montarFrontal(r, `VISTA FRONTAL ${titulo || ''}`.trim());
+    shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
+    const m = { prims: mL.prims.concat(mF.prims), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos) };
+    return dxfLateral(r, titulo, m);
+  }
+  function svgFrontal(r, titulo) { return svgModelo(montarFrontal(r, titulo)); }
+  function svgLateral(r, titulo) { return svgModelo(montarLateral(r, titulo)); }
+  function svgModelo(m) {
+    const [x0, y0, x1, y1] = m.bbox, W = x1 - x0, Hh = y1 - y0;
     const X = (x) => (x - x0).toFixed(1), Y = (y) => (y1 - y).toFixed(1);
     const parts = [];
     const byLayer = {};
@@ -176,6 +248,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { dxfLateral, svgLateral, montarLateral, colunaFrontal };
+  const DXF = { dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);
