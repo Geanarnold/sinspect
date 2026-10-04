@@ -44,6 +44,47 @@
     return ys; // a última fica no último passo que cabe; o vão até o topo fecha com o elemento de topo (DXF de referência)
   }
 
+  // ---- tabelas de dimensionamento F 346 a F 351 (Treinamento Comercial Drive-In fev/2024, Eng. Rafael Brant)
+  // premissas das tabelas: rua 1400, braço 230, 1º braço até 2000 mm, contraventamento de topo e fundo em zig-zag, espaçamento 1025
+  // cortes = níveis acima do chão (C+n). Espaçamento especial: { nº de paletes na profundidade: [espaços, medida] }; null = não permitido
+  const GAUGE_MM = { 12: '2.65', 13: '2.25', 14: '2.0', 15: '1.8', 16: '1.5' }; // [CONFIRMAR] bitola # → espessura do catálogo
+  const RED = { 1000: { 3: [4, 769], 4: [5, 820], 5: [6, 855], 6: [7, 879], 7: [8, 897], 8: [9, 912], 9: [10, 923] },
+                1200: { 3: [4, 769], 4: [6, 684], 5: [7, 733], 6: [8, 769], 7: [10, 718], 8: [11, 746], 9: [12, 769] } };
+  const DIMENS = [
+    { f: 'F 346', H: 4000, C: 1, k: { 600: ['80', 15, 15], 1000: ['80', 15, 15], 1200: ['80', 15, 15], 1500: ['80', 15, 14] } },
+    { f: 'F 347', H: 6000, C: 2, k: { 600: ['80', 15, 15], 1000: ['80', 15, 15], 1200: ['101', 15, 15], 1500: ['101', 15, 14] } },
+    { f: 'F 348', H: 6000, C: 3, k: { 600: ['80', 15, 15], 1000: ['101', 15, 15], 1200: ['101', 15, 15], 1500: ['101', 14, 14] } },
+    { f: 'F 349', H: 8500, C: 3, k: { 600: ['101', 15, 15], 1000: ['122', 15, 15], 1200: ['122', 14, 15], 1500: ['122', 12, 14] } },
+    { f: 'F 350', H: 8500, C: 4, k: { 600: ['122', 15, 15], 1000: ['122', 13, 15], 1200: ['122', 12, 15],
+        1500: ['122', 12, 15, { 2: 'AMPP122#15 + requadro', ...RED[1200] }] } },
+    { f: 'F 351', H: 8500, C: 5, k: { 600: ['122', 15, 15], 1000: ['122', 12, 15, { 2: 'AMPP122#15 + requadro', ...RED[1000] }],
+        1200: ['122', 12, 15, { 2: 'AMPP122#15 + requadro', ...RED[1200] }],
+        1500: ['122', 12, 15, { 2: 'AMPP122#13 + requadro', 3: null, 4: null, 5: null, 6: null, 7: null, 8: null, 9: null }] } },
+  ];
+  function dimensionar({ H, cortes, carga, col, esp, P, rua, alt1, balAlto, cD }) {
+    const out = { alertas: [], erros: [], sugestao: null };
+    const t = DIMENS.filter((d) => d.H >= H && d.C >= cortes).sort((a, b) => a.H - b.H || a.C - b.C)[0];
+    const cargas = [600, 1000, 1200, 1500], kc = cargas.find((c) => c >= carga);
+    if (!t || !kc) { out.alertas.push(`Fora das tabelas F 346–F 351 (altura ${H} mm, chão + ${cortes}, ${carga} kg): dimensionamento pela engenharia.`); return out; }
+    const [c, g, gb, esp2] = t.k[kc], e = GAUGE_MM[g];
+    out.sugestao = { tabela: t.f, coluna: c, espessura: e, gauge: g, braco: `Ue94x40x15#${gb}`, bracoEsp: GAUGE_MM[gb], carga: kc };
+    const ref = `${t.f} (${t.H} mm, chão + ${t.C}, ${kc} kg): coluna AMPP${c}#${g} (${e} mm), braço Ue94x40x15#${gb} (${GAUGE_MM[gb]} mm)`;
+    const fraca = Number(col) < Number(c) || (Number(col) === Number(c) && Number(esp) < Number(e));
+    if (fraca) out.erros.push(`Coluna COL ${col} / ${esp} mm abaixo do dimensionamento da ${ref}.`);
+    else out.alertas.push(`Dimensionamento ${ref}. Selecionado: COL ${col} / ${esp} mm.`);
+    if (cD < Number(GAUGE_MM[gb])) out.erros.push(`Espessura do C do braço (${cD} mm) abaixo da tabela ${t.f}: #${gb} (${GAUGE_MM[gb]} mm).`);
+    if (esp2 && esp2[P] !== undefined) {
+      const s = esp2[P];
+      if (s === null) out.erros.push(`${t.f}, ${kc} kg: ${P} paletes na profundidade não é permitido.`);
+      else if (typeof s === 'string') out.alertas.push(`${t.f}, ${kc} kg com 2 paletes na profundidade: ${s} no fundo ("porta-paletes").`);
+      else out.alertas.push(`${t.f}, ${kc} kg com ${P} paletes na profundidade: usar ${s[0]} espaços de ${s[1]} mm (em vez de 1025).`);
+    }
+    if (rua > 1400) out.alertas.push(`Rua de ${rua} mm maior que a premissa das tabelas (1400 mm): confirmar com a engenharia.`);
+    if (alt1 > 2000) out.alertas.push(`1º braço a ${alt1} mm acima da premissa das tabelas (até 2000 mm): confirmar com a engenharia.`);
+    if (balAlto > 230) out.alertas.push(`Balanço ${balAlto} mm maior que a premissa das tabelas (230 mm).`);
+    return out;
+  }
+
   function calcular(inp, cat) {
     const col = Number(inp.coluna);
     const esp = String(inp.espessura);
@@ -164,7 +205,7 @@
     const passoNivel = Number(inp.alturaPalete) + 200;
     const niveisArm = []; for (let k = 0; k < N - 1; k++) niveisArm.push(Number(inp.alt1Nivel) + k * passoNivel);
     // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa 2,65, altura 180) abraçando a coluna + perfil C informado pelo operador
-    // balanço medido da face externa do U até a ponta do C; até 2500 mm usa o balanço "baixo", acima o "alto"
+    // balanço medido da face externa do U até a ponta do C; 1º nível usa o balanço "baixo" (180), 2º em diante o "alto" (230) — treinamento slide 17
     const balBaixo = Number(inp.balancoBaixo) || 180, balAlto = Number(inp.balancoAlto || inp.bracoAcima) || 230;
     const modeloAlto = String(balAlto);
     const perfilC = { A: Number(inp.cA) || 94, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 2 };
@@ -176,8 +217,8 @@
     const pesoBracoCalc = (tipo, bal) => pesoU + desenvC * perfilC.D * compC(tipo, bal) * DENS;
     const lateraisPonta = Math.min(laterais, 2), lateraisInternas = Math.max(laterais - 2, 0);
     const contBraco = {};
-    for (const y of niveisArm) {
-      const bal = y <= 2500 ? balBaixo : balAlto;
+    for (const [k, y] of niveisArm.entries()) {
+      const bal = k === 0 ? balBaixo : balAlto;
       if (lateraisPonta) contBraco['S|' + bal] = (contBraco['S|' + bal] || 0) + lateraisPonta * colPorLateral;
       if (lateraisInternas) contBraco['D|' + bal] = (contBraco['D|' + bal] || 0) + lateraisInternas * colPorLateral;
     }
@@ -190,7 +231,7 @@
     }
     // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
     const apoioBaixo = ESP_U + balBaixo - FOLGA_PALETE_COLUNA, apoioAlto = ESP_U + balAlto - FOLGA_PALETE_COLUNA;
-    for (const [nome, ap, usa] of [['até 2,5 m', apoioBaixo, niveisArm.some((y) => y <= 2500)], ['acima de 2,5 m', apoioAlto, niveisArm.some((y) => y > 2500)]]) {
+    for (const [nome, ap, usa] of [['1º nível', apoioBaixo, niveisArm.length > 0], ['2º nível em diante', apoioAlto, niveisArm.length > 1]]) {
       if (!usa) continue;
       if (ap <= 0) erros.push(`Braço ${nome}: balanço não alcança o palete (apoio ${ap.toFixed(1)} mm). O palete fica a ${FOLGA_PALETE_COLUNA} mm da coluna.`);
       else alertas.push(`Apoio do palete sobre o braço (${nome}): ${ap.toFixed(1)} mm por lado. Apoio mínimo ainda não definido pela engenharia.`);
@@ -203,7 +244,8 @@
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
     add('Longarinas', 'LGTOPO', `Longarina superior (frontal) – rua ${larguraRua} mm`, SEM.SA, R, larguraRua, null, '1 por rua, no topo; peso e SA a confirmar');
-    if (niveisArm.some((y) => y > 2500)) pend.push(`Níveis acima de 2500 mm usando braço com balanço ${modeloAlto} mm (informado pelo operador).`);
+    const dim = dimensionar({ H, cortes: N - 1, carga: Number(inp.cargaPalete) || 0, col, esp, P, rua: larguraRua, alt1, balAlto, cD: perfilC.D });
+    alertas.push(...dim.alertas); erros.push(...dim.erros);
 
     // ---- ainda não levantado
     pend.push('Contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
@@ -213,7 +255,7 @@
     return {
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
-      posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
+      dimensionamento: dim.sugestao, posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,

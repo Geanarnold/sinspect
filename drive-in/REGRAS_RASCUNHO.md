@@ -317,3 +317,15 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Peso do braço calculado: U desenvolvido (largura + 2 × 42,65) × 180 × 2,65 + C (A + 2C + 2B − 4D) × D × (U ext + balanço [× 2 no duplo]); sem descontar furos. Confere com a planilha antiga: S180 1,435 (planilha 1,465), S230 1,589 (1,580), D180 1,989 (1,878), D230 2,297 (2,107).
 - Apoio do palete sobre o braço = 2,65 + balanço − 100: erro se ≤ 0; caso contrário mostrado como atenção. [PENDENTE] apoio mínimo.
 - Vista frontal desenha os paletes (layer PALETE) centralizados na rua, no chão e sobre o topo do C de cada nível.
+
+## 19. Treinamento comercial Drive-In (fev/2024) e projeto modelo SUPRA240942
+Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MODELO_DRIVE_IN_SUPRA240942.pdf.
+- [IMPLEMENTADO] Braço: 1º nível 180 mm, 2º nível em diante 230 mm (slide 17). Substitui a regra "≤ 2500 → 180". No projeto modelo o 1º braço está a 3150 mm e usa 180, o que confirma a regra por nível.
+- [IMPLEMENTADO] Tabelas F 346–F 351 (Eng. Rafael Brant, CREA MG231667D): coluna e braço por altura (4000/6000/8500), cortes (chão + 1…5) e carga (600/1000/1200/1500 kg). Premissas: rua 1400, braço 230, 1º braço até 2000, zig-zag topo e fundo, espaçamento 1025. O app escolhe a menor tabela com altura ≥ H e cortes ≥ níveis acima do chão, e a menor carga ≥ carga do palete; coluna abaixo = erro, fora das tabelas = encaminhar para a engenharia. Espaçamentos especiais (F 350/F 351) e requadro com 2 paletes na profundidade avisados.
+- [CONFIRMAR] Bitola → espessura: #12 = 2,65; #13 = 2,25; #14 = 2,0; #15 = 1,8; #16 = 1,5.
+- [CONFIRMAR] Braço Ue94x40x15#15 (1,8 mm) nas tabelas × modelo 0004.0003.01.008 com D = 2.
+- Folga vertical: mínimo 100 mm entre o topo do palete e o braço acima, e entre o último palete e a longarina de topo (slide 17). No projeto modelo: palete 1500, passo 1650 (+150), topo 1765 acima do último braço. O app ainda usa passo = palete + 200 (planilha). [CONFIRMAR qual vale]
+- Projeto modelo: "CHÃO+03" com 35 paletes por rua = 7 na profundidade × 5 → 2 paletes empilhados no chão (1º braço a 3150 = 2 × 1500 + 150). O app ainda não tem empilhamento no chão. [CONFIRMAR]
+- Componentes (slide 8): coluna do montante, diagonais e travessas, braço duplo, braço simples, longarina de túnel, protetor caneleira, trilho guia, longarina de topo, travamento de topo em zig-zag, travamento de fundo em zig-zag, longarina requadro, stop palete. Viga/longarina das tabelas: U100x38#15.
+- Requadro: par de longarinas nas duas últimas colunas, ao longo de todos os túneis, no nível da longarina de túnel (slide 10). Obrigatório com 2 paletes na profundidade nos casos marcados nas F 350/F 351.
+- Diagonais sempre voltadas para dentro da rua (tracionadas) (slide 17).

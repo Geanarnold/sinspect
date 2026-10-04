@@ -204,7 +204,7 @@
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
       for (const yNivel of F.niveis) {
-        const bal = yNivel <= 2500 ? F.balBaixo : F.balAlto, yb = snapBraco(yNivel);
+        const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapBraco(yNivel);
         const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
         put(br.prims, x, yb, 'BRACO');
         if (i === 0) topoBraco.push(yb + br.topoC);
