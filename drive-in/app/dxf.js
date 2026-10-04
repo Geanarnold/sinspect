@@ -41,13 +41,13 @@
   }
 
   // coluna na vista frontal (com sapata), conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
-  // base da sapata em y = 0 e topo da coluna em H; furação oblonga a cada 50 mm com o 1º furo a 25 mm do topo
+  // base da chapa da sapata em y = 0 (piso) e topo da coluna em H; furação oblonga a cada 50 mm com o 1º furo a 25 mm do topo
   // (como a coluna é cortada em múltiplos de 50, os furos ficam a 25 mm das duas pontas)
   const FR_TOPO_FURO = 25;
   const yrq = (q) => { const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; return [Math.min(...ys), Math.max(...ys)]; };
   const longq = (q) => q.p && yrq(q)[1] - yrq(q)[0] > 500;
   function geoFrontal(src) {
-    return { Y0: -Math.min(...src.map((q) => yrq(q)[0])),                  // sapata abaixo da origem do bloco
+    return { Y0: 0, // base da chapa da sapata (y = 0 no bloco) apoiada no piso; placas niveladoras e chumbadores ficam abaixo, no concreto
       Ht: Math.max(...src.filter(longq).map((q) => yrq(q)[1])),           // topo da coluna no bloco
       Hb: Math.min(...src.filter(longq).map((q) => yrq(q)[0])) };         // pé da coluna (acima da sapata)
   }
