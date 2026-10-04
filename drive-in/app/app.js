@@ -12,6 +12,7 @@
   function entradas() {
     const o = {};
     for (const id of IDS) { const v = $(id).value; o[id] = v === '' ? null : v; }
+    o.escravo = $('escravo').checked;
     const n = Math.max(1, Math.min(30, Number(o.espacamentos) || 1));
     o.espacamentos = n;
     o.espacos = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].map((i) => Number(i.value) || Number(o.largura)) : Array(n).fill(Number(o.largura));
@@ -186,6 +187,7 @@
   });
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
+  $('escravo').addEventListener('change', render);
   $('espacamentos').addEventListener('input', montarEspacos);
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });

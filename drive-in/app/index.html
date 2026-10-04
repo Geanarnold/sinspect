@@ -36,9 +36,10 @@
         <div><label>Frente do palete (mm)</label><input id="frentePalete" type="number" min="1" value="1200"/></div>
         <div><label>Carga do palete (kg)</label><input id="cargaPalete" type="number" value="1000"/></div>
         <div><label>Altura do palete (mm)</label><input id="alturaPalete" type="number" value="1600"/></div>
-        <div><label>Altura 1º braço (mm)</label><input id="alt1Nivel" type="number" placeholder="auto: palete + 100"/></div>
+        <div><label>Altura 1º braço (mm)</label><input id="alt1Nivel" type="number" step="50" placeholder="auto"/></div>
+        <div class="full"><label class="chk"><input id="escravo" type="checkbox"/> Palete escravo no 1º nível (2 paletes empilhados no chão)</label></div>
         <div><label>Altura manual (mm)</label><input id="alturaManual" type="number" step="50" placeholder="auto"/></div>
-        <p class="nota full">Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado). Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
+        <p class="nota full">Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado). Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Passo entre níveis = palete + 100 + altura do braço (A), arredondado para cima em 50 mm. 1º nível = palete (× 2 com escravo) + 100 + A. Altura = último nível + palete + 100 + longarina de topo, arredondada para cima em 50 mm, medida da base da sapata.</p>
       </div>
       <div id="passo-lateral" class="form hidden">
         <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
@@ -71,8 +72,8 @@
         <div><label>A – altura do C (mm)</label><input id="cA" type="number" step="0.1" value="94"/></div>
         <div><label>C – aba (mm)</label><input id="cC" type="number" step="0.1" value="40"/></div>
         <div><label>B – dobra (mm)</label><input id="cB" type="number" step="0.1" value="15"/></div>
-        <div><label>D – espessura (mm)</label><input id="cD" type="number" step="0.05" value="2"/></div>
-        <p class="nota full">Suporte em U: interno = largura da coluna, chapa 2,65, altura 180, rasgos a 15 mm das bordas. Balanço medido da face externa do U até a ponta do C. Simples nas laterais das pontas, duplo nas internas. Espessura mínima do C conforme tabelas F 346–F 351 (#15 = 1,8 / #14 = 2,0). Peso calculado pela geometria.</p>
+        <div><label>D – espessura (mm)</label><input id="cD" type="number" step="0.05" value="1.8"/></div>
+        <p class="nota full">Suporte em U: interno = largura da coluna, chapa 2,65, altura 180, rasgos a 15 mm das bordas. Balanço medido da face externa do U até a ponta do C. Simples nas laterais das pontas, duplo nas internas. Peso calculado pela geometria.</p>
       </div>
       <div class="rodape-form">
         <button id="btnVoltar">Voltar</button>

@@ -193,6 +193,9 @@
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2); // eixos das colunas (rua = vão livre entre faces)
     const hy = furosFrontal(col, H), hx = HOLE_FX[col] || col / 2 - 18;
     const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
+    // braço: o topo do C (apoio do palete) deve ficar no nível ou logo acima (furação de 50 em 50; furo inferior do braço 15 mm acima da base)
+    const offApoio = (180 - F.perfilC.A) / 2 + F.perfilC.A;
+    const snapApoio = (y) => { for (const h of hy) if (h - 15 + offApoio >= y - 0.01) return h - 15; return hy[hy.length - 1] - 15; };
     const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
     const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {
@@ -204,7 +207,7 @@
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
       for (const yNivel of F.niveis) {
-        const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapBraco(yNivel);
+        const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapApoio(yNivel);
         const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
         put(br.prims, x, yb, 'BRACO');
         if (i === 0) topoBraco.push(yb + br.topoC);
@@ -215,7 +218,7 @@
       const ret = (x0, y0, w, h) => { line(x0, y0, x0 + w, y0, 'PALETE'); line(x0 + w, y0, x0 + w, y0 + h, 'PALETE'); line(x0 + w, y0 + h, x0, y0 + h, 'PALETE'); line(x0, y0 + h, x0, y0, 'PALETE'); line(x0, y0 + 150, x0 + w, y0 + 150, 'PALETE'); };
       for (let i = 0; i < R; i++) {
         const x0 = xs[i] + col / 2 + F.folgaPalete;
-        for (const y0 of [0, ...topoBraco]) ret(x0, y0, F.frentePalete, F.alturaPalete);
+        for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) ret(x0, y0, F.frentePalete, F.alturaPalete);
       }
       if (R) cota(xs[0] + col / 2, topoBraco.length ? topoBraco[0] + F.alturaPalete : F.alturaPalete, xs[0] + col / 2 + F.folgaPalete, topoBraco.length ? topoBraco[0] + F.alturaPalete : F.alturaPalete, 60, `${F.folgaPalete}`, false);
     }
@@ -234,8 +237,8 @@
     for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0');
     cota(0, H + 80, W, H + 80, 450, `L = ${Math.round(W)}`, false);
     cota(-200, 0, -200, H, 600, `B = ${H}`, true);
-    if (F.niveis.length) cota(-200, 0, -200, snapBraco(F.niveis[0]), 300, `1º braço ${Math.round(snapBraco(F.niveis[0]))}`, true);
-    if (F.niveis.length > 1) cota(W + 400, F.niveis[0], W + 400, F.niveis[1], -300, `passo ${F.niveis[1] - F.niveis[0]}`, true);
+    if (topoBraco.length) cota(-200, 0, -200, topoBraco[0], 300, `1º nível ${Math.round(topoBraco[0])}`, true);
+    if (topoBraco.length > 1) cota(W + 400, topoBraco[0], W + 400, topoBraco[1], -300, `passo ${Math.round(topoBraco[1] - topoBraco[0])}`, true);
     text(W / 2, -600, 120, titulo || 'VISTA FRONTAL', '4 - TEXTO DE ESCALA E VISTA');
     if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
     return { prims, linhas, textos, bbox: [-1500, -1000, W + 1600, H + 700], faltam: [...faltam] };

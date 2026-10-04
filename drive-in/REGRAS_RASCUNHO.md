@@ -321,11 +321,18 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 ## 19. Treinamento comercial Drive-In (fev/2024) e projeto modelo SUPRA240942
 Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MODELO_DRIVE_IN_SUPRA240942.pdf.
 - [IMPLEMENTADO] Braço: 1º nível 180 mm, 2º nível em diante 230 mm (slide 17). Substitui a regra "≤ 2500 → 180". No projeto modelo o 1º braço está a 3150 mm e usa 180, o que confirma a regra por nível.
-- [IMPLEMENTADO] Tabelas F 346–F 351 (Eng. Rafael Brant, CREA MG231667D): coluna e braço por altura (4000/6000/8500), cortes (chão + 1…5) e carga (600/1000/1200/1500 kg). Premissas: rua 1400, braço 230, 1º braço até 2000, zig-zag topo e fundo, espaçamento 1025. O app escolhe a menor tabela com altura ≥ H e cortes ≥ níveis acima do chão, e a menor carga ≥ carga do palete; coluna abaixo = erro, fora das tabelas = encaminhar para a engenharia. Espaçamentos especiais (F 350/F 351) e requadro com 2 paletes na profundidade avisados.
-- [CONFIRMAR] Bitola → espessura: #12 = 2,65; #13 = 2,25; #14 = 2,0; #15 = 1,8; #16 = 1,5.
+- [REMOVIDO do app por decisão do Gean — não usar as tabelas; seleção de coluna é do operador] Tabelas F 346–F 351 (Eng. Rafael Brant, CREA MG231667D): coluna e braço por altura (4000/6000/8500), cortes (chão + 1…5) e carga (600/1000/1200/1500 kg). Premissas: rua 1400, braço 230, 1º braço até 2000, zig-zag topo e fundo, espaçamento 1025. O app escolhe a menor tabela com altura ≥ H e cortes ≥ níveis acima do chão, e a menor carga ≥ carga do palete; coluna abaixo = erro, fora das tabelas = encaminhar para a engenharia. Espaçamentos especiais (F 350/F 351) e requadro com 2 paletes na profundidade avisados.
+- Bitola: não considerar; usar sempre a espessura da chapa em mm.
 - [CONFIRMAR] Braço Ue94x40x15#15 (1,8 mm) nas tabelas × modelo 0004.0003.01.008 com D = 2.
 - Folga vertical: mínimo 100 mm entre o topo do palete e o braço acima, e entre o último palete e a longarina de topo (slide 17). No projeto modelo: palete 1500, passo 1650 (+150), topo 1765 acima do último braço. O app ainda usa passo = palete + 200 (planilha). [CONFIRMAR qual vale]
 - Projeto modelo: "CHÃO+03" com 35 paletes por rua = 7 na profundidade × 5 → 2 paletes empilhados no chão (1º braço a 3150 = 2 × 1500 + 150). O app ainda não tem empilhamento no chão. [CONFIRMAR]
 - Componentes (slide 8): coluna do montante, diagonais e travessas, braço duplo, braço simples, longarina de túnel, protetor caneleira, trilho guia, longarina de topo, travamento de topo em zig-zag, travamento de fundo em zig-zag, longarina requadro, stop palete. Viga/longarina das tabelas: U100x38#15.
 - Requadro: par de longarinas nas duas últimas colunas, ao longo de todos os túneis, no nível da longarina de túnel (slide 10). Obrigatório com 2 paletes na profundidade nos casos marcados nas F 350/F 351.
 - Diagonais sempre voltadas para dentro da rua (tracionadas) (slide 17).
+
+## 20. Níveis, palete escravo e braço (decisões de out/2026)
+- Perfil C padrão do braço: Ue 94 × 40 × 15 × 1,8 mm (editável por projeto).
+- Passo entre níveis = altura do palete + 100 + altura do braço (cota A do C), arredondado PARA CIMA em múltiplo de 50.
+- 1º nível = palete + 100 + A (arredondado para cima em 50). Com palete escravo no 1º nível (2 paletes empilhados no chão): 2 × palete + 100 + A. Escravo conta 2 posições no chão.
+- Nível = altura do apoio do palete (topo do C). Como os furos da coluna são fixos (25 mm do topo, passo 50) e o braço fixa no furo (furo inferior a 15 mm da base do U de 180), o 1º nível sobe até a próxima posição possível (ex.: A = 94 → níveis terminam em ...47). O passo continua múltiplo de 50.
+- Altura total = último nível + palete + 100 + longarina de topo (154,65 do topo da coluna), arredondada para cima em 50. [PROPOSTA — confirmar; substitui "+1400" da planilha antiga]
