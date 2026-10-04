@@ -68,7 +68,10 @@
     const laterais = R + 1;                 // [CONFIRMAR] laterais compartilhadas entre ruas
     const colPorLateral = n + 1;
     const colunas = laterais * colPorLateral;
-    const larguraRua = Number(inp.larguraRua || LARGURA_RUA);
+    // rua = frente do palete + 100 mm de cada lado até as colunas (palete centralizado na rua)
+    const FOLGA_PALETE_COLUNA = 100;
+    const frentePalete = Number(inp.frentePalete) || 0;
+    const larguraRua = frentePalete > 0 ? frentePalete + 2 * FOLGA_PALETE_COLUNA : Number(inp.larguraRua || LARGURA_RUA);
     const largura = R * larguraRua + laterais * col;
     const profundidade = espacos.reduce((s, v) => s + v, 0); // A1..An são medidas face a face (externas), como no DRIVE_IN.dxf: o total já inclui as colunas
     // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
@@ -193,7 +196,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      frontal: { niveis: niveisArm, modeloAlto, larguraRua, laterais },
+      frontal: { niveis: niveisArm, modeloAlto, larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };
   }

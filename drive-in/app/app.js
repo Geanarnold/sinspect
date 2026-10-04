@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'bracoAcima', 'niveis', 'espacamentos', 'largura', 'larguraRua', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'bracoAcima', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -96,10 +96,10 @@
     const s = 420 / Math.max(H, Wt), pad = 30, w = Wt * s + 2 * pad, h = H * s + 2 * pad;
     const X = (x) => pad + x * s, Y = (y) => pad + (H - y) * s;
     let g = '';
-    for (let i = 0; i <= R; i++) g += `<rect x="${X(i * (Number(r.entradas.larguraRua || 1400) + col))}" y="${Y(H)}" width="${Math.max(col * s, 2)}" height="${H * s}" fill="#6b7280"/>`;
+    for (let i = 0; i <= R; i++) g += `<rect x="${X(i * (r.frontal.larguraRua + col))}" y="${Y(H)}" width="${Math.max(col * s, 2)}" height="${H * s}" fill="#6b7280"/>`;
     const y1 = Number(r.entradas.alt1Nivel), hp = Number(r.entradas.alturaPalete);
-    for (let i = 0; i < R; i++) for (let k = 0; k < N - 1; k++) { const y = y1 + k * (hp + 200); g += `<rect x="${X(i * (Number(r.entradas.larguraRua || 1400) + col) + col)}" y="${Y(y)}" width="${Number(r.entradas.larguraRua || 1400) * s}" height="3" fill="#E8520A"/>`; }
-    g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} mm (${R} ruas × ${Number(r.entradas.larguraRua || 1400)} + ${R + 1} colunas × ${col})</text>`;
+    for (let i = 0; i < R; i++) for (let k = 0; k < N - 1; k++) { const y = y1 + k * (hp + 200); g += `<rect x="${X(i * (r.frontal.larguraRua + col) + col)}" y="${Y(y)}" width="${r.frontal.larguraRua * s}" height="3" fill="#E8520A"/>`; }
+    g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} mm (${R} ruas × ${r.frontal.larguraRua} + ${R + 1} colunas × ${col})</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
   function svgPlanta(r) {
@@ -108,8 +108,8 @@
     const s = 420 / Math.max(D, Wt), pad = 30, w = Wt * s + 2 * pad, h = D * s + 2 * pad;
     const X = (x) => pad + x * s, Y = (y) => pad + y * s;
     let g = `<rect x="${X(0)}" y="${Y(0)}" width="${Wt * s}" height="${D * s}" fill="none" stroke="#9ca3af" stroke-dasharray="3 3"/>`;
-    for (let i = 0; i <= R; i++) ysc.forEach((yv) => { g += `<rect x="${X(i * (Number(r.entradas.larguraRua || 1400) + col))}" y="${Y(yv)}" width="${Math.max(col * s, 3)}" height="${Math.max(col * s, 3)}" fill="#111"/>`; });
-    for (let i = 0; i < R; i++) g += `<text x="${X(i * (Number(r.entradas.larguraRua || 1400) + col) + col + 700)}" y="${Y(D / 2)}" font-size="10" text-anchor="middle" fill="#E8520A">rua ${i + 1}</text>`;
+    for (let i = 0; i <= R; i++) ysc.forEach((yv) => { g += `<rect x="${X(i * (r.frontal.larguraRua + col))}" y="${Y(yv)}" width="${Math.max(col * s, 3)}" height="${Math.max(col * s, 3)}" fill="#111"/>`; });
+    for (let i = 0; i < R; i++) g += `<text x="${X(i * (r.frontal.larguraRua + col) + col + 700)}" y="${Y(D / 2)}" font-size="10" text-anchor="middle" fill="#E8520A">rua ${i + 1}</text>`;
     g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} × ${D} mm</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }

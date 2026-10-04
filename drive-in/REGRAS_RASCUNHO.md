@@ -307,3 +307,9 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - BOM: caneleira (1 por lateral, 2,5 kg provisório) e longarina superior (1 por rua) `[CONFIRMAR quantidades]`.
 - Blocos faltantes aparecem escritos no desenho (ex.: braços duplos, braços das colunas 101/122).
 - Topo da vista frontal (VISTA_FRONTAL_COM_DI_LGTOPO.dxf, vale para COL 80/101/122): base da sapata em y = 0, topo da coluna em H; furos oblongos a cada 50 mm com o 1º a 25 mm do topo (e a 25 mm do pé). DI_LGTOPO: furo de fixação 8,46 mm acima do centro do 3º furo de cima e 2,23 mm além do centro do oblongo (34,63 mm do eixo na COL 101); topo da longarina 4,65 mm abaixo do topo da coluna; esticada pelo meio conforme a largura da rua (vão de furos 1931,73 para rua 1900 na COL 101). Caneleira 700 mm a partir do pé da coluna.
+
+## 18. Braço por regra (em andamento)
+- Rua = frente do palete + 100 mm de cada lado (palete centralizado na rua). Entrada do app passou a ser "Frente do palete"; a largura da rua é calculada.
+- Modelo recebido: 0004.0003.01.008 SUP BRAÇO DRIVE IN (COL 80) — é o braço DUPLO: suporte em U abraçando a coluna (interno 80, chapa 4,65, externo 89,3, altura 180, aba lateral 42,65) + perfil C passante (A = 94 alma, C = 40 aba, B = 15 dobra, D = 2 espessura), 549,5 de comprimento = 89,3 + 2 × 230,1 de balanço a partir da face externa do U. Rasgos 9 × 14 (R4,5) a 15 mm das bordas, 2 por altura na face frontal (c/c 40) + 1 por altura em cada aba lateral (24 mm da borda) = 8 furos.
+- [PENDENTE] regra do balanço em função do palete; tabela do perfil C (A/C/B/D) por condição; U para COL 101/122; braço simples = mesmo U com C de um lado só?
+- Divergência: os blocos DI_BRACO_S180/S230_COL80 antigos têm chapa de 104,4 e ponta a 178,3 / 228,3 da face da coluna; o modelo novo tem U de 89,3 e balanço de 230,1 a partir do U.

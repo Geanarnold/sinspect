@@ -32,13 +32,13 @@
         <div><label>Profundidade do palete (mm)</label><input id="profPalete" type="number" min="1" value="1000"/></div>
         <div><label>Paletes por rua (opcional)</label><input id="paletesInformados" type="number" min="1" placeholder="auto"/></div>
         <div><label>Níveis (chão + níveis)</label><input id="niveis" type="number" min="2" value="5"/></div>
-        <div><label>Largura da rua (mm)</label><input id="larguraRua" type="number" value="1400"/></div>
+        <div><label>Frente do palete (mm)</label><input id="frentePalete" type="number" min="1" value="1200"/></div>
         <div><label>Carga do palete (kg)</label><input id="cargaPalete" type="number" value="1000"/></div>
         <div><label>Altura do palete (mm)</label><input id="alturaPalete" type="number" value="1600"/></div>
         <div><label>Altura 1º braço (mm)</label><input id="alt1Nivel" type="number" placeholder="auto: palete + 100"/></div>
         <div><label>Braço acima de 2,5 m</label><select id="bracoAcima"><option value="230" selected>230 mm</option><option value="180">180 mm</option></select></div>
         <div><label>Altura manual (mm)</label><input id="alturaManual" type="number" step="50" placeholder="auto"/></div>
-        <p class="nota full">Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
+        <p class="nota full">Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado). Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Altura = 1º nível + (níveis − 2) × (palete + 200) + 1400, em múltiplos de 50 mm, medida da parte inferior da sapata ao contraventamento superior.</p>
       </div>
       <div id="passo-lateral" class="form hidden">
         <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
