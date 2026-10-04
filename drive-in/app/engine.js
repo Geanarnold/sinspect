@@ -5,6 +5,7 @@
   'use strict';
 
   const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado
+  const DENS = 7.85e-6;       // kg/mm³ (aço)
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
   const PASSO_COLUNA = 50;    // altura da coluna em múltiplos de 50 mm
   const TOL_SA = 3;           // ±3 mm para aceitar um SA de travessa/diagonal
@@ -162,19 +163,37 @@
     // 1 braço por coluna por nível de armazenagem (níveis acima do chão); nível ≤ 2500 mm → 180; acima → escolha do operador (180 ou 230)
     const passoNivel = Number(inp.alturaPalete) + 200;
     const niveisArm = []; for (let k = 0; k < N - 1; k++) niveisArm.push(Number(inp.alt1Nivel) + k * passoNivel);
-    const modeloAlto = String(inp.bracoAcima || '230');
+    // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa 2,65, altura 180) abraçando a coluna + perfil C informado pelo operador
+    // balanço medido da face externa do U até a ponta do C; até 2500 mm usa o balanço "baixo", acima o "alto"
+    const balBaixo = Number(inp.balancoBaixo) || 180, balAlto = Number(inp.balancoAlto || inp.bracoAcima) || 230;
+    const modeloAlto = String(balAlto);
+    const perfilC = { A: Number(inp.cA) || 94, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 2 };
+    const ESP_U = 2.65, ALT_BRACO = 180, ABA_U = 42.65;
+    const uExt = col + 2 * ESP_U;
+    const pesoU = (col + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
+    const desenvC = perfilC.A + 2 * perfilC.C + 2 * perfilC.B - 4 * perfilC.D;          // desenvolvimento aproximado do C (linha média)
+    const compC = (tipo, bal) => uExt + (tipo === 'D' ? 2 : 1) * bal;
+    const pesoBracoCalc = (tipo, bal) => pesoU + desenvC * perfilC.D * compC(tipo, bal) * DENS;
     const lateraisPonta = Math.min(laterais, 2), lateraisInternas = Math.max(laterais - 2, 0);
-    const pesoBraco = { S180: { 80: 1.4654, 101: 1.5135, 122: 1.5616 }, S230: { 80: 1.58, 101: 1.6281, 122: 1.6762 }, D180: { 80: 1.878, 101: 1.9261, 122: 1.9742 }, D230: { 80: 2.1072, 101: 2.1553, 122: 2.2035 } };
     const contBraco = {};
     for (const y of niveisArm) {
-      const mod = y <= 2500 ? '180' : modeloAlto;
-      if (lateraisPonta) contBraco['S' + mod] = (contBraco['S' + mod] || 0) + lateraisPonta * colPorLateral;
-      if (lateraisInternas) contBraco['D' + mod] = (contBraco['D' + mod] || 0) + lateraisInternas * colPorLateral;
+      const bal = y <= 2500 ? balBaixo : balAlto;
+      if (lateraisPonta) contBraco['S|' + bal] = (contBraco['S|' + bal] || 0) + lateraisPonta * colPorLateral;
+      if (lateraisInternas) contBraco['D|' + bal] = (contBraco['D|' + bal] || 0) + lateraisInternas * colPorLateral;
     }
     let totBracos = 0;
+    const cTxt = `C ${perfilC.A}x${perfilC.C}x${perfilC.B}x${perfilC.D}`;
     for (const [m, q] of Object.entries(contBraco)) {
       totBracos += q;
-      add('Braços', `BRACO-${m}-${col}`, `Braço ${m[0] === 'S' ? 'simples' : 'duplo'} ${m.slice(1)} – COL ${col}`, SEM.SA, q, null, (pesoBraco[m] || {})[col] ?? null, 'peso da planilha antiga (a confirmar); SA a definir');
+      const [tipo, bal] = m.split('|'), b = Number(bal);
+      add('Braços', `BRACO-${tipo}${bal}-${col}`, `Braço ${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – COL ${col} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3), 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
+    }
+    // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
+    const apoioBaixo = ESP_U + balBaixo - FOLGA_PALETE_COLUNA, apoioAlto = ESP_U + balAlto - FOLGA_PALETE_COLUNA;
+    for (const [nome, ap, usa] of [['até 2,5 m', apoioBaixo, niveisArm.some((y) => y <= 2500)], ['acima de 2,5 m', apoioAlto, niveisArm.some((y) => y > 2500)]]) {
+      if (!usa) continue;
+      if (ap <= 0) erros.push(`Braço ${nome}: balanço não alcança o palete (apoio ${ap.toFixed(1)} mm). O palete fica a ${FOLGA_PALETE_COLUNA} mm da coluna.`);
+      else alertas.push(`Apoio do palete sobre o braço (${nome}): ${ap.toFixed(1)} mm por lado. Apoio mínimo ainda não definido pela engenharia.`);
     }
     if (totBracos) {
       add('Fixadores dos braços', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 8 * totBracos, null, null, '8 por braço');
@@ -184,7 +203,7 @@
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
     add('Longarinas', 'LGTOPO', `Longarina superior (frontal) – rua ${larguraRua} mm`, SEM.SA, R, larguraRua, null, '1 por rua, no topo; peso e SA a confirmar');
-    if (niveisArm.some((y) => y > 2500)) pend.push(`Níveis acima de 2500 mm usando braço ${modeloAlto} (escolha do operador).`);
+    if (niveisArm.some((y) => y > 2500)) pend.push(`Níveis acima de 2500 mm usando braço com balanço ${modeloAlto} mm (informado pelo operador).`);
 
     // ---- ainda não levantado
     pend.push('Contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
@@ -196,7 +215,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      frontal: { niveis: niveisArm, modeloAlto, larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
+      frontal: { niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };
   }

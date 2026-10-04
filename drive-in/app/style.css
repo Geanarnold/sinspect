@@ -57,3 +57,5 @@ label.chk input{width:auto}
 .cad-tabela{overflow:auto;max-height:70vh}.cad-tabela input{padding:3px 6px;font-size:12px;min-width:70px}.cad-tabela td{padding:3px 4px}
 button.mini{padding:2px 8px;font-size:12px}
 .erro{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:12px;margin-top:16px}.erro b{display:block;margin-bottom:4px}.erro ul{margin:0;padding-left:20px}
+
+.croqui{width:100%;max-width:460px;height:auto;color:#1f2937;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px}

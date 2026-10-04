@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -159,6 +159,26 @@
   }
 
   // ---- vista frontal (olhando para dentro das ruas)
+  // braço paramétrico na vista frontal (modelo 0004.0003.01.008 SUP BRAÇO DRIVE IN)
+  // origem: eixo da coluna, base do U. lado: +1 = C para a direita, -1 = esquerda, 0 = duplo (os dois lados)
+  // U: interno = largura da coluna, chapa 2,65, altura 180; rasgos 14 x 9 a 15 mm das bordas, c/c = largura − 40 (40 na COL 80)
+  // C: altura A centralizada no U, passa na frente do U (esconde o U nesse trecho); linhas de dobra a D + 2,3 das bordas
+  function bracoParam(col, bal, lado, pf, esp = 2.65, alt = 180) {
+    const L = [], ln = (x1, y1, x2, y2) => L.push({ t: 'p', l: 'BRACO', p: [[x1, y1], [x2, y2]] });
+    const arc = (cx, cy, r, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } L.push({ t: 'p', l: 'BRACO', p }); };
+    const uo = col / 2 + esp, yc0 = (alt - pf.A) / 2, yc1 = yc0 + pf.A;
+    const xa = lado === 1 ? -uo : -uo - bal, xb = lado === -1 ? uo : uo + bal;
+    // U (verticais interrompidas atrás do C)
+    for (const x of [-uo, -col / 2, col / 2, uo]) { ln(x, 0, x, yc0); ln(x, yc1, x, alt); }
+    ln(-uo, 0, uo, 0); ln(-uo, alt, uo, alt);
+    // rasgos oblongos
+    const sx = (col - 40) / 2;
+    for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) { arc(cx - 2.5, cy, 4.5, 90, 270); arc(cx + 2.5, cy, 4.5, -90, 90); ln(cx - 2.5, cy + 4.5, cx + 2.5, cy + 4.5); ln(cx - 2.5, cy - 4.5, cx + 2.5, cy - 4.5); }
+    // perfil C
+    const d = pf.D + 2.3;
+    ln(xa, yc0, xb, yc0); ln(xa, yc1, xb, yc1); ln(xa, yc0 + d, xb, yc0 + d); ln(xa, yc1 - d, xb, yc1 - d); ln(xa, yc0, xa, yc1); ln(xb, yc0, xb, yc1);
+    return { prims: L, topoC: yc1 };
+  }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
   function montarFrontal(r, titulo) {
     const col = Number(r.entradas.coluna), H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
@@ -174,6 +194,7 @@
     const hy = furosFrontal(col, H), hx = HOLE_FX[col] || col / 2 - 18;
     const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
     const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
+    const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {
       put(colunaFrontal(col, H), x, 0, 'MONTANTE');
       // caneleira 700 mm (sobre a sapata)
@@ -183,18 +204,21 @@
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
       for (const yNivel of F.niveis) {
-        const mod = yNivel <= 2500 ? '180' : F.modeloAlto, yb = snapBraco(yNivel);
-        if (externa) {
-          const nome = `DI_BRACO_S${mod}_COL${col}`, blk = B()[nome];
-          if (!blk) { faltam.add(nome); continue; }
-          put(i === 0 ? clone(blk) : mirrorX(clone(blk)), x, yb, 'BRACO');
-        } else {
-          const nome = `DI_BRACO_D${mod}_COL${col}`, blk = B()[nome];
-          if (!blk) { faltam.add(nome); continue; }
-          put(clone(blk), x, yb, 'BRACO');
-        }
+        const bal = yNivel <= 2500 ? F.balBaixo : F.balAlto, yb = snapBraco(yNivel);
+        const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
+        put(br.prims, x, yb, 'BRACO');
+        if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
+    // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
+    if (F.frentePalete > 0 && F.alturaPalete > 0) {
+      const ret = (x0, y0, w, h) => { line(x0, y0, x0 + w, y0, 'PALETE'); line(x0 + w, y0, x0 + w, y0 + h, 'PALETE'); line(x0 + w, y0 + h, x0, y0 + h, 'PALETE'); line(x0, y0 + h, x0, y0, 'PALETE'); line(x0, y0 + 150, x0 + w, y0 + 150, 'PALETE'); };
+      for (let i = 0; i < R; i++) {
+        const x0 = xs[i] + col / 2 + F.folgaPalete;
+        for (const y0 of [0, ...topoBraco]) ret(x0, y0, F.frentePalete, F.alturaPalete);
+      }
+      if (R) cota(xs[0] + col / 2, topoBraco.length ? topoBraco[0] + F.alturaPalete : F.alturaPalete, xs[0] + col / 2 + F.folgaPalete, topoBraco.length ? topoBraco[0] + F.alturaPalete : F.alturaPalete, 60, `${F.folgaPalete}`, false);
+    }
     // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
     // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
     // e 2,23 mm além do centro do oblongo; o bloco é esticado pelo meio para acompanhar a largura da rua
@@ -239,7 +263,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   function dxfCompleto(r, titulo) {
     const mL = montarLateral(r, `CORTE - VISTA LATERAL ${titulo || ''}`.trim()), mF = montarFrontal(r, `VISTA FRONTAL ${titulo || ''}`.trim());
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
@@ -266,6 +290,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  const DXF = { bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);

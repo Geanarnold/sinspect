@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'bracoAcima', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -39,7 +39,7 @@
       kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
       kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
       kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} (medidas externas)`),
-      kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem braços, LG-UE, vigas, protetores'),
+      kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem longarina de fundo, LG-UE, zigzag; caneleira e LG topo provisórios'),
       kpi('kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
     ].join('');
 
@@ -163,7 +163,7 @@
     if (VISTAS[t.dataset.tab]) { vistaAtual = t.dataset.tab; if (last) renderVista(last); }
     else ['pecas', 'pend'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
   }));
-  const PASSOS = ['projeto', 'estrutura', 'lateral'];
+  const PASSOS = ['projeto', 'estrutura', 'lateral', 'braco'];
   let passo = 0;
   function mostrarPasso(i) {
     passo = Math.max(0, Math.min(PASSOS.length - 1, i));
