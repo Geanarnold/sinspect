@@ -1,5 +1,5 @@
 # Extrai os blocos DI_* (DXF enviados pelo responsável técnico) para app/blocos.js em primitivas simples.
-# Uso: python3 extrair_blocos.py <pasta com DI_*.dxf>
+# Uso: python3 extrair_blocos.py blocos_dxf   (um DXF por bloco, nome do arquivo = nome do bloco)
 import ezdxf,sys,glob,json,math,os
 from ezdxf.math import Vec3
 pasta=sys.argv[1]; out={}
@@ -42,6 +42,9 @@ def rnd(P):
 for f in sorted(glob.glob(os.path.join(pasta,'*DI_*.dxf'))):
     d=ezdxf.readfile(f)
     for b in d.blocks:
-        if b.name.startswith('DI_'): out[b.name]=rnd(prim(b)); print(b.name,len(out[b.name]),'primitivas')
+        if b.name.startswith('DI_'):
+            nome=b.name[:-4] if b.name.endswith('_ESQ') else b.name   # braço: só o ESQ é enviado; o DIR é espelhado no app
+            if nome!=b.name and not os.path.basename(f).startswith(b.name): continue  # ignora cópias de outros braços dentro do arquivo
+            out[nome]=rnd(prim(b)); print(nome,len(out[nome]),'primitivas')
 open('app/blocos.js','w',encoding='utf-8').write('// Blocos DI_* extraídos dos DXF do responsável técnico (extrair_blocos.py). Coordenadas locais em mm.\nwindow.BLOCOS = '+json.dumps(out,separators=(',',':'))+';\n')
 print('tamanho',os.path.getsize('app/blocos.js'))
