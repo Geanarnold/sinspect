@@ -114,10 +114,11 @@
     g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} × ${D} mm</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
+  const corte = () => ($('nomeCorte').value || 'A').trim().toUpperCase();
   const VISTAS = {
-    lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, `CORTE A - VISTA LATERAL - ${$('projeto').value || ''}`.trim()) : svgLateral(r) }),
+    lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, DXF.tituloVista('LATERAL', corte())) : svgLateral(r) }),
     esquema: (r) => ({ t: 'Esquema', s: `${r.lateral.quadros} quadro(s)${r.lateral.solteira ? ' + coluna solteira (verde)' : ''} · horizontais (laranja), diagonais (azul), topo (cinza)`, svg: svgLateral(r) }),
-    frontal: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista frontal — desenho real', s: `colunas, sapatas, caneleiras 700 mm, braços (simples nas colunas externas, duplo nas internas), longarina superior por rua${DXF.montarFrontal(r).faltam.length ? ' · blocos ainda não recebidos: ' + DXF.montarFrontal(r).faltam.join(', ') : ''}`, svg: DXF.svgFrontal(r, 'VISTA FRONTAL') } : ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${Number(r.entradas.alturaPalete) + 200} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
+    frontal: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista frontal — desenho real', s: `colunas, sapatas, caneleiras 700 mm, braços (simples nas colunas externas, duplo nas internas), longarina superior por rua${DXF.montarFrontal(r).faltam.length ? ' · blocos ainda não recebidos: ' + DXF.montarFrontal(r).faltam.join(', ') : ''}`, svg: DXF.svgFrontal(r, DXF.tituloVista('FRONTAL', corte())) } : ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${r.frontal.passoNivel} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
     planta: (r) => ({ t: 'Planta', s: 'colunas em preto; vigas túnel e contraventamentos não levantados', svg: svgPlanta(r) }),
   };
   let vistaAtual = 'lateral';
@@ -182,12 +183,13 @@
   $('btnDxf').addEventListener('click', () => {
     if (!last) return;
     const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
-    const txt = DXF.dxfCompleto(last, $('projeto').value || '');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `vista-lateral-${nome}.dxf`; a.click();
+    const txt = DXF.dxfCompleto(last, corte());
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-corte-${corte().replace(/[^\w-]+/g, '_')}.dxf`; a.click();
   });
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
   $('escravo').addEventListener('change', render);
+  $('nomeCorte').addEventListener('input', () => { if (last) renderVista(last); });
   $('espacamentos').addEventListener('input', montarEspacos);
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });

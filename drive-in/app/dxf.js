@@ -267,8 +267,11 @@
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
   const COR = { PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
-  function dxfCompleto(r, titulo) {
-    const mL = montarLateral(r, `CORTE - VISTA LATERAL ${titulo || ''}`.trim()), mF = montarFrontal(r, `VISTA FRONTAL ${titulo || ''}`.trim());
+  // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
+  const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
+  function dxfCompleto(r, corte) {
+    const titulo = corte;
+    const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte));
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const m = { prims: mL.prims.concat(mF.prims), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos) };
     return dxfLateral(r, titulo, m);
@@ -293,6 +296,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  const DXF = { tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);
