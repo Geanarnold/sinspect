@@ -17,6 +17,9 @@
   const rotate = (prims, ang) => { const c = Math.cos(ang), s = Math.sin(ang); return mapPts(prims, (v) => [v[0] * c - v[1] * s, v[0] * s + v[1] * c]); };
   // estica ao longo de X: pontos com x > xMid deslocam delta
   const stretchX = (prims, xMid, delta) => mapPts(prims, (v) => [v[0] > xMid ? v[0] + delta : v[0], v[1]]);
+  // nome de bloco DXF (R12: letras, números, _ - $): DI_<PEÇA>_<parâmetros>; decimais com "-" (710.9 → 710-9)
+  const nb = (v) => String(Math.round(v * 10) / 10).replace('.', '-');
+  const nomeBloco = (...partes) => partes.filter((p) => p !== '' && p != null).join('_').toUpperCase().replace(/[^A-Z0-9_$-]/g, '_');
   const circles = (prims) => prims.filter((q) => q.t === 'c').map((q) => q.c);
 
   // ---- peças paramétricas
@@ -123,7 +126,12 @@
     espacos.forEach((a, i) => { const quadroI = solteira ? i % 2 === 1 : i % 2 === 0; lf.push(lf[i] + (solteira && i === 0 ? a : quadroI ? a - CW : a + CW)); });
     const xs = lf.map((v) => v + CW / 2); // eixos das colunas
     const prims = [], linhas = [], textos = [];
-    const put = (ps, dx, dy, layerDefault) => { for (const q of ps) { q.l = q.l && q.l !== '0' ? q.l : layerDefault; prims.push(translate([q], dx, dy)[0]); } };
+    const items = []; // cada peça vira um bloco no DXF (definição local + INSERT)
+    const put = (ps, dx, dy, layerDefault, nome) => {
+      for (const q of ps) q.l = q.l && q.l !== '0' ? q.l : layerDefault;
+      if (nome) items.push({ nome, local: clone(ps), x: dx, y: dy, l: layerDefault });
+      for (const q of ps) { const w = translate([q], dx, dy)[0]; if (nome) w.blk = 1; prims.push(w); }
+    };
     const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
     const text = (x, y, h, s, layer, rot = 0, just = 1) => textos.push({ x, y, h, s, l: layer, rot, just });
     const cota = (x1, y1, x2, y2, off, label, vertical) => {
@@ -132,18 +140,21 @@
     };
     const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50);
     const holesRight = (i) => (solteira ? i === 0 || i % 2 === 1 : i % 2 === 0) && i < n;
-    xs.forEach((x, i) => { const hr = holesRight(i); put(coluna(H, hr), x, 0, 'MONTANTE'); put(hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE'); });
+    xs.forEach((x, i) => { const hr = holesRight(i), lado = hr ? 'D' : 'E'; put(coluna(H, hr), x, 0, 'MONTANTE', nomeBloco('DI_COLUNA', 'H' + H, lado)); put(hr ? sapata() : mirrorX(sapata()), x + (hr ? -7.35 : 7.35), 0, 'MONTANTE', nomeBloco('DI_SAPATA', lado)); });
     for (let i = 0; i < n; i++) {
       const uni = solteira && i === 0, quadro = solteira ? i % 2 === 1 : i % 2 === 0;
       // travessa: furos c/c = A − 109,1 (regra do cadastro), centrada no quadro
       const ccQ = espacos[i] - 109.1, xm = (xs[i] + xs[i + 1]) / 2;
       const hxL = quadro ? xm - ccQ / 2 : xs[i] + HOLE_DX, hxR = quadro ? xm + ccQ / 2 : xs[i + 1] - HOLE_DX;
       if (quadro) {
-        ys.forEach((y) => put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE'));
-        for (let k = 0; k < nD; k++) put(travessaD([hxL, holeY(ys[k])], [hxR, holeY(ys[k + 1])]), 0, 0, 'MONTANTE');
+        ys.forEach((y) => put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE', nomeBloco('DI_TRAVESSA_H', 'CC' + nb(hxR - hxL))));
+        for (let k = 0; k < nD; k++) {
+          const p1 = [hxL, holeY(ys[k])], p2 = [hxR, holeY(ys[k + 1])];
+          put(translate(travessaD(p1, p2), -p1[0], -p1[1]), p1[0], p1[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(p2[0] - p1[0]) + 'X' + nb(p2[1] - p1[1])));
+        }
       }
-      if (uni) ys.forEach((y) => put(uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE'));
-      put(topo(xs[i + 1] - xs[i] + CW), xs[i], H, 'Contraventamento'); // DI_TOPO desenhado para quadro de 820 externo [CONFIRMAR]
+      if (uni) ys.forEach((y) => put(uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE', nomeBloco('DI_UNIAO', nb((xs[i + 1] - HOLE_DX) - hxL))));
+      put(topo(xs[i + 1] - xs[i] + CW), xs[i], H, 'Contraventamento', nomeBloco('DI_TOPO', nb(xs[i + 1] - xs[i] + CW))); // DI_TOPO desenhado para quadro de 820 externo [CONFIRMAR]
       const yc = H + 120 + (i % 2) * 90;
       cota(cum[i], H + 60, cum[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
     }
@@ -151,11 +162,11 @@
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
     const x0p = xs[0] - 1500, nP = Math.ceil((xs[n] + 1500 - x0p) / 1000);
-    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0'); // topo do concreto (y local 0) na base da sapata
+    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === nP - 1 ? 'FIM' : '')); // topo do concreto (y local 0) na base da sapata
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', cum[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
-    return { prims, linhas, textos, bbox: [xs[0] - 1500, -800, xs[n] + 3200, H + 700] };
+    return { prims, items, linhas, textos, bbox: [xs[0] - 1500, -800, xs[n] + 3200, H + 700] };
   }
 
   // ---- vista frontal (olhando para dentro das ruas)
@@ -183,7 +194,12 @@
   function montarFrontal(r, titulo) {
     const col = Number(r.entradas.coluna), H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const prims = [], linhas = [], textos = [], faltam = new Set();
-    const put = (ps, dx, dy, layerDefault) => { for (const q of ps) { q.l = q.l && q.l !== '0' ? q.l : layerDefault; prims.push(translate([q], dx, dy)[0]); } };
+    const items = []; // cada peça vira um bloco no DXF (definição local + INSERT)
+    const put = (ps, dx, dy, layerDefault, nome) => {
+      for (const q of ps) q.l = q.l && q.l !== '0' ? q.l : layerDefault;
+      if (nome) items.push({ nome, local: clone(ps), x: dx, y: dy, l: layerDefault });
+      for (const q of ps) { const w = translate([q], dx, dy)[0]; if (nome) w.blk = 1; prims.push(w); }
+    };
     const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
     const text = (x, y, h, s, layer, rot = 0, just = 1) => textos.push({ x, y, h, s, l: layer, rot, just });
     const cota = (x1, y1, x2, y2, off, label, vertical) => {
@@ -199,23 +215,24 @@
     const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
     const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {
-      put(colunaFrontal(col, H), x, 0, 'MONTANTE');
+      put(colunaFrontal(col, H), x, 0, 'MONTANTE', nomeBloco('DI_COLUNA_FRONTAL', col, 'H' + H));
       // caneleira 700 mm (sobre a sapata)
       const w = col / 2 + 6; [[x - w, 105], [x + w, 105]].forEach(() => {}); 
-      const c0 = pe, c1 = pe + 700;
-      line(x - w, c0, x + w, c0, 'CANELEIRA'); line(x + w, c0, x + w, c1, 'CANELEIRA'); line(x + w, c1, x - w, c1, 'CANELEIRA'); line(x - w, c1, x - w, c0, 'CANELEIRA');
+      const cnl = [[-w, 0, w, 0], [w, 0, w, 700], [w, 700, -w, 700], [-w, 700, -w, 0]].map(([a, b, c, d]) => ({ t: 'p', l: 'CANELEIRA', p: [[a, b], [c, d]] }));
+      put(cnl, x, pe, 'CANELEIRA', nomeBloco('DI_CANELEIRA', 'COL' + col));
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
       for (const yNivel of F.niveis) {
         const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapApoio(yNivel);
         const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
-        put(br.prims, x, yb, 'BRACO');
+        const ladoB = externa ? (i === 0 ? 'ESQ' : 'DIR') : '', pf = F.perfilC;
+        put(br.prims, x, yb, 'BRACO', nomeBloco('DI_BRACO', (externa ? 'S' : 'D') + nb(bal), 'COL' + col, ladoB, 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X')));
         if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {
-      const ret = (x0, y0, w, h) => { line(x0, y0, x0 + w, y0, 'PALETE'); line(x0 + w, y0, x0 + w, y0 + h, 'PALETE'); line(x0 + w, y0 + h, x0, y0 + h, 'PALETE'); line(x0, y0 + h, x0, y0, 'PALETE'); line(x0, y0 + 150, x0 + w, y0 + 150, 'PALETE'); };
+      const ret = (x0, y0, w, h) => put([[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0], [0, 150, w, 150]].map(([a, b, c, d]) => ({ t: 'p', l: 'PALETE', p: [[a, b], [c, d]] })), x0, y0, 'PALETE', nomeBloco('DI_PALETE', nb(w) + 'X' + nb(h)));
       for (let i = 0; i < R; i++) {
         const x0 = xs[i] + col / 2 + F.folgaPalete;
         for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) ret(x0, y0, F.frentePalete, F.alturaPalete);
@@ -229,30 +246,45 @@
     for (let i = 0; i < R; i++) {
       const src = B().DI_LGTOPO; if (!src) { faltam.add('DI_LGTOPO'); break; }
       const yLg = H - FR_TOPO_FURO - 100 + LG_DY, x1 = xs[i] + hx + LG_DX, x2 = xs[i + 1] - hx - LG_DX;
-      put(stretchX(clone(src), LG_VAO0 / 2, (x2 - x1) - LG_VAO0), x1, yLg, 'LONGARINA');
+      put(stretchX(clone(src), LG_VAO0 / 2, (x2 - x1) - LG_VAO0), x1, yLg, 'LONGARINA', nomeBloco('DI_LGTOPO', 'RUA' + nb(rua), 'COL' + col));
       cota(xs[i] + col / 2, H + 80, xs[i + 1] - col / 2, H + 80, 150, `${rua}`, false);
     }
     const W = xs[R] + col / 2;
     const x0p = -1500, nP = Math.ceil((W + 3000) / 1000);
-    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0');
+    for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === nP - 1 ? 'FIM' : ''));
     cota(0, H + 80, W, H + 80, 450, `L = ${Math.round(W)}`, false);
     cota(-200, 0, -200, H, 600, `B = ${H}`, true);
     if (topoBraco.length) cota(-200, 0, -200, topoBraco[0], 300, `1º nível ${Math.round(topoBraco[0])}`, true);
     if (topoBraco.length > 1) cota(W + 400, topoBraco[0], W + 400, topoBraco[1], -300, `passo ${Math.round(topoBraco[1] - topoBraco[0])}`, true);
     text(W / 2, -600, 120, titulo || 'VISTA FRONTAL', '4 - TEXTO DE ESCALA E VISTA');
     if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
-    return { prims, linhas, textos, bbox: [-1500, -1000, W + 1600, H + 700], faltam: [...faltam] };
+    return { prims, items, linhas, textos, bbox: [-1500, -1000, W + 1600, H + 700], faltam: [...faltam] };
   }
   function shiftModel(m, dx) {
     for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1]]); if (q.c) q.c = [q.c[0] + dx, q.c[1]]; }
     for (const q of m.linhas) q.p = q.p.map((v) => [v[0] + dx, v[1]]);
     for (const t of m.textos) t.x += dx;
+    for (const it of m.items || []) it.x += dx;
     m.bbox = [m.bbox[0] + dx, m.bbox[1], m.bbox[2] + dx, m.bbox[3]];
     return m;
   }
   function dxfLateral(r, titulo, modelo) {
-    const m = modelo || montarLateral(r, titulo), out = [];
-    emit(out, m.prims, 0, 0, '0');
+    const m = modelo || montarLateral(r, titulo), out = [], blocos = [];
+    // peças como blocos: uma definição por geometria (nome com os parâmetros) + INSERT na posição; o resto (cotas, textos) solto
+    const defs = new Map();
+    for (const it of m.items || []) {
+      const sig = JSON.stringify(it.local.map((q) => [q.t, q.l, q.p && q.p.map((v) => [f(v[0]), f(v[1])]), q.c && [f(q.c[0]), f(q.c[1])], q.r && f(q.r)]));
+      let nome = it.nome, k = 2;
+      while (defs.has(nome) && defs.get(nome).sig !== sig) nome = `${it.nome}_${k++}`;
+      if (!defs.has(nome)) {
+        defs.set(nome, { sig });
+        blocos.push('0', 'BLOCK', '8', '0', '2', nome, '70', '0', '10', '0', '20', '0', '30', '0', '3', nome);
+        emit(blocos, it.local, 0, 0, it.l);
+        blocos.push('0', 'ENDBLK', '8', '0');
+      }
+      out.push('0', 'INSERT', '8', ld(it.l), '2', nome, '10', f(it.x), '20', f(it.y), '30', '0');
+    }
+    emit(out, m.prims.filter((q) => !q.blk), 0, 0, '0');
     for (const q of m.linhas) out.push('0', 'LINE', '8', ld(q.l), '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
     const asc = (s) => String(s).replace(/[^\x00-\x7F]/g, (c) => '\\U+' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')); // acentos no padrão do AutoCAD
     for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
@@ -263,6 +295,7 @@
       '0', 'TABLE', '2', 'LAYER', '70', String(Object.keys(LAYERS).length), '0', 'LAYER', '2', '0', '70', '0', '62', '7', '6', 'CONTINUOUS', ...layers, '0', 'ENDTAB',
       '0', 'TABLE', '2', 'STYLE', '70', '1', '0', 'STYLE', '2', 'STANDARD', '70', '0', '40', '0', '41', '1', '50', '0', '71', '0', '42', '2.5', '3', 'txt', '4', '', '0', 'ENDTAB',
       '0', 'ENDSEC',
+      '0', 'SECTION', '2', 'BLOCKS', ...blocos, '0', 'ENDSEC',
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
@@ -273,7 +306,7 @@
     const titulo = corte;
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte));
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
-    const m = { prims: mL.prims.concat(mF.prims), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos) };
+    const m = { prims: mL.prims.concat(mF.prims), items: mL.items.concat(mF.items), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos) };
     return dxfLateral(r, titulo, m);
   }
   function svgFrontal(r, titulo) { return svgModelo(montarFrontal(r, titulo)); }
