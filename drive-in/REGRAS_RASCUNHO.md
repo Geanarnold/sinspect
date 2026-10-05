@@ -368,3 +368,4 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - [IMPLEMENTADO] Longarina de fundo: mesmo perfil da longarina de topo (DI_LGTOPO esticado pela largura da rua), 1 por rua por nível de braço, layer LONGARINA_FUNDO em laranja (cor 30). Peso/SA iguais aos da longarina de topo (a confirmar). [CONFIRMAR altura: hoje o topo fica no nível de apoio do palete]
 - Requadro: removido do escopo (decisão do Gean).
 - [IMPLEMENTADO] Zig-zag de topo e de fundo: somente diagonais. Fixadores por diagonal: 2 × INT1193 (parafuso sextavado 5/16" × 1") + 2 × INT0650. INT1193 incluído no CATALOGO.xlsx (Produtos).
+- [IMPLEMENTADO] Braço com preenchimento sólido laranja (SOLID no layer BRACO_HACHURA, cor 30; R12 não tem HATCH) dentro do próprio bloco do braço, para diferenciar das longarinas na vista frontal.

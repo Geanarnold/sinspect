@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -107,6 +107,10 @@
       const lay = ld(q.l && q.l !== '0' ? q.l : layerDefault);
       if (q.t === 'l') out.push('0', 'LINE', '8', lay, '10', f(q.p[0][0] + dx), '20', f(q.p[0][1] + dy), '30', '0', '11', f(q.p[1][0] + dx), '21', f(q.p[1][1] + dy), '31', '0');
       else if (q.t === 'c') out.push('0', 'CIRCLE', '8', lay, '10', f(q.c[0] + dx), '20', f(q.c[1] + dy), '30', '0', '40', f(q.r));
+      else if (q.t === 's') { // SOLID: vértices na ordem do R12 (1, 2, 3, 4 = inf-esq, inf-dir, sup-esq, sup-dir)
+        out.push('0', 'SOLID', '8', lay);
+        q.p.forEach((v, k) => out.push(String(10 + k), f(v[0] + dx), String(20 + k), f(v[1] + dy), String(30 + k), '0'));
+      }
       else if (q.t === 'p') {
         out.push('0', 'POLYLINE', '8', lay, '66', '1', '10', '0', '20', '0', '30', '0', '70', '0');
         for (const v of q.p) out.push('0', 'VERTEX', '8', lay, '10', f(v[0] + dx), '20', f(v[1] + dy), '30', '0');
@@ -197,6 +201,9 @@
     const arc = (cx, cy, r, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } L.push({ t: 'p', l: 'BRACO', p }); };
     const uo = col / 2 + esp, yc0 = (alt - pf.A) / 2, yc1 = yc0 + pf.A;
     const xa = lado === 1 ? -uo : -uo - bal, xb = lado === -1 ? uo : uo + bal;
+    // preenchimento sólido laranja (SOLID, R12 não tem HATCH) para diferenciar o braço das longarinas na vista frontal
+    const sol = (x0, y0, x1, y1) => L.push({ t: 's', l: 'BRACO_HACHURA', p: [[x0, y0], [x1, y0], [x0, y1], [x1, y1]] });
+    sol(-uo, 0, uo, yc0); sol(-uo, yc1, uo, alt); sol(xa, yc0, xb, yc1);
     // U (verticais interrompidas atrás do C)
     for (const x of [-uo, -col / 2, col / 2, uo]) { ln(x, 0, x, yc0); ln(x, yc1, x, alt); }
     ln(-uo, 0, uo, 0); ln(-uo, alt, uo, alt);
@@ -334,7 +341,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   function dxfCompleto(r, corte) {
@@ -358,6 +365,7 @@
       const sw = l === 'MONTANTE' ? 2.2 : 1.6;
       let path = '';
       for (const q of qs) {
+        if (q.t === 's') { const [a, b, c, e] = q.p; parts.unshift(`<polygon points="${[a, b, e, c].map((v) => X(v[0]) + ',' + Y(v[1])).join(' ')}" fill="${COR[l] || '#f97316'}" stroke="none"/>`); continue; }
         if (q.t === 'c') parts.push(`<circle cx="${X(q.c[0])}" cy="${Y(q.c[1])}" r="${q.r.toFixed(1)}" fill="none" stroke="${COR[l] || '#fff'}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/>`);
         else path += 'M' + q.p.map((v, i) => (i ? 'L' : '') + X(v[0]) + ' ' + Y(v[1])).join('');
       }
