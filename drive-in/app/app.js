@@ -106,6 +106,7 @@
     g2 += `<rect x="${f1(FX(-col / 2))}" y="${f1(FY(ymax - 25))}" width="${f1(col * sB)}" height="${f1((ymax - 25 + 14) * sB)}" fill="none" stroke="${LF}" stroke-width=".6"/>`;
     g2 += `<line x1="${f1(FX(0))}" y1="${f1(FY(198))}" x2="${f1(FX(0))}" y2="${f1(FY(-8))}" stroke="${CT}" stroke-width=".45" stroke-dasharray="10 2 2 2"/>`;
     // braço: contorno grosso; linhas de tangência das dobras finas; rasgos
+    for (const q of br.prims) if (q.t === 'c') g2 += `<circle cx="${f1(FX(q.c[0]))}" cy="${f1(FY(q.c[1]))}" r="${f1(q.r * sB)}" fill="none" stroke="${LG}" stroke-width=".6"/>`;
     for (const q of br.prims) {
       if (q.t === 's' || !q.p) continue;
       const fino = q.p.length === 2 && Math.abs(q.p[0][1] - q.p[1][1]) < .01 && [yc0, yc1].every((y) => Math.abs(q.p[0][1] - y) > .01) && q.p[0][1] > yc0 && q.p[0][1] < yc1;

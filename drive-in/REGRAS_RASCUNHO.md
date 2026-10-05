@@ -390,3 +390,4 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 
 ## 24. Projeto em arquivo
 - Botões Salvar / Abrir / Novo (bloco "Projeto e cortes"): salva um arquivo <projeto>.drivein.json com cabeçalho (projeto, revisão, responsável, observações) e todos os cortes; Abrir recarrega exatamente o mesmo projeto (testado: mesmos cortes e totais). Continua salvando automaticamente no navegador.
+- [IMPLEMENTADO] Braço e caneleira no mesmo formato: preenchimento sólido (BRACO_HACHURA cor 30 laranja / CANELEIRA_HACHURA cor 2 amarelo) com contorno, dobras, rasgos e parafusos por cima nos layers BRACO / CANELEIRA (cor 7). Braço mostra os 4 parafusos da frente (arruela Ø20, cabeça sextavada 1/2", ponta Ø7,94) e a espessura da ponta do C.

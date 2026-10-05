@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -214,9 +214,17 @@
     // rasgos oblongos
     const sx = (col - 40) / 2;
     for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) { arc(cx - 2.5, cy, 4.5, 90, 270); arc(cx + 2.5, cy, 4.5, -90, 90); ln(cx - 2.5, cy + 4.5, cx + 2.5, cy + 4.5); ln(cx - 2.5, cy - 4.5, cx + 2.5, cy - 4.5); }
+    // parafusos nos rasgos da frente (INT0648 5/16" + arruela INT0812 Ø20): arruela, cabeça sextavada (1/2" entre faces) e ponta do parafuso
+    for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) {
+      L.push({ t: 'c', l: 'BRACO', c: [cx, cy], r: 10 }, { t: 'c', l: 'BRACO', c: [cx, cy], r: 3.97 });
+      const hx = []; for (let k = 0; k <= 6; k++) { const a = (30 + 60 * k) * Math.PI / 180; hx.push([cx + 7.33 * Math.cos(a), cy + 7.33 * Math.sin(a)]); }
+      L.push({ t: 'p', l: 'BRACO', p: hx });
+    }
     // perfil C
     const d = pf.D + 1.15 * pf.D; // linha de tangência da dobra: espessura + raio interno (ri = 1,15·D, como na tala 2025.0066)
     ln(xa, yc0, xb, yc0); ln(xa, yc1, xb, yc1); ln(xa, yc0 + d, xb, yc0 + d); ln(xa, yc1 - d, xb, yc1 - d); ln(xa, yc0, xa, yc1); ln(xb, yc0, xb, yc1);
+    // ponta do C (corte do perfil): espessura das abas e da dobra nas extremidades, dá leitura de profundidade
+    for (const xe of lado === 0 ? [xa, xb] : lado === 1 ? [xb] : [xa]) { const s = xe > 0 ? -1 : 1; ln(xe + s * pf.D, yc0, xe + s * pf.D, yc0 + pf.B); ln(xe + s * pf.D, yc1, xe + s * pf.D, yc1 - pf.B); }
     return { prims: L, topoC: yc1 };
   }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
@@ -247,7 +255,11 @@
       put(colunaFrontal(col, H), x, 0, 'MONTANTE', nomeBloco('DI_COLUNA_FRONTAL', col, 'H' + H));
       // caneleira 700 mm (sobre a sapata)
       const w = col / 2 + 6; [[x - w, 105], [x + w, 105]].forEach(() => {}); 
-      const cnl = [[-w, 0, w, 0], [w, 0, w, 700], [w, 700, -w, 700], [-w, 700, -w, 0]].map(([a, b, c, d]) => ({ t: 'p', l: 'CANELEIRA', p: [[a, b], [c, d]] }));
+      // caneleira 700 mm: mesmo formato do braço — preenchimento sólido (amarelo) + contorno e linhas de dobra por cima (layer CANELEIRA, cor 7)
+      const seg = (a1, b1, c1, d1) => ({ t: 'p', l: 'CANELEIRA', p: [[a1, b1], [c1, d1]] });
+      const cnl = [{ t: 's', l: 'CANELEIRA_HACHURA', p: [[-w, 0], [w, 0], [-w, 700], [w, 700]] },
+        seg(-w, 0, w, 0), seg(w, 0, w, 700), seg(w, 700, -w, 700), seg(-w, 700, -w, 0),
+        seg(-w + 4, 0, -w + 4, 700), seg(w - 4, 0, w - 4, 700), seg(-w, 696, w, 696)];
       put(cnl, x, pe, 'CANELEIRA', nomeBloco('DI_CANELEIRA', 'COL' + col));
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
       const externa = i === 0 || i === R;
@@ -345,7 +357,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
