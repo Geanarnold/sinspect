@@ -362,6 +362,8 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - Trilho guia: perfil a definir depois (sem peso por enquanto).
 - [IMPLEMENTADO] Zig-zag de topo e de fundo em todas as ruas, mesmo perfil das travessas da lateral (sliter 80 × 1,40), SA buscado nas tabelas de travessa/diagonal (±3 mm; os comprimentos maiores tendem a ficar sem SA).
   - Fixação na furação frontal da coluna (±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5. Diagonal = √(c/c² + vão²) + 30,5. [PREMISSA — confirmar pontos de fixação]
-  - Fundo (slide 11): horizontal no 1º furo ≥ 100 mm (125) e no furo logo abaixo de cada braço; diagonal alternada por painel, a última até o 3º furo de cima (fixação da longarina de topo). Desenhado na vista frontal (DI_ZIGZAG_H / DI_ZIGZAG_D).
+  - Fundo: SEM horizontais. Uma diagonal por painel, alternada, de 50 mm acima da sapata (ou do topo do suporte do braço) até 50 mm abaixo do próximo suporte do braço (ou da longarina de topo). 2 parafusos por diagonal [CONFIRMAR]. Desenhado na vista frontal (DI_ZIGZAG_D).
   - Topo (slide 9): horizontal em cada linha de colunas ao longo da profundidade, exceto a da frente (longarina de topo); diagonal alternada por vão entre linhas de coluna. Só lista de peças (vista superior ainda não existe).
   - Fixadores: 2 parafusos da travessa (por coluna) + 2 INT0650 por horizontal; diagonais sem fixação própria (mesma regra da lateral).
+- [IMPLEMENTADO — PROVISÓRIO] Longarina de fundo no lugar das horizontais do zig-zag de fundo: 1 por rua por nível de braço, perfil igual ao da longarina de túnel, comprimento eixo a eixo das colunas (rua + coluna). Desenhada na vista frontal (DI_LG_FUNDO). [CONFIRMAR perfil, comprimento, fixação e se o chão leva]
+- Requadro: removido do escopo (decisão do Gean).

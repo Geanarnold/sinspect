@@ -248,17 +248,22 @@
         if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
-    // travamento de fundo em zig-zag (plano do fundo, visto através da rua): horizontais + diagonais alternadas por painel
-    if (F.zigzag && B().DI_TRAVESSA_H && B().DI_TRAVESSA_D) {
-      const Z = F.zigzag, pts = [...Z.yHz, Z.yTopo];
+    // travamento de fundo em zig-zag (plano do fundo, visto através da rua): só diagonais alternadas por painel; longarina de fundo em cada nível de braço
+    if (F.zigzag && B().DI_TRAVESSA_D) {
+      const Z = F.zigzag;
       for (let i = 0; i < R; i++) {
         const xl = xs[i] + Z.hx, xr = xs[i + 1] - Z.hx;
-        for (const y of Z.yHz) put(travessaH(xr - xl), xl, y, 'Contraventamento', nomeBloco('DI_ZIGZAG_H', 'CC' + nb(xr - xl)));
-        for (let k = 0; k < pts.length - 1; k++) {
-          const p1 = k % 2 === 0 ? [xl, pts[k]] : [xr, pts[k]], p2 = k % 2 === 0 ? [xr, pts[k + 1]] : [xl, pts[k + 1]];
+        Z.paineis.forEach(([y1, y2], k) => {
+          if (y2 <= y1) return;
+          const p1 = k % 2 === 0 ? [xl, y1] : [xr, y1], p2 = k % 2 === 0 ? [xr, y2] : [xl, y2];
           put(translate(travessaD(p1, p2), -p1[0], -p1[1]), p1[0], p1[1], 'Contraventamento', nomeBloco('DI_ZIGZAG_D', nb(p2[0] - p1[0]) + 'X' + nb(p2[1] - p1[1])));
-        }
+        });
       }
+    }
+    if (F.lgFundo) for (let i = 0; i < R; i++) for (const yN of F.niveis) {
+      const ya = snapApoio(yN) + offApoio, x0 = xs[i] + col / 2, Lf = xs[i + 1] - xs[i] - col, h = F.lgFundo.h;
+      const ps = [[0, 0, Lf, 0], [Lf, 0, Lf, h], [Lf, h, 0, h], [0, h, 0, 0]].map(([a, b, c, e]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, e]] }));
+      put(ps, x0, ya - h, 'LONGARINA', nomeBloco('DI_LG_FUNDO', 'U' + nb(h), nb(Lf)));
     }
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {

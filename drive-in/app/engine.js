@@ -255,28 +255,34 @@
     // fixação na furação frontal da coluna (oblongos a ±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5 (regra das travessas)
     const HX = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
     const ccZ = larguraRua + col - 2 * HX, totZH = ccZ + 30.5;
-    // FUNDO (plano do fundo, vista frontal): horizontal no 1º furo ≥ 100 mm e logo abaixo de cada braço; diagonal alternada por painel até o furo da longarina de topo
-    const offApoioZ = (180 - perfilC.A) / 2 + perfilC.A;
-    const yHz = [125, ...niveisArm.map((y) => +(y - offApoioZ - 35).toFixed(2))];
-    const yTopoZ = H - 125; // 3º furo de cima (fixação da longarina de topo)
-    const pontosZ = [...yHz, yTopoZ];
-    const diagZ = []; for (let k = 0; k < pontosZ.length - 1; k++) diagZ.push(+(Math.hypot(ccZ, pontosZ[k + 1] - pontosZ[k]) + 30.5).toFixed(1));
+    // FUNDO (plano do fundo, vista frontal): SEM horizontais (no lugar delas entra a longarina de fundo); uma diagonal por painel, alternada,
+    // do ponto 50 mm acima da sapata / do suporte do braço até 50 mm abaixo do próximo suporte do braço / da longarina de topo (Gean)
+    const offApoioZ = (180 - perfilC.A) / 2 + perfilC.A, SAPATA_TOPO = 104.76, LGTOPO_BASE = H - 154.65;
+    const basesU = niveisArm.map((y) => y - offApoioZ);
+    const panZ = []; let ySup = SAPATA_TOPO + 50;
+    for (const yb of basesU) { panZ.push([ySup, yb - 50]); ySup = yb + 180 + 50; }
+    panZ.push([ySup, LGTOPO_BASE - 50]);
+    const diagZ = panZ.filter(([a1, b1]) => b1 > a1).map(([a1, b1]) => +(Math.hypot(ccZ, b1 - a1) + 30.5).toFixed(1));
     const addZ = (grupo, tipo, tot, qtd, obs) => {
       const it = buscaSA(tipo === 'H' ? cat.travessas : cat.diagonais, tot);
       add(grupo, `ZZ-${tipo}-${r1(tot)}`, `${tipo === 'H' ? 'Travessa horizontal' : 'Travessa diagonal'} zig-zag – total ${r1(tot)} mm`, it ? it.sa : SEM.SA, qtd, r1(tot), KG_M_TRAVESSA * tot / 1000, (it ? it.nome + '; ' : 'sem SA no cadastro (±3 mm); ') + obs);
     };
-    addZ('Travamento de fundo (zig-zag)', 'H', totZH, yHz.length * R, `${yHz.length} por rua (piso + 1 por nível de braço)`);
     const porDZ = {}; for (const t of diagZ) porDZ[t] = (porDZ[t] || 0) + 1;
-    for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua`);
+    for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua; 50 mm acima da sapata/suporte até 50 mm abaixo do suporte seguinte`);
+    // longarina de fundo: no lugar das horizontais do zig-zag, 1 por rua em cada nível de braço [CONFIRMAR perfil, comprimento e se o chão também leva]
+    const compLgFundo = larguraRua + col; // eixo a eixo das colunas [CONFIRMAR]
+    if (niveisArm.length) add('Longarinas', 'LG-FUNDO', `Longarina de fundo U ${lgU.A}x${lgU.B}x${lgU.e} – ${compLgFundo} mm`, SEM.SA, R * niveisArm.length, compLgFundo, +(kgmLgU * compLgFundo / 1000).toFixed(3),
+      `1 por rua × ${niveisArm.length} nível(is); perfil igual ao da longarina de túnel e comprimento eixo a eixo das colunas — PROVISÓRIO`);
     // TOPO (plano do topo): horizontal em cada linha de colunas ao longo da profundidade (a da frente é a longarina de topo); diagonal alternada por vão
     const linhasTopo = eixosLat.length - 1;
     addZ('Travamento de topo (zig-zag)', 'H', totZH, linhasTopo * R, `${linhasTopo} por rua (linhas de coluna, exceto a frente)`);
     const porDT = {}; for (let i = 0; i < eixosLat.length - 1; i++) { const t = +(Math.hypot(ccZ, eixosLat[i + 1] - eixosLat[i]) + 30.5).toFixed(1); porDT[t] = (porDT[t] || 0) + 1; }
     for (const [t, q] of Object.entries(porDT)) addZ('Travamento de topo (zig-zag)', 'D', Number(t), q * R, `${q} por rua`);
-    const nHZ = (yHz.length + linhasTopo) * R;
+    // fixadores: topo = 2 por horizontal (diagonais sem fixação própria, regra da lateral); fundo = 2 por diagonal (não há horizontal para compartilhar) [CONFIRMAR]
+    const nParZ = 2 * linhasTopo * R + 2 * diagZ.length * R;
     const parZ = prodOf(cat, PARAFUSO_TRAV[col]);
-    add('Travamento de topo (zig-zag)', parZ.id, parZ.desc + ' (zig-zag topo + fundo)', parZ.codigo, 2 * nHZ, null, null, '2 por horizontal; diagonais sem fixação própria (regra da lateral)');
-    add('Travamento de topo (zig-zag)', 'INT0650', prodOf(cat, 'INT0650').desc + ' (zig-zag topo + fundo)', 'INT0650', 2 * nHZ, null, null, '2 por horizontal');
+    add('Travamento de topo (zig-zag)', parZ.id, parZ.desc + ' (zig-zag topo + fundo)', parZ.codigo, nParZ, null, null, '2 por horizontal do topo + 2 por diagonal do fundo');
+    add('Travamento de topo (zig-zag)', 'INT0650', prodOf(cat, 'INT0650').desc + ' (zig-zag topo + fundo)', 'INT0650', nParZ, null, null, 'idem');
     // o U da longarina de túnel abraça o C do braço: altura interna do U ≥ altura A do C
     const uInterno = lgU.A - 2 * lgU.e;
     // tolerância de encaixe: altura interna do U = A do C ± 1 mm (Gean)
@@ -301,7 +307,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      frontal: { zigzag: { ccZ, hx: HX, yHz, yTopo: yTopoZ }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
+      frontal: { zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };
   }
