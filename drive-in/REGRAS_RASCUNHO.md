@@ -358,3 +358,10 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - Tolerância de encaixe U × C: altura interna do U = A do C ± 1 mm (abaixo de −1 = erro; acima de +1 = alerta). Com os padrões (U 100 × 1,8 → 96,4; C 94) a folga é 2,4 mm → alerta.
 - [IMPLEMENTADO] Emenda da longarina de túnel (2025.0066.01.003 REV.01, referencias_dxf/): kit PK041366 = 1 tala SA042691 (C 300 × 94 × 30 × 15) + 14 INT0648 + 14 INT0650 + 14 INT0812, 1,340 kg (peso do kit). 1 kit por emenda; fixadores listados com "já incluídos no PK". Perfil diferente do padrão U 100 × 38 × 1,8: tala acompanha (altura = interno do U − 2,4; aba = aba do U − 8; dobra 15), mesmos 14 parafusos, código PKXXXXXX e peso estimado proporcional ao desenvolvimento da seção. [CONFIRMAR regra de ajuste da tala e espessura da chapa]
 - Bloco DI_EMENDA_LONG (blocos_dxf/) desenhado em cada junta na vista lateral.
+- Limite de 3000 mm da longarina de túnel: capacidade da máquina de dobra.
+- Trilho guia: perfil a definir depois (sem peso por enquanto).
+- [IMPLEMENTADO] Zig-zag de topo e de fundo em todas as ruas, mesmo perfil das travessas da lateral (sliter 80 × 1,40), SA buscado nas tabelas de travessa/diagonal (±3 mm; os comprimentos maiores tendem a ficar sem SA).
+  - Fixação na furação frontal da coluna (±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5. Diagonal = √(c/c² + vão²) + 30,5. [PREMISSA — confirmar pontos de fixação]
+  - Fundo (slide 11): horizontal no 1º furo ≥ 100 mm (125) e no furo logo abaixo de cada braço; diagonal alternada por painel, a última até o 3º furo de cima (fixação da longarina de topo). Desenhado na vista frontal (DI_ZIGZAG_H / DI_ZIGZAG_D).
+  - Topo (slide 9): horizontal em cada linha de colunas ao longo da profundidade, exceto a da frente (longarina de topo); diagonal alternada por vão entre linhas de coluna. Só lista de peças (vista superior ainda não existe).
+  - Fixadores: 2 parafusos da travessa (por coluna) + 2 INT0650 por horizontal; diagonais sem fixação própria (mesma regra da lateral).

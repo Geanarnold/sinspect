@@ -248,6 +248,18 @@
         if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
+    // travamento de fundo em zig-zag (plano do fundo, visto através da rua): horizontais + diagonais alternadas por painel
+    if (F.zigzag && B().DI_TRAVESSA_H && B().DI_TRAVESSA_D) {
+      const Z = F.zigzag, pts = [...Z.yHz, Z.yTopo];
+      for (let i = 0; i < R; i++) {
+        const xl = xs[i] + Z.hx, xr = xs[i + 1] - Z.hx;
+        for (const y of Z.yHz) put(travessaH(xr - xl), xl, y, 'Contraventamento', nomeBloco('DI_ZIGZAG_H', 'CC' + nb(xr - xl)));
+        for (let k = 0; k < pts.length - 1; k++) {
+          const p1 = k % 2 === 0 ? [xl, pts[k]] : [xr, pts[k]], p2 = k % 2 === 0 ? [xr, pts[k + 1]] : [xl, pts[k + 1]];
+          put(translate(travessaD(p1, p2), -p1[0], -p1[1]), p1[0], p1[1], 'Contraventamento', nomeBloco('DI_ZIGZAG_D', nb(p2[0] - p1[0]) + 'X' + nb(p2[1] - p1[1])));
+        }
+      }
+    }
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {
       const ret = (x0, y0, w, h) => put([[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0], [0, 150, w, 150]].map(([a, b, c, d]) => ({ t: 'p', l: 'PALETE', p: [[a, b], [c, d]] })), x0, y0, 'PALETE', nomeBloco('DI_PALETE', nb(w) + 'X' + nb(h)));
