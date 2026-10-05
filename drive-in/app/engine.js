@@ -240,6 +240,17 @@
       const porComp = {}; for (const b of barrasTunel) porComp[b] = (porComp[b] || 0) + 1;
       for (const [b, q] of Object.entries(porComp)) add('Longarinas', 'LG-TUNEL', `Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e} – ${b} mm`, SEM.SA, q * 2 * R * niveisArm.length, Number(b), +(kgmLgU * Number(b) / 1000).toFixed(3), `${q} por linha (barras ≤ ${LG_TUNEL_MAX}, emenda sobre o braço) × 2 por rua × ${niveisArm.length} nível(is); ${kgmLgU.toFixed(3)} kg/m`);
     }
+    // emenda da longarina de túnel (2025.0066.01.003 REV.01): kit PK041366 = tala SA042691 C 300 × 94 × 30 × 15 + 14 INT0648 + 14 INT0650 + 14 INT0812, 1,340 kg
+    // a tala entra por dentro do U; se o perfil da longarina mudar, a tala acompanha (altura = interno do U − 2,4; aba = aba do U − 8) e os 14 parafusos se mantêm
+    const nJuntas = (barrasTunel.length - 1) * 2 * R * niveisArm.length;
+    if (nJuntas > 0) {
+      const padrao = lgU.A === 100 && lgU.B === 38 && lgU.e === 1.8;
+      const tA = +(lgU.A - 2 * lgU.e - 2.4).toFixed(1), tC = +(lgU.B - 8).toFixed(1);
+      const pesoKit = padrao ? 1.34 : +(1.34 * (tA + 2 * tC + 30) / (94 + 60 + 30)).toFixed(3);
+      add('Emendas da longarina de túnel', padrao ? 'PK041366' : 'PK-TALA', `Tala de junção ${300} x ${tA} x ${tC} x 15 (kit com fixadores)`, padrao ? 'PK041366' : SEM.PK, nJuntas, 300, pesoKit,
+        `${barrasTunel.length - 1} emenda(s) por linha × 2 por rua × ${niveisArm.length} nível(is); tala ${padrao ? 'SA042691' : SEM.SA}${padrao ? '' : '; perfil fora do padrão: tala e peso estimados, sem código'}`);
+      for (const id of ['INT0648', 'INT0650', 'INT0812']) add('Emendas da longarina de túnel', id, prodOf(cat, id).desc, id, 14 * nJuntas, null, null, `14 por tala (já incluídos no ${padrao ? 'PK041366' : 'kit'})`);
+    }
     // o U da longarina de túnel abraça o C do braço: altura interna do U ≥ altura A do C
     const uInterno = lgU.A - 2 * lgU.e;
     // tolerância de encaixe: altura interna do U = A do C ± 1 mm (Gean)

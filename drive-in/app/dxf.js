@@ -168,6 +168,7 @@
         const ps = [[0, 0, Lb, 0], [0, e, Lb, e], [0, h - e, Lb, h - e], [0, h, Lb, h], [0, 0, 0, h], [Lb, 0, Lb, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, d]] }));
         put(ps, cum[0] + cortes[k], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lb)));
       }
+      if (B().DI_EMENDA_LONG) for (const j of L.juntasTunel || []) put(clone(B().DI_EMENDA_LONG), cum[0] + j, yN - h / 2, 'LONGARINA', 'DI_EMENDA_LONG');
     }
     if (L.trilho && L.trilho.comp > 0) {
       const Tl = L.trilho.comp, th = L.trilho.alt;

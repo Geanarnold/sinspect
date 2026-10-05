@@ -356,3 +356,5 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - [IMPLEMENTADO] Stop palete: 2 por rua (total, não por nível), peso unitário informado pelo operador.
 - [PENDENTE] Trilho guia: largura/chapa/peso.
 - Tolerância de encaixe U × C: altura interna do U = A do C ± 1 mm (abaixo de −1 = erro; acima de +1 = alerta). Com os padrões (U 100 × 1,8 → 96,4; C 94) a folga é 2,4 mm → alerta.
+- [IMPLEMENTADO] Emenda da longarina de túnel (2025.0066.01.003 REV.01, referencias_dxf/): kit PK041366 = 1 tala SA042691 (C 300 × 94 × 30 × 15) + 14 INT0648 + 14 INT0650 + 14 INT0812, 1,340 kg (peso do kit). 1 kit por emenda; fixadores listados com "já incluídos no PK". Perfil diferente do padrão U 100 × 38 × 1,8: tala acompanha (altura = interno do U − 2,4; aba = aba do U − 8; dobra 15), mesmos 14 parafusos, código PKXXXXXX e peso estimado proporcional ao desenvolvimento da seção. [CONFIRMAR regra de ajuste da tala e espessura da chapa]
+- Bloco DI_EMENDA_LONG (blocos_dxf/) desenhado em cada junta na vista lateral.
