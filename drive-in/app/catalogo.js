@@ -868,7 +868,8 @@ window.CATALOGO = {
    "codigo": "",
    "peso": 1.25,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-101": {
    "tipo": "Sapata (conjunto)",
@@ -876,7 +877,8 @@ window.CATALOGO = {
    "codigo": "CO040437",
    "peso": 1.3,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-122": {
    "tipo": "Sapata (conjunto)",
@@ -884,7 +886,8 @@ window.CATALOGO = {
    "codigo": "CO040544",
    "peso": 1.35,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-80DUP": {
    "tipo": "Sapata (conjunto)",
@@ -892,7 +895,8 @@ window.CATALOGO = {
    "codigo": "",
    "peso": 1.65,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "SAP-BASE": {
    "tipo": "Sapata (componente)",
@@ -900,7 +904,8 @@ window.CATALOGO = {
    "codigo": "SA041442",
    "peso": null,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-U80": {
    "tipo": "Sapata (componente)",
@@ -908,7 +913,8 @@ window.CATALOGO = {
    "codigo": "",
    "peso": null,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-U101": {
    "tipo": "Sapata (componente)",
@@ -916,7 +922,8 @@ window.CATALOGO = {
    "codigo": "SA041441",
    "peso": null,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "SAP-U122": {
    "tipo": "Sapata (componente)",
@@ -924,7 +931,8 @@ window.CATALOGO = {
    "codigo": "SA041652",
    "peso": null,
    "unid": "kg",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "PLN-80-101": {
    "tipo": "Placa niveladora",
@@ -932,7 +940,8 @@ window.CATALOGO = {
    "codigo": "SA041463",
    "peso": 0.223,
    "unid": "kg",
-   "aco": "ACO0066 chapa F F 1,40x1200x2000"
+   "aco": "ACO0066 chapa F F 1,40x1200x2000",
+   "dim": null
   },
   "PLN-122": {
    "tipo": "Placa niveladora",
@@ -940,7 +949,8 @@ window.CATALOGO = {
    "codigo": "SA041649",
    "peso": 0.231,
    "unid": "kg",
-   "aco": "USI Civil 300"
+   "aco": "USI Civil 300",
+   "dim": null
   },
   "TAL": {
    "tipo": "Tala de junção",
@@ -948,7 +958,8 @@ window.CATALOGO = {
    "codigo": "SA040045",
    "peso": 0.448,
    "unid": "kg",
-   "aco": "ACO0610 blank a quente, Civil 300"
+   "aco": "ACO0610 blank a quente, Civil 300",
+   "dim": null
   },
   "INT0648": {
    "tipo": "Fixador",
@@ -956,7 +967,8 @@ window.CATALOGO = {
    "codigo": "INT0648",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "INT0650": {
    "tipo": "Fixador",
@@ -964,7 +976,8 @@ window.CATALOGO = {
    "codigo": "INT0650",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "INT0812": {
    "tipo": "Fixador",
@@ -972,7 +985,8 @@ window.CATALOGO = {
    "codigo": "INT0812",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "COL-80-1_5": {
    "tipo": "Coluna (perfil)",
@@ -980,7 +994,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 2.8966,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-80-1_8": {
    "tipo": "Coluna (perfil)",
@@ -988,7 +1003,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 3.476,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-80-2_0": {
    "tipo": "Coluna (perfil)",
@@ -996,7 +1012,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 3.8622,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-80-2_25": {
    "tipo": "Coluna (perfil)",
@@ -1004,7 +1021,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 4.345,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-80-2_65": {
    "tipo": "Coluna (perfil)",
@@ -1012,7 +1030,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 5.1174,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-101-1_5": {
    "tipo": "Coluna (perfil)",
@@ -1020,7 +1039,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 3.2146,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-101-1_8": {
    "tipo": "Coluna (perfil)",
@@ -1028,7 +1048,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 3.8575,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-101-2_0": {
    "tipo": "Coluna (perfil)",
@@ -1036,7 +1057,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 4.2861,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-101-2_25": {
    "tipo": "Coluna (perfil)",
@@ -1044,7 +1066,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 4.8219,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-101-2_65": {
    "tipo": "Coluna (perfil)",
@@ -1052,7 +1075,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 5.6791,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-122-1_5": {
    "tipo": "Coluna (perfil)",
@@ -1060,7 +1084,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 3.5148,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-122-1_8": {
    "tipo": "Coluna (perfil)",
@@ -1068,7 +1093,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 4.2178,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-122-2_0": {
    "tipo": "Coluna (perfil)",
@@ -1076,7 +1102,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 4.6864,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-122-2_25": {
    "tipo": "Coluna (perfil)",
@@ -1084,7 +1111,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 5.2723,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "COL-122-2_65": {
    "tipo": "Coluna (perfil)",
@@ -1092,7 +1120,8 @@ window.CATALOGO = {
    "codigo": "ver aba Colunas (por altura)",
    "peso": 6.2095,
    "unid": "kg/m",
-   "aco": "Civil 300"
+   "aco": "Civil 300",
+   "dim": null
   },
   "CHUMB": {
    "tipo": "Fixador",
@@ -1100,7 +1129,8 @@ window.CATALOGO = {
    "codigo": "INT0654",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "TRAV-H": {
    "tipo": "Travessa horizontal",
@@ -1108,7 +1138,8 @@ window.CATALOGO = {
    "codigo": "ver aba Travessas",
    "peso": 0.8792,
    "unid": "kg/m",
-   "aco": "ACO0602 SLITER FF 1,40 x 80 GI"
+   "aco": "ACO0602 SLITER FF 1,40 x 80 GI",
+   "dim": null
   },
   "TRAV-D": {
    "tipo": "Travessa diagonal",
@@ -1116,7 +1147,8 @@ window.CATALOGO = {
    "codigo": "ver aba Diagonais",
    "peso": 0.8792,
    "unid": "kg/m",
-   "aco": "ACO0602 SLITER FF 1,40 x 80 GI"
+   "aco": "ACO0602 SLITER FF 1,40 x 80 GI",
+   "dim": null
   },
   "INT0993": {
    "tipo": "Fixador",
@@ -1124,7 +1156,8 @@ window.CATALOGO = {
    "codigo": "INT0993",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "INT0958": {
    "tipo": "Fixador",
@@ -1132,7 +1165,8 @@ window.CATALOGO = {
    "codigo": "INT0958",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "TUBO-80": {
    "tipo": "Tubo complemento",
@@ -1140,7 +1174,8 @@ window.CATALOGO = {
    "codigo": "SA040047",
    "peso": 0.014,
    "unid": "kg",
-   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000"
+   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000",
+   "dim": null
   },
   "TUBO-101": {
    "tipo": "Tubo complemento",
@@ -1148,7 +1183,8 @@ window.CATALOGO = {
    "codigo": "SA040018",
    "peso": 0.021,
    "unid": "kg",
-   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000"
+   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000",
+   "dim": null
   },
   "TUBO-122": {
    "tipo": "Tubo complemento",
@@ -1156,7 +1192,8 @@ window.CATALOGO = {
    "codigo": "SA040046",
    "peso": 0.027,
    "unid": "kg",
-   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000"
+   "aco": "TUB0134 - TUBO REDONDO 1,2 x 1/2\" x 6000",
+   "dim": null
   },
   "INT0973": {
    "tipo": "Fixador",
@@ -1164,7 +1201,8 @@ window.CATALOGO = {
    "codigo": "INT0973",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "INT1193": {
    "tipo": "Fixador",
@@ -1172,7 +1210,8 @@ window.CATALOGO = {
    "codigo": "INT1193",
    "peso": null,
    "unid": "kg",
-   "aco": ""
+   "aco": "",
+   "dim": null
   },
   "UNIAO-80-1_05": {
    "tipo": "Travessa união",
@@ -1180,7 +1219,8 @@ window.CATALOGO = {
    "codigo": "CO040165",
    "peso": 1.499,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-80-1_08": {
    "tipo": "Travessa união",
@@ -1188,7 +1228,8 @@ window.CATALOGO = {
    "codigo": "CO040425",
    "peso": 1.493,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-80-0_70": {
    "tipo": "Travessa união",
@@ -1196,7 +1237,8 @@ window.CATALOGO = {
    "codigo": "CO040458",
    "peso": 1.134,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-101-1_03": {
    "tipo": "Travessa união",
@@ -1204,7 +1246,8 @@ window.CATALOGO = {
    "codigo": "CO040356",
    "peso": 1.793,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-101-1_02": {
    "tipo": "Travessa união",
@@ -1212,7 +1255,8 @@ window.CATALOGO = {
    "codigo": "CO040432",
    "peso": 1.793,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-101-0_76": {
    "tipo": "Travessa união",
@@ -1220,7 +1264,8 @@ window.CATALOGO = {
    "codigo": "CO040755",
    "peso": 1.434,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
   },
   "UNIAO-122-1_02": {
    "tipo": "Travessa união",
@@ -1228,7 +1273,53 @@ window.CATALOGO = {
    "codigo": "CO040543",
    "peso": 2.059,
    "unid": "kg",
-   "aco": "(não especificado no desenho)"
+   "aco": "(não especificado no desenho)",
+   "dim": null
+  },
+  "LGTB80-1350": {
+   "tipo": "Longarina TB 80 (topo/fundo)",
+   "desc": "PP LONG 1,35 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
+   "codigo": "PK041365",
+   "peso": 3.119,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1350
+  },
+  "LGTB80-1400": {
+   "tipo": "Longarina TB 80 (topo/fundo)",
+   "desc": "PP LONG 1,40 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
+   "codigo": "PK041334",
+   "peso": 3.215,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1400
+  },
+  "LGTB80-1480": {
+   "tipo": "Longarina TB 80 (topo/fundo)",
+   "desc": "PP LONG 1,48 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
+   "codigo": "PK041634",
+   "peso": 3.369,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1480
+  },
+  "LGTB80-1570": {
+   "tipo": "Longarina TB 80 (topo/fundo)",
+   "desc": "PP LONG 1,57 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
+   "codigo": "PK041446",
+   "peso": 3.541,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1570
+  },
+  "LGTB80-1000T": {
+   "tipo": "Longarina TB 80 (topo/fundo)",
+   "desc": "PP LONG 1,00 TB 80 - ESP DRIVE IN TRAVAMENTO – kit com 2 INT0648 + 2 INT0650",
+   "codigo": "PK041536",
+   "peso": 2.499,
+   "unid": "kg",
+   "aco": "",
+   "dim": 996.3
   }
  },
  "composicao": [

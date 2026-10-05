@@ -53,6 +53,7 @@ main.wrap{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;paddin
 .lista-cortes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .chip-corte{height:28px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--borda-forte);background:#fff;color:var(--texto)}
 .chip-corte.active{background:var(--topo);border-color:var(--topo);color:#fff}
+.cortes-arq{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--borda)}.cortes-arq button,.cortes-arq .btn-arquivo{font-size:11.5px;padding:6px 4px}
 .cortes-acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cortes-acoes button{font-size:12px;padding:6px 8px}
 
 /* ---- etapas */

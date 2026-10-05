@@ -376,4 +376,17 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - "DXF do projeto": um arquivo com todos os cortes empilhados (lateral + frontal de cada um), títulos "VISTA LATERAL/FRONTAL CORTE <nome>" e nota "N BLOCOS IGUAIS". "DXF do corte" continua para o corte atual.
 - O projeto fica salvo no navegador (localStorage). Não sincroniza entre computadores — para levar a outro PC, falta exportar/importar o projeto (próximo passo, se quiser).
 - [CORRIGIDO] AutoCAD recusava o DXF: nome de bloco no R12 tem limite de 31 caracteres (o GstarCAD aceita mais). Braço passou a DI_BR_<S|D><balanço>_<coluna><E|D>_C<A>X<C>X<B>X<D> (ex.: DI_BR_S180_101E_C94X40X15X1-8) e todo nome acima de 31 é encurtado com um sufixo de 4 caracteres.
-- Raio de dobra dos perfis dobrados: interno Ri = 1,15 × chapa (proporção da tala 2025.0066: Ri 2,3 / chapa 2), externo = Ri + chapa. Usado no croqui técnico (seção A-A) e nas linhas de tangência do braço no DXF. [CONFIRMAR raio padrão da dobradeira]
+- Raio de dobra dos perfis dobrados: interno Ri = 1,15 × chapa (proporção da tala 2025.0066: Ri 2,3 / chapa 2), externo = Ri + chapa. Usado no croqui técnico (seção A-A) e nas linhas de tangência do braço no DXF. (confirmado pelo Gean)
+
+## 23. Longarina TB 80 (topo e fundo) — 0004.0003.01.011 REV.05
+- Comprimento = largura nominal da rua. Modelos (kit PK = conjunto CO + 2 INT0648 + 2 INT0650; peso do kit):
+  - 1350 → PK041365 / CO041034 – 3,119 kg
+  - 1400 → PK041334 / CO040447 – 3,215 kg
+  - 1480 → PK041634 / CO041260 – 3,369 kg
+  - 1570 → PK041446 / CO041092 – 3,541 kg
+  - 996,3 travamento → PK041536 / CO041183 – 2,499 kg (não usado como longarina de rua)
+- Cadastrados no CATALOGO.xlsx (Produtos, IDs LGTB80-*), editáveis na página Cadastro. Rua igual a um modelo (±3 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua).
+- Vale para a longarina de topo (1 por rua) e a de fundo (1 por rua por nível de braço). Fixadores listados como "já incluídos no PK".
+
+## 24. Projeto em arquivo
+- Botões Salvar / Abrir / Novo (bloco "Projeto e cortes"): salva um arquivo <projeto>.drivein.json com cabeçalho (projeto, revisão, responsável, observações) e todos os cortes; Abrir recarrega exatamente o mesmo projeto (testado: mesmos cortes e totais). Continua salvando automaticamente no navegador.

@@ -20,7 +20,7 @@ for d in rows('Travessa união'):
     if isinstance(d['Comprimento total (mm)'],(int,float)):
         cat['uniao'].append({'nome':d['Descrição'],'col':d['Coluna'],'co':d['Código CO (conjunto)'],'peso':d['Peso (kg, desenho)'],'total':d['Comprimento total (mm)']})
 for d in rows('Produtos'):
-    cat['produtos'][d['ID']]={'tipo':d['Tipo'],'desc':d['Descrição'],'codigo':d['Código'] or '','peso':d['Peso usado no cálculo'] if isinstance(d['Peso usado no cálculo'],(int,float)) else None,'unid':d['Unidade'],'aco':d['Aço / material'] or ''}
+    cat['produtos'][d['ID']]={'tipo':d['Tipo'],'desc':d['Descrição'],'codigo':d['Código'] or '','peso':d['Peso usado no cálculo'] if isinstance(d['Peso usado no cálculo'],(int,float)) else None,'unid':d['Unidade'],'aco':d['Aço / material'] or '','dim':d.get('Dimensões (mm)') if isinstance(d.get('Dimensões (mm)'),(int,float)) else None}
 for d in rows('Composição'):
     cat['composicao'].append({'pai':d['Conjunto (pai)'],'item':d['Item (ID em Produtos)'],'qtd':d['Quantidade'],'contagem':d['Contagem']})
 open('app/catalogo.js','w',encoding='utf-8').write('// Gerado de ../catalogo/CATALOGO.xlsx por gerar_catalogo_js.py — não editar à mão.\nwindow.CATALOGO = '+json.dumps(cat,ensure_ascii=False,indent=1)+';\n')

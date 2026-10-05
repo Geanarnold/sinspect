@@ -14,7 +14,14 @@
   let proj = null;
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: 'A', qtd: 1, dados: null }] };
-  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
+  const CAB = ['projeto', 'revisao', 'responsavel', 'obs'];
+  const salvar = () => { proj.cab = Object.fromEntries(CAB.map((k) => [k, $(k).value])); try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
+  function carregarProjeto(p) {
+    if (!p || !Array.isArray(p.cortes) || !p.cortes.length) throw new Error('arquivo sem cortes');
+    proj = p; proj.atual = Math.min(Math.max(0, p.atual || 0), p.cortes.length - 1);
+    for (const k of CAB) if (p.cab && p.cab[k] != null) $(k).value = p.cab[k];
+    selecionarCorte(proj.atual);
+  }
   function lerForm() {
     const v = {}; for (const id of IDS) v[id] = $(id).value;
     return { v, escravo: $('escravo').checked, diferentes: $('diferentes').checked, espacos: [...$('espacos').querySelectorAll('input')].map((i) => i.value) };
@@ -335,6 +342,23 @@
     proj.cortes.push({ nome, qtd: 1, dados: JSON.parse(JSON.stringify(proj.cortes[proj.atual].dados)) });
     selecionarCorte(proj.cortes.length - 1);
   });
+  $('btnSalvarProj').addEventListener('click', () => {
+    render();
+    const nome = ($('projeto').value || 'projeto').replace(/[^\w-]+/g, '_');
+    const arq = { formato: 'drivein-projeto', versao: 1, salvoEm: new Date().toISOString(), ...proj };
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(arq, null, 1)], { type: 'application/json' })); a.download = `${nome}.drivein.json`; a.click();
+  });
+  $('abrirProj').addEventListener('change', (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    f.text().then((t) => { const p = JSON.parse(t); if (p.formato && p.formato !== 'drivein-projeto') throw new Error('não é um projeto Drive-In'); carregarProjeto(p); })
+      .catch((e) => alert('Não foi possível abrir o projeto: ' + e.message)).finally(() => { ev.target.value = ''; });
+  });
+  $('btnNovoProj').addEventListener('click', () => {
+    if (!confirm('Começar um projeto novo? O projeto atual sai da tela (salve o arquivo antes, se precisar).')) return;
+    const dados = proj.cortes[proj.atual].dados;
+    for (const k of CAB) $(k).value = k === 'revisao' ? 'REV.00' : '';
+    carregarProjeto({ atual: 0, cortes: [{ nome: 'A', qtd: 1, dados }] });
+  });
   $('btnRemCorte').addEventListener('click', () => {
     if (proj.cortes.length < 2 || !confirm(`Remover o corte ${proj.cortes[proj.atual].nome}?`)) return;
     proj.cortes.splice(proj.atual, 1); selecionarCorte(Math.max(0, proj.atual - 1));
@@ -354,7 +378,8 @@
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });
   montarEspacos();
-  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); }
+  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = proj.cab[k]; }
+  CAB.forEach((k) => $(k).addEventListener('input', salvar));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = cat.versao;

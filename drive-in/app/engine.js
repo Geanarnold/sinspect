@@ -251,6 +251,16 @@
         `${barrasTunel.length - 1} emenda(s) por linha × 2 por rua × ${niveisArm.length} nível(is); tala ${padrao ? 'SA042691' : SEM.SA}${padrao ? '' : '; perfil fora do padrão: tala e peso estimados, sem código'}`);
       for (const id of ['INT0648', 'INT0650', 'INT0812']) add('Emendas da longarina de túnel', id, prodOf(cat, id).desc, id, 14 * nJuntas, null, null, `14 por tala (já incluídos no ${padrao ? 'PK041366' : 'kit'})`);
     }
+    // longarina TB 80 (topo e fundo, mesmo perfil — desenho 0004.0003.01.011 REV.05): comprimento = largura nominal da rua
+    // modelo cadastrado (±3 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta dos modelos: kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua)
+    const lgTB80 = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGTB80-') && !id.endsWith('T') && p.dim != null).map(([id, p]) => ({ id, ...p }));
+    const lgTB = lgTB80.find((p) => Math.abs(p.dim - larguraRua) <= 3);
+    let nLgTB80 = 0;
+    const addLgTB80 = (idItem, nome, qtd, obs) => {
+      nLgTB80 += qtd;
+      if (lgTB) add('Longarinas', idItem, `${nome} – ${lgTB.desc}`, lgTB.codigo, qtd, lgTB.dim, lgTB.peso, obs);
+      else add('Longarinas', idItem, `${nome} TB 80 – ${larguraRua} mm (fora dos modelos cadastrados)`, SEM.PK, qtd, larguraRua, +(0.527 + 0.001918 * larguraRua).toFixed(3), `${obs}; peso estimado pela reta dos modelos 1350/1400/1480/1570`);
+    };
     // ---- travamento em zig-zag (treinamento slides 9 e 11): mesmo perfil das travessas da lateral (sliter 80 × 1,40), em todas as ruas
     // fixação na furação frontal da coluna (oblongos a ±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5 (regra das travessas)
     const HX = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
@@ -271,8 +281,7 @@
     for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua; 50 mm acima da sapata/suporte até 50 mm abaixo do suporte seguinte`);
     // longarina de fundo: mesmo perfil da longarina de topo (DI_LGTOPO, acompanha a largura da rua), 1 por rua em cada nível de braço, cor laranja no desenho
     const compLgFundo = larguraRua;
-    if (niveisArm.length) add('Longarinas', 'LG-FUNDO', `Longarina de fundo (perfil da longarina de topo) – rua ${larguraRua} mm`, SEM.SA, R * niveisArm.length, compLgFundo, null,
-      `1 por rua × ${niveisArm.length} nível(is); peso e SA a confirmar (iguais aos da longarina de topo)`);
+    if (niveisArm.length) addLgTB80('LG-FUNDO', 'Longarina de fundo', R * niveisArm.length, `1 por rua × ${niveisArm.length} nível(is)`);
     // TOPO (plano do topo): só diagonais, alternadas, uma por vão entre linhas de coluna ao longo da profundidade
     const porDT = {}; for (let i = 0; i < eixosLat.length - 1; i++) { const t = +(Math.hypot(ccZ, eixosLat[i + 1] - eixosLat[i]) + 30.5).toFixed(1); porDT[t] = (porDT[t] || 0) + 1; }
     for (const [t, q] of Object.entries(porDT)) addZ('Travamento de topo (zig-zag)', 'D', Number(t), q * R, `${q} por rua`);
@@ -290,7 +299,8 @@
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
     const pesoStop = Number(inp.pesoStop) || null;
     add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R, null, pesoStop, `2 por rua${pesoStop ? '' : '; peso unitário não informado'}`);
-    add('Longarinas', 'LGTOPO', `Longarina superior (frontal) – rua ${larguraRua} mm`, SEM.SA, R, larguraRua, null, '1 por rua, no topo; peso e SA a confirmar');
+    addLgTB80('LGTOPO', 'Longarina de topo', R, '1 por rua, no topo');
+    if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
 
 
     // ---- ainda não levantado
