@@ -384,8 +384,8 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
   - 1400 → PK041334 / CO040447 – 3,215 kg
   - 1480 → PK041634 / CO041260 – 3,369 kg
   - 1570 → PK041446 / CO041092 – 3,541 kg
-  - 996,3 travamento → PK041536 / CO041183 – 2,499 kg (não usado como longarina de rua)
-- Cadastrados no CATALOGO.xlsx (Produtos, IDs LGTB80-*), editáveis na página Cadastro. Rua igual a um modelo (±3 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua).
+  - 996,3 → PK041536 / CO041183 – 2,499 kg: rua de 1000 mm (palete estreito de 800 de frente)
+- Cadastrados no CATALOGO.xlsx (Produtos, IDs LGTB80-*), editáveis na página Cadastro. Rua igual a um modelo (±5 mm, por causa da de 996,3 para rua 1000) → PK e peso do desenho; senão PKXXXXXX e peso pela reta kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua).
 - Vale para a longarina de topo (1 por rua) e a de fundo (1 por rua por nível de braço). Fixadores listados como "já incluídos no PK".
 
 ## 24. Projeto em arquivo

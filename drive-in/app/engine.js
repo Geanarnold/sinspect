@@ -252,9 +252,9 @@
       for (const id of ['INT0648', 'INT0650', 'INT0812']) add('Emendas da longarina de túnel', id, prodOf(cat, id).desc, id, 14 * nJuntas, null, null, `14 por tala (já incluídos no ${padrao ? 'PK041366' : 'kit'})`);
     }
     // longarina TB 80 (topo e fundo, mesmo perfil — desenho 0004.0003.01.011 REV.05): comprimento = largura nominal da rua
-    // modelo cadastrado (±3 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta dos modelos: kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua)
-    const lgTB80 = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGTB80-') && !id.endsWith('T') && p.dim != null).map(([id, p]) => ({ id, ...p }));
-    const lgTB = lgTB80.find((p) => Math.abs(p.dim - larguraRua) <= 3);
+    // modelo cadastrado (±5 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta dos modelos: kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua)
+    const lgTB80 = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGTB80-') && p.dim != null).map(([id, p]) => ({ id, ...p }));
+    const lgTB = lgTB80.find((p) => Math.abs(p.dim - larguraRua) <= 5); // ±5: a de rua 1000 (palete 800) mede 996,3
     let nLgTB80 = 0;
     const addLgTB80 = (idItem, nome, qtd, obs) => {
       nLgTB80 += qtd;
