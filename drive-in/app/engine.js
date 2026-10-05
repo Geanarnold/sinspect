@@ -217,7 +217,14 @@
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
     // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
-    const compTrilho = Math.max(P - 1, 0) * ocupPalete - 25; // fim do penúltimo palete (cada palete ocupa palete + 25) [CONFIRMAR origem: face frontal da estrutura]
+    // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
+    const TRILHO_ALT = 75, TRILHO_FRENTE = 50;
+    const compTrilho = P > 1 ? (P - 1) * ocupPalete + TRILHO_FRENTE : 0;
+    // longarina de túnel (Drawing1.dxf): perfil U na mesma faixa do C do braço (topo = apoio do palete), contínua em toda a profundidade,
+    // uma em cada linha de braço → 2 por rua por nível de braço
+    const lgU = { A: Number(inp.uA) || 100, B: Number(inp.uB) || 38, e: Number(inp.uE) || 1.8 };
+    const kgmLgU = (lgU.A + 2 * lgU.B - 2 * lgU.e) * lgU.e * DENS * 1000;
+    if (niveisArm.length) add('Longarinas', 'LG-TUNEL', `Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e} – comp. ${profundidade}`, SEM.SA, 2 * R * niveisArm.length, profundidade, +(kgmLgU * profundidade / 1000).toFixed(3), `2 por rua × ${niveisArm.length} nível(is); ${kgmLgU.toFixed(3)} kg/m (chapa desenvolvida)`);
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, 2 * R, compTrilho, null, '2 por rua (um de cada lado); perfil e peso a definir');
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
     if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R * niveisArm.length, null, null, `2 por rua × ${niveisArm.length} nível(is) de braço; peso a definir [CONFIRMAR se o chão também leva]`);
@@ -234,7 +241,7 @@
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
-      lateral: { ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
+      lateral: { niveis: niveisArm, lgU, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };

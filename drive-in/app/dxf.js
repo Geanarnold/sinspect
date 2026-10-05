@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -158,6 +158,19 @@
       const yc = H + 120 + (i % 2) * 90;
       cota(cum[i], H + 60, cum[i + 1], H + 60, yc - H - 60, `A${i + 1}`, false);
     }
+    // longarina de túnel em cada nível (topo = apoio do palete), face a face da estrutura; trilho guia no piso a partir da frente (lado direito)
+    const L = r.lateral, Lt = cum[n] - cum[0];
+    if (L.niveis && L.lgU) for (const yN of L.niveis) {
+      const h = L.lgU.A, e = L.lgU.e;
+      const ps = [[0, 0, Lt, 0], [0, e, Lt, e], [0, h - e, Lt, h - e], [0, h, Lt, h], [0, 0, 0, h], [Lt, 0, Lt, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, d]] }));
+      put(ps, cum[0], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lt)));
+    }
+    if (L.trilho && L.trilho.comp > 0) {
+      const Tl = L.trilho.comp, th = L.trilho.alt;
+      const ps = [[0, 0, Tl, 0], [Tl, 0, Tl, th], [Tl, th, 0, th], [0, th, 0, 0]].map(([a, b, c, d]) => ({ t: 'p', l: 'TRILHO', p: [[a, b], [c, d]] }));
+      put(ps, cum[n] + L.trilho.frente - Tl, 0, 'TRILHO', nomeBloco('DI_TRILHO_GUIA', nb(Tl)));
+      text(cum[n] + 200, -250, 70, 'FRENTE', '4 - TEXTO DE ESCALA E VISTA');
+    }
     cota(cum[0], H + 60, cum[n], H + 60, 420, 'A', false);
     cota(xs[0] - 200, 0, xs[0] - 200, H, 700, 'B', true);
     cota(xs[0] - 200, ys[0], xs[0] - 200, ys[1], 300, 'C', true);
@@ -299,7 +312,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   function dxfCompleto(r, corte) {
