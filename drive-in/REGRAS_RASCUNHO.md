@@ -355,3 +355,4 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - [IMPLEMENTADO] O U da longarina de túnel abraça o C do braço: altura interna do U (alma − 2 × chapa) ≥ A do C, senão erro. [Interpretação da resposta 2 — confirmar; Gean ofereceu DXF modelo]
 - [IMPLEMENTADO] Stop palete: 2 por rua (total, não por nível), peso unitário informado pelo operador.
 - [PENDENTE] Trilho guia: largura/chapa/peso.
+- Tolerância de encaixe U × C: altura interna do U = A do C ± 1 mm (abaixo de −1 = erro; acima de +1 = alerta). Com os padrões (U 100 × 1,8 → 96,4; C 94) a folga é 2,4 mm → alerta.

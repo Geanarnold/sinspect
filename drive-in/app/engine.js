@@ -242,7 +242,10 @@
     }
     // o U da longarina de túnel abraça o C do braço: altura interna do U ≥ altura A do C
     const uInterno = lgU.A - 2 * lgU.e;
-    if (uInterno < perfilC.A) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm menor que o C do braço (A = ${perfilC.A} mm). Perfis incompatíveis.`);
+    // tolerância de encaixe: altura interna do U = A do C ± 1 mm (Gean)
+    const folgaUC = uInterno - perfilC.A;
+    if (folgaUC < -1) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm não comporta o C do braço (A = ${perfilC.A} mm; tolerância ± 1 mm).`);
+    else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, 2 * R, compTrilho, null, '2 por rua (um de cada lado); perfil e peso a definir');
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
     const pesoStop = Number(inp.pesoStop) || null;
