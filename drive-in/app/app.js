@@ -48,6 +48,45 @@
     return `<div class="kpi"><div class="l">${ic(icone)}${label}</div><div class="v">${value}</div>${sub ? `<div class="s" title="${esc(sub)}">${sub}</div>` : ''}</div>`;
   }
 
+
+  // ---- croqui do braço desenhado com as medidas digitadas (mesma geometria do bloco do DXF)
+  function croquiBraco(r) {
+    const el = $('croquiBraco'); if (!el || !window.DXF) return;
+    const pf = r.frontal.perfilC, col = Number(r.entradas.coluna), bal1 = r.frontal.balBaixo, esp = r.frontal.espU;
+    const n = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+    const COTA = '#475569', VAL = '#c2410c';
+    const seta = (x1, y1, x2, y2, txt, tx, ty, anc = 'middle', rot = 0) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COTA}" stroke-width="1" marker-start="url(#cs)" marker-end="url(#cs)"/>` +
+      `<text x="${tx}" y="${ty}" text-anchor="${anc}" font-size="12" font-weight="700" fill="${VAL}"${rot ? ` transform="rotate(${rot} ${tx} ${ty})"` : ''}>${txt}</text>`;
+    const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COTA}" stroke-width=".7" stroke-dasharray="3 2"/>`;
+    // seção do C (abertura para a direita), escala para caber em 150 px de altura
+    const sC = 150 / pf.A, A = pf.A * sC, B = pf.B * sC, C = pf.C * sC, D = Math.max(pf.D * sC, 2.2);
+    const ox = 70, oy = 236; // canto inferior esquerdo
+    const P = [[0, 0], [C, 0], [C, B], [C - D, B], [C - D, D], [D, D], [D, A - D], [C - D, A - D], [C - D, A - B], [C, A - B], [C, A], [0, A]].map(([x, y]) => `${ox + x},${oy - y}`).join(' ');
+    let g1 = `<text x="${ox + C / 2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Seção do perfil C</text>`;
+    g1 += `<polygon points="${P}" fill="#fdba74" stroke="#9a3412" stroke-width="1.2"/>`;
+    g1 += ext(ox, oy, ox - 30, oy) + ext(ox, oy - A, ox - 30, oy - A) + seta(ox - 24, oy, ox - 24, oy - A, `A = ${n(pf.A)}`, ox - 30, oy - A / 2, 'middle', -90);
+    g1 += ext(ox, oy - A, ox, oy - A - 22) + ext(ox + C, oy - A, ox + C, oy - A - 22) + seta(ox, oy - A - 16, ox + C, oy - A - 16, `C = ${n(pf.C)}`, ox + C / 2, oy - A - 22);
+    g1 += ext(ox + C, oy - A, ox + C + 26, oy - A) + ext(ox + C, oy - A + B, ox + C + 26, oy - A + B) + seta(ox + C + 20, oy - A, ox + C + 20, oy - A + B, `B = ${n(pf.B)}`, ox + C + 26, oy - A + B / 2 + 4, 'start');
+    g1 += `<line x1="${ox + D / 2}" y1="${oy - A / 2}" x2="${ox + C + 22}" y2="${oy - A / 2 + 30}" stroke="${COTA}" stroke-width=".8"/><text x="${ox + C + 26}" y="${oy - A / 2 + 34}" font-size="12" font-weight="700" fill="${VAL}">D = ${n(pf.D)}</text>`;
+    // braço simples (1º nível) na vista frontal, com a coluna: geometria do bloco DXF
+    const br = DXF.bracoParam(col, bal1, 1, pf, esp), uo = col / 2 + esp;
+    const xmin = -uo - 30, xmax = uo + bal1 + 10, ymin = -60, ymax = 230, W2 = 280, sB = Math.min(W2 / (xmax - xmin), 210 / (ymax - ymin));
+    const bx0 = 250, X = (x) => (bx0 + (x - xmin) * sB).toFixed(1), Y = (y) => (258 - (y - ymin) * sB).toFixed(1);
+    let g2 = `<text x="${bx0 + W2 / 2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Braço na vista frontal (simples, 1º nível)</text>`;
+    g2 += `<rect x="${X(-col / 2)}" y="${Y(ymax - 20)}" width="${(col * sB).toFixed(1)}" height="${((ymax - 20 - ymin - 10) * sB).toFixed(1)}" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>`;
+    for (const q of br.prims) {
+      if (q.t === 's') { const [a1, b1, c1, d1] = q.p; g2 += `<polygon points="${[a1, b1, d1, c1].map((v) => X(v[0]) + ',' + Y(v[1])).join(' ')}" fill="#fb923c"/>`; }
+    }
+    for (const q of br.prims) if (q.t !== 's' && q.p) g2 += `<polyline points="${q.p.map((v) => X(v[0]) + ',' + Y(v[1])).join(' ')}" fill="none" stroke="#7c2d12" stroke-width=".8"/>`;
+    const yc0 = (180 - pf.A) / 2, yc1 = yc0 + pf.A, tip = uo + bal1;
+    g2 += ext(X(uo), Y(0), X(uo), Y(-40)) + ext(X(tip), Y(yc0), X(tip), Y(-40)) + seta(X(uo), Y(-32), X(tip), Y(-32), `Balanço = ${n(bal1)}`, (Number(X(uo)) + Number(X(tip))) / 2, Number(Y(-32)) + 15);
+    g2 += ext(X(tip), Y(yc1), X(tip + 22), Y(yc1)) + ext(X(tip), Y(yc0), X(tip + 22), Y(yc0)) + seta(X(tip + 16), Y(yc0), X(tip + 16), Y(yc1), `A = ${n(pf.A)}`, Number(X(tip + 16)) + 14, (Number(Y(yc0)) + Number(Y(yc1))) / 2, 'middle', -90);
+    g2 += ext(X(-uo), Y(0), X(-uo - 26), Y(0)) + ext(X(-uo), Y(180), X(-uo - 26), Y(180)) + seta(X(-uo - 20), Y(0), X(-uo - 20), Y(180), '180', Number(X(-uo - 20)) - 6, (Number(Y(0)) + Number(Y(180))) / 2, 'middle', -90);
+    g2 += seta(X(-col / 2), Y(ymax - 30), X(col / 2), Y(ymax - 30), `COL ${col}`, X(0), Number(Y(ymax - 30)) - 6);
+    el.innerHTML = `<svg viewBox="0 0 560 270" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif"><defs><marker id="cs" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 2L10 5L0 8z" fill="${COTA}"/></marker></defs>${g1}${g2}</svg>` +
+      `<div class="croqui-leg">Em escala, com as medidas digitadas · balanço: face do suporte U até a ponta do C</div>`;
+  }
+
   function renderCortes() {
     $('listaCortes').innerHTML = proj.cortes.map((c, i) => `<button class="chip-corte ${i === proj.atual ? 'active' : ''}" data-i="${i}">${esc(c.nome || '?')}${c.qtd > 1 ? ' ×' + c.qtd : ''}</button>`).join('');
     $('listaCortes').querySelectorAll('.chip-corte').forEach((b) => b.addEventListener('click', () => selecionarCorte(Number(b.dataset.i))));
@@ -98,6 +137,7 @@
     const L = r.lateral;
     $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
     renderVista(r);
+    croquiBraco(r);
     if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); renderProjeto(lp); }
   }
 
