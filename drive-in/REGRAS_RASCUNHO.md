@@ -347,3 +347,5 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - Altura total confirmada: último nível + palete + 100 + longarina de topo (≈155), arredondada para cima em 50.
 - Aviso fixo em todo projeto: "COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente." (tela, lista de peças, CSV e DXF).
 - Longarina de túnel: alinhada com o suporte do braço e contínua até o fim da rua; quantidade "conforme projeto" — aguardando projeto de referência.
+- [IMPLEMENTADO] Trilho guia: 2 por rua (um de cada lado), comprimento da frente até o fim do penúltimo palete = (P − 1) × (palete + 25) − 25. Perfil/peso/SA a definir.
+- [IMPLEMENTADO] Stop palete: 2 por rua por nível de braço. Peso/SA a definir. [CONFIRMAR se o chão também leva]

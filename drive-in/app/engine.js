@@ -216,6 +216,11 @@
     }
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
+    // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
+    const compTrilho = Math.max(P - 1, 0) * ocupPalete - 25; // fim do penúltimo palete (cada palete ocupa palete + 25) [CONFIRMAR origem: face frontal da estrutura]
+    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, 2 * R, compTrilho, null, '2 por rua (um de cada lado); perfil e peso a definir');
+    // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
+    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R * niveisArm.length, null, null, `2 por rua × ${niveisArm.length} nível(is) de braço; peso a definir [CONFIRMAR se o chão também leva]`);
     add('Longarinas', 'LGTOPO', `Longarina superior (frontal) – rua ${larguraRua} mm`, SEM.SA, R, larguraRua, null, '1 por rua, no topo; peso e SA a confirmar');
 
 
