@@ -43,8 +43,9 @@
     box.classList.toggle('hidden', !$('diferentes').checked);
   }
 
-  function kpi(label, value, sub) {
-    return `<div class="kpi"><div class="l">${label}</div><div class="v">${value}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
+  const ic = (k) => `<svg class="ic"><use href="#i-${k}"/></svg>`;
+  function kpi(icone, label, value, sub) {
+    return `<div class="kpi"><div class="l">${ic(icone)}${label}</div><div class="v">${value}</div>${sub ? `<div class="s" title="${esc(sub)}">${sub}</div>` : ''}</div>`;
   }
 
   function renderCortes() {
@@ -80,19 +81,19 @@
     last = r;
     const d = r.dimensoes;
     $('kpis').innerHTML = [
-      kpi('Posições de palete', fmt0(r.posicoes), `${inp.ruas} ruas × ${r.paletesPorRua} paletes × ${inp.niveis} níveis · ${r.paletesPorRua} × ${r.ocupPalete} = ${r.paletesPorRua * r.ocupPalete} mm (sobra ${fmt0(r.sobraProfundidade)})`),
-      kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
-      kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
-      kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} (medidas externas)`),
-      kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem peso: longarinas de topo e fundo, trilho guia; caneleira provisória'),
-      kpi('kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
+      kpi('pallet', 'Posições', fmt0(r.posicoes), `${inp.ruas} ruas × ${r.paletesPorRua} paletes × ${Number(inp.niveis) + (inp.escravo ? 1 : 0)} no chão e níveis`),
+      kpi('alt', 'Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'coluna em peça única'),
+      kpi('larg', 'Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais · rua ${r.frontal.larguraRua} mm`),
+      kpi('prof', 'Profundidade', `${fmt0(d.profundidade)} mm`, `${inp.espacamentos} espaços · sobra ${fmt0(r.sobraProfundidade)} mm`),
+      kpi('peso', 'Peso do corte', `${fmt(r.pesoTotal, 1)} kg`, 'longarinas topo/fundo e trilho sem peso'),
+      kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
     ].join('');
 
     const lp = calcularProjeto();
     const posP = lp.reduce((s, x) => s + x.r.posicoes * x.qtd, 0), pesoP = lp.reduce((s, x) => s + x.r.pesoTotal * x.qtd, 0), errP = lp.filter((x) => x.r.erros.length).map((x) => x.nome);
     let kp = document.getElementById('kpiProj'); if (!kp) { kp = document.createElement('p'); kp.id = 'kpiProj'; kp.className = 'kpi-proj'; $('kpis').after(kp); }
-    kp.innerHTML = `Projeto: <b>${lp.length} corte(s)</b>, ${lp.reduce((s, x) => s + x.qtd, 0)} bloco(s) · <b>${fmt0(posP)}</b> posições · <b>${fmt(pesoP, 1)} kg</b> (itens levantados)${errP.length ? ` · <span style="color:#b91c1c">erro nos cortes ${esc(errP.join(', '))}</span>` : ''}`;
-    $('alertas').innerHTML = (r.erros.length ? `<div class="erro"><b>Erro</b><ul>${r.erros.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '') + (r.alertas.length ? `<div class="alerta"><b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '');
+    kp.innerHTML = `${ic('proj')} Projeto: <b>${lp.length} corte(s)</b>, ${lp.reduce((s, x) => s + x.qtd, 0)} bloco(s) · <b>${fmt0(posP)}</b> posições · <b>${fmt(pesoP, 1)} kg</b> (itens levantados)${errP.length ? ` · <span style="color:#b91c1c">erro nos cortes ${esc(errP.join(', '))}</span>` : ''}`;
+    $('alertas').innerHTML = (r.erros.length ? `<div class="erro">${ic('erro')}<b>Corrigir antes de usar</b><ul>${r.erros.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '') + (r.alertas.length ? `<div class="alerta">${ic('alerta')}<b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '');
 
     const L = r.lateral;
     $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
@@ -113,7 +114,7 @@
       }
     }
     html += `<tr class="grp"><td colspan="5">TOTAL (itens levantados)</td><td class="num">${fmt(r.pesoTotal)}</td><td></td></tr></tbody></table>`;
-    $('tab-pecas').innerHTML = `<p class="aviso-estr">${esc(Engine.AVISO_ESTRUTURAL)}</p>` + html;
+    $('tab-pecas').innerHTML = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p>` + html;
   }
 
   // ---- desenho (SVG): vista lateral de um pórtico, vista frontal e planta
@@ -172,7 +173,7 @@
   let vistaAtual = 'lateral';
   function renderVista(r) {
     const v = VISTAS[vistaAtual](r);
-    $('vista').innerHTML = `<h3>${v.t}</h3><div class="s">${v.s}</div>${v.svg}<p class="nota">Esquemático, atualizado conforme o preenchimento. O DXF com cotas e carimbo é uma fase posterior.</p>`;
+    $('vista').innerHTML = `<h3>${v.t}</h3><div class="s">${v.s}</div>${v.svg}<p class="nota">Desenho atualizado conforme o preenchimento. O DXF sai com as peças em blocos.</p>`;
   }
   function baixarPng() {
     const svg = $('vista').querySelector('svg'); if (!svg) return;
@@ -189,7 +190,7 @@
 
   function renderProjeto(lp) {
     const itens = consolidar(lp), grupos = [...new Set(itens.map((p) => p.grupo))], total = itens.reduce((s, p) => s + (p.pesoTotal || 0), 0);
-    let html = `<p class="aviso-estr">${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
+    let html = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 10px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
     html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Compr. (mm)</th><th class="num">Peso unit. (kg)</th><th class="num">Peso total (kg)</th><th>Cortes</th></tr></thead><tbody>`;
     for (const g of grupos) {
       const ps = itens.filter((p) => p.grupo === g), sub = ps.reduce((s, p) => s + (p.pesoTotal || 0), 0);

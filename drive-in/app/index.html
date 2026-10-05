@@ -7,56 +7,72 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <header><div class="wrap hdr">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none"><symbol id="i-proj" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-estr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18M19 3v18M5 9h14M5 15h14"/></symbol><symbol id="i-col" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18M9 3v18M15 3v18M19 3v18M5 8h4M15 8h4M5 14h4M15 14h4"/></symbol><symbol id="i-braco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18M6 9h13v4H6"/></symbol><symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol><symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol><symbol id="i-dxf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6"/></symbol><symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5"/><circle cx="9" cy="9" r="1.5"/></symbol><symbol id="i-pallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14v9H5zM3 15h18M5 15v4M12 15v4M19 15v4"/></symbol><symbol id="i-alt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></symbol><symbol id="i-larg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></symbol><symbol id="i-prof" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5-9 5zM3 8v8l9 5 9-5V8M12 13v8"/></symbol><symbol id="i-peso" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12l2 11H4zM9 9a3 3 0 0 1 6 0"/></symbol><symbol id="i-taxa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19L19 5"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/></symbol><symbol id="i-alerta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3zM12 10v4M12 17v.5"/></symbol><symbol id="i-erro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-lista" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"/></symbol><symbol id="i-tabela" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/></symbol><symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5M5 8h14v8H5zM7 14h10v7H7z"/></symbol><symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3"/></symbol><symbol id="i-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6zM9 7h6M9 11h.5M12 11h.5M15 11h.5M9 15h.5M12 15h.5M15 15h.5"/></symbol><symbol id="i-vista" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></symbol><symbol id="i-regras" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5zM8 10h8M8 14h8M8 18h5"/></symbol></svg>
+  <header class="topo"><div class="wrap hdr">
     <div class="logo">DI</div>
-    <div><h1>Configurador Drive-In</h1><div class="sub">Levantamento de peso e lista de peças · protótipo · catálogo <span id="catVersao"></span></div></div>
-    
-    <nav class="nav"><a href="#" id="navConfig" class="active">Configurador</a><a href="#" id="navCad">Cadastro de produtos</a></nav>
+    <div class="marca"><h1>Configurador Drive-In</h1><div class="sub">Levantamento de peso, lista de peças e desenho · catálogo <span id="catVersao"></span></div></div>
+    <nav class="nav"><a href="#" id="navConfig" class="active"><svg class="ic"><use href="#i-calc"/></svg>Configurador</a><a href="#" id="navCad"><svg class="ic"><use href="#i-db"/></svg>Cadastro de produtos</a></nav>
   </div></header>
 
   <main class="wrap" id="paginaConfig">
-    <aside class="card">
+    <aside class="card lateral-esq">
       <div class="cortes">
-        <div class="cortes-tit">Cortes do projeto</div>
+        <div class="cortes-tit"><svg class="ic"><use href="#i-proj"/></svg>Cortes do projeto</div>
         <div id="listaCortes" class="lista-cortes"></div>
-        <div class="cortes-acoes"><button id="btnNovoCorte">+ Novo corte (copia o atual)</button><button id="btnRemCorte">Remover corte</button></div>
+        <div class="cortes-acoes"><button id="btnNovoCorte"><svg class="ic"><use href="#i-plus"/></svg>Novo corte</button><button id="btnRemCorte" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div>
       </div>
       <div class="passos">
-        <div class="passo active" data-passo="projeto">1 · Projeto</div>
-        <div class="passo" data-passo="estrutura">2 · Estrutura</div>
-        <div class="passo" data-passo="lateral">3 · Coluna e lateral</div>
-        <div class="passo" data-passo="braco">4 · Braço</div>
+        <div class="passo active" data-passo="projeto"><span class="n">1</span><span class="t">Projeto</span></div>
+        <div class="passo" data-passo="estrutura"><span class="n">2</span><span class="t">Estrutura</span></div>
+        <div class="passo" data-passo="lateral"><span class="n">3</span><span class="t">Lateral</span></div>
+        <div class="passo" data-passo="braco"><span class="n">4</span><span class="t">Braço</span></div>
       </div>
       <div id="passo-projeto" class="form">
-        <div class="full"><label>Projeto / cliente</label><input id="projeto" type="text" placeholder="Ex.: SUPRA260407 – Bloco A"/></div>
-        <div><label>Nome do corte</label><input id="nomeCorte" type="text" value="A" placeholder="Ex.: A"/></div>
-        <div><label>Blocos iguais a este corte</label><input id="qtdCorte" type="number" min="1" value="1"/></div>
-        <div><label>Revisão</label><input id="revisao" type="text" value="REV.00"/></div>
-        <div><label>Responsável</label><input id="responsavel" type="text" placeholder="Nome"/></div>
-        <div class="full"><label>Observações</label><input id="obs" type="text" placeholder="Opcional"/></div>
+        <div class="sec full"><svg class="ic"><use href="#i-proj"/></svg>Identificação</div>
+        <div class="campo full"><label for="projeto" title="Projeto / cliente">Projeto / cliente</label><div class="in"><input id="projeto" type="text" placeholder="Ex.: SUPRA260407"/></div></div>
+        <div class="campo"><label for="nomeCorte" title="Nome do corte">Nome do corte</label><div class="in"><input id="nomeCorte" type="text" value="A" placeholder="Ex.: A1"/></div></div>
+        <div class="campo"><label for="qtdCorte" title="Blocos iguais">Blocos iguais</label><div class="in com-un"><input id="qtdCorte" type="number" min="1" value="1"/><span class="un">un</span></div></div>
+        <div class="campo"><label for="revisao" title="Revisão">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00"/></div></div>
+        <div class="campo"><label for="responsavel" title="Responsável">Responsável</label><div class="in"><input id="responsavel" type="text" placeholder="Nome"/></div></div>
+        <div class="campo full"><label for="obs" title="Observações">Observações</label><div class="in"><input id="obs" type="text" placeholder="Opcional"/></div></div>
       </div>
       <div id="passo-estrutura" class="form hidden">
-        <div><label>Ruas</label><input id="ruas" type="number" min="1" value="1"/></div>
-        <div><label>Profundidade do palete (mm)</label><input id="profPalete" type="number" min="1" value="1000"/></div>
-        <div><label>Paletes por rua (opcional)</label><input id="paletesInformados" type="number" min="1" placeholder="auto"/></div>
-        <div><label>Níveis (chão + níveis)</label><input id="niveis" type="number" min="2" value="5"/></div>
-        <div><label>Frente do palete (mm)</label><input id="frentePalete" type="number" min="1" value="1200"/></div>
-        <div><label>Carga do palete (kg)</label><input id="cargaPalete" type="number" value="1000"/></div>
-        <div><label>Altura do palete (mm)</label><input id="alturaPalete" type="number" value="1600"/></div>
-        <div><label>Altura 1º braço (mm)</label><input id="alt1Nivel" type="number" step="50" placeholder="auto"/></div>
-        <div class="full"><label class="chk"><input id="escravo" type="checkbox"/> Palete escravo no 1º nível (2 paletes empilhados no chão)</label></div>
-        <div><label>Altura manual (mm)</label><input id="alturaManual" type="number" step="50" placeholder="auto"/></div>
-        <p class="nota full">Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado). Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), arredondado para baixo. Passo entre níveis = palete + 100 + altura do braço (A), arredondado para cima em 50 mm. 1º nível = palete (× 2 com escravo) + 100 + A. Altura = último nível + palete + 100 + longarina de topo, arredondada para cima em 50 mm, medida da base da sapata.</p>
+        <div class="sec full"><svg class="ic"><use href="#i-estr"/></svg>Estrutura</div>
+        <div class="campo"><label for="ruas" title="Ruas">Ruas</label><div class="in"><input id="ruas" type="number" min="1" value="1"/></div></div>
+        <div class="campo"><label for="niveis" title="Níveis (chão + níveis)">Níveis (chão + níveis)</label><div class="in"><input id="niveis" type="number" min="2" value="5"/></div></div>
+        <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Palete</div>
+        <div class="campo"><label for="frentePalete" title="Frente">Frente</label><div class="in com-un"><input id="frentePalete" type="number" min="1" value="1200"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="profPalete" title="Profundidade">Profundidade</label><div class="in com-un"><input id="profPalete" type="number" min="1" value="1000"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="alturaPalete" title="Altura">Altura</label><div class="in com-un"><input id="alturaPalete" type="number" value="1600"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="cargaPalete" title="Carga">Carga</label><div class="in com-un"><input id="cargaPalete" type="number" value="1000"/><span class="un">kg</span></div></div>
+        <div class="campo full"><label class="chk"><input id="escravo" type="checkbox"/> Palete escravo no 1º nível (2 empilhados no chão)</label></div>
+        <div class="sec full"><svg class="ic"><use href="#i-alt"/></svg>Ajustes manuais (opcional)</div>
+        <div class="campo"><label for="paletesInformados" title="Paletes por rua">Paletes por rua</label><div class="in"><input id="paletesInformados" type="number" min="1" placeholder="auto"/></div></div>
+        <div class="campo"><label for="alt1Nivel" title="1º nível (apoio)">1º nível (apoio)</label><div class="in com-un"><input id="alt1Nivel" type="number" step="50" placeholder="auto"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="alturaManual" title="Altura total">Altura total</label><div class="in com-un"><input id="alturaManual" type="number" step="50" placeholder="auto"/><span class="un">mm</span></div></div>
+        <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
+          <li>Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado).</li>
+          <li>Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), para baixo.</li>
+          <li>Passo entre níveis = palete + 100 + altura do braço (A), para cima em 50 mm.</li>
+          <li>1º nível = palete (× 2 com escravo) + 100 + A; ajustado à furação de 50 mm.</li>
+          <li>Altura = último nível + palete + 100 + longarina de topo, para cima em 50 mm, a partir da base da sapata.</li>
+        </ul></details>
       </div>
       <div id="passo-lateral" class="form hidden">
-        <div><label>Coluna</label><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div>
-        <div><label>Espessura (mm)</label><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select></div>
-        <div><label>Espaços de profundidade</label><input id="espacamentos" type="number" min="1" max="30" value="5"/></div>
-        <div><label>Medida do espaço (mm)</label><input id="largura" type="number" step="1" value="820"/></div>
-        <div class="full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
+        <div class="sec full"><svg class="ic"><use href="#i-col"/></svg>Coluna</div>
+        <div class="campo"><label for="coluna">Modelo</label><div class="in"><select id="coluna"><option value="80">AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div></div>
+        <div class="campo"><label for="espessura">Espessura</label><div class="in com-un"><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select><span class="un">mm</span></div></div>
+        <div class="sec full"><svg class="ic"><use href="#i-prof"/></svg>Profundidade (lateral)</div>
+        <div class="campo"><label for="espacamentos" title="Espaços">Espaços</label><div class="in"><input id="espacamentos" type="number" min="1" max="30" value="5"/></div></div>
+        <div class="campo"><label for="largura" title="Medida do espaço">Medida do espaço</label><div class="in com-un"><input id="largura" type="number" step="1" value="820"/><span class="un">mm</span></div></div>
+        <div class="campo full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
         <div id="espacos" class="full espacos hidden"></div>
         <p class="nota full" id="notaQuadros"></p>
-        <p class="nota full">Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal. Códigos SA buscados a ±3 mm.</p>
+        <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
+          <li>Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal.</li>
+          <li>Códigos SA de travessa e diagonal buscados no cadastro a ±3 mm.</li>
+          <li>Nº par de espaços: coluna solteira à esquerda com travessa união.</li>
+        </ul></details>
       </div>
       <div id="passo-braco" class="form hidden">
         <div class="full"><svg viewBox="0 0 460 210" class="croqui" xmlns="http://www.w3.org/2000/svg" font-family="Arial" font-size="12">
@@ -74,46 +90,55 @@
             <text x="270" y="204" fill="currentColor" font-size="10">coluna + suporte U</text>
             <text x="200" y="78" fill="currentColor" font-size="10">duplo: C para os dois lados · simples: um lado</text>
           </svg></div>
-        <div><label>Balanço 1º nível (mm)</label><input id="balancoBaixo" type="number" min="1" value="180"/></div>
-        <div><label>Balanço 2º nível em diante (mm)</label><input id="balancoAlto" type="number" min="1" value="230"/></div>
-        <div><label>A – altura do C (mm)</label><input id="cA" type="number" step="0.1" value="94"/></div>
-        <div><label>C – aba (mm)</label><input id="cC" type="number" step="0.1" value="40"/></div>
-        <div><label>B – dobra (mm)</label><input id="cB" type="number" step="0.1" value="15"/></div>
-        <div><label>D – espessura (mm)</label><input id="cD" type="number" step="0.05" value="1.8"/></div>
-        <div class="full"><label>Longarina de túnel – perfil U (alma × aba × chapa, mm)</label></div>
-        <div><label>Alma (mm)</label><input id="uA" type="number" step="0.1" value="100"/></div>
-        <div><label>Aba (mm)</label><input id="uB" type="number" step="0.1" value="38"/></div>
-        <div><label>Chapa (mm)</label><input id="uE" type="number" step="0.05" value="1.8"/></div>
-        <div><label>Peso do stop palete (kg/un)</label><input id="pesoStop" type="number" step="0.001" placeholder="informar"/></div>
-        <p class="nota full">Longarina de túnel: barras de até 3000 mm, emenda sempre sobre um suporte de braço. A altura interna do U deve comportar o C do braço.</p>
-        <p class="nota full">Suporte em U: interno = largura da coluna, chapa 2,65, altura 180, rasgos a 15 mm das bordas. Balanço medido da face externa do U até a ponta do C. Simples nas laterais das pontas, duplo nas internas. Peso calculado pela geometria.</p>
+        <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Balanço do braço</div>
+        <div class="campo"><label for="balancoBaixo" title="1º nível">1º nível</label><div class="in com-un"><input id="balancoBaixo" type="number" min="1" value="180"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="balancoAlto" title="2º nível em diante">2º nível em diante</label><div class="in com-un"><input id="balancoAlto" type="number" min="1" value="230"/><span class="un">mm</span></div></div>
+        <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Perfil C do braço</div>
+        <div class="campo"><label for="cA" title="A – altura">A – altura</label><div class="in com-un"><input id="cA" type="number" step="0.1" value="94"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="cC" title="C – aba">C – aba</label><div class="in com-un"><input id="cC" type="number" step="0.1" value="40"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="cB" title="B – dobra">B – dobra</label><div class="in com-un"><input id="cB" type="number" step="0.1" value="15"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="cD" title="D – espessura">D – espessura</label><div class="in com-un"><input id="cD" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
+        <div class="sec full"><svg class="ic"><use href="#i-larg"/></svg>Longarina de túnel (perfil U)</div>
+        <div class="campo"><label for="uA" title="Alma">Alma</label><div class="in com-un"><input id="uA" type="number" step="0.1" value="100"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="uB" title="Aba">Aba</label><div class="in com-un"><input id="uB" type="number" step="0.1" value="38"/><span class="un">mm</span></div></div>
+        <div class="campo"><label for="uE" title="Chapa">Chapa</label><div class="in com-un"><input id="uE" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
+        <div class="campo"></div>
+        <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Stop palete</div>
+        <div class="campo"><label for="pesoStop" title="Peso unitário">Peso unitário</label><div class="in com-un"><input id="pesoStop" type="number" step="0.001" placeholder="informar"/><span class="un">kg</span></div></div>
+        <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
+          <li>Suporte em U: interno = largura da coluna, chapa 2,65, altura 180, rasgos a 15 mm das bordas.</li>
+          <li>Balanço medido da face externa do U até a ponta do C; apoio mínimo do palete 80 mm por lado.</li>
+          <li>Simples nas laterais das pontas, duplo nas internas. Peso calculado pela geometria.</li>
+          <li>Longarina de túnel: barras de até 3000 mm, emenda (PK041366) sempre sobre um suporte de braço.</li>
+          <li>Altura interna do U = A do C ± 1 mm.</li>
+        </ul></details>
       </div>
       <div class="rodape-form">
         <button id="btnVoltar">Voltar</button>
         <button id="btnAvancar" class="primario">Avançar</button>
-        <button id="btnBom" class="primario hidden">Gerar lista de peças</button>
+        <button id="btnBom" class="primario hidden"><svg class="ic"><use href="#i-lista"/></svg>Gerar lista de peças</button>
       </div>
     </aside>
 
-    <section>
+    <section class="conteudo">
       <div id="kpis" class="kpis"></div>
       <div id="alertas"></div>
       <div class="card painel">
         <div class="tabs">
-          <div class="tab active" data-tab="lateral">Vista lateral</div>
-          <div class="tab" data-tab="esquema">Esquema</div>
-          <div class="tab" data-tab="frontal">Vista frontal</div>
-          <div class="tab" data-tab="planta">Planta</div>
-          <div class="acoes-tab"><button id="btnPng">Baixar imagem (PNG)</button><button id="btnDxf">DXF do corte</button><button id="btnDxfProj" class="primario">DXF do projeto (todos os cortes)</button></div>
+          <div class="tab active" data-tab="lateral"><svg class="ic"><use href="#i-col"/></svg>Vista lateral</div>
+          <div class="tab" data-tab="frontal"><svg class="ic"><use href="#i-estr"/></svg>Vista frontal</div>
+          <div class="tab" data-tab="esquema"><svg class="ic"><use href="#i-vista"/></svg>Esquema</div>
+          <div class="tab" data-tab="planta"><svg class="ic"><use href="#i-prof"/></svg>Planta</div>
+          <div class="acoes-tab"><button id="btnPng" title="Baixar imagem (PNG)"><svg class="ic"><use href="#i-img"/></svg>PNG</button><button id="btnDxf"><svg class="ic"><use href="#i-dxf"/></svg>DXF do corte</button><button id="btnDxfProj" class="primario"><svg class="ic"><use href="#i-down"/></svg>DXF do projeto</button></div>
         </div>
         <div id="vista" class="vista"></div>
       </div>
       <div id="bom" class="card painel hidden">
         <div class="tabs">
-          <div class="tab active" data-tab="pecas">Lista de peças (corte)</div>
-          <div class="tab" data-tab="proj">Lista do projeto (consolidada)</div>
-          <div class="tab" data-tab="pend">Pendências e regras</div>
-          <div class="acoes-tab"><button id="btnCsv">Exportar CSV</button><button id="btnPrint" class="primario">Imprimir / PDF</button></div>
+          <div class="tab active" data-tab="pecas"><svg class="ic"><use href="#i-lista"/></svg>Peças do corte</div>
+          <div class="tab" data-tab="proj"><svg class="ic"><use href="#i-tabela"/></svg>Projeto consolidado</div>
+          <div class="tab" data-tab="pend"><svg class="ic"><use href="#i-regras"/></svg>Pendências e regras</div>
+          <div class="acoes-tab"><button id="btnCsv"><svg class="ic"><use href="#i-tabela"/></svg>CSV</button><button id="btnPrint" class="primario"><svg class="ic"><use href="#i-print"/></svg>Imprimir / PDF</button></div>
         </div>
         <div id="tab-pecas"></div>
         <div id="tab-proj" class="hidden"></div>
