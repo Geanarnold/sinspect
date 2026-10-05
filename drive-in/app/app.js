@@ -49,42 +49,78 @@
   }
 
 
-  // ---- croqui do braço desenhado com as medidas digitadas (mesma geometria do bloco do DXF)
+  // ---- croqui técnico do braço com as medidas digitadas (mesma geometria do bloco do DXF)
+  // seção A-A do perfil C com raios de dobra (ri = 1,15·D, como no desenho da tala; re = ri + D) e hachura de corte; vista frontal com linhas de centro
   function croquiBraco(r) {
     const el = $('croquiBraco'); if (!el || !window.DXF) return;
-    const pf = r.frontal.perfilC, col = Number(r.entradas.coluna), bal1 = r.frontal.balBaixo, esp = r.frontal.espU;
+    const pf = r.frontal.perfilC, col = Number(r.entradas.coluna), bal = r.frontal.balBaixo, esp = r.frontal.espU;
     const n = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
-    const COTA = '#475569', VAL = '#c2410c';
-    const seta = (x1, y1, x2, y2, txt, tx, ty, anc = 'middle', rot = 0) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COTA}" stroke-width="1" marker-start="url(#cs)" marker-end="url(#cs)"/>` +
-      `<text x="${tx}" y="${ty}" text-anchor="${anc}" font-size="12" font-weight="700" fill="${VAL}"${rot ? ` transform="rotate(${rot} ${tx} ${ty})"` : ''}>${txt}</text>`;
-    const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COTA}" stroke-width=".7" stroke-dasharray="3 2"/>`;
-    // seção do C (abertura para a direita), escala para caber em 150 px de altura
-    const sC = 150 / pf.A, A = pf.A * sC, B = pf.B * sC, C = pf.C * sC, D = Math.max(pf.D * sC, 2.2);
-    const ox = 70, oy = 236; // canto inferior esquerdo
-    const P = [[0, 0], [C, 0], [C, B], [C - D, B], [C - D, D], [D, D], [D, A - D], [C - D, A - D], [C - D, A - B], [C, A - B], [C, A], [0, A]].map(([x, y]) => `${ox + x},${oy - y}`).join(' ');
-    let g1 = `<text x="${ox + C / 2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Seção do perfil C</text>`;
-    g1 += `<polygon points="${P}" fill="#fdba74" stroke="#9a3412" stroke-width="1.2"/>`;
-    g1 += ext(ox, oy, ox - 30, oy) + ext(ox, oy - A, ox - 30, oy - A) + seta(ox - 24, oy, ox - 24, oy - A, `A = ${n(pf.A)}`, ox - 30, oy - A / 2, 'middle', -90);
-    g1 += ext(ox, oy - A, ox, oy - A - 22) + ext(ox + C, oy - A, ox + C, oy - A - 22) + seta(ox, oy - A - 16, ox + C, oy - A - 16, `C = ${n(pf.C)}`, ox + C / 2, oy - A - 22);
-    g1 += ext(ox + C, oy - A, ox + C + 26, oy - A) + ext(ox + C, oy - A + B, ox + C + 26, oy - A + B) + seta(ox + C + 20, oy - A, ox + C + 20, oy - A + B, `B = ${n(pf.B)}`, ox + C + 26, oy - A + B / 2 + 4, 'start');
-    g1 += `<line x1="${ox + D / 2}" y1="${oy - A / 2}" x2="${ox + C + 22}" y2="${oy - A / 2 + 30}" stroke="${COTA}" stroke-width=".8"/><text x="${ox + C + 26}" y="${oy - A / 2 + 34}" font-size="12" font-weight="700" fill="${VAL}">D = ${n(pf.D)}</text>`;
-    // braço simples (1º nível) na vista frontal, com a coluna: geometria do bloco DXF
-    const br = DXF.bracoParam(col, bal1, 1, pf, esp), uo = col / 2 + esp;
-    const xmin = -uo - 30, xmax = uo + bal1 + 10, ymin = -60, ymax = 230, W2 = 280, sB = Math.min(W2 / (xmax - xmin), 210 / (ymax - ymin));
-    const bx0 = 250, X = (x) => (bx0 + (x - xmin) * sB).toFixed(1), Y = (y) => (258 - (y - ymin) * sB).toFixed(1);
-    let g2 = `<text x="${bx0 + W2 / 2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Braço na vista frontal (simples, 1º nível)</text>`;
-    g2 += `<rect x="${X(-col / 2)}" y="${Y(ymax - 20)}" width="${(col * sB).toFixed(1)}" height="${((ymax - 20 - ymin - 10) * sB).toFixed(1)}" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>`;
-    for (const q of br.prims) {
-      if (q.t === 's') { const [a1, b1, c1, d1] = q.p; g2 += `<polygon points="${[a1, b1, d1, c1].map((v) => X(v[0]) + ',' + Y(v[1])).join(' ')}" fill="#fb923c"/>`; }
+    const LG = '#111827', LF = '#374151', CT = '#1d4ed8';
+    const f1 = (v) => (+v).toFixed(2);
+    // cota linear (pontos em px): (ox, oy) = deslocamento da linha de cota para fora da peça; extensões com afastamento; texto do lado de fora
+    function cota(x1, y1, x2, y2, ox, oy, txt) {
+      const L = Math.hypot(ox, oy) || 1, nx = ox / L, ny = oy / L, g = 2, e = 3;
+      const a1 = [x1 + ox, y1 + oy], a2 = [x2 + ox, y2 + oy];
+      let s = `<g stroke="${LF}" stroke-width=".45" fill="none">`;
+      s += `<line x1="${f1(x1 + nx * g)}" y1="${f1(y1 + ny * g)}" x2="${f1(a1[0] + nx * e)}" y2="${f1(a1[1] + ny * e)}"/><line x1="${f1(x2 + nx * g)}" y1="${f1(y2 + ny * g)}" x2="${f1(a2[0] + nx * e)}" y2="${f1(a2[1] + ny * e)}"/>`;
+      s += `<line x1="${f1(a1[0])}" y1="${f1(a1[1])}" x2="${f1(a2[0])}" y2="${f1(a2[1])}" marker-start="url(#seta)" marker-end="url(#seta)"/></g>`;
+      let ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      if (ang > 90) ang -= 180; if (ang <= -90) ang += 180; if (Math.abs(Math.abs(ang) - 90) < 1e-6) ang = -90;
+      const th = ang * Math.PI / 180, up = [Math.sin(th), -Math.cos(th)], fora = up[0] * nx + up[1] * ny > 0;
+      const mx = (a1[0] + a2[0]) / 2 + nx * 1.5, my = (a1[1] + a2[1]) / 2 + ny * 1.5;
+      s += `<text x="${f1(mx)}" y="${f1(my)}" font-size="8.5" text-anchor="middle" fill="${LG}" transform="rotate(${f1(ang)} ${f1(mx)} ${f1(my)})" dy="${fora ? '-0.2em' : '1em'}">${txt}</text>`;
+      return s;
     }
-    for (const q of br.prims) if (q.t !== 's' && q.p) g2 += `<polyline points="${q.p.map((v) => X(v[0]) + ',' + Y(v[1])).join(' ')}" fill="none" stroke="#7c2d12" stroke-width=".8"/>`;
-    const yc0 = (180 - pf.A) / 2, yc1 = yc0 + pf.A, tip = uo + bal1;
-    g2 += ext(X(uo), Y(0), X(uo), Y(-40)) + ext(X(tip), Y(yc0), X(tip), Y(-40)) + seta(X(uo), Y(-32), X(tip), Y(-32), `Balanço = ${n(bal1)}`, (Number(X(uo)) + Number(X(tip))) / 2, Number(Y(-32)) + 15);
-    g2 += ext(X(tip), Y(yc1), X(tip + 22), Y(yc1)) + ext(X(tip), Y(yc0), X(tip + 22), Y(yc0)) + seta(X(tip + 16), Y(yc0), X(tip + 16), Y(yc1), `A = ${n(pf.A)}`, Number(X(tip + 16)) + 14, (Number(Y(yc0)) + Number(Y(yc1))) / 2, 'middle', -90);
-    g2 += ext(X(-uo), Y(0), X(-uo - 26), Y(0)) + ext(X(-uo), Y(180), X(-uo - 26), Y(180)) + seta(X(-uo - 20), Y(0), X(-uo - 20), Y(180), '180', Number(X(-uo - 20)) - 6, (Number(Y(0)) + Number(Y(180))) / 2, 'middle', -90);
-    g2 += seta(X(-col / 2), Y(ymax - 30), X(col / 2), Y(ymax - 30), `COL ${col}`, X(0), Number(Y(ymax - 30)) - 6);
-    el.innerHTML = `<svg viewBox="0 0 560 270" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif"><defs><marker id="cs" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 2L10 5L0 8z" fill="${COTA}"/></marker></defs>${g1}${g2}</svg>` +
-      `<div class="croqui-leg">Em escala, com as medidas digitadas · balanço: face do suporte U até a ponta do C</div>`;
+    const arc = (cx, cy, rr, a0, a1, out) => { for (let k = 1; k <= 8; k++) { const t = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; out.push([cx + rr * Math.cos(t), cy + rr * Math.sin(t)]); } };
+    // ---------- SEÇÃO A-A (mm, origem no canto externo inferior esquerdo, y para cima; abertura para a direita)
+    const A = pf.A, B = pf.B, C = pf.C, t = pf.D, ri = 1.15 * t, ro = ri + t;
+    const ext = [[C, B], [C, ro]]; arc(C - ro, ro, ro, 0, -90, ext); ext.push([ro, 0]); arc(ro, ro, ro, -90, -180, ext); ext.push([0, A - ro]); arc(ro, A - ro, ro, 180, 90, ext);
+    ext.push([C - ro, A]); arc(C - ro, A - ro, ro, 90, 0, ext); ext.push([C, A - B], [C - t, A - B], [C - t, A - ro]); arc(C - ro, A - ro, ri, 0, 90, ext);
+    ext.push([ro, A - t]); arc(ro, A - ro, ri, 90, 180, ext); ext.push([t, ro]); arc(ro, ro, ri, 180, 270, ext); ext.push([C - ro, t]); arc(C - ro, ro, ri, 270, 360, ext); ext.push([C - t, B]);
+    const sS = Math.min(165 / A, 120 / C), ox = 150 - C * Math.min(165 / A, 120 / C) / 2, oy = 215, SX = (x) => ox + x * sS, SY = (y) => oy - y * sS;
+    const pathC = 'M' + ext.map(([x, y]) => `${f1(SX(x))} ${f1(SY(y))}`).join('L') + 'Z';
+    let g1 = `<text x="150" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="${LG}" letter-spacing=".5">SEÇÃO A-A</text>`;
+    g1 += `<path d="${pathC}" fill="${LF}" stroke="${LG}" stroke-width=".8" stroke-linejoin="round"/>`; // seção fina: preenchimento cheio (ISO 128)
+    g1 += cota(SX(0), SY(0), SX(0), SY(A), -18, 0, `${n(A)}`);
+    g1 += cota(SX(0), SY(A), SX(C), SY(A), 0, -14, `${n(C)}`);
+    g1 += cota(SX(C), SY(A), SX(C), SY(A - B), 14, 0, `${n(B)}`);
+    g1 += cota(SX(C), SY(B), SX(C), SY(0), 14, 0, `${n(B)}`);
+    // espessura e raio por chamada
+    const pe = [SX(t / 2), SY(A / 2)], pr = [SX(ro - ro * Math.SQRT1_2), SY(ro - ro * Math.SQRT1_2)];
+    g1 += `<g stroke="${LF}" stroke-width=".45" fill="none"><polyline points="${f1(pe[0])},${f1(pe[1])} ${f1(SX(C) + 6)},${f1(SY(A / 2) + 14)} ${f1(SX(C) + 34)},${f1(SY(A / 2) + 14)}"/><circle cx="${f1(pe[0])}" cy="${f1(pe[1])}" r="1.1" fill="${LF}"/>`;
+    g1 += `<polyline points="${f1(pr[0])},${f1(pr[1])} ${f1(SX(C) + 6)},${f1(SY(0) + 14)} ${f1(SX(C) + 34)},${f1(SY(0) + 14)}"/><circle cx="${f1(pr[0])}" cy="${f1(pr[1])}" r="1.1" fill="${LF}"/></g>`;
+    g1 += `<text x="${f1(SX(C) + 8)}" y="${f1(SY(A / 2) + 12)}" font-size="8.5" fill="${LG}">ch. ${n(t)}</text><text x="${f1(SX(C) + 8)}" y="${f1(SY(0) + 12)}" font-size="8.5" fill="${LG}">Ri ${n(ri)}</text>`;
+    // ---------- VISTA FRONTAL (braço simples do 1º nível + coluna), mesma geometria do bloco do DXF
+    const br = DXF.bracoParam(col, bal, 1, pf, esp), uo = col / 2 + esp, yc0 = (180 - A) / 2, yc1 = yc0 + A, tip = uo + bal;
+    const xmin = -uo - 40, xmax = tip + 30, ymin = -55, ymax = 235;
+    const sB = Math.min(270 / (xmax - xmin), 215 / (ymax - ymin)), bx = 150 - (xmax - xmin) * Math.min(270 / (xmax - xmin), 215 / (ymax - ymin)) / 2, FX = (x) => bx + (x - xmin) * sB, FY = (y) => 248 - (y - ymin) * sB;
+    let g2 = `<text x="150" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="${LG}" letter-spacing=".5">VISTA FRONTAL · BRAÇO SIMPLES 1º NÍVEL</text>`;
+    // coluna (contorno fino) e eixo
+    g2 += `<rect x="${f1(FX(-col / 2))}" y="${f1(FY(ymax - 25))}" width="${f1(col * sB)}" height="${f1((ymax - 25 + 14) * sB)}" fill="none" stroke="${LF}" stroke-width=".6"/>`;
+    g2 += `<line x1="${f1(FX(0))}" y1="${f1(FY(198))}" x2="${f1(FX(0))}" y2="${f1(FY(-8))}" stroke="${CT}" stroke-width=".45" stroke-dasharray="10 2 2 2"/>`;
+    // braço: contorno grosso; linhas de tangência das dobras finas; rasgos
+    for (const q of br.prims) {
+      if (q.t === 's' || !q.p) continue;
+      const fino = q.p.length === 2 && Math.abs(q.p[0][1] - q.p[1][1]) < .01 && [yc0, yc1].every((y) => Math.abs(q.p[0][1] - y) > .01) && q.p[0][1] > yc0 && q.p[0][1] < yc1;
+      g2 += `<polyline points="${q.p.map((v) => f1(FX(v[0])) + ',' + f1(FY(v[1]))).join(' ')}" fill="none" stroke="${LG}" stroke-width="${fino ? .5 : 1.1}" stroke-linejoin="round"/>`;
+    }
+    // linhas de centro dos rasgos
+    const sx = (col - 40) / 2;
+    for (const cy of [15, 165]) for (const cx of [-sx, sx]) g2 += `<g stroke="${CT}" stroke-width=".4"><line x1="${f1(FX(cx - 9))}" y1="${f1(FY(cy))}" x2="${f1(FX(cx + 9))}" y2="${f1(FY(cy))}"/><line x1="${f1(FX(cx))}" y1="${f1(FY(cy - 7))}" x2="${f1(FX(cx))}" y2="${f1(FY(cy + 7))}"/></g>`;
+    // corte A-A no C
+    const xa = uo + bal * .6;
+    g2 += `<g stroke="${LG}" stroke-width=".8"><line x1="${f1(FX(xa))}" y1="${f1(FY(yc1 + 22))}" x2="${f1(FX(xa))}" y2="${f1(FY(yc0 - 22))}" stroke-dasharray="10 2 2 2" stroke-width=".5"/>`;
+    for (const [y, d] of [[yc1 + 22, 1], [yc0 - 22, -1]]) g2 += `<line x1="${f1(FX(xa))}" y1="${f1(FY(y))}" x2="${f1(FX(xa) - 12)}" y2="${f1(FY(y))}" marker-end="url(#seta)"/><text x="${f1(FX(xa) + 4)}" y="${f1(FY(y) + (d > 0 ? -2 : 9))}" font-size="9" font-weight="700" fill="${LG}" stroke="none">A</text>`;
+    g2 += `</g>`;
+    // cotas
+    g2 += cota(FX(uo), FY(yc0), FX(tip), FY(yc0), 0, FY(-32) - FY(yc0), `${n(bal)}`);
+    g2 += cota(FX(-uo), FY(0), FX(uo), FY(0), 0, FY(-32) - FY(0), `${n(2 * uo)}`);
+    g2 += cota(FX(-uo), FY(0), FX(-uo), FY(180), -18, 0, '180');
+    g2 += cota(FX(tip), FY(yc0), FX(tip), FY(yc1), 16, 0, `${n(A)}`);
+    g2 += cota(FX(-sx), FY(165), FX(sx), FY(165), 0, FY(205) - FY(165), `${n(2 * sx)}`);
+    const defs = `<defs><marker id="seta" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 1.8L10 5L0 8.2z" fill="${LF}"/></marker></defs>`;
+    const svg = (h, corpo, rod) => `<svg viewBox="0 0 300 ${h}" xmlns="http://www.w3.org/2000/svg" font-family="'Arial Narrow', 'Roboto Condensed', Arial, sans-serif">${defs}<rect x=".5" y=".5" width="299" height="${h - 1}" fill="#fff" stroke="#cbd5e1" stroke-width=".8"/>${corpo}${rod ? `<text x="294" y="${h - 5}" text-anchor="end" font-size="7.5" fill="#64748b">${rod}</text>` : ''}</svg>`;
+    el.innerHTML = svg(240, g1, '') + svg(262, g2, `COL ${col} · suporte U chapa ${n(esp)} · medidas em mm`);
   }
 
   function renderCortes() {

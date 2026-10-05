@@ -77,8 +77,8 @@ main.wrap{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;paddin
 .regras[open] summary{border-bottom:1px solid var(--borda);color:var(--texto)}
 .regras ul{margin:0;padding:8px 12px 10px 28px;font-size:12px;color:#475569}.regras li{margin:3px 0}
 .espacos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.espacos label{font-size:11px}
-.croqui{width:100%;background:#fff;border:1px solid var(--borda);border-radius:var(--raio-p);padding:8px 8px 6px}
-.croqui svg{width:100%;height:auto;display:block}
+.croqui{width:100%;background:#fff;border:1px solid var(--borda);border-radius:var(--raio-p);padding:4px}
+.croqui svg{width:100%;height:auto;display:block}.croqui svg+svg{margin-top:6px}
 .croqui-leg{font-size:11px;color:var(--cinza);text-align:center;margin-top:4px;line-height:1.35}
 .rodape-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--borda)}
 .rodape-form #btnBom{grid-column:2}

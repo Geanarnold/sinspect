@@ -215,7 +215,7 @@
     const sx = (col - 40) / 2;
     for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) { arc(cx - 2.5, cy, 4.5, 90, 270); arc(cx + 2.5, cy, 4.5, -90, 90); ln(cx - 2.5, cy + 4.5, cx + 2.5, cy + 4.5); ln(cx - 2.5, cy - 4.5, cx + 2.5, cy - 4.5); }
     // perfil C
-    const d = pf.D + 2.3;
+    const d = pf.D + 1.15 * pf.D; // linha de tangência da dobra: espessura + raio interno (ri = 1,15·D, como na tala 2025.0066)
     ln(xa, yc0, xb, yc0); ln(xa, yc1, xb, yc1); ln(xa, yc0 + d, xb, yc0 + d); ln(xa, yc1 - d, xb, yc1 - d); ln(xa, yc0, xa, yc1); ln(xb, yc0, xb, yc1);
     return { prims: L, topoC: yc1 };
   }
