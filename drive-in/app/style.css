@@ -60,3 +60,10 @@ button.mini{padding:2px 8px;font-size:12px}
 
 .croqui{width:100%;max-width:460px;height:auto;color:#1f2937;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px}
 .aviso-estr{margin:8px 16px;padding:8px 12px;border:1px solid #dc2626;background:#fef2f2;color:#991b1b;font-weight:600;border-radius:6px}
+.cortes{margin:-4px -4px 12px;padding:10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa}
+.cortes-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--cinza);margin-bottom:6px}
+.lista-cortes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip-corte{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.chip-corte.active{background:var(--laranja);border-color:var(--laranja);color:#fff}
+.cortes-acoes{display:flex;gap:6px}.cortes-acoes button{flex:1;font-size:12px;padding:6px}
+.kpi-proj{margin:8px 0 0;font-size:13px;color:var(--cinza)}.kpi-proj b{color:#111}

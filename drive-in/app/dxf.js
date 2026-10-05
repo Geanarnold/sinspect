@@ -302,12 +302,12 @@
     if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
     return { prims, items, linhas, textos, bbox: [-1500, -1000, W + 1600, H + 700], faltam: [...faltam] };
   }
-  function shiftModel(m, dx) {
-    for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1]]); if (q.c) q.c = [q.c[0] + dx, q.c[1]]; }
-    for (const q of m.linhas) q.p = q.p.map((v) => [v[0] + dx, v[1]]);
-    for (const t of m.textos) t.x += dx;
-    for (const it of m.items || []) it.x += dx;
-    m.bbox = [m.bbox[0] + dx, m.bbox[1], m.bbox[2] + dx, m.bbox[3]];
+  function shiftModel(m, dx, dy = 0) {
+    for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1] + dy]); if (q.c) q.c = [q.c[0] + dx, q.c[1] + dy]; }
+    for (const q of m.linhas) q.p = q.p.map((v) => [v[0] + dx, v[1] + dy]);
+    for (const t of m.textos) { t.x += dx; t.y += dy; }
+    for (const it of m.items || []) { it.x += dx; it.y += dy; }
+    m.bbox = [m.bbox[0] + dx, m.bbox[1] + dy, m.bbox[2] + dx, m.bbox[3] + dy];
     return m;
   }
   function dxfLateral(r, titulo, modelo) {
@@ -344,14 +344,28 @@
   const COR = { BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
-  function dxfCompleto(r, corte) {
-    const titulo = corte;
+  // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
+  function modeloCorte(r, corte) {
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte));
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
     if (aviso) for (const mm of [mL, mF]) mm.textos.push({ x: (mm.bbox[0] + mm.bbox[2]) / 2, y: -800 - (mm === mF && mF.faltam.length ? 200 : 0), h: 90, s: aviso, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
-    const m = { prims: mL.prims.concat(mF.prims), items: mL.items.concat(mF.items), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos) };
-    return dxfLateral(r, titulo, m);
+    return { prims: mL.prims.concat(mF.prims), items: mL.items.concat(mF.items), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos),
+      bbox: [Math.min(mL.bbox[0], mF.bbox[0]), Math.min(mL.bbox[1], mF.bbox[1]), Math.max(mL.bbox[2], mF.bbox[2]), Math.max(mL.bbox[3], mF.bbox[3])] };
+  }
+  function dxfCompleto(r, corte) { return dxfLateral(r, corte, modeloCorte(r, corte)); }
+  // projeto com vários cortes: um DXF só, cortes empilhados de cima para baixo (mesma origem X), 3000 mm entre eles
+  function dxfProjeto(lista) {
+    const m = { prims: [], items: [], linhas: [], textos: [] };
+    let topo = 0;
+    lista.forEach(({ r, corte, qtd }) => {
+      const mc = modeloCorte(r, corte);
+      if (qtd > 1) mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
+      shiftModel(mc, -mc.bbox[0], topo - mc.bbox[3] - 400);
+      for (const k of ['prims', 'items', 'linhas', 'textos']) m[k] = m[k].concat(mc[k]);
+      topo = mc.bbox[1] - 3000;
+    });
+    return dxfLateral(lista[0] && lista[0].r, '', m);
   }
   function svgFrontal(r, titulo) { return svgModelo(montarFrontal(r, titulo)); }
   function svgLateral(r, titulo) { return svgModelo(montarLateral(r, titulo)); }
@@ -374,6 +388,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  const DXF = { dxfProjeto, tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);

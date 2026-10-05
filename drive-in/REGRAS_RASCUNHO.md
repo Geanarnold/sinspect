@@ -369,3 +369,9 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - Requadro: removido do escopo (decisão do Gean).
 - [IMPLEMENTADO] Zig-zag de topo e de fundo: somente diagonais. Fixadores por diagonal: 2 × INT1193 (parafuso sextavado 5/16" × 1") + 2 × INT0650. INT1193 incluído no CATALOGO.xlsx (Produtos).
 - [IMPLEMENTADO] Braço com preenchimento sólido laranja (SOLID no layer BRACO_HACHURA, cor 30; R12 não tem HATCH) dentro do próprio bloco do braço, para diferenciar das longarinas na vista frontal.
+
+## 22. Projeto com vários cortes
+- Barra "Cortes do projeto" no topo do formulário: cada corte guarda toda a configuração (estrutura, lateral, braço), nome e quantidade de blocos iguais. "+ Novo corte" copia o atual; o formulário edita o corte selecionado.
+- Totais do projeto (posições e peso) somam todos os cortes × blocos iguais. Aba "Lista do projeto (consolidada)": peças iguais (grupo + código + descrição + comprimento) somadas, com a coluna de cortes de origem. CSV: consolidado + lista de cada corte.
+- "DXF do projeto": um arquivo com todos os cortes empilhados (lateral + frontal de cada um), títulos "VISTA LATERAL/FRONTAL CORTE <nome>" e nota "N BLOCOS IGUAIS". "DXF do corte" continua para o corte atual.
+- O projeto fica salvo no navegador (localStorage). Não sincroniza entre computadores — para levar a outro PC, falta exportar/importar o projeto (próximo passo, se quiser).

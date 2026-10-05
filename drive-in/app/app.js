@@ -9,18 +9,35 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   let last = null;
 
-  function entradas() {
+  // ---- projeto com vários cortes: cada corte guarda os valores do formulário; o formulário edita o corte selecionado
+  const CHAVE = 'drivein_projeto_v1';
+  let proj = null;
+  try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
+  if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: 'A', qtd: 1, dados: null }] };
+  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
+  function lerForm() {
+    const v = {}; for (const id of IDS) v[id] = $(id).value;
+    return { v, escravo: $('escravo').checked, diferentes: $('diferentes').checked, espacos: [...$('espacos').querySelectorAll('input')].map((i) => i.value) };
+  }
+  function aplicarForm(d) {
+    if (!d) return;
+    for (const id of IDS) if (d.v && d.v[id] !== undefined) $(id).value = d.v[id];
+    $('escravo').checked = !!d.escravo; $('diferentes').checked = !!d.diferentes;
+    montarEspacos(d.espacos);
+  }
+  function entradasDe(d) {
     const o = {};
-    for (const id of IDS) { const v = $(id).value; o[id] = v === '' ? null : v; }
-    o.escravo = $('escravo').checked;
+    for (const id of IDS) { const v = d.v[id]; o[id] = v === '' || v == null ? null : v; }
+    o.escravo = !!d.escravo;
     const n = Math.max(1, Math.min(30, Number(o.espacamentos) || 1));
     o.espacamentos = n;
-    o.espacos = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].map((i) => Number(i.value) || Number(o.largura)) : Array(n).fill(Number(o.largura));
+    o.espacos = d.diferentes ? Array.from({ length: n }, (_, i) => Number(d.espacos[i]) || Number(o.largura)) : Array(n).fill(Number(o.largura));
     return o;
   }
-  function montarEspacos() {
+  const entradas = () => entradasDe(lerForm());
+  function montarEspacos(valores) {
     const n = Math.max(1, Math.min(30, Number($('espacamentos').value) || 1)), box = $('espacos');
-    const atuais = [...box.querySelectorAll('input')].map((i) => i.value);
+    const atuais = valores || [...box.querySelectorAll('input')].map((i) => i.value);
     box.innerHTML = Array.from({ length: n }, (_, i) => `<div><label>A${i + 1}</label><input type="number" step="1" value="${atuais[i] || $('largura').value}"/></div>`).join('');
     box.querySelectorAll('input').forEach((i) => i.addEventListener('input', render));
     box.classList.toggle('hidden', !$('diferentes').checked);
@@ -30,7 +47,34 @@
     return `<div class="kpi"><div class="l">${label}</div><div class="v">${value}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
   }
 
+  function renderCortes() {
+    $('listaCortes').innerHTML = proj.cortes.map((c, i) => `<button class="chip-corte ${i === proj.atual ? 'active' : ''}" data-i="${i}">${esc(c.nome || '?')}${c.qtd > 1 ? ' ×' + c.qtd : ''}</button>`).join('');
+    $('listaCortes').querySelectorAll('.chip-corte').forEach((b) => b.addEventListener('click', () => selecionarCorte(Number(b.dataset.i))));
+    $('btnRemCorte').disabled = proj.cortes.length < 2;
+  }
+  function selecionarCorte(i) {
+    proj.atual = i; const c = proj.cortes[i];
+    $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd;
+    aplicarForm(c.dados); render();
+  }
+  // resultados de todos os cortes (o atual com o formulário na tela)
+  function calcularProjeto() {
+    return proj.cortes.map((c, i) => ({ nome: c.nome, qtd: Math.max(1, Number(c.qtd) || 1), r: i === proj.atual ? last : Engine.calcular(entradasDe(c.dados || lerForm()), cat) }));
+  }
+  function consolidar(lista) {
+    const mapa = new Map();
+    for (const { nome, qtd, r } of lista) for (const p of r.pecas) {
+      const k = [p.grupo, p.codigo, p.desc, p.compr].join('|');
+      const e = mapa.get(k) || { ...p, qtd: 0, pesoTotal: p.pesoUnit == null ? null : 0, cortes: [] };
+      e.qtd += p.qtd * qtd; if (p.pesoUnit != null) e.pesoTotal += p.pesoUnit * p.qtd * qtd; e.cortes.push(nome);
+      mapa.set(k, e);
+    }
+    return [...mapa.values()];
+  }
   function render() {
+    const c = proj.cortes[proj.atual];
+    c.dados = lerForm(); c.nome = ($('nomeCorte').value || 'A').trim().toUpperCase(); c.qtd = Math.max(1, Number($('qtdCorte').value) || 1);
+    salvar(); renderCortes();
     const inp = entradas();
     const r = Engine.calcular(inp, cat);
     last = r;
@@ -40,16 +84,20 @@
       kpi('Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'peça única'),
       kpi('Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais`),
       kpi('Profundidade', `${fmt0(d.profundidade)} mm`, `Σ A1..A${inp.espacamentos} (medidas externas)`),
-      kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem longarina de fundo, LG-UE, zigzag; caneleira e LG topo provisórios'),
+      kpi('Peso (itens levantados)', `${fmt(r.pesoTotal, 1)} kg`, 'sem peso: longarinas de topo e fundo, trilho guia; caneleira provisória'),
       kpi('kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
     ].join('');
 
+    const lp = calcularProjeto();
+    const posP = lp.reduce((s, x) => s + x.r.posicoes * x.qtd, 0), pesoP = lp.reduce((s, x) => s + x.r.pesoTotal * x.qtd, 0), errP = lp.filter((x) => x.r.erros.length).map((x) => x.nome);
+    let kp = document.getElementById('kpiProj'); if (!kp) { kp = document.createElement('p'); kp.id = 'kpiProj'; kp.className = 'kpi-proj'; $('kpis').after(kp); }
+    kp.innerHTML = `Projeto: <b>${lp.length} corte(s)</b>, ${lp.reduce((s, x) => s + x.qtd, 0)} bloco(s) · <b>${fmt0(posP)}</b> posições · <b>${fmt(pesoP, 1)} kg</b> (itens levantados)${errP.length ? ` · <span style="color:#b91c1c">erro nos cortes ${esc(errP.join(', '))}</span>` : ''}`;
     $('alertas').innerHTML = (r.erros.length ? `<div class="erro"><b>Erro</b><ul>${r.erros.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '') + (r.alertas.length ? `<div class="alerta"><b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '');
 
     const L = r.lateral;
     $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
     renderVista(r);
-    if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); }
+    if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); renderProjeto(lp); }
   }
 
   function renderPecas(r) {
@@ -139,6 +187,18 @@
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   }
 
+  function renderProjeto(lp) {
+    const itens = consolidar(lp), grupos = [...new Set(itens.map((p) => p.grupo))], total = itens.reduce((s, p) => s + (p.pesoTotal || 0), 0);
+    let html = `<p class="aviso-estr">${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
+    html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Compr. (mm)</th><th class="num">Peso unit. (kg)</th><th class="num">Peso total (kg)</th><th>Cortes</th></tr></thead><tbody>`;
+    for (const g of grupos) {
+      const ps = itens.filter((p) => p.grupo === g), sub = ps.reduce((s, p) => s + (p.pesoTotal || 0), 0);
+      html += `<tr class="grp"><td colspan="5">${esc(g)}</td><td class="num">${fmt(sub)}</td><td></td></tr>`;
+      for (const p of ps) html += `<tr><td><span class="code ${!p.codigo || /XXXX/.test(p.codigo) ? 'semcod' : ''}">${esc(p.codigo || Engine.SEM.SA)}</span></td><td>${esc(p.desc)}</td><td class="num">${fmt0(p.qtd)}</td><td class="num">${p.compr == null ? '' : fmt(p.compr)}</td><td class="num">${p.pesoUnit == null ? '' : fmt(p.pesoUnit, 3)}</td><td class="num">${p.pesoTotal == null ? '' : fmt(p.pesoTotal)}</td><td class="obs">${esc([...new Set(p.cortes)].join(', '))}</td></tr>`;
+    }
+    html += `<tr class="grp"><td colspan="5">TOTAL DO PROJETO (itens levantados)</td><td class="num">${fmt(total)}</td><td></td></tr></tbody></table>`;
+    $('tab-proj').innerHTML = html;
+  }
   function renderPend(r) {
     $('tab-pend').innerHTML = `<h3>Pendências</h3><ul>${r.pendencias.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
       <h3 style="margin-top:16px">Regras aplicadas neste cálculo</h3><ul>
@@ -153,8 +213,14 @@
 
   function csv() {
     if (!last) return;
-    const rows = [[Engine.AVISO_ESTRUTURAL], ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs']];
-    for (const p of last.pecas) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
+    const cab = ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs / cortes'];
+    const lp = calcularProjeto();
+    const rows = [[Engine.AVISO_ESTRUTURAL], [], ['PROJETO CONSOLIDADO', lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], cab];
+    for (const p of consolidar(lp)) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), [...new Set(p.cortes)].join(', ')]);
+    for (const x of lp) {
+      rows.push([], [`CORTE ${x.nome}`, `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], cab);
+      for (const p of x.r.pecas) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
+    }
     const txt = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.csv`; a.click();
   }
@@ -163,7 +229,7 @@
     const grupo = t.closest('.painel');
     grupo.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
     if (VISTAS[t.dataset.tab]) { vistaAtual = t.dataset.tab; if (last) renderVista(last); }
-    else ['pecas', 'pend'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
+    else ['pecas', 'pend', 'proj'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
   }));
   const PASSOS = ['projeto', 'estrutura', 'lateral', 'braco'];
   let passo = 0;
@@ -180,6 +246,22 @@
   $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
   $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
   $('btnPng').addEventListener('click', baixarPng);
+  $('btnDxfProj').addEventListener('click', () => {
+    if (!last) return;
+    const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
+    const txt = DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-projeto.dxf`; a.click();
+  });
+  $('btnNovoCorte').addEventListener('click', () => {
+    render();
+    const usados = new Set(proj.cortes.map((c) => c.nome)); let k = proj.cortes.length + 1, nome = 'A' + k; while (usados.has(nome)) nome = 'A' + (++k);
+    proj.cortes.push({ nome, qtd: 1, dados: JSON.parse(JSON.stringify(proj.cortes[proj.atual].dados)) });
+    selecionarCorte(proj.cortes.length - 1);
+  });
+  $('btnRemCorte').addEventListener('click', () => {
+    if (proj.cortes.length < 2 || !confirm(`Remover o corte ${proj.cortes[proj.atual].nome}?`)) return;
+    proj.cortes.splice(proj.atual, 1); selecionarCorte(Math.max(0, proj.atual - 1));
+  });
   $('btnDxf').addEventListener('click', () => {
     if (!last) return;
     const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
@@ -189,11 +271,13 @@
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
   $('escravo').addEventListener('change', render);
-  $('nomeCorte').addEventListener('input', () => { if (last) renderVista(last); });
+  $('nomeCorte').addEventListener('input', render);
+  $('qtdCorte').addEventListener('input', render);
   $('espacamentos').addEventListener('input', montarEspacos);
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });
   montarEspacos();
+  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); }
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = cat.versao;

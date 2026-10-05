@@ -16,6 +16,11 @@
 
   <main class="wrap" id="paginaConfig">
     <aside class="card">
+      <div class="cortes">
+        <div class="cortes-tit">Cortes do projeto</div>
+        <div id="listaCortes" class="lista-cortes"></div>
+        <div class="cortes-acoes"><button id="btnNovoCorte">+ Novo corte (copia o atual)</button><button id="btnRemCorte">Remover corte</button></div>
+      </div>
       <div class="passos">
         <div class="passo active" data-passo="projeto">1 · Projeto</div>
         <div class="passo" data-passo="estrutura">2 · Estrutura</div>
@@ -25,6 +30,7 @@
       <div id="passo-projeto" class="form">
         <div class="full"><label>Projeto / cliente</label><input id="projeto" type="text" placeholder="Ex.: SUPRA260407 – Bloco A"/></div>
         <div><label>Nome do corte</label><input id="nomeCorte" type="text" value="A" placeholder="Ex.: A"/></div>
+        <div><label>Blocos iguais a este corte</label><input id="qtdCorte" type="number" min="1" value="1"/></div>
         <div><label>Revisão</label><input id="revisao" type="text" value="REV.00"/></div>
         <div><label>Responsável</label><input id="responsavel" type="text" placeholder="Nome"/></div>
         <div class="full"><label>Observações</label><input id="obs" type="text" placeholder="Opcional"/></div>
@@ -98,17 +104,19 @@
           <div class="tab" data-tab="esquema">Esquema</div>
           <div class="tab" data-tab="frontal">Vista frontal</div>
           <div class="tab" data-tab="planta">Planta</div>
-          <div class="acoes-tab"><button id="btnPng">Baixar imagem (PNG)</button><button id="btnDxf" class="primario">Baixar DXF (lateral + frontal)</button></div>
+          <div class="acoes-tab"><button id="btnPng">Baixar imagem (PNG)</button><button id="btnDxf">DXF do corte</button><button id="btnDxfProj" class="primario">DXF do projeto (todos os cortes)</button></div>
         </div>
         <div id="vista" class="vista"></div>
       </div>
       <div id="bom" class="card painel hidden">
         <div class="tabs">
-          <div class="tab active" data-tab="pecas">Lista de peças</div>
+          <div class="tab active" data-tab="pecas">Lista de peças (corte)</div>
+          <div class="tab" data-tab="proj">Lista do projeto (consolidada)</div>
           <div class="tab" data-tab="pend">Pendências e regras</div>
           <div class="acoes-tab"><button id="btnCsv">Exportar CSV</button><button id="btnPrint" class="primario">Imprimir / PDF</button></div>
         </div>
         <div id="tab-pecas"></div>
+        <div id="tab-proj" class="hidden"></div>
         <div id="tab-pend" class="hidden"></div>
       </div>
     </section>
