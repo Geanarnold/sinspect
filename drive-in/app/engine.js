@@ -224,10 +224,29 @@
     // uma em cada linha de braço → 2 por rua por nível de braço
     const lgU = { A: Number(inp.uA) || 100, B: Number(inp.uB) || 38, e: Number(inp.uE) || 1.8 };
     const kgmLgU = (lgU.A + 2 * lgU.B - 2 * lgU.e) * lgU.e * DENS * 1000;
-    if (niveisArm.length) add('Longarinas', 'LG-TUNEL', `Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e} – comp. ${profundidade}`, SEM.SA, 2 * R * niveisArm.length, profundidade, +(kgmLgU * profundidade / 1000).toFixed(3), `2 por rua × ${niveisArm.length} nível(is); ${kgmLgU.toFixed(3)} kg/m (chapa desenvolvida)`);
+    // barras de no máximo 3000 mm; a emenda cai sempre sobre um suporte de braço (eixo de coluna na vista lateral), cada barra a maior possível
+    const LG_TUNEL_MAX = 3000, CW_LAT = 69.8;
+    const faces = [0]; espacos.forEach((a, i) => { const quadroI = solteira ? i % 2 === 1 : i % 2 === 0; faces.push(faces[i] + (solteira && i === 0 ? a : quadroI ? a - CW_LAT : a + CW_LAT)); });
+    const eixosLat = faces.map((v) => v + CW_LAT / 2);
+    const barrasTunel = []; let ini = 0;
+    while (profundidade - ini > LG_TUNEL_MAX + 1e-6) {
+      const cand = eixosLat.filter((x) => x > ini + 1e-6 && x - ini <= LG_TUNEL_MAX + 1e-6);
+      if (!cand.length) { erros.push(`Longarina de túnel: vão sem suporte de braço maior que ${LG_TUNEL_MAX} mm a partir de ${Math.round(ini)} mm.`); break; }
+      const fim = Math.max(...cand); barrasTunel.push(+(fim - ini).toFixed(1)); ini = fim;
+    }
+    barrasTunel.push(+(profundidade - ini).toFixed(1));
+    const juntasTunel = barrasTunel.slice(0, -1).reduce((acc, b) => acc.concat((acc.length ? acc[acc.length - 1] : 0) + b), []);
+    if (niveisArm.length) {
+      const porComp = {}; for (const b of barrasTunel) porComp[b] = (porComp[b] || 0) + 1;
+      for (const [b, q] of Object.entries(porComp)) add('Longarinas', 'LG-TUNEL', `Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e} – ${b} mm`, SEM.SA, q * 2 * R * niveisArm.length, Number(b), +(kgmLgU * Number(b) / 1000).toFixed(3), `${q} por linha (barras ≤ ${LG_TUNEL_MAX}, emenda sobre o braço) × 2 por rua × ${niveisArm.length} nível(is); ${kgmLgU.toFixed(3)} kg/m`);
+    }
+    // o U da longarina de túnel abraça o C do braço: altura interna do U ≥ altura A do C
+    const uInterno = lgU.A - 2 * lgU.e;
+    if (uInterno < perfilC.A) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm menor que o C do braço (A = ${perfilC.A} mm). Perfis incompatíveis.`);
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, 2 * R, compTrilho, null, '2 por rua (um de cada lado); perfil e peso a definir');
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
-    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R * niveisArm.length, null, null, `2 por rua × ${niveisArm.length} nível(is) de braço; peso a definir [CONFIRMAR se o chão também leva]`);
+    const pesoStop = Number(inp.pesoStop) || null;
+    add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R, null, pesoStop, `2 por rua${pesoStop ? '' : '; peso unitário não informado'}`);
     add('Longarinas', 'LGTOPO', `Longarina superior (frontal) – rua ${larguraRua} mm`, SEM.SA, R, larguraRua, null, '1 por rua, no topo; peso e SA a confirmar');
 
 
@@ -241,7 +260,7 @@
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
-      lateral: { niveis: niveisArm, lgU, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
+      lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };

@@ -162,8 +162,12 @@
     const L = r.lateral, Lt = cum[n] - cum[0];
     if (L.niveis && L.lgU) for (const yN of L.niveis) {
       const h = L.lgU.A, e = L.lgU.e;
-      const ps = [[0, 0, Lt, 0], [0, e, Lt, e], [0, h - e, Lt, h - e], [0, h, Lt, h], [0, 0, 0, h], [Lt, 0, Lt, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, d]] }));
-      put(ps, cum[0], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lt)));
+      const cortes = [0, ...(L.juntasTunel || []), Lt]; // barras ≤ 3000 com emenda sobre o braço
+      for (let k = 0; k < cortes.length - 1; k++) {
+        const Lb = cortes[k + 1] - cortes[k];
+        const ps = [[0, 0, Lb, 0], [0, e, Lb, e], [0, h - e, Lb, h - e], [0, h, Lb, h], [0, 0, 0, h], [Lb, 0, Lb, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, d]] }));
+        put(ps, cum[0] + cortes[k], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lb)));
+      }
     }
     if (L.trilho && L.trilho.comp > 0) {
       const Tl = L.trilho.comp, th = L.trilho.alt;

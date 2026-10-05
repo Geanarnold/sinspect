@@ -351,3 +351,7 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - [IMPLEMENTADO] Stop palete: 2 por rua por nível de braço. Peso/SA a definir. [CONFIRMAR se o chão também leva]
 - [IMPLEMENTADO] Longarina de túnel (VISTAS_LATERAIS_LG_TUNEL_TRILHO.dxf, blocos A–D): perfil U na mesma faixa de altura do C do braço (topo = apoio do palete), contínua em toda a profundidade (comprimento = ΣA), em todos os níveis de braço; 2 por rua por nível (uma em cada linha de braço). Perfil informado na etapa Braço (padrão U 100 × 38 × 1,8); peso pela chapa desenvolvida (alma + 2 abas − 2e) × e. Comprimentos do desenho: 4901 / 7351 / 8576 / 11026 para 4 / 6 / 7 / 9 paletes de 1225. Desenhada na vista lateral (bloco DI_LG_TUNEL_*), trilho guia também (DI_TRILHO_GUIA_*), frente à direita.
 - [CONFIRMAR] Barras acima de 6000 mm: a longarina de túnel de 11025 é uma peça só ou tem emenda? Comprimento comercial máximo?
+- [IMPLEMENTADO] Longarina de túnel em barras de no máximo 3000 mm; emenda sempre sobre um suporte de braço (eixo de coluna da lateral), cada barra a maior possível (guloso a partir do fundo da vista). Ex.: 9 × 1225 → 2485 + 2450 + 2450 + 2450 + 1190 por linha. [CONFIRMAR: peças de emenda/fixação]
+- [IMPLEMENTADO] O U da longarina de túnel abraça o C do braço: altura interna do U (alma − 2 × chapa) ≥ A do C, senão erro. [Interpretação da resposta 2 — confirmar; Gean ofereceu DXF modelo]
+- [IMPLEMENTADO] Stop palete: 2 por rua (total, não por nível), peso unitário informado pelo operador.
+- [PENDENTE] Trilho guia: largura/chapa/peso.
