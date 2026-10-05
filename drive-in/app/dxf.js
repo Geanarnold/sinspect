@@ -19,7 +19,11 @@
   const stretchX = (prims, xMid, delta) => mapPts(prims, (v) => [v[0] > xMid ? v[0] + delta : v[0], v[1]]);
   // nome de bloco DXF (R12: letras, números, _ - $): DI_<PEÇA>_<parâmetros>; decimais com "-" (710.9 → 710-9)
   const nb = (v) => String(Math.round(v * 10) / 10).replace('.', '-');
-  const nomeBloco = (...partes) => partes.filter((p) => p !== '' && p != null).join('_').toUpperCase().replace(/[^A-Z0-9_$-]/g, '_');
+  // DXF R12 (AutoCAD): nome de bloco com no máximo 31 caracteres; acima disso o AutoCAD descarta o arquivo inteiro
+  const MAX_NOME = 31;
+  const hash4 = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36).toUpperCase().padStart(4, '0').slice(-4); };
+  const limitarNome = (n) => n.length <= MAX_NOME ? n : n.slice(0, MAX_NOME - 5) + '_' + hash4(n);
+  const nomeBloco = (...partes) => limitarNome(partes.filter((p) => p !== '' && p != null).join('_').toUpperCase().replace(/[^A-Z0-9_$-]/g, '_'));
   const circles = (prims) => prims.filter((q) => q.t === 'c').map((q) => q.c);
 
   // ---- peças paramétricas
@@ -251,7 +255,7 @@
         const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapApoio(yNivel);
         const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
         const ladoB = externa ? (i === 0 ? 'ESQ' : 'DIR') : '', pf = F.perfilC;
-        put(br.prims, x, yb, 'BRACO', nomeBloco('DI_BRACO', (externa ? 'S' : 'D') + nb(bal), 'COL' + col, ladoB, 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X')));
+        put(br.prims, x, yb, 'BRACO', nomeBloco('DI_BR', (externa ? 'S' : 'D') + nb(bal), col + (ladoB ? ladoB[0] : ''), 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X')));
         if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
@@ -317,7 +321,7 @@
     for (const it of m.items || []) {
       const sig = JSON.stringify(it.local.map((q) => [q.t, q.l, q.p && q.p.map((v) => [f(v[0]), f(v[1])]), q.c && [f(q.c[0]), f(q.c[1])], q.r && f(q.r)]));
       let nome = it.nome, k = 2;
-      while (defs.has(nome) && defs.get(nome).sig !== sig) nome = `${it.nome}_${k++}`;
+      while (defs.has(nome) && defs.get(nome).sig !== sig) nome = limitarNome(`${it.nome}_${k++}`.length <= MAX_NOME ? `${it.nome}_${k - 1}` : `${it.nome.slice(0, MAX_NOME - 3)}_${k - 1}`);
       if (!defs.has(nome)) {
         defs.set(nome, { sig });
         blocos.push('0', 'BLOCK', '8', '0', '2', nome, '70', '0', '10', '0', '20', '0', '30', '0', '3', nome);
