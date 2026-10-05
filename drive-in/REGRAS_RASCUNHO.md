@@ -339,3 +339,8 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - [IMPLEMENTADO] Nome do corte (etapa Projeto, padrão "A"). Títulos no DXF e na tela: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando a vista superior existir). Arquivo: <projeto>-corte-<nome>.dxf.
 - [IMPLEMENTADO] DXF com peças em blocos: cada peça é um BLOCK + INSERT, com o nome carregando os parâmetros (ex.: DI_COLUNA_H9250_D, DI_TRAVESSA_H_CC710-9, DI_TRAVESSA_D_710-9X900, DI_BRACO_D230_COL101_C94X40X15X1-8, DI_LGTOPO_RUA1400_COL101, DI_PALETE_1200X1350, DI_CANELEIRA_COL101). Peças iguais compartilham a definição; decimais com "-". Cotas e textos ficam soltos. Os nomes não colidem com os blocos originais da biblioteca (blocos_dxf/).
 - [PRÓXIMO] Vista superior.
+
+## 21. Decisões (rodada de perguntas 1)
+- Código SA e peso da coluna: pela altura B (base da sapata ao topo), múltiplos de 50 — como o app já faz. Pergunta da "altura padrão" encerrada.
+- Apoio mínimo do palete sobre o braço: 80 mm por lado. Abaixo disso = erro bloqueante (balanço mínimo = 80 + 100 − 2,65 ≈ 178 mm).
+- Palete escravo: os 2 paletes do chão contam como posição (como já implementado).

@@ -202,11 +202,11 @@
       add('Braços', `BRACO-${tipo}${bal}-${col}`, `Braço ${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – COL ${col} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3), 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }
     // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
+    const APOIO_MIN = 80; // apoio mínimo do palete sobre o braço, por lado (definido pelo Gean)
     const apoioBaixo = ESP_U + balBaixo - FOLGA_PALETE_COLUNA, apoioAlto = ESP_U + balAlto - FOLGA_PALETE_COLUNA;
     for (const [nome, ap, usa] of [['1º nível', apoioBaixo, niveisArm.length > 0], ['2º nível em diante', apoioAlto, niveisArm.length > 1]]) {
       if (!usa) continue;
-      if (ap <= 0) erros.push(`Braço ${nome}: balanço não alcança o palete (apoio ${ap.toFixed(1)} mm). O palete fica a ${FOLGA_PALETE_COLUNA} mm da coluna.`);
-      else alertas.push(`Apoio do palete sobre o braço (${nome}): ${ap.toFixed(1)} mm por lado. Apoio mínimo ainda não definido pela engenharia.`);
+      if (ap < APOIO_MIN) erros.push(`Braço ${nome}: apoio do palete ${ap.toFixed(1)} mm por lado, abaixo do mínimo de ${APOIO_MIN} mm. Aumente o balanço (mínimo ${Math.ceil(APOIO_MIN + FOLGA_PALETE_COLUNA - ESP_U)} mm).`);
     }
     if (totBracos) {
       add('Fixadores dos braços', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 8 * totBracos, null, null, '8 por braço');
