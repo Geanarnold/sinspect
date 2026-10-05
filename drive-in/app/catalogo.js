@@ -1,6 +1,6 @@
 // Gerado de ../catalogo/CATALOGO.xlsx por gerar_catalogo_js.py — não editar à mão.
 window.CATALOGO = {
- "versao": "2026-10-01",
+ "versao": "2026-10-05",
  "colunas": {
   "80": {
    "1.5": 2.8966,
@@ -1162,6 +1162,14 @@ window.CATALOGO = {
    "tipo": "Fixador",
    "desc": "Parafuso sextavado 5/16\" x 4\" ZNC",
    "codigo": "INT0973",
+   "peso": null,
+   "unid": "kg",
+   "aco": ""
+  },
+  "INT1193": {
+   "tipo": "Fixador",
+   "desc": "Parafuso sextavado 5/16\" x 1\"",
+   "codigo": "INT1193",
    "peso": null,
    "unid": "kg",
    "aco": ""

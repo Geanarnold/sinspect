@@ -254,7 +254,7 @@
     // ---- travamento em zig-zag (treinamento slides 9 e 11): mesmo perfil das travessas da lateral (sliter 80 × 1,40), em todas as ruas
     // fixação na furação frontal da coluna (oblongos a ±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5 (regra das travessas)
     const HX = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
-    const ccZ = larguraRua + col - 2 * HX, totZH = ccZ + 30.5;
+    const ccZ = larguraRua + col - 2 * HX;
     // FUNDO (plano do fundo, vista frontal): SEM horizontais (no lugar delas entra a longarina de fundo); uma diagonal por painel, alternada,
     // do ponto 50 mm acima da sapata / do suporte do braço até 50 mm abaixo do próximo suporte do braço / da longarina de topo (Gean)
     const offApoioZ = (180 - perfilC.A) / 2 + perfilC.A, SAPATA_TOPO = 104.76, LGTOPO_BASE = H - 154.65;
@@ -269,20 +269,17 @@
     };
     const porDZ = {}; for (const t of diagZ) porDZ[t] = (porDZ[t] || 0) + 1;
     for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua; 50 mm acima da sapata/suporte até 50 mm abaixo do suporte seguinte`);
-    // longarina de fundo: no lugar das horizontais do zig-zag, 1 por rua em cada nível de braço [CONFIRMAR perfil, comprimento e se o chão também leva]
-    const compLgFundo = larguraRua + col; // eixo a eixo das colunas [CONFIRMAR]
-    if (niveisArm.length) add('Longarinas', 'LG-FUNDO', `Longarina de fundo U ${lgU.A}x${lgU.B}x${lgU.e} – ${compLgFundo} mm`, SEM.SA, R * niveisArm.length, compLgFundo, +(kgmLgU * compLgFundo / 1000).toFixed(3),
-      `1 por rua × ${niveisArm.length} nível(is); perfil igual ao da longarina de túnel e comprimento eixo a eixo das colunas — PROVISÓRIO`);
-    // TOPO (plano do topo): horizontal em cada linha de colunas ao longo da profundidade (a da frente é a longarina de topo); diagonal alternada por vão
-    const linhasTopo = eixosLat.length - 1;
-    addZ('Travamento de topo (zig-zag)', 'H', totZH, linhasTopo * R, `${linhasTopo} por rua (linhas de coluna, exceto a frente)`);
+    // longarina de fundo: mesmo perfil da longarina de topo (DI_LGTOPO, acompanha a largura da rua), 1 por rua em cada nível de braço, cor laranja no desenho
+    const compLgFundo = larguraRua;
+    if (niveisArm.length) add('Longarinas', 'LG-FUNDO', `Longarina de fundo (perfil da longarina de topo) – rua ${larguraRua} mm`, SEM.SA, R * niveisArm.length, compLgFundo, null,
+      `1 por rua × ${niveisArm.length} nível(is); peso e SA a confirmar (iguais aos da longarina de topo)`);
+    // TOPO (plano do topo): só diagonais, alternadas, uma por vão entre linhas de coluna ao longo da profundidade
     const porDT = {}; for (let i = 0; i < eixosLat.length - 1; i++) { const t = +(Math.hypot(ccZ, eixosLat[i + 1] - eixosLat[i]) + 30.5).toFixed(1); porDT[t] = (porDT[t] || 0) + 1; }
     for (const [t, q] of Object.entries(porDT)) addZ('Travamento de topo (zig-zag)', 'D', Number(t), q * R, `${q} por rua`);
-    // fixadores: topo = 2 por horizontal (diagonais sem fixação própria, regra da lateral); fundo = 2 por diagonal (não há horizontal para compartilhar) [CONFIRMAR]
-    const nParZ = 2 * linhasTopo * R + 2 * diagZ.length * R;
-    const parZ = prodOf(cat, PARAFUSO_TRAV[col]);
-    add('Travamento de topo (zig-zag)', parZ.id, parZ.desc + ' (zig-zag topo + fundo)', parZ.codigo, nParZ, null, null, '2 por horizontal do topo + 2 por diagonal do fundo');
-    add('Travamento de topo (zig-zag)', 'INT0650', prodOf(cat, 'INT0650').desc + ' (zig-zag topo + fundo)', 'INT0650', nParZ, null, null, 'idem');
+    // fixadores das diagonais do zig-zag (topo e fundo): 2 INT1193 + 2 INT0650 por diagonal
+    const nDiagZ = (diagZ.length + (eixosLat.length - 1)) * R;
+    add('Fixadores do zig-zag', 'INT1193', prodOf(cat, 'INT1193').desc, 'INT1193', 2 * nDiagZ, null, null, `2 por diagonal (${nDiagZ} diagonais de topo + fundo)`);
+    add('Fixadores do zig-zag', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 2 * nDiagZ, null, null, '2 por diagonal');
     // o U da longarina de túnel abraça o C do braço: altura interna do U ≥ altura A do C
     const uInterno = lgU.A - 2 * lgU.e;
     // tolerância de encaixe: altura interna do U = A do C ± 1 mm (Gean)

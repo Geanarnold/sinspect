@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 30, CANELEIRA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -260,10 +260,10 @@
         });
       }
     }
-    if (F.lgFundo) for (let i = 0; i < R; i++) for (const yN of F.niveis) {
-      const ya = snapApoio(yN) + offApoio, x0 = xs[i] + col / 2, Lf = xs[i + 1] - xs[i] - col, h = F.lgFundo.h;
-      const ps = [[0, 0, Lf, 0], [Lf, 0, Lf, h], [Lf, h, 0, h], [0, h, 0, 0]].map(([a, b, c, e]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, e]] }));
-      put(ps, x0, ya - h, 'LONGARINA', nomeBloco('DI_LG_FUNDO', 'U' + nb(h), nb(Lf)));
+    // longarina de fundo: perfil da longarina de topo (DI_LGTOPO esticado pela rua), em cada nível de braço, layer laranja; topo no nível de apoio [CONFIRMAR altura]
+    if (F.lgFundo && B().DI_LGTOPO) for (let i = 0; i < R; i++) for (const yN of F.niveis) {
+      const ya = snapApoio(yN) + offApoio, x1 = xs[i] + hx + 2.23, x2 = xs[i + 1] - hx - 2.23;
+      put(stretchX(clone(B().DI_LGTOPO).map((q) => ({ ...q, l: 'LONGARINA_FUNDO' })), 1931.73 / 2, (x2 - x1) - 1931.73), x1, ya - 111.89, 'LONGARINA_FUNDO', nomeBloco('DI_LG_FUNDO', 'RUA' + nb(rua), 'COL' + col));
     }
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {
@@ -334,7 +334,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#f97316', CANELEIRA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   function dxfCompleto(r, corte) {
