@@ -344,3 +344,6 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 - Código SA e peso da coluna: pela altura B (base da sapata ao topo), múltiplos de 50 — como o app já faz. Pergunta da "altura padrão" encerrada.
 - Apoio mínimo do palete sobre o braço: 80 mm por lado. Abaixo disso = erro bloqueante (balanço mínimo = 80 + 100 − 2,65 ≈ 178 mm).
 - Palete escravo: os 2 paletes do chão contam como posição (como já implementado).
+- Altura total confirmada: último nível + palete + 100 + longarina de topo (≈155), arredondada para cima em 50.
+- Aviso fixo em todo projeto: "COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente." (tela, lista de peças, CSV e DXF).
+- Longarina de túnel: alinhada com o suporte do braço e contínua até o fim da rua; quantidade "conforme projeto" — aguardando projeto de referência.

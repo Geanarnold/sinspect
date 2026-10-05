@@ -5,6 +5,7 @@
   'use strict';
 
   const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado
+  const AVISO_ESTRUTURAL = 'COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente.';
   const DENS = 7.85e-6;       // kg/mm³ (aço)
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
   const PASSO_COLUNA = 50;    // altura da coluna em múltiplos de 50 mm
@@ -220,6 +221,7 @@
 
     // ---- ainda não levantado
     pend.push('Contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
+    alertas.unshift(AVISO_ESTRUTURAL); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);
@@ -233,6 +235,6 @@
     };
   }
 
-  const Engine = { calcular, posicoesHorizontais, buscaSA, KG_M_TRAVESSA, SEM };
+  const Engine = { AVISO_ESTRUTURAL, calcular, posicoesHorizontais, buscaSA, KG_M_TRAVESSA, SEM };
   if (typeof module !== 'undefined' && module.exports) module.exports = Engine; else root.Engine = Engine;
 })(typeof window !== 'undefined' ? window : globalThis);

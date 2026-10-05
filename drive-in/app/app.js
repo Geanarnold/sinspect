@@ -65,7 +65,7 @@
       }
     }
     html += `<tr class="grp"><td colspan="5">TOTAL (itens levantados)</td><td class="num">${fmt(r.pesoTotal)}</td><td></td></tr></tbody></table>`;
-    $('tab-pecas').innerHTML = html;
+    $('tab-pecas').innerHTML = `<p class="aviso-estr">${esc(Engine.AVISO_ESTRUTURAL)}</p>` + html;
   }
 
   // ---- desenho (SVG): vista lateral de um pórtico, vista frontal e planta
@@ -153,7 +153,7 @@
 
   function csv() {
     if (!last) return;
-    const rows = [['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs']];
+    const rows = [[Engine.AVISO_ESTRUTURAL], ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs']];
     for (const p of last.pecas) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
     const txt = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.csv`; a.click();
