@@ -403,5 +403,13 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - [PRÓXIMO] Vista superior (planta) no padrão do 260324: colunas, longarinas de túnel, braços, setas de entrada por rua, numeração das posições (A01…), cotas de largura/profundidade, corredor e distâncias à parede.
 - [DEPOIS] Empilhadeira entre as vistas + nota "ATENTAR-SE AS DIMENSÕES DA GRADE DA EMPILHADEIRA…" (precisa do bloco da empilhadeira). Lateral do 260324 tem falhas — completar os detalhes depois (Gean).
 - [IMPLEMENTADO] Vista superior (planta) no padrão do 260324, abaixo da frontal no DXF e na aba Planta: colunas, braços (simples nas pontas, duplos nas internas, balanço do 2º nível em diante), longarinas de túnel na ponta do braço ao longo de toda a profundidade, longarina de topo (frente) e de fundo, zig-zag de topo, paletes (do fundo para a frente, palete + 25), seta e número de cada rua na frente, cotas de ruas/largura e espaços/profundidade. Título "VISTA SUPERIOR CORTE X".
-- [PENDENTE] Seção real da coluna em planta (80 / 101 / 122 / 80 duplada) — hoje retângulo largura × 69,8; aguardando blocos. Coluna 80 duplada ainda não existe como opção no app.
+- [IMPLEMENTADO] Seção real da coluna em planta (blocos DI_SECAO_COL80 / DI_SECAO_COL122, de COLUNAS.dxf): abertura voltada para dentro do quadro (as duas colunas do quadro se olham, como no 80_DUP.dxf); coluna solteira abre para a vizinha. COL 101 ainda sem seção (retângulo 101 × 69,8) — aguardando o bloco.
 - [PENDENTE] Numeração das posições (A01…): regra de numeração a confirmar (no 260324: A01, A09, A18, A162 nos cantos).
+
+## 26. Coluna 80 duplada (COLUNAS.dxf / 80_DUP.dxf)
+
+- Regra do Gean: duas montantes grudadas uma na outra. Bloco COL_80_DUP = 2 × COL_80 lado a lado (eixos a ±40 mm do centro), 160 mm na largura da estrutura; cada montante com o próprio par de diagonais (DI_DIAGONAL) no quadro.
+- Opção "AMPP COL 80 DUPLADA" (valor `80D`). Largura da estrutura = ruas × rua + laterais × 160.
+- Lista de peças: perfil COL 80 em dobro (2 por posição), emenda em dobro, contraventamento lateral em dobro (travessas, diagonais, tubos, união da solteira, topo, parafusos); 1 sapata SAP-80DUP (1,65 kg) por posição — composição e CO não cadastrados.
+- Provisório `[CONFIRMAR]`: braço com U abraçando as 2 montantes (interno 160); zig-zag e longarinas de topo/fundo no oblongo externo da montante do lado da rua (61,9 mm do centro); caneleira cobrindo as 2 montantes (1 por lateral); fixação montante–montante não levantada.
+- Vistas: frontal com 2 colunas lado a lado; planta com as 2 seções COL 80 e uma linha de contraventamento em cada montante; lateral igual à COL 80.

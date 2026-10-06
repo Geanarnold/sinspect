@@ -46,7 +46,10 @@
   }
 
   function calcular(inp, cat) {
-    const col = Number(inp.coluna);
+    // coluna duplada ("80D"): duas montantes do mesmo perfil grudadas lado a lado (COLUNAS.dxf / 80_DUP.dxf: COL_80_DUP = 2 × COL_80, 160 mm),
+    // cada montante com o próprio contraventamento lateral; na largura da estrutura ocupa 2 × perfil
+    const dup = /D$/i.test(String(inp.coluna).trim());
+    const col = parseInt(inp.coluna, 10), nM = dup ? 2 : 1, colW = col * nM, nomeCol = `COL ${col}${dup ? ' DUPLADA' : ''}`;
     const esp = String(inp.espessura);
     const R = Number(inp.ruas), N = Number(inp.niveis);
     const n = Number(inp.espacamentos);
@@ -88,7 +91,7 @@
     const FOLGA_PALETE_COLUNA = 100;
     const frentePalete = Number(inp.frentePalete) || 0;
     const larguraRua = frentePalete > 0 ? frentePalete + 2 * FOLGA_PALETE_COLUNA : Number(inp.larguraRua || LARGURA_RUA);
-    const largura = R * larguraRua + laterais * col;
+    const largura = R * larguraRua + laterais * colW;
     const profundidade = espacos.reduce((s, v) => s + v, 0); // A1..An são medidas face a face (externas), como no DRIVE_IN.dxf: o total já inclui as colunas
     // quadros de 2 colunas nos passos 1,3,5...; passos par → coluna solteira no último passo (união, sem diagonal)
     const quadros = Math.floor((n + 1) / 2);
@@ -112,10 +115,10 @@
     const trechos = H > MAX_PECA ? [MAX_PECA, H - MAX_PECA] : [H];
     trechos.forEach((L, i) => {
       const sa = saCol(L);
-      add('Colunas', `COL-${col}-${L}`, `AMPP COL ${col} C/ABA #${esp} mm – ${L} mm${trechos.length > 1 ? (i ? ' (superior)' : ' (inferior)') : ''}`, sa, colunas, L, kgm != null ? kgm * L / 1000 : null,
-        sa === SEM.SA ? 'altura sem SA cadastrado' : '');
+      add('Colunas', `COL-${col}-${L}`, `AMPP COL ${col} C/ABA #${esp} mm – ${L} mm${trechos.length > 1 ? (i ? ' (superior)' : ' (inferior)') : ''}`, sa, colunas * nM, L, kgm != null ? kgm * L / 1000 : null,
+        [sa === SEM.SA ? 'altura sem SA cadastrado' : '', dup ? `duplada: 2 montantes por posição (${colunas} posições)` : ''].filter(Boolean).join('; '));
     });
-    const emendas = H > MAX_PECA ? colunas : 0;
+    const emendas = H > MAX_PECA ? colunas * nM : 0;
     if (emendas) {
       pend.push('Posição da emenda: regra "o mais alta possível, desviando de braços e longarinas" ainda não aplicada (usa 8500 + restante).');
       for (const c of cat.composicao.filter((x) => x.pai === 'EMENDA')) {
@@ -124,13 +127,16 @@
       }
     }
 
-    // ---- sapatas
-    for (const c of cat.composicao.filter((x) => x.pai === SAPATA[col])) {
+    // ---- sapatas (duplada: uma sapata SAP-80DUP por posição, abraçando as 2 montantes)
+    const idSap = dup ? `SAP-${col}DUP` : SAPATA[col];
+    const compSap = cat.composicao.filter((x) => x.pai === idSap);
+    for (const c of compSap) {
       const p = prodOf(cat, c.item);
-      add('Sapatas', c.item, p.desc, p.codigo || (c.item.startsWith('SAP-U') ? SEM.SA : ''), c.qtd * colunas, null, c.item.startsWith('SAP-') && c.item !== SAPATA[col] ? null : p.peso);
+      add('Sapatas', c.item, p.desc, p.codigo || (c.item.startsWith('SAP-U') ? SEM.SA : ''), c.qtd * colunas, null, c.item.startsWith('SAP-') && c.item !== idSap ? null : p.peso);
     }
-    const sap = prodOf(cat, SAPATA[col]);
-    add('Sapatas', SAPATA[col], sap.desc + ' (conjunto)', sap.codigo || SEM.CO, colunas, null, sap.peso, 'peso do conjunto (componentes acima sem peso próprio)');
+    const sap = prodOf(cat, idSap);
+    add('Sapatas', idSap, sap.desc + ' (conjunto)', sap.codigo || SEM.CO, colunas, null, sap.peso, compSap.length ? 'peso do conjunto (componentes acima sem peso próprio)' : 'peso do conjunto; composição (base, U, placas, chumbadores) não cadastrada');
+    if (dup && !compSap.length) pend.push(`Sapata ${idSap}: composição e código CO não cadastrados no CATALOGO.xlsx (só o peso do conjunto, ${sap.peso} kg).`);
 
     // ---- laterais: travessas, diagonais, tubos, parafusos (por quadro de 2 colunas)
     const ys = posicoesHorizontais(H);
@@ -138,7 +144,7 @@
     const porPasso = {};
     for (const a of passosQuadro) porPasso[a] = (porPasso[a] || 0) + 1;
     for (const [aStr, q] of Object.entries(porPasso)) {
-      const a = Number(aStr), vaos = q * laterais, ccH = a - 109.1, totH = a - 78.6;
+      const a = Number(aStr), vaos = q * laterais * nM, ccH = a - 109.1, totH = a - 78.6;
       const itH = buscaSA(cat.travessas, totH);
       add('Travessas', `TRAV-H-${a}`, `Travessa horizontal – passo ${a} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * vaos, r1(totH), KG_M_TRAVESSA * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
       const diagPorV = {};
@@ -149,22 +155,22 @@
         add('Travessas', `TRAV-D-${a}-${V}`, `Travessa diagonal – passo ${a}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, qd * vaos, r1(tot), KG_M_TRAVESSA * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
       }
     }
-    const vaosQuadro = passosQuadro.length * laterais;
+    const vaosQuadro = passosQuadro.length * laterais * nM;
     const tubos = (2 * nH - 2 * nD) * vaosQuadro;
     const tb = prodOf(cat, TUBO[col]);
     add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal (1ª e última horizontais)');
     if (solteira) {
       const a = passoSolteira, totU = r1(a - 69.8);
       const itU = (cat.uniao || []).filter((u) => u.col === col).find((u) => Math.abs(u.total - totU) <= TOL_SA);
-      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais, totU, itU ? itU.peso : null, itU ? itU.nome : 'sem CO cadastrado para este comprimento (±3 mm); peso não estimado');
-      const q = nH * laterais;
+      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais * nM, totU, itU ? itU.peso : null, itU ? itU.nome : 'sem CO cadastrado para este comprimento (±3 mm); peso não estimado');
+      const q = nH * laterais * nM;
       add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
       add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
     }
     // elemento de topo: dois modelos, um para o passo dentro do quadro e outro para o passo entre quadros (inclui o passo da solteira [CONFIRMAR])
     const porPassoTopo = (lista, rotulo, id) => {
       const c = {}; for (const a of lista) c[a] = (c[a] || 0) + 1;
-      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais, Number(a), null, 'SA e peso a confirmar');
+      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais * nM, Number(a), null, 'SA e peso a confirmar');
     };
     porPassoTopo(passosQuadro, 'da montante (dentro do quadro)', 'TOPO-Q');
     porPassoTopo(espacos.filter((_, i) => solteira ? i % 2 === 0 : i % 2 === 1), 'entre montantes', 'TOPO-E');
@@ -183,8 +189,8 @@
     const modeloAlto = String(balAlto);
     const perfilC = { A: alturaBracoC, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 1.8 };
     const ESP_U = 2.65, ALT_BRACO = 180, ABA_U = 42.65;
-    const uExt = col + 2 * ESP_U;
-    const pesoU = (col + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
+    const uExt = colW + 2 * ESP_U; // duplada: U abraça as 2 montantes (160) [CONFIRMAR]
+    const pesoU = (colW + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
     const desenvC = perfilC.A + 2 * perfilC.C + 2 * perfilC.B - 4 * perfilC.D;          // desenvolvimento aproximado do C (linha média)
     const compC = (tipo, bal) => uExt + (tipo === 'D' ? 2 : 1) * bal;
     const pesoBracoCalc = (tipo, bal) => pesoU + desenvC * perfilC.D * compC(tipo, bal) * DENS;
@@ -200,7 +206,7 @@
     for (const [m, q] of Object.entries(contBraco)) {
       totBracos += q;
       const [tipo, bal] = m.split('|'), b = Number(bal);
-      add('Braços', `BRACO-${tipo}${bal}-${col}`, `Braço ${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – COL ${col} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3), 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
+      add('Braços', `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, `Braço ${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – ${nomeCol} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3), 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }
     // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
     const APOIO_MIN = 80; // apoio mínimo do palete sobre o braço, por lado (definido pelo Gean)
@@ -263,8 +269,9 @@
     };
     // ---- travamento em zig-zag (treinamento slides 9 e 11): mesmo perfil das travessas da lateral (sliter 80 × 1,40), em todas as ruas
     // fixação na furação frontal da coluna (oblongos a ±hx do eixo): c/c horizontal = rua + coluna − 2·hx; total = c/c + 30,5 (regra das travessas)
-    const HX = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
-    const ccZ = larguraRua + col - 2 * HX;
+    const hx1 = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
+    const HX = dup ? col / 2 + hx1 : hx1; // duplada: oblongo externo da montante voltada para a rua (eixo da montante a ±col/2 do centro) [CONFIRMAR]
+    const ccZ = larguraRua + colW - 2 * HX;
     // FUNDO (plano do fundo, vista frontal): SEM horizontais (no lugar delas entra a longarina de fundo); uma diagonal por painel, alternada,
     // do ponto 50 mm acima da sapata / do suporte do braço até 50 mm abaixo do próximo suporte do braço / da longarina de topo (Gean)
     const offApoioZ = (180 - perfilC.A) / 2 + perfilC.A, SAPATA_TOPO = 104.76, LGTOPO_BASE = H - 154.65;
@@ -310,11 +317,12 @@
     else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
     alertas.unshift(AVISO_ESTRUTURAL); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
+    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço com U abraçando as 2 montantes (${colW} mm), zig-zag no oblongo externo. Confirmar braço, caneleira e fixação montante–montante.`);
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);
     return {
-      entradas: { ...inp, coluna: col, espessura: esp },
-      dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
+      entradas: { ...inp, coluna: col, dup, espessura: esp },
+      dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, montantes: colunas * nM, colW, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       planta: { eixos: eixosLat, profPalete: Number(inp.profPalete || 1000) },
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },

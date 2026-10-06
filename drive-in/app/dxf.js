@@ -246,7 +246,8 @@
   }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
   function montarFrontal(r, titulo) {
-    const col = Number(r.entradas.coluna), H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    // col = largura ocupada na frontal (duplada: 2 × perfil); cp = perfil da montante
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const prims = [], linhas = [], textos = [], faltam = new Set();
     const items = []; // cada peça vira um bloco no DXF (definição local + INSERT)
     const put = (ps, dx, dy, layerDefault, nome) => {
@@ -258,7 +259,7 @@
     const text = (x, y, h, s, layer, rot = 0, just = 1, st) => textos.push({ x, y, h, s, l: layer, rot, just, st });
     const cota = fazCota(line, text);
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2); // eixos das colunas (rua = vão livre entre faces)
-    const hy = furosFrontal(col, H), hx = HOLE_FX[col] || col / 2 - 18;
+    const hy = furosFrontal(cp, H), hx1 = HOLE_FX[cp] || cp / 2 - 18, hx = dup ? cp / 2 + hx1 : hx1; // duplada: oblongo externo da montante do lado da rua
     const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
     // braço: o topo do C (apoio do palete) deve ficar no nível ou logo acima (furação de 50 em 50; furo inferior do braço 15 mm acima da base)
     const offApoio = (180 - F.perfilC.A) / 2 + F.perfilC.A;
@@ -266,9 +267,9 @@
     const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
     const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {
-      put(colunaFrontal(col, H), x, 0, 'MONTANTE', nomeBloco('DI_COLUNA_FRONTAL', col, 'H' + H));
-      // caneleira 700 mm (sobre a sapata)
-      const w = col / 2 + 6; [[x - w, 105], [x + w, 105]].forEach(() => {}); 
+      // duplada: duas montantes grudadas, eixos a ±cp/2 do centro da posição
+      for (const dx of dup ? [-cp / 2, cp / 2] : [0]) put(colunaFrontal(cp, H), x + dx, 0, 'MONTANTE', nomeBloco('DI_COLUNA_FRONTAL', cp, 'H' + H));
+      const w = col / 2 + 6;
       // caneleira 700 mm: mesmo formato do braço — preenchimento sólido (amarelo) + contorno e linhas de dobra por cima (layer CANELEIRA, cor 7)
       const seg = (a1, b1, c1, d1) => ({ t: 'p', l: 'CANELEIRA', p: [[a1, b1], [c1, d1]] });
       const cnl = [{ t: 's', l: 'CANELEIRA_HACHURA', p: [[-w, 0], [w, 0], [-w, 700], [w, 700]] },
@@ -356,8 +357,9 @@
   // ---- vista superior (planta), no padrão do projeto 260324: frente embaixo (y = 0), fundo em cima
   // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
   function montarPlanta(r, titulo) {
-    const col = Number(r.entradas.coluna), R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const D = r.dimensoes.profundidade, eixos = r.planta.eixos, CW = 69.8;
+    const dxM = dup ? [-cp / 2, cp / 2] : [0]; // eixos das montantes em relação ao centro da posição (duplada: 2 montantes grudadas)
     const prims = [], linhas = [], textos = [], items = [];
     const put = (ps, dx, dy, layerDefault, nome) => {
       for (const q of ps) q.l = q.l && q.l !== '0' ? q.l : layerDefault;
@@ -371,7 +373,7 @@
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2);
     const ysC = eixos.map((t) => D - t); // centro das colunas ao longo da profundidade (frente = 0)
     const yMin = Math.min(...ysC), yMax = Math.max(...ysC), W = xs[R] + col / 2;
-    const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC, hx = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
+    const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC, hx = F.zigzag ? F.zigzag.hx : (HOLE_FX[cp] || cp / 2 - 18);
     // paletes (embaixo de tudo): do fundo para a frente, palete + 25 mm cada
     const prof = r.planta.profPalete, P = r.paletesPorRua;
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
@@ -394,16 +396,30 @@
       put(ret(rua, 40, 'LONGARINA_FUNDO'), xs[i] + col / 2, yMax - 20, 'LONGARINA_FUNDO', nomeBloco('DI_PL_LGFUNDO', nb(rua)));
     }
     // contraventamento das laterais (linha da lateral) e colunas
-    for (let i = 0; i <= R; i++) line(xs[i], yMin, xs[i], yMax, 'Contraventamento');
+    for (let i = 0; i <= R; i++) for (const dx of dxM) line(xs[i] + dx, yMin, xs[i] + dx, yMax, 'Contraventamento');
+    // seção real da coluna (COLUNAS.dxf: COL_80 / COL_122; alma em y = 0, abertura para +y); abertura voltada para dentro do quadro
+    // (as duas colunas do quadro se olham); a solteira abre para a coluna vizinha. COL 101 ainda sem desenho: contorno retangular.
+    const Lt = r.lateral, nEsp = Lt.espacos.length;
+    const quadroEsp = (k) => k >= 0 && k < nEsp && (Lt.solteira ? k % 2 === 1 : k % 2 === 0);
+    const abreT = (j) => (quadroEsp(j - 1) ? -1 : 1); // sentido da abertura ao longo da lateral (t crescente = +1); na planta y = D − t
+    const secao = (sy) => {
+      const src = B()['DI_SECAO_COL' + cp];
+      const loc = src ? clone(src) : mapPts(ret(cp, CW, 'MONTANTE', 'MONTANTE_HACHURA'), (v) => [v[0] - cp / 2, v[1]]);
+      const h = src ? Math.max(...loc.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : CW;
+      return mapPts(loc, (v) => [v[0], sy * (v[1] - h / 2)]);
+    };
     // braços (vistos de cima: aba do C) — simples nas laterais das pontas, duplos nas internas
     for (let i = 0; i <= R; i++) for (const y of ysC) {
       const lados = i === 0 ? [1] : i === R ? [-1] : [1, -1];
       for (const s of lados) {
-        const L = ret(uo + bal, pf.C, 'BRACO', 'BRACO_HACHURA');
+        const L = translate(ret(uo + bal - col / 2, pf.C, 'BRACO', 'BRACO_HACHURA'), col / 2, 0); // da face da coluna (U 2,65 + balanço); não cobre a seção
         put(s === 1 ? L : mirrorX(L), xs[i], y - pf.C / 2, 'BRACO', nomeBloco('DI_PL_BRACO', nb(bal), col + (s === 1 ? 'D' : 'E')));
       }
-      put(ret(col, CW, 'MONTANTE', 'MONTANTE_HACHURA'), xs[i] - col / 2, y - CW / 2, 'MONTANTE', nomeBloco('DI_PL_COLUNA', col));
     }
+    for (let i = 0; i <= R; i++) ysC.forEach((y, j) => {
+      const sy = -abreT(j); // t crescente = y decrescente
+      for (const dx of dxM) put(secao(sy), xs[i] + dx, y, 'MONTANTE', nomeBloco('DI_PL_COLUNA', cp, sy > 0 ? 'F' : 'T'));
+    });
     // entrada de cada rua: seta e número da rua
     for (let i = 0; i < R; i++) {
       const xm = (xs[i] + xs[i + 1]) / 2;

@@ -60,7 +60,7 @@
   // seção A-A do perfil C com raios de dobra (ri = 1,15·D, como no desenho da tala; re = ri + D) e hachura de corte; vista frontal com linhas de centro
   function croquiBraco(r) {
     const el = $('croquiBraco'); if (!el || !window.DXF) return;
-    const pf = r.frontal.perfilC, col = Number(r.entradas.coluna), bal = r.frontal.balBaixo, esp = r.frontal.espU;
+    const pf = r.frontal.perfilC, col = r.dimensoes.colW || Number(r.entradas.coluna), bal = r.frontal.balBaixo, esp = r.frontal.espU;
     const n = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
     const LG = '#111827', LF = '#374151', CT = '#1d4ed8';
     const f1 = (v) => (+v).toFixed(2);
@@ -169,7 +169,7 @@
       kpi('larg', 'Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais · rua ${r.frontal.larguraRua} mm`),
       kpi('prof', 'Profundidade', `${fmt0(d.profundidade)} mm`, `${inp.espacamentos} espaços · sobra ${fmt0(r.sobraProfundidade)} mm`),
       kpi('peso', 'Peso do corte', `${fmt(r.pesoTotal, 1)} kg`, 'longarinas topo/fundo e trilho sem peso'),
-      kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), `${d.colunas} colunas`),
+      kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), d.montantes && d.montantes !== d.colunas ? `${d.colunas} colunas duplas (${d.montantes} montantes)` : `${d.colunas} colunas`),
     ].join('');
 
     const lp = calcularProjeto();
@@ -233,7 +233,7 @@
     for (let i = 0; i <= R; i++) g += `<rect x="${X(i * (r.frontal.larguraRua + col))}" y="${Y(H)}" width="${Math.max(col * s, 2)}" height="${H * s}" fill="#6b7280"/>`;
     const y1 = Number(r.entradas.alt1Nivel), hp = Number(r.entradas.alturaPalete);
     for (let i = 0; i < R; i++) for (let k = 0; k < N - 1; k++) { const y = y1 + k * (hp + 200); g += `<rect x="${X(i * (r.frontal.larguraRua + col) + col)}" y="${Y(y)}" width="${r.frontal.larguraRua * s}" height="3" fill="#E8520A"/>`; }
-    g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} mm (${R} ruas × ${r.frontal.larguraRua} + ${R + 1} colunas × ${col})</text>`;
+    g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} mm (${R} ruas × ${r.frontal.larguraRua} + ${R + 1} colunas × ${r.dimensoes.colW || col})</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
   function svgPlanta(r) {

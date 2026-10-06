@@ -25,6 +25,7 @@ Faltam: braços simples COL 101/122, braços duplos (D180/D230) de todas as colu
 Observações:
 - DI_UNIAO.dxf foi recortado de `referencias_dxf/VISTA_LATERAL_COM_UNIAO.dxf` (versão mais recente: furos 15 / 641,66).
 - DI_COLUNA_FRONTAL_122.dxf veio como geometria solta; foi convertida em bloco e deslocada (+65,15; −1,40) para ficar igual às colunas 80/101.
+- DI_SECAO_COL80.dxf e DI_SECAO_COL122.dxf foram recortados de COLUNAS.dxf (blocos COL_80 e COL_122): centro da seção em x = 0, face externa da alma em y = 0, abertura para +y. Falta a COL 101.
 - Os arquivos DI_BRACO_*_DIR enviados não foram mantidos (o DIR é espelhado; o S230_DIR veio com o bloco S180 por engano).
 
 `../referencias_dxf/` guarda os desenhos de referência (DRIVE_IN, posições de sapata, vista lateral com união, posição dos braços, vista frontal com LGTOPO). Servem para conferir o app, não são lidos por ele.
