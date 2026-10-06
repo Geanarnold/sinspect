@@ -391,3 +391,14 @@ Fonte: referencias_dxf/TREINAMENTO_COMERCIAL_DRIVE_IN_FEV_2024.pptx e PROJETO_MO
 ## 24. Projeto em arquivo
 - Botões Salvar / Abrir / Novo (bloco "Projeto e cortes"): salva um arquivo <projeto>.drivein.json com cabeçalho (projeto, revisão, responsável, observações) e todos os cortes; Abrir recarrega exatamente o mesmo projeto (testado: mesmos cortes e totais). Continua salvando automaticamente no navegador.
 - [IMPLEMENTADO] Braço e caneleira no mesmo formato: preenchimento sólido (BRACO_HACHURA cor 30 laranja / CANELEIRA_HACHURA cor 2 amarelo) com contorno, dobras, rasgos e parafusos por cima nos layers BRACO / CANELEIRA (cor 7). Braço mostra os 4 parafusos da frente (arruela Ø20, cabeça sextavada 1/2", ponta Ø7,94) e a espessura da ponta do C.
+
+## 25. Padrão de cotas e folha (base: projeto 260324 – Refrigerantes Coroa)
+Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 e um modelo com cortes A e B) — não guardados no repositório.
+- [IMPLEMENTADO] Estilo de cota dos estilos IGOR: marca oblíqua (tique 45°) nas pontas, texto sobre a linha e alinhado, fonte ROMANS (STYLE ROMANS → romans.shx no DXF). Tamanhos: corrente 80 / principal 150 / total 220 (marca 25 / 40 / 50).
+- [IMPLEMENTADO] Lateral: corrente dos espaços (A1…An) em cima + profundidade total acima; corrente das travessas (piso → 1ª, vãos, topo) e altura total à esquerda.
+- [IMPLEMENTADO] Frontal: rua de cada vão em cima + largura total; à esquerda corrente dos níveis (1º nível, passos, topo) + altura total, e por dentro corrente palete + folga de cada nível; em cada nível, na última rua, balanço / vão livre entre pontas / balanço (a partir da face do suporte U).
+- [IMPLEMENTADO] Pé-direito (campo na etapa Estrutura): linha com marcador "PÉ DIREITO xxxx mm" cruzando lateral e frontal; erro se a estrutura passar do pé-direito, alerta se a folga for < 300 mm.
+- [IMPLEMENTADO] Carga escrita em cada palete ("1000 kg").
+- Parafusos do braço no layer BRACO_PARAFUSO cor 250 (o R12 não tem preto verdadeiro; a cor 7 fica branca no fundo escuro).
+- [PRÓXIMO] Vista superior (planta) no padrão do 260324: colunas, longarinas de túnel, braços, setas de entrada por rua, numeração das posições (A01…), cotas de largura/profundidade, corredor e distâncias à parede.
+- [DEPOIS] Empilhadeira entre as vistas + nota "ATENTAR-SE AS DIMENSÕES DA GRADE DA EMPILHADEIRA…" (precisa do bloco da empilhadeira). Lateral do 260324 tem falhas — completar os detalhes depois (Gean).

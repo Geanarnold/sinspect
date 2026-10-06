@@ -305,6 +305,9 @@
 
     // ---- ainda não levantado
     pend.push('Contraventamentos LG-UE superior e de fundo, viga túnel e complemento, diagonais superiores e de amarração de fundo, protetores de coluna e caneleira, stop de palete: ainda não levantados. Não entram no peso.');
+    const peDireito = Number(inp.peDireito) || 0;
+    if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
+    else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
     alertas.unshift(AVISO_ESTRUTURAL); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
 
@@ -314,7 +317,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      frontal: { zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
+      frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };
   }
