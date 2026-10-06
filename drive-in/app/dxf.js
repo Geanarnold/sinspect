@@ -2,9 +2,9 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
-  const LAYER_DXF = { BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
+  const LAYER_DXF = { MONTANTE_HACHURA: 'MONTANTE_HACHURA', BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
   const f = (v) => (Math.round(v * 100) / 100).toString();
   const B = () => root.BLOCOS || (typeof require === 'function' ? (global.window && global.window.BLOCOS) : null);
@@ -352,6 +352,74 @@
     if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
     return { prims, items, linhas, textos, bbox: [-1900, -1000, W + 1600, H + 1150], faltam: [...faltam] };
   }
+
+  // ---- vista superior (planta), no padrão do projeto 260324: frente embaixo (y = 0), fundo em cima
+  // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
+  function montarPlanta(r, titulo) {
+    const col = Number(r.entradas.coluna), R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    const D = r.dimensoes.profundidade, eixos = r.planta.eixos, CW = 69.8;
+    const prims = [], linhas = [], textos = [], items = [];
+    const put = (ps, dx, dy, layerDefault, nome) => {
+      for (const q of ps) q.l = q.l && q.l !== '0' ? q.l : layerDefault;
+      if (nome) items.push({ nome, local: clone(ps), x: dx, y: dy, l: layerDefault });
+      for (const q of ps) { const w = translate([q], dx, dy)[0]; if (nome) w.blk = 1; prims.push(w); }
+    };
+    const line = (x1, y1, x2, y2, layer) => linhas.push({ l: layer, p: [[x1, y1], [x2, y2]] });
+    const text = (x, y, h, s, layer, rot = 0, just = 1, st) => textos.push({ x, y, h, s, l: layer, rot, just, st });
+    const cota = fazCota(line, text);
+    const ret = (w, h, layer, sol) => { const L = [[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0]].map(([a, b, c, d]) => ({ t: 'p', l: layer, p: [[a, b], [c, d]] })); if (sol) L.unshift({ t: 's', l: sol, p: [[0, 0], [w, 0], [0, h], [w, h]] }); return L; };
+    const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2);
+    const ysC = eixos.map((t) => D - t); // centro das colunas ao longo da profundidade (frente = 0)
+    const yMin = Math.min(...ysC), yMax = Math.max(...ysC), W = xs[R] + col / 2;
+    const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC, hx = { 80: 21.9, 101: 32.4, 122: 43.05 }[col] || col / 2 - 18;
+    // paletes (embaixo de tudo): do fundo para a frente, palete + 25 mm cada
+    const prof = r.planta.profPalete, P = r.paletesPorRua;
+    if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
+      const yTopo = D - k * r.ocupPalete;
+      put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
+    }
+    // travamento de topo em zig-zag (diagonais alternadas entre linhas de coluna)
+    for (let i = 0; i < R; i++) for (let j = 0; j < ysC.length - 1; j++) {
+      const a = j % 2 === 0, x1 = xs[i] + hx, x2 = xs[i + 1] - hx;
+      line(a ? x1 : x2, ysC[j], a ? x2 : x1, ysC[j + 1], 'Contraventamento');
+    }
+    // longarinas de túnel: ao longo de toda a profundidade, na ponta do braço, nos dois lados de cada rua
+    for (let i = 0; i < R; i++) for (const lado of [1, -1]) {
+      const xt = lado === 1 ? xs[i] + uo + bal : xs[i + 1] - uo - bal, x0 = lado === 1 ? xt - (r.lateral.lgU ? r.lateral.lgU.B : 38) : xt;
+      put(ret(r.lateral.lgU ? r.lateral.lgU.B : 38, D, 'LONGARINA'), x0, 0, 'LONGARINA', nomeBloco('DI_PL_LG_TUNEL', nb(D)));
+    }
+    // longarina de topo (frente) e de fundo (fundo) atravessando cada rua
+    for (let i = 0; i < R; i++) {
+      put(ret(rua, 40, 'LONGARINA'), xs[i] + col / 2, yMin - 20, 'LONGARINA', nomeBloco('DI_PL_LGTOPO', nb(rua)));
+      put(ret(rua, 40, 'LONGARINA_FUNDO'), xs[i] + col / 2, yMax - 20, 'LONGARINA_FUNDO', nomeBloco('DI_PL_LGFUNDO', nb(rua)));
+    }
+    // contraventamento das laterais (linha da lateral) e colunas
+    for (let i = 0; i <= R; i++) line(xs[i], yMin, xs[i], yMax, 'Contraventamento');
+    // braços (vistos de cima: aba do C) — simples nas laterais das pontas, duplos nas internas
+    for (let i = 0; i <= R; i++) for (const y of ysC) {
+      const lados = i === 0 ? [1] : i === R ? [-1] : [1, -1];
+      for (const s of lados) {
+        const L = ret(uo + bal, pf.C, 'BRACO', 'BRACO_HACHURA');
+        put(s === 1 ? L : mirrorX(L), xs[i], y - pf.C / 2, 'BRACO', nomeBloco('DI_PL_BRACO', nb(bal), col + (s === 1 ? 'D' : 'E')));
+      }
+      put(ret(col, CW, 'MONTANTE', 'MONTANTE_HACHURA'), xs[i] - col / 2, y - CW / 2, 'MONTANTE', nomeBloco('DI_PL_COLUNA', col));
+    }
+    // entrada de cada rua: seta e número da rua
+    for (let i = 0; i < R; i++) {
+      const xm = (xs[i] + xs[i + 1]) / 2;
+      line(xm, -900, xm, -250, 'COTAS'); line(xm, -250, xm - 90, -420, 'COTAS'); line(xm, -250, xm + 90, -420, 'COTAS');
+      text(xm, -1150, 150, `RUA ${String(i + 1).padStart(2, '0')}`, 'COTAS', 0, 1, 'ROMANS');
+    }
+    text(W / 2, -1450, 110, 'FRENTE (ENTRADA DA EMPILHADEIRA)', 'COTAS', 0, 1, 'ROMANS');
+    // cotas: ruas e largura total em cima; espaços (A1…An, do fundo para a frente) e profundidade total à esquerda
+    for (let i = 0; i < R; i++) cota(xs[i] + col / 2, D, xs[i + 1] - col / 2, D, 300, `${rua}`, false, 'p');
+    cota(0, D, W, D, 700, `${Math.round(W)}`, false, 'g');
+    const esp = r.lateral.espacos; let acc = 0;
+    esp.forEach((a) => { cota(0, D - acc, 0, D - acc - a, 300, `${Math.round(a)}`, true, 'c'); acc += a; });
+    cota(0, D, 0, 0, 750, `${Math.round(D)}`, true, 'g');
+    text(W / 2, -2000, 120, titulo || 'VISTA SUPERIOR', '4 - TEXTO DE ESCALA E VISTA');
+    return { prims, items, linhas, textos, bbox: [-1900, -2300, W + 900, D + 1150] };
+  }
   function shiftModel(m, dx, dy = 0) {
     for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1] + dy]); if (q.c) q.c = [q.c[0] + dx, q.c[1] + dy]; }
     for (const q of m.linhas) q.p = q.p.map((v) => [v[0] + dx, v[1] + dy]);
@@ -391,7 +459,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
@@ -407,8 +475,12 @@
       mL.textos.push({ x: x0 + 400, y: pd + 330, h: 150, s: 'PÉ DIREITO', l: 'COTAS', rot: 0, just: 0, st: 'ROMANS' }, { x: x0 + 400, y: pd + 90, h: 150, s: `${pd} mm`, l: 'COTAS', rot: 0, just: 0, st: 'ROMANS' });
       mL.bbox[3] = Math.max(mL.bbox[3], pd + 700); mF.bbox[3] = Math.max(mF.bbox[3], pd + 700);
     }
-    return { prims: mL.prims.concat(mF.prims), items: mL.items.concat(mF.items), linhas: mL.linhas.concat(mF.linhas), textos: mL.textos.concat(mF.textos),
-      bbox: [Math.min(mL.bbox[0], mF.bbox[0]), Math.min(mL.bbox[1], mF.bbox[1]), Math.max(mL.bbox[2], mF.bbox[2]), Math.max(mL.bbox[3], mF.bbox[3])] };
+    // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
+    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte));
+    shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
+    const ms = [mL, mF, mP];
+    return { prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
+      bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] };
   }
   function dxfCompleto(r, corte) { return dxfLateral(r, corte, modeloCorte(r, corte)); }
   // projeto com vários cortes: um DXF só, cortes empilhados de cima para baixo (mesma origem X), 3000 mm entre eles
@@ -426,6 +498,7 @@
   }
   function svgFrontal(r, titulo) { return svgModelo(montarFrontal(r, titulo)); }
   function svgLateral(r, titulo) { return svgModelo(montarLateral(r, titulo)); }
+  function svgPlanta(r, titulo) { return svgModelo(montarPlanta(r, titulo)); }
   function svgModelo(m) {
     const [x0, y0, x1, y1] = m.bbox, W = x1 - x0, Hh = y1 - y0;
     const X = (x) => (x - x0).toFixed(1), Y = (y) => (y1 - y).toFixed(1);
@@ -445,6 +518,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { dxfProjeto, tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  const DXF = { svgPlanta, montarPlanta, dxfProjeto, tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);

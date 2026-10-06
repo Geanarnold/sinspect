@@ -252,7 +252,7 @@
     lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, DXF.tituloVista('LATERAL', corte())) : svgLateral(r) }),
     esquema: (r) => ({ t: 'Esquema', s: `${r.lateral.quadros} quadro(s)${r.lateral.solteira ? ' + coluna solteira (verde)' : ''} · horizontais (laranja), diagonais (azul), topo (cinza)`, svg: svgLateral(r) }),
     frontal: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista frontal — desenho real', s: `colunas, sapatas, caneleiras 700 mm, braços (simples nas colunas externas, duplo nas internas), longarina superior por rua${DXF.montarFrontal(r).faltam.length ? ' · blocos ainda não recebidos: ' + DXF.montarFrontal(r).faltam.join(', ') : ''}`, svg: DXF.svgFrontal(r, DXF.tituloVista('FRONTAL', corte())) } : ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${r.frontal.passoNivel} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
-    planta: (r) => ({ t: 'Planta', s: 'colunas em preto; vigas túnel e contraventamentos não levantados', svg: svgPlanta(r) }),
+    planta: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista superior — desenho real', s: 'colunas, braços, longarinas de túnel, longarina de topo (frente) e de fundo, zig-zag de topo, paletes e entrada de cada rua · sai no DXF abaixo da frontal', svg: DXF.svgPlanta(r, DXF.tituloVista('SUPERIOR', corte())) } : ({ t: 'Planta', s: 'colunas em preto', svg: svgPlanta(r) }),
   };
   let vistaAtual = 'lateral';
   function renderVista(r) {

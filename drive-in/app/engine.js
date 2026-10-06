@@ -316,6 +316,7 @@
       entradas: { ...inp, coluna: col, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
+      planta: { eixos: eixosLat, profPalete: Number(inp.profPalete || 1000) },
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
