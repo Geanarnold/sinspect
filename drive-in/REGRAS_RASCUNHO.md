@@ -404,7 +404,7 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - [DEPOIS] Empilhadeira entre as vistas + nota "ATENTAR-SE AS DIMENSÕES DA GRADE DA EMPILHADEIRA…" (precisa do bloco da empilhadeira). Lateral do 260324 tem falhas — completar os detalhes depois (Gean).
 - [IMPLEMENTADO] Vista superior (planta) no padrão do 260324, abaixo da frontal no DXF e na aba Planta: colunas, braços (simples nas pontas, duplos nas internas, balanço do 2º nível em diante), longarinas de túnel na ponta do braço ao longo de toda a profundidade, longarina de topo (frente) e de fundo, zig-zag de topo, paletes (do fundo para a frente, palete + 25), seta e número de cada rua na frente, cotas de ruas/largura e espaços/profundidade. Título "VISTA SUPERIOR CORTE X".
 - [IMPLEMENTADO] Seção real da coluna em planta (blocos DI_SECAO_COL80 / DI_SECAO_COL122, de COLUNAS.dxf): abertura voltada para dentro do quadro (as duas colunas do quadro se olham, como no 80_DUP.dxf); coluna solteira abre para a vizinha. COL 101 ainda sem seção (retângulo 101 × 69,8) — aguardando o bloco.
-- [PENDENTE] Numeração das posições (A01…): regra de numeração a confirmar (no 260324: A01, A09, A18, A162 nos cantos).
+- [IMPLEMENTADO] Numeração das posições (Gean): por rua, da frente para o fundo, nível por nível (chão, escravo, 1º braço…), depois a rua seguinte. Prefixo = nome do corte (A01…). Planta: pilha de números em cada palete; frontal: número do palete da frente em cada camada. Total = posições do corte.
 
 ## 26. Coluna 80 duplada (COLUNAS.dxf / 80_DUP.dxf)
 

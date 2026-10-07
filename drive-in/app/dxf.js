@@ -244,8 +244,15 @@
     for (const xe of lado === 0 ? [xa, xb] : lado === 1 ? [xb] : [xa]) { const s = xe > 0 ? -1 : 1; ln(xe + s * pf.D, yc0, xe + s * pf.D, yc0 + pf.B); ln(xe + s * pf.D, yc1, xe + s * pf.D, yc1 - pf.B); }
     return { prims: L, topoC: yc1 };
   }
-  const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 }; // furo da face frontal (oblongo), distância ao eixo
-  function montarFrontal(r, titulo) {
+  const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 };
+  // numeração das posições (Gean): por rua, da frente para o fundo, nível por nível (chão, escravo, 1º braço…); prefixo = nome do corte
+  // n = rua × (P × camadas) + camada × P + profundidade + 1  (profundidade 0 = palete da frente)
+  function numPos(r, corte, rua, camada, prof) {
+    const P = r.paletesPorRua, L = 1 + (r.frontal.escravo ? 1 : 0) + r.frontal.niveis.length;
+    const n = rua * P * L + camada * P + prof + 1;
+    return `${String(corte || 'A').trim().toUpperCase()}${String(n).padStart(2, '0')}`;
+  } // furo da face frontal (oblongo), distância ao eixo
+  function montarFrontal(r, titulo, corte) {
     // col = largura ocupada na frontal (duplada: 2 × perfil); cp = perfil da montante
     const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const prims = [], linhas = [], textos = [], faltam = new Set();
@@ -312,6 +319,9 @@
       }
       // carga escrita no palete
       if (F.cargaPalete) for (let i = 0; i < R; i++) for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2, 110, `${F.cargaPalete} kg`, 'PALETE');
+      // número da posição do palete da frente de cada camada
+      for (let i = 0; i < R; i++) [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco].forEach((y0, k) =>
+        text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, k, 0), 'PALETE', 0, 1, 'ROMANS'));
     }
     // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
     // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
@@ -356,7 +366,7 @@
 
   // ---- vista superior (planta), no padrão do projeto 260324: frente embaixo (y = 0), fundo em cima
   // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
-  function montarPlanta(r, titulo) {
+  function montarPlanta(r, titulo, corte) {
     const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
     const D = r.dimensoes.profundidade, CW = 69.8;
     const dxM = dup ? [-cp / 2, cp / 2] : [0]; // eixos das montantes em relação ao centro da posição (duplada: 2 montantes grudadas)
@@ -378,6 +388,9 @@
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
+      // posições empilhadas neste ponto da rua (de cima para baixo: último nível … chão)
+      const L = 1 + (F.escravo ? 1 : 0) + F.niveis.length, dP = P - 1 - k, h = Math.min(90, (prof - 100) / L / 1.4);
+      for (let c = 0; c < L; c++) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 + ((L - 1) / 2 - (L - 1 - c)) * h * 1.4 - h / 2, h, numPos(r, corte, i, c, dP), 'PALETE', 0, 1, 'ROMANS');
     }
     // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
     // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
@@ -497,7 +510,7 @@
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
   function modeloCorte(r, corte) {
-    const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte));
+    const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte), corte);
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
     if (aviso) for (const mm of [mL, mF]) mm.textos.push({ x: (mm.bbox[0] + mm.bbox[2]) / 2, y: -800 - (mm === mF && mF.faltam.length ? 200 : 0), h: 90, s: aviso, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
@@ -509,7 +522,7 @@
       mL.bbox[3] = Math.max(mL.bbox[3], pd + 700); mF.bbox[3] = Math.max(mF.bbox[3], pd + 700);
     }
     // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
-    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte));
+    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte), corte);
     shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
     const ms = [mL, mF, mP];
     return { prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
@@ -529,9 +542,9 @@
     });
     return dxfLateral(lista[0] && lista[0].r, '', m);
   }
-  function svgFrontal(r, titulo) { return svgModelo(montarFrontal(r, titulo)); }
+  function svgFrontal(r, titulo, corte) { return svgModelo(montarFrontal(r, titulo, corte)); }
   function svgLateral(r, titulo) { return svgModelo(montarLateral(r, titulo)); }
-  function svgPlanta(r, titulo) { return svgModelo(montarPlanta(r, titulo)); }
+  function svgPlanta(r, titulo, corte) { return svgModelo(montarPlanta(r, titulo, corte)); }
   function svgModelo(m) {
     const [x0, y0, x1, y1] = m.bbox, W = x1 - x0, Hh = y1 - y0;
     const X = (x) => (x - x0).toFixed(1), Y = (y) => (y1 - y).toFixed(1);
