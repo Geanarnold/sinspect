@@ -423,3 +423,9 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - **Zig-zag de topo** preso nas chapas de ponta da longarina superior: furo a 60 mm da face da coluna (c/c em x = rua − 120) e, na profundidade, 65 mm da alma para dentro do quadro ou 25 mm para fora. Dentro do quadro Δ = A − 130; no vão entre quadros Δ = A − 50; solteira Δ = A − 90. Total = c/c + 30,5. Confere com o modelo: 1592,4 (DI_TRAV_SUP) e 1639,5 (DI_DIAG_MAIOR, vão de 1025,3). Alternância a partir da frente (linha da frente: furo à direita).
 - **Trilho guia centrado na linha de colunas de cada lateral** → 1 por lateral (o das laterais internas serve às duas ruas) — **confirmado pelo Gean**. Perfil e peso ainda a informar. Comprimento continua pela regra (até o fim do penúltimo palete, 50 mm à frente); o modelo tem 3265,6 nos dois exemplos (cópia), por isso não foi usado como regra.
 - COL 101 / 122: sem DI_MONT_<col> e DI_PL_COL<col>_SOLT ainda — usam a seção real (COLUNAS.dxf) e uma linha de contraventamento.
+
+## 28. Projeto leve (Gean)
+
+- Vista superior: paletes **não** são desenhados; só a numeração dos cantos.
+- Vista frontal: paletes só na **1ª rua** do corte; nessa rua o zig-zag de fundo não é desenhado (continua na lista de peças). Carga e número da posição só nessa rua.
+- Vista frontal com mais de 5 ruas: desenha só as 5 primeiras, com linha de interrupção à direita e a nota "VISTA PARCIAL: 5 DE N RUAS - LARGURA TOTAL …". A última coluna desenhada é interna (braço duplo). A lista de peças e a vista superior continuam com todas as ruas.

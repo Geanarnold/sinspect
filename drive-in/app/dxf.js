@@ -245,6 +245,7 @@
     return { prims: L, topoC: yc1 };
   }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 };
+  const MAX_RUAS_FRONTAL = 5; // Gean: projetos com mais de 5 ruas mostram só 5 na frontal
   // numeração das posições em planta (Gean): a fileira da frente leva o número da rua (01…R); a fileira seguinte continua (R+1…2R)
   // e assim até o fundo → último palete da última rua = R × P. O número vale para a pilha toda (todos os níveis daquele ponto).
   // Ex.: 28 ruas × 2 paletes: rua 01 = 01 (frente) e 29 (fundo); rua 28 = 28 e 56. Prefixo = nome do corte [CONFIRMAR]
@@ -255,8 +256,10 @@
   } // furo da face frontal (oblongo), distância ao eixo
   function montarFrontal(r, titulo, corte) {
     // col = largura ocupada na frontal (duplada: 2 × perfil); cp = perfil da montante
-    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, H = r.dimensoes.altura, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    // projeto leve (Gean): a frontal mostra no máximo 5 ruas (RT = total do corte, R = ruas desenhadas); a lista de peças continua com todas
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, H = r.dimensoes.altura, RT = Number(r.entradas.ruas), R = Math.min(RT, MAX_RUAS_FRONTAL), F = r.frontal, rua = F.larguraRua;
     const prims = [], linhas = [], textos = [], faltam = new Set();
+    const comPalete = F.frentePalete > 0 && F.alturaPalete > 0; // paletes só na 1ª rua; nela o zig-zag de fundo não é desenhado (continua na lista)
     const items = []; // cada peça vira um bloco no DXF (definição local + INSERT)
     const put = (ps, dx, dy, layerDefault, nome) => {
       for (const q of ps) q.l = q.l && q.l !== '0' ? q.l : layerDefault;
@@ -285,7 +288,7 @@
         seg(-w + 4, 0, -w + 4, 700), seg(w - 4, 0, w - 4, 700), seg(-w, 696, w, 696)];
       put(cnl, x, pe, 'CANELEIRA', nomeBloco('DI_CANELEIRA', 'COL' + col));
       // braços: simples nas colunas externas (voltados para dentro), duplo nas internas
-      const externa = i === 0 || i === R;
+      const externa = i === 0 || i === RT; // a última coluna desenhada de uma vista parcial é interna (braço duplo)
       for (const yNivel of F.niveis) {
         const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapApoio(yNivel);
         const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
@@ -297,7 +300,7 @@
     // travamento de fundo em zig-zag (plano do fundo, visto através da rua): só diagonais alternadas por painel; longarina de fundo em cada nível de braço
     if (F.zigzag && B().DI_TRAVESSA_D) {
       const Z = F.zigzag;
-      for (let i = 0; i < R; i++) {
+      for (let i = comPalete ? 1 : 0; i < R; i++) {
         const xl = xs[i] + Z.hx, xr = xs[i + 1] - Z.hx;
         Z.paineis.forEach(([y1, y2], k) => {
           if (y2 <= y1) return;
@@ -314,14 +317,14 @@
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {
       const ret = (x0, y0, w, h) => put([[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0], [0, 150, w, 150]].map(([a, b, c, d]) => ({ t: 'p', l: 'PALETE', p: [[a, b], [c, d]] })), x0, y0, 'PALETE', nomeBloco('DI_PALETE', nb(w) + 'X' + nb(h)));
-      for (let i = 0; i < R; i++) {
+      for (const i of [0]) { // paletes só na 1ª rua (projeto leve)
         const x0 = xs[i] + col / 2 + F.folgaPalete;
         for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) ret(x0, y0, F.frentePalete, F.alturaPalete);
       }
       // carga escrita no palete
-      if (F.cargaPalete) for (let i = 0; i < R; i++) for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2, 110, `${F.cargaPalete} kg`, 'PALETE');
+      if (F.cargaPalete) for (const i of [0]) for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2, 110, `${F.cargaPalete} kg`, 'PALETE');
       // número da posição do palete da frente (igual em todos os níveis): escrito no palete do chão
-      for (const i of [...new Set([0, R - 1])]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, 0), 'PALETE', 0, 1, 'ROMANS'); // só 1ª e última rua
+      text(xs[0] + col / 2 + F.folgaPalete + F.frentePalete / 2, F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, 0, 0), 'PALETE', 0, 1, 'ROMANS'); // só na 1ª rua (a única com palete)
     }
     // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
     // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
@@ -359,9 +362,14 @@
         cota(a1, yC, t1, yC, -1, `${bal}`, false, 'c'); cota(t1, yC, t2, yC, -1, `${Math.round(t2 - t1)}`, false, 'c'); cota(t2, yC, a2, yC, -1, `${bal}`, false, 'c');
       });
     }
+    if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
+      const xb = W + 350, z = [[xb, -200], [xb, H * 0.45], [xb - 120, H * 0.48], [xb + 120, H * 0.52], [xb, H * 0.55], [xb, H + 300]];
+      for (let k = 0; k < z.length - 1; k++) line(z[k][0], z[k][1], z[k + 1][0], z[k + 1][1], 'COTAS');
+      text(W / 2, -1000, 110, `VISTA PARCIAL: ${R} DE ${RT} RUAS - LARGURA TOTAL ${Math.round(r.dimensoes.largura)} mm`, 'COTAS', 0, 1, 'ROMANS');
+    }
     text(W / 2, -600, 120, titulo || 'VISTA FRONTAL', '4 - TEXTO DE ESCALA E VISTA');
-    if (faltam.size) text(W / 2, -800, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
-    return { prims, items, linhas, textos, bbox: [-1900, -1000, W + 1600, H + 1150], faltam: [...faltam] };
+    if (faltam.size) text(W / 2, -1180, 70, 'Blocos ainda nao recebidos (nao desenhados): ' + [...faltam].join(', '), '4 - TEXTO DE ESCALA E VISTA');
+    return { prims, items, linhas, textos, bbox: [-1900, -1300, W + 1600, H + 1150], faltam: [...faltam] };
   }
 
   // ---- vista superior (planta), no padrão do projeto 260324: frente embaixo (y = 0), fundo em cima
@@ -383,11 +391,10 @@
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2);
     const W = xs[R] + col / 2;
     const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC;
-    // paletes (embaixo de tudo): do fundo para a frente, palete + 25 mm cada
+    // paletes não são desenhados na planta (projeto leve, Gean); só a numeração dos cantos, no lugar de cada palete (do fundo para a frente, palete + 25)
     const prof = r.planta.profPalete, P = r.paletesPorRua;
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
-      put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
       // número da posição (vale para todos os níveis deste ponto da rua): só nos cantos — 1º e último palete da 1ª e da última rua (Gean)
       if ((i === 0 || i === R - 1) && (k === 0 || k === P - 1)) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
     }
@@ -512,7 +519,7 @@
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte), corte);
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
-    if (aviso) for (const mm of [mL, mF]) mm.textos.push({ x: (mm.bbox[0] + mm.bbox[2]) / 2, y: -800 - (mm === mF && mF.faltam.length ? 200 : 0), h: 90, s: aviso, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
+    if (aviso) for (const mm of [mL, mF]) mm.textos.push({ x: (mm.bbox[0] + mm.bbox[2]) / 2, y: -800, h: 90, s: aviso, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
     const pd = Number(r.frontal.peDireito) || 0;
     if (pd > 0) { // linha de pé-direito com marcador, como no 260324
       const x0 = mL.bbox[0] + 400, x1 = mF.bbox[2] - 400;
