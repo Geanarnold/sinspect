@@ -321,7 +321,7 @@
       // carga escrita no palete
       if (F.cargaPalete) for (let i = 0; i < R; i++) for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2, 110, `${F.cargaPalete} kg`, 'PALETE');
       // número da posição do palete da frente (igual em todos os níveis): escrito no palete do chão
-      for (let i = 0; i < R; i++) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, 0), 'PALETE', 0, 1, 'ROMANS');
+      for (const i of [...new Set([0, R - 1])]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, 0), 'PALETE', 0, 1, 'ROMANS'); // só 1ª e última rua
     }
     // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
     // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
@@ -388,8 +388,8 @@
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
-      // número da posição (vale para todos os níveis deste ponto da rua)
-      text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
+      // número da posição (vale para todos os níveis deste ponto da rua): só nos cantos — 1º e último palete da 1ª e da última rua (Gean)
+      if ((i === 0 || i === R - 1) && (k === 0 || k === P - 1)) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
     }
     // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
     // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
