@@ -245,12 +245,13 @@
     return { prims: L, topoC: yc1 };
   }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 };
-  // numeração das posições (Gean): por rua, da frente para o fundo, nível por nível (chão, escravo, 1º braço…); prefixo = nome do corte
-  // n = rua × (P × camadas) + camada × P + profundidade + 1  (profundidade 0 = palete da frente)
-  function numPos(r, corte, rua, camada, prof) {
-    const P = r.paletesPorRua, L = 1 + (r.frontal.escravo ? 1 : 0) + r.frontal.niveis.length;
-    const n = rua * P * L + camada * P + prof + 1;
-    return `${String(corte || 'A').trim().toUpperCase()}${String(n).padStart(2, '0')}`;
+  // numeração das posições em planta (Gean): a fileira da frente leva o número da rua (01…R); a fileira seguinte continua (R+1…2R)
+  // e assim até o fundo → último palete da última rua = R × P. O número vale para a pilha toda (todos os níveis daquele ponto).
+  // Ex.: 28 ruas × 2 paletes: rua 01 = 01 (frente) e 29 (fundo); rua 28 = 28 e 56. Prefixo = nome do corte [CONFIRMAR]
+  function numPos(r, corte, rua, prof) {
+    const R = Number(r.entradas.ruas), tot = R * r.paletesPorRua;
+    const n = prof * R + rua + 1;
+    return `${String(corte || 'A').trim().toUpperCase()}${String(n).padStart(Math.max(2, String(tot).length), '0')}`;
   } // furo da face frontal (oblongo), distância ao eixo
   function montarFrontal(r, titulo, corte) {
     // col = largura ocupada na frontal (duplada: 2 × perfil); cp = perfil da montante
@@ -319,9 +320,8 @@
       }
       // carga escrita no palete
       if (F.cargaPalete) for (let i = 0; i < R; i++) for (const y0 of [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco]) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2, 110, `${F.cargaPalete} kg`, 'PALETE');
-      // número da posição do palete da frente de cada camada
-      for (let i = 0; i < R; i++) [0, ...(F.escravo ? [F.alturaPalete] : []), ...topoBraco].forEach((y0, k) =>
-        text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, y0 + F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, k, 0), 'PALETE', 0, 1, 'ROMANS'));
+      // número da posição do palete da frente (igual em todos os níveis): escrito no palete do chão
+      for (let i = 0; i < R; i++) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, F.alturaPalete / 2 + (F.cargaPalete ? 200 : -50), 130, numPos(r, corte, i, 0), 'PALETE', 0, 1, 'ROMANS');
     }
     // longarina superior (DI_LGTOPO) em cada rua, conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
     // furo de fixação 8,46 mm acima do 3º furo de cima da coluna (topo da longarina 4,65 mm abaixo do topo da coluna)
@@ -388,9 +388,8 @@
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
-      // posições empilhadas neste ponto da rua (de cima para baixo: último nível … chão)
-      const L = 1 + (F.escravo ? 1 : 0) + F.niveis.length, dP = P - 1 - k, h = Math.min(90, (prof - 100) / L / 1.4);
-      for (let c = 0; c < L; c++) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 + ((L - 1) / 2 - (L - 1 - c)) * h * 1.4 - h / 2, h, numPos(r, corte, i, c, dP), 'PALETE', 0, 1, 'ROMANS');
+      // número da posição (vale para todos os níveis deste ponto da rua)
+      text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
     }
     // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
     // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
