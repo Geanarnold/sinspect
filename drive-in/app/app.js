@@ -268,7 +268,7 @@
   }
   const corte = () => (proj.cortes[proj.atual] || {}).nome || 'A'; // nome aceito (único), não o que está sendo digitado
   const VISTAS = {
-    lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, DXF.tituloVista('LATERAL', corte())) : svgLateral(r) }),
+    lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · sai no "DXF do projeto" junto com a frontal e a superior`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, DXF.tituloVista('LATERAL', corte())) : svgLateral(r) }),
     esquema: (r) => ({ t: 'Esquema', s: `${r.lateral.quadros} quadro(s)${r.lateral.solteira ? ' + coluna solteira (verde)' : ''} · horizontais (laranja), diagonais (azul), topo (cinza)`, svg: svgLateral(r) }),
     frontal: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista frontal — desenho real', s: `colunas, sapatas, caneleiras 700 mm, braços (simples nas colunas externas, duplo nas internas), longarina superior por rua${DXF.montarFrontal(r).faltam.length ? ' · blocos ainda não recebidos: ' + DXF.montarFrontal(r).faltam.join(', ') : ''}`, svg: DXF.svgFrontal(r, DXF.tituloVista('FRONTAL', corte()), corte()) } : ({ t: 'Vista frontal', s: `níveis a partir de ${r.entradas.alt1Nivel} mm, passo ${r.frontal.passoNivel} mm (braços ainda não levantados)`, svg: svgFrontal(r) }),
     planta: (r) => (window.DXF && window.BLOCOS) ? { t: 'Vista superior — desenho real', s: 'quadros e colunas, braços na alma, longarinas de túnel, longarina superior em cada linha de coluna, zig-zag de topo nas chapas da longarina, trilho guia por lateral, número da posição nos cantos (sem desenhar paletes) e entrada de cada rua · sai no DXF abaixo da frontal', svg: DXF.svgPlanta(r, DXF.tituloVista('SUPERIOR', corte()), corte()) } : ({ t: 'Planta', s: 'colunas em preto', svg: svgPlanta(r) }),
@@ -278,17 +278,28 @@
     const v = VISTAS[vistaAtual](r);
     $('vista').innerHTML = `<h3>${v.t}</h3><div class="s">${v.s}</div>${v.svg}<p class="nota">Desenho atualizado conforme o preenchimento. O DXF sai com as peças em blocos.</p>`;
   }
+  // PNG da vista: o desenho real vem em mm (viewBox de dezenas de milhares) → escala para no máx. 6000 px no lado maior
+  // (limite seguro de canvas dos navegadores); xmlns só é acrescentado se faltar (repetido invalida o SVG e a imagem não carrega)
   function baixarPng() {
     const svg = $('vista').querySelector('svg'); if (!svg) return;
-    const vb = svg.viewBox.baseVal, scale = 3;
-    const xml = new XMLSerializer().serializeToString(svg);
+    const vb = svg.viewBox.baseVal, W0 = vb && vb.width ? vb.width : svg.clientWidth, H0 = vb && vb.height ? vb.height : svg.clientHeight;
+    const MAX = 6000, scale = Math.min(MAX / W0, MAX / H0, 3), w = Math.max(1, Math.round(W0 * scale)), h = Math.max(1, Math.round(H0 * scale));
+    const cl = svg.cloneNode(true); cl.setAttribute('width', w); cl.setAttribute('height', h);
+    if (!cl.getAttribute('xmlns')) cl.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(cl)], { type: 'image/svg+xml;charset=utf-8' }));
     const img = new Image();
     img.onload = () => {
-      const c = document.createElement('canvas'); c.width = vb.width * scale; c.height = vb.height * scale;
-      const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
-      const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = `${vistaAtual}-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.png`; a.click();
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+      c.toBlob((blob) => {
+        if (!blob) { alert('Não foi possível gerar o PNG desta vista.'); return; }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `${vistaAtual}-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}-corte-${corte().replace(/[^\w-]+/g, '_')}.png`;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      }, 'image/png');
     };
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+    img.onerror = () => { URL.revokeObjectURL(url); alert('Não foi possível gerar o PNG desta vista.'); };
+    img.src = url;
   }
 
   function renderProjeto(lp) {
@@ -382,12 +393,6 @@
   $('btnRemCorte').addEventListener('click', () => {
     if (proj.cortes.length < 2 || !confirm(`Remover o corte ${proj.cortes[proj.atual].nome}?`)) return;
     proj.cortes.splice(proj.atual, 1); selecionarCorte(Math.max(0, proj.atual - 1));
-  });
-  $('btnDxf').addEventListener('click', () => {
-    if (!last) return;
-    const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
-    const txt = DXF.dxfCompleto(last, corte());
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-corte-${corte().replace(/[^\w-]+/g, '_')}.dxf`; a.click();
   });
   mostrarPasso(0);
   IDS.forEach((id) => $(id).addEventListener('input', render));
