@@ -15,11 +15,13 @@
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: 'A', qtd: 1, dados: null }] };
   const CAB = ['projeto', 'revisao', 'responsavel', 'obs'];
+  // nome do projeto (padrão SUPRA + número, ex. SUPRA263020): até 11 letras ou números, sem espaço nem caracteres especiais, em maiúsculas
+  const limparProjeto = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 11);
   const salvar = () => { proj.cab = Object.fromEntries(CAB.map((k) => [k, $(k).value])); try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
   function carregarProjeto(p) {
     if (!p || !Array.isArray(p.cortes) || !p.cortes.length) throw new Error('arquivo sem cortes');
     proj = p; proj.atual = Math.min(Math.max(0, p.atual || 0), p.cortes.length - 1);
-    for (const k of CAB) if (p.cab && p.cab[k] != null) $(k).value = p.cab[k];
+    for (const k of CAB) if (p.cab && p.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(p.cab[k]) : p.cab[k];
     selecionarCorte(proj.atual);
   }
   function lerForm() {
@@ -379,7 +381,9 @@
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });
   montarEspacos();
-  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = proj.cab[k]; }
+  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(proj.cab[k]) : proj.cab[k]; }
+  $('projeto').addEventListener('input', () => { const el = $('projeto'), v = limparProjeto(el.value); if (v !== el.value) el.value = v; });
+  $('projeto').value = limparProjeto($('projeto').value);
   CAB.forEach((k) => $(k).addEventListener('input', salvar));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
