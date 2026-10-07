@@ -358,7 +358,7 @@
   // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
   function montarPlanta(r, titulo) {
     const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
-    const D = r.dimensoes.profundidade, eixos = r.planta.eixos, CW = 69.8;
+    const D = r.dimensoes.profundidade, CW = 69.8;
     const dxM = dup ? [-cp / 2, cp / 2] : [0]; // eixos das montantes em relação ao centro da posição (duplada: 2 montantes grudadas)
     const prims = [], linhas = [], textos = [], items = [];
     const put = (ps, dx, dy, layerDefault, nome) => {
@@ -371,55 +371,72 @@
     const cota = fazCota(line, text);
     const ret = (w, h, layer, sol) => { const L = [[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0]].map(([a, b, c, d]) => ({ t: 'p', l: layer, p: [[a, b], [c, d]] })); if (sol) L.unshift({ t: 's', l: sol, p: [[0, 0], [w, 0], [0, h], [w, h]] }); return L; };
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2);
-    const ysC = eixos.map((t) => D - t); // centro das colunas ao longo da profundidade (frente = 0)
-    const yMin = Math.min(...ysC), yMax = Math.max(...ysC), W = xs[R] + col / 2;
-    const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC, hx = F.zigzag ? F.zigzag.hx : (HOLE_FX[cp] || cp / 2 - 18);
+    const W = xs[R] + col / 2;
+    const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC;
     // paletes (embaixo de tudo): do fundo para a frente, palete + 25 mm cada
     const prof = r.planta.profPalete, P = r.paletesPorRua;
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       put(ret(F.frentePalete, prof, 'PALETE'), xs[i] + col / 2 + F.folgaPalete, yTopo - prof, 'PALETE', nomeBloco('DI_PL_PALETE', nb(F.frentePalete) + 'X' + nb(prof)));
     }
-    // travamento de topo em zig-zag (diagonais alternadas entre linhas de coluna)
-    for (let i = 0; i < R; i++) for (let j = 0; j < ysC.length - 1; j++) {
-      const a = j % 2 === 0, x1 = xs[i] + hx, x2 = xs[i + 1] - hx;
-      line(a ? x1 : x2, ysC[j], a ? x2 : x1, ysC[j + 1], 'Contraventamento');
-    }
-    // longarinas de túnel: ao longo de toda a profundidade, na ponta do braço, nos dois lados de cada rua
-    for (let i = 0; i < R; i++) for (const lado of [1, -1]) {
-      const xt = lado === 1 ? xs[i] + uo + bal : xs[i + 1] - uo - bal, x0 = lado === 1 ? xt - (r.lateral.lgU ? r.lateral.lgU.B : 38) : xt;
-      put(ret(r.lateral.lgU ? r.lateral.lgU.B : 38, D, 'LONGARINA'), x0, 0, 'LONGARINA', nomeBloco('DI_PL_LG_TUNEL', nb(D)));
-    }
-    // longarina de topo (frente) e de fundo (fundo) atravessando cada rua
-    for (let i = 0; i < R; i++) {
-      put(ret(rua, 40, 'LONGARINA'), xs[i] + col / 2, yMin - 20, 'LONGARINA', nomeBloco('DI_PL_LGTOPO', nb(rua)));
-      put(ret(rua, 40, 'LONGARINA_FUNDO'), xs[i] + col / 2, yMax - 20, 'LONGARINA_FUNDO', nomeBloco('DI_PL_LGFUNDO', nb(rua)));
-    }
-    // contraventamento das laterais (linha da lateral) e colunas
-    for (let i = 0; i <= R; i++) for (const dx of dxM) line(xs[i] + dx, yMin, xs[i] + dx, yMax, 'Contraventamento');
-    // seção real da coluna (COLUNAS.dxf: COL_80 / COL_122; alma em y = 0, abertura para +y); abertura voltada para dentro do quadro
-    // (as duas colunas do quadro se olham); a solteira abre para a coluna vizinha. COL 101 ainda sem desenho: contorno retangular.
+    // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
+    // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
+    const PL = r.planta, almaY = PL.almaT.map((t) => D - t), abreY = PL.abreT.map((v) => -v), FL = PL.furoLg, nRows = almaY.length;
+    const furoY = (j, dir) => almaY[j] + dir * (dir === abreY[j] ? FL.dentro : FL.fora); // furo da chapa de ponta da longarina superior
     const Lt = r.lateral, nEsp = Lt.espacos.length;
     const quadroEsp = (k) => k >= 0 && k < nEsp && (Lt.solteira ? k % 2 === 1 : k % 2 === 0);
-    const abreT = (j) => (quadroEsp(j - 1) ? -1 : 1); // sentido da abertura ao longo da lateral (t crescente = +1); na planta y = D − t
-    const secao = (sy) => {
-      const src = B()['DI_SECAO_COL' + cp];
-      const loc = src ? clone(src) : mapPts(ret(cp, CW, 'MONTANTE', 'MONTANTE_HACHURA'), (v) => [v[0] - cp / 2, v[1]]);
-      const h = src ? Math.max(...loc.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : CW;
-      return mapPts(loc, (v) => [v[0], sy * (v[1] - h / 2)]);
-    };
-    // braços (vistos de cima: aba do C) — simples nas laterais das pontas, duplos nas internas
-    for (let i = 0; i <= R; i++) for (const y of ysC) {
-      const lados = i === 0 ? [1] : i === R ? [-1] : [1, -1];
-      for (const s of lados) {
-        const L = translate(ret(uo + bal - col / 2, pf.C, 'BRACO', 'BRACO_HACHURA'), col / 2, 0); // da face da coluna (U 2,65 + balanço); não cobre a seção
-        put(s === 1 ? L : mirrorX(L), xs[i], y - pf.C / 2, 'BRACO', nomeBloco('DI_PL_BRACO', nb(bal), col + (s === 1 ? 'D' : 'E')));
+    const espMont = (ps, dA) => mapPts(ps, (v) => [v[0], v[1] < -512.5 ? v[1] - dA : v[1]]); // DI_MONT_80 desenhado com quadro de 1025
+    // braços (vistos de cima: aba do C, largura = aba C do perfil): simples nas laterais das pontas (cobrem a coluna até a ponta), duplos nas internas
+    for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
+      const y0 = abreY[j] > 0 ? yA - pf.C : yA, simples = i === 0 || i === R;
+      const L = simples ? translate(ret(col / 2 + uo + bal, pf.C, 'BRACO', 'BRACO_HACHURA'), -col / 2, 0) : translate(ret(2 * (uo + bal), pf.C, 'BRACO', 'BRACO_HACHURA'), -(uo + bal), 0);
+      put(simples && i === R ? mirrorX(L) : L, xs[i], y0, 'BRACO', nomeBloco('DI_PL_BRACO', (simples ? 'S' : 'D') + nb(bal), col + (simples ? (i === 0 ? 'D' : 'E') : '')));
+    });
+    // longarinas de túnel: ao longo de toda a profundidade, na ponta do braço, nos dois lados de cada rua
+    const lgB = r.lateral.lgU ? r.lateral.lgU.B : 38;
+    for (let i = 0; i < R; i++) for (const lado of [1, -1]) {
+      const xt = lado === 1 ? xs[i] + uo + bal : xs[i + 1] - uo - bal, x0 = lado === 1 ? xt - lgB : xt;
+      put(ret(lgB, D, 'LONGARINA', 'BRACO_HACHURA'), x0, 0, 'LONGARINA', nomeBloco('DI_PL_LG_TUNEL', nb(D)));
+    }
+    // colunas: COL 80 (e duplada) com os blocos do Gean — quadro DI_MONT_80 (2 seções + contraventamento, esticado no A do quadro) e solteira
+    // DI_PL_COL80_SOLT; demais colunas: seção real (COLUNAS.dxf) e linha do contraventamento dentro do quadro
+    const MONT = B()['DI_MONT_' + cp], SOLT = B()['DI_PL_COL' + cp + '_SOLT'], SEC = B()['DI_SECAO_COL' + cp];
+    const secao = (sy) => SEC ? mapPts(clone(SEC), (v) => [v[0], sy * v[1]]) : mapPts(ret(cp, CW, 'MONTANTE', 'MONTANTE_HACHURA'), (v) => [v[0] - cp / 2, sy * v[1]]);
+    const emQuadro = new Set();
+    for (let k = 0; k < nEsp; k++) if (quadroEsp(k)) {
+      emQuadro.add(k); emQuadro.add(k + 1);
+      const A = almaY[k] - almaY[k + 1];
+      for (let i = 0; i <= R; i++) for (const dx of dxM) {
+        if (MONT) put(espMont(clone(MONT), A - 1025), xs[i] + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_QUADRO', cp, nb(A)));
+        else line(xs[i] + dx, almaY[k] - CW, xs[i] + dx, almaY[k + 1] + CW, 'Contraventamento');
       }
     }
-    for (let i = 0; i <= R; i++) ysC.forEach((y, j) => {
-      const sy = -abreT(j); // t crescente = y decrescente
-      for (const dx of dxM) put(secao(sy), xs[i] + dx, y, 'MONTANTE', nomeBloco('DI_PL_COLUNA', cp, sy > 0 ? 'F' : 'T'));
+    for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
+      if (MONT && emQuadro.has(j)) return;
+      const ps = !emQuadro.has(j) && SOLT ? mapPts(clone(SOLT), (v) => [v[0], -abreY[j] * v[1]]) : secao(abreY[j]);
+      for (const dx of dxM) put(clone(ps), xs[i] + dx, yA, 'MONTANTE', nomeBloco(!emQuadro.has(j) && SOLT ? 'DI_PL_COL_SOLT' : 'DI_PL_COLUNA', cp, abreY[j] > 0 ? 'F' : 'T'));
     });
+    // longarina superior (DI_LONG_VIST_SUP, TB 80) em cada linha de coluna, esticada para a largura da rua (desenhada para rua 1400)
+    const LGS = B().DI_LONG_VIST_SUP, dR = (rua - 1400) / 2;
+    for (let i = 0; i < R; i++) almaY.forEach((yA, j) => {
+      const xm = (xs[i] + xs[i + 1]) / 2, sy = abreY[j];
+      const ps = LGS ? mapPts(clone(LGS), (v) => [v[0] > 100 ? v[0] + dR : v[0] < -100 ? v[0] - dR : v[0], sy * v[1]]) : mapPts(ret(rua, 40, 'LONGARINA'), (v) => [v[0] - rua / 2, sy * v[1]]);
+      put(ps, xm, yA, 'LONGARINA', nomeBloco('DI_PL_LGSUP', nb(rua), sy > 0 ? 'F' : 'T'));
+    });
+    // travamento de topo em zig-zag: diagonais (DI_TRAV_SUP esticada) entre os furos das chapas de ponta das longarinas superiores,
+    // alternando o lado a partir da frente (linha da frente: furo do lado direito)
+    const TRV = B().DI_TRAV_SUP, CC0 = 1561.87, dxh = rua / 2 - FL.x;
+    for (let i = 0; i < R; i++) for (let j = 0; j < nRows - 1; j++) {
+      const xm = (xs[i] + xs[i + 1]) / 2, dirJ = (nRows - 1 - j) % 2 === 0 ? 1 : -1; // lado do furo na linha j (+1 = direita)
+      const p1 = [xm + dirJ * dxh, furoY(j, -1)], p2 = [xm - dirJ * dxh, furoY(j + 1, 1)];
+      const cc = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), ang = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
+      if (TRV) put(rotate(mapPts(clone(TRV), (v) => [v[0] > CC0 / 2 ? v[0] + cc - CC0 : v[0], v[1]]), ang), p1[0], p1[1], 'Contraventamento', nomeBloco('DI_PL_DIAG_TOPO', nb(cc), dirJ > 0 ? 'A' : 'B'));
+      else line(p1[0], p1[1], p2[0], p2[1], 'Contraventamento');
+    }
+    // trilho guia (DI_TRILHO_GUIA): centrado na linha de colunas de cada lateral, começa à frente da estrutura e entra até o fim do penúltimo palete
+    const Tr = r.lateral.trilho, TRL = B().DI_TRILHO_GUIA, TL0 = 3265.6;
+    if (Tr && Tr.comp > 100 && TRL) for (let i = 0; i <= R; i++)
+      put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), xs[i], -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', nb(Tr.comp)));
     // entrada de cada rua: seta e número da rua
     for (let i = 0; i < R; i++) {
       const xm = (xs[i] + xs[i + 1]) / 2;

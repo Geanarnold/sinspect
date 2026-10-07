@@ -31,7 +31,19 @@ def prim(b):
             try: pts=[[v.x,v.y] for v in e.flattening(0.5)]
             except Exception: pts=[[v.x,v.y] for v in e.control_points]
             P.append({'t':'p','l':lay,'p':pts})
-        elif t=='HATCH': pass
+        elif t=='HATCH':
+            # hachura sólida → triângulos (SOLID do R12); hachura de padrão (ANSI31 etc.) é ignorada (o contorno já vem em linhas)
+            if not e.dxf.solid_fill: continue
+            from ezdxf import path as zpath
+            from ezdxf.math.triangulation import mapbox_earcut_2d
+            from ezdxf.math import Vec2
+            ps=[[Vec2(v) for v in pth.flattening(0.5)] for pth in zpath.from_hatch(e)]
+            ps=[q for q in ps if len(q)>=3]
+            if not ps: continue
+            ps.sort(key=lambda q: -abs(sum(q[i].x*q[i-1].y-q[i-1].x*q[i].y for i in range(len(q)))))
+            for tri in mapbox_earcut_2d(ps[0], ps[1:]):
+                a,b,c=[[v.x,v.y] for v in tri]
+                P.append({'t':'s','l':lay,'p':[a,b,c,c]})
         elif t=='INSERT': P+=prim(list(e.virtual_entities()))  # inserts aninhados (arrays de furos)
     return P
 def rnd(P):

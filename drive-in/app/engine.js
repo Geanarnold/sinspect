@@ -289,8 +289,18 @@
     // longarina de fundo: mesmo perfil da longarina de topo (DI_LGTOPO, acompanha a largura da rua), 1 por rua em cada nível de braço, cor laranja no desenho
     const compLgFundo = larguraRua;
     if (niveisArm.length) addLgTB80('LG-FUNDO', 'Longarina de fundo', R * niveisArm.length, `1 por rua × ${niveisArm.length} nível(is)`);
-    // TOPO (plano do topo): só diagonais, alternadas, uma por vão entre linhas de coluna ao longo da profundidade
-    const porDT = {}; for (let i = 0; i < eixosLat.length - 1; i++) { const t = +(Math.hypot(ccZ, eixosLat[i + 1] - eixosLat[i]) + 30.5).toFixed(1); porDT[t] = (porDT[t] || 0) + 1; }
+    // TOPO (plano do topo, VISTA_SUPERIOR.dxf): só diagonais, alternadas, uma por vão entre linhas de coluna, presas nas chapas de ponta das
+    // longarinas superiores (DI_LONG_VIST_SUP): furos a 60 mm para dentro da face da coluna (c/c em x = rua − 120) e, ao longo da profundidade,
+    // a 65 mm da alma para o lado da longarina (dentro do quadro) ou 25 mm para o lado de fora (vão entre quadros / solteira)
+    // alma de cada coluna (t a partir do fundo): a coluna abre para dentro do quadro; a solteira abre para a vizinha
+    const quadroEsp = (k) => k >= 0 && k < n && (solteira ? k % 2 === 1 : k % 2 === 0);
+    const abreT = eixosLat.map((_, j) => (quadroEsp(j - 1) ? -1 : 1));
+    const almaT = faces.map((f, j) => (abreT[j] > 0 ? f : f + CW_LAT));
+    const FURO_LG_DENTRO = 65, FURO_LG_FORA = 25, FURO_LG_X = 60;
+    const furoT = (j, dir) => almaT[j] + dir * (dir === abreT[j] ? FURO_LG_DENTRO : FURO_LG_FORA); // dir = +1 (para a frente) ou −1
+    const ccXTopo = larguraRua - 2 * FURO_LG_X;
+    const vaosTopo = []; for (let j = 0; j < eixosLat.length - 1; j++) vaosTopo.push(+(furoT(j + 1, -1) - furoT(j, 1)).toFixed(1));
+    const porDT = {}; for (const dy of vaosTopo) { const t = +(Math.hypot(ccXTopo, dy) + 30.5).toFixed(1); porDT[t] = (porDT[t] || 0) + 1; }
     for (const [t, q] of Object.entries(porDT)) addZ('Travamento de topo (zig-zag)', 'D', Number(t), q * R, `${q} por rua`);
     // fixadores das diagonais do zig-zag (topo e fundo): 2 INT1193 + 2 INT0650 por diagonal
     const nDiagZ = (diagZ.length + (eixosLat.length - 1)) * R;
@@ -302,11 +312,13 @@
     const folgaUC = uInterno - perfilC.A;
     if (folgaUC < -1) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm não comporta o C do braço (A = ${perfilC.A} mm; tolerância ± 1 mm).`);
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
-    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, 2 * R, compTrilho, null, '2 por rua (um de cada lado); perfil e peso a definir');
+    // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) [CONFIRMAR]
+    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
     const pesoStop = Number(inp.pesoStop) || null;
     add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R, null, pesoStop, `2 por rua${pesoStop ? '' : '; peso unitário não informado'}`);
-    addLgTB80('LGTOPO', 'Longarina de topo', R, '1 por rua, no topo');
+    // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas [CONFIRMAR]
+    addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
     if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
 
 
@@ -324,7 +336,7 @@
       entradas: { ...inp, coluna: col, dup, espessura: esp },
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, montantes: colunas * nM, colW, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
-      planta: { eixos: eixosLat, profPalete: Number(inp.profPalete || 1000) },
+      planta: { eixos: eixosLat, faces, almaT, abreT, cw: CW_LAT, furoLg: { dentro: FURO_LG_DENTRO, fora: FURO_LG_FORA, x: FURO_LG_X }, profPalete: Number(inp.profPalete || 1000) },
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,

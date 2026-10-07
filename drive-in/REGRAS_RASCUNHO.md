@@ -413,3 +413,13 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Lista de peças: perfil COL 80 em dobro (2 por posição), emenda em dobro, contraventamento lateral em dobro (travessas, diagonais, tubos, união da solteira, topo, parafusos); 1 sapata SAP-80DUP (1,65 kg) por posição — composição e CO não cadastrados.
 - Provisório `[CONFIRMAR]`: braço com U abraçando as 2 montantes (interno 160); zig-zag e longarinas de topo/fundo no oblongo externo da montante do lado da rua (61,9 mm do centro); caneleira cobrindo as 2 montantes (1 por lateral); fixação montante–montante não levantada.
 - Vistas: frontal com 2 colunas lado a lado; planta com as 2 seções COL 80 e uma linha de contraventamento em cada montante; lateral igual à COL 80.
+
+## 27. Vista superior pelo modelo do Gean (VISTA_SUPERIOR.dxf)
+
+- Blocos: DI_MONT_80 (quadro em planta: 2 seções simplificadas + contraventamento de 22 mm, desenhado com A = 1025 e esticado no A do quadro), DI_PL_COL80_SOLT (era COL_80_SOLT), DI_LONG_VIST_SUP (longarina superior TB 80, rua 1400, esticada na rua), DI_TRAV_SUP (diagonal de topo, c/c 1561,87, esticada), DI_TRILHO_GUIA (167 mm, esticado no comprimento).
+- Coluna: alma para fora do quadro, abertura para dentro; solteira (no fundo) abre para a frente.
+- Braço: encostado na alma, por fora da coluna, largura = aba C (40); simples cobre a coluna até a ponta; duplo de ponta a ponta.
+- **Longarina superior em todas as linhas de coluna** (não só na frente): lista = ruas × colunas por lateral `[CONFIRMAR]`.
+- **Zig-zag de topo** preso nas chapas de ponta da longarina superior: furo a 60 mm da face da coluna (c/c em x = rua − 120) e, na profundidade, 65 mm da alma para dentro do quadro ou 25 mm para fora. Dentro do quadro Δ = A − 130; no vão entre quadros Δ = A − 50; solteira Δ = A − 90. Total = c/c + 30,5. Confere com o modelo: 1592,4 (DI_TRAV_SUP) e 1639,5 (DI_DIAG_MAIOR, vão de 1025,3). Alternância a partir da frente (linha da frente: furo à direita).
+- **Trilho guia centrado na linha de colunas de cada lateral** → 1 por lateral (o das laterais internas serve às duas ruas) `[CONFIRMAR]`. Comprimento continua pela regra (até o fim do penúltimo palete, 50 mm à frente); o modelo tem 3265,6 nos dois exemplos (cópia), por isso não foi usado como regra.
+- COL 101 / 122: sem DI_MONT_<col> e DI_PL_COL<col>_SOLT ainda — usam a seção real (COLUNAS.dxf) e uma linha de contraventamento.
