@@ -14,13 +14,25 @@
   let proj = null;
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: 'A', qtd: 1, dados: null }] };
+  // nomes de corte únicos no projeto (Gean): nome vazio ou repetido não é aceito; projetos antigos com repetição ganham sufixo -2, -3…
+  const normCorte = (v) => String(v || '').trim().toUpperCase();
+  function nomesUnicos(p) {
+    const usados = new Set();
+    for (const c of p.cortes) {
+      let base = normCorte(c.nome) || 'A', nome = base, k = 2;
+      while (usados.has(nome)) nome = `${base}-${k++}`;
+      c.nome = nome; usados.add(nome);
+    }
+  }
+  nomesUnicos(proj);
+  const nomeCorteLivre = (nome, i) => !!nome && !proj.cortes.some((c, j) => j !== i && c.nome === nome);
   const CAB = ['projeto', 'revisao', 'responsavel', 'obs'];
   // nome do projeto (padrão SUPRA + número, ex. SUPRA263020): até 11 letras ou números, sem espaço nem caracteres especiais, em maiúsculas
   const limparProjeto = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 11);
   const salvar = () => { proj.cab = Object.fromEntries(CAB.map((k) => [k, $(k).value])); try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
   function carregarProjeto(p) {
     if (!p || !Array.isArray(p.cortes) || !p.cortes.length) throw new Error('arquivo sem cortes');
-    proj = p; proj.atual = Math.min(Math.max(0, p.atual || 0), p.cortes.length - 1);
+    proj = p; nomesUnicos(proj); proj.atual = Math.min(Math.max(0, p.atual || 0), p.cortes.length - 1);
     for (const k of CAB) if (p.cab && p.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(p.cab[k]) : p.cab[k];
     selecionarCorte(proj.atual);
   }
@@ -159,7 +171,12 @@
   }
   function render() {
     const c = proj.cortes[proj.atual];
-    c.dados = lerForm(); c.nome = ($('nomeCorte').value || 'A').trim().toUpperCase(); c.qtd = Math.max(1, Number($('qtdCorte').value) || 1);
+    const nv = normCorte($('nomeCorte').value), livre = nomeCorteLivre(nv, proj.atual);
+    if (livre) c.nome = nv; // nome repetido/vazio: o corte mantém o nome anterior até o operador corrigir
+    $('nomeCorte').classList.toggle('invalido', !livre);
+    $('erroCorte').textContent = livre ? '' : (nv ? `Já existe um corte "${nv}" neste projeto. Use outro nome.` : 'Informe o nome do corte.');
+    $('erroCorte').classList.toggle('hidden', livre);
+    c.dados = lerForm(); c.qtd = Math.max(1, Number($('qtdCorte').value) || 1);
     salvar(); renderCortes();
     const inp = entradas();
     const r = Engine.calcular(inp, cat);
@@ -249,7 +266,7 @@
     g += `<text x="${w / 2}" y="${h - 2}" font-size="10" text-anchor="middle">${Wt} × ${D} mm</text>`;
     return `<svg viewBox="0 0 ${w} ${h + 10}" >${g}</svg>`;
   }
-  const corte = () => ($('nomeCorte').value || 'A').trim().toUpperCase();
+  const corte = () => (proj.cortes[proj.atual] || {}).nome || 'A'; // nome aceito (único), não o que está sendo digitado
   const VISTAS = {
     lateral: (r) => ({ t: 'Vista lateral (corte) — desenho real', s: `${r.lateral.quadros} quadro(s) de 2 colunas${r.lateral.solteira ? ' + coluna solteira com travessa união' : ''} · ${r.lateral.nH} horizontais e ${r.lateral.nD} diagonais por quadro · é este desenho que o botão "Baixar DXF" exporta`, svg: (window.DXF && window.BLOCOS) ? DXF.svgLateral(r, DXF.tituloVista('LATERAL', corte())) : svgLateral(r) }),
     esquema: (r) => ({ t: 'Esquema', s: `${r.lateral.quadros} quadro(s)${r.lateral.solteira ? ' + coluna solteira (verde)' : ''} · horizontais (laranja), diagonais (azul), topo (cinza)`, svg: svgLateral(r) }),
@@ -376,6 +393,7 @@
   IDS.forEach((id) => $(id).addEventListener('input', render));
   $('escravo').addEventListener('change', render);
   $('nomeCorte').addEventListener('input', render);
+  $('nomeCorte').addEventListener('blur', () => { const c = proj.cortes[proj.atual]; if (normCorte($('nomeCorte').value) !== c.nome) { $('nomeCorte').value = c.nome; render(); } });
   $('qtdCorte').addEventListener('input', render);
   $('espacamentos').addEventListener('input', montarEspacos);
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
