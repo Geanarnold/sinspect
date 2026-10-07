@@ -189,7 +189,7 @@
     const modeloAlto = String(balAlto);
     const perfilC = { A: alturaBracoC, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 1.8 };
     const ESP_U = 2.65, ALT_BRACO = 180, ABA_U = 42.65;
-    const uExt = colW + 2 * ESP_U; // duplada: U abraça as 2 montantes (160) [CONFIRMAR]
+    const uExt = colW + 2 * ESP_U; // duplada: braço específico (Gean); sem desenho ainda → peso estimado com U abraçando as 2 montantes (160)
     const pesoU = (colW + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
     const desenvC = perfilC.A + 2 * perfilC.C + 2 * perfilC.B - 4 * perfilC.D;          // desenvolvimento aproximado do C (linha média)
     const compC = (tipo, bal) => uExt + (tipo === 'D' ? 2 : 1) * bal;
@@ -206,7 +206,8 @@
     for (const [m, q] of Object.entries(contBraco)) {
       totBracos += q;
       const [tipo, bal] = m.split('|'), b = Number(bal);
-      add('Braços', `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, `Braço ${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – ${nomeCol} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3), 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
+      add('Braços', `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, `Braço ${dup ? 'específico ' : ''}${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – ${nomeCol} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3),
+        dup ? 'braço específico da coluna duplada (sem desenho/SA): peso ESTIMADO com U de 160 abraçando as 2 montantes + perfil C' : 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }
     // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
     const APOIO_MIN = 80; // apoio mínimo do palete sobre o braço, por lado (definido pelo Gean)
@@ -312,12 +313,12 @@
     const folgaUC = uInterno - perfilC.A;
     if (folgaUC < -1) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm não comporta o C do braço (A = ${perfilC.A} mm; tolerância ± 1 mm).`);
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
-    // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) [CONFIRMAR]
+    // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
     // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
     const pesoStop = Number(inp.pesoStop) || null;
     add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R, null, pesoStop, `2 por rua${pesoStop ? '' : '; peso unitário não informado'}`);
-    // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas [CONFIRMAR]
+    // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas — confirmado pelo Gean
     addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
     if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
 
@@ -329,7 +330,7 @@
     else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
     alertas.unshift(AVISO_ESTRUTURAL); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
-    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço com U abraçando as 2 montantes (${colW} mm), zig-zag no oblongo externo. Confirmar braço, caneleira e fixação montante–montante.`);
+    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço específico da duplada (sem desenho, SA nem peso cadastrados: peso estimado com U de ${colW} mm), zig-zag no oblongo externo. Faltam: desenho do braço específico, caneleira, fixação montante–montante e se a duplada vale para todas as laterais.`);
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);
     return {
