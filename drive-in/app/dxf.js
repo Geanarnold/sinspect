@@ -2,7 +2,7 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 32, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 32, BRACO_LT: 30, LONGARINA_TUNEL: 30, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
   const LAYER_DXF = { MONTANTE_HACHURA: 'MONTANTE_HACHURA', BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
@@ -227,10 +227,37 @@
       const cortes = [0, ...(L.juntasTunel || []), Lt]; // barras ≤ 3000 com emenda sobre o braço
       for (let k = 0; k < cortes.length - 1; k++) {
         const Lb = cortes[k + 1] - cortes[k];
-        const ps = [[0, 0, Lb, 0], [0, e, Lb, e], [0, h - e, Lb, h - e], [0, h, Lb, h], [0, 0, 0, h], [Lb, 0, Lb, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA', p: [[a, b], [c, d]] }));
-        put(ps, cum[0] + cortes[k], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lb)));
+        const ps = [[0, 0, Lb, 0], [0, e, Lb, e], [0, h - e, Lb, h - e], [0, h, Lb, h], [0, 0, 0, h], [Lb, 0, Lb, h]].map(([a, b, c, d]) => ({ t: 'p', l: 'LONGARINA_TUNEL', p: [[a, b], [c, d]] }));
+        put(ps, cum[0] + cortes[k], yN - h, 'LONGARINA_TUNEL', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lb)));
       }
-      if (B().DI_EMENDA_LONG) for (const j of L.juntasTunel || []) put(clone(B().DI_EMENDA_LONG), cum[0] + j, yN - h / 2, 'LONGARINA', 'DI_EMENDA_LONG');
+      if (B().DI_EMENDA_LONG) for (const j of L.juntasTunel || []) put(clone(B().DI_EMENDA_LONG), cum[0] + j, yN - h / 2, 'LONGARINA_TUNEL', 'DI_EMENDA_LONG');
+    }
+    // suporte do braço visto de lado (BRAÇO_LATERAL.dxf, Gean): aba do U (42,25 × 180) com 2 oblongos a 15 mm do topo e da base, encostada
+    // na coluna a partir da alma, e o C do braço em corte (A × C, abas B, chapa D, pelo perfil do projeto) por fora da alma — o mesmo lado
+    // do braço na planta; base do U = apoio − ((180 − A)/2 + A), igual à frontal. Laranja (BRACO_LT, cor 30)
+    if (L.niveis && L.niveis.length && r.planta && r.planta.almaT) {
+      const pf = r.frontal.perfilC, ALT = 180, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1;
+      const bl = []; const sg = (x1, y1, x2, y2) => bl.push({ t: 'p', l: 'BRACO_LT', p: [[x1, y1], [x2, y2]] });
+      const arcL = (cx, cy, rr, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } bl.push({ t: 'p', l: 'BRACO_LT', p }); };
+      // desenhado com a alma da coluna em x = 0, aba do U para −x (dentro da coluna) e C para +x (fora)
+      sg(-ABA, 0, 0, 0); sg(0, 0, 0, ALT); sg(0, ALT, -ABA, ALT); sg(-ABA, ALT, -ABA, 0);
+      for (const cy of [15, ALT - 15]) { const cx = -ABA + 24.85 - 0.0; arcL(cx - 2.5, cy, 4, 90, 270); arcL(cx + 2.5, cy, 4, -90, 90); sg(cx - 2.5, cy + 4, cx + 2.5, cy + 4); sg(cx - 2.5, cy - 4, cx + 2.5, cy - 4); }
+      const Cw = pf.C, D = pf.D, Bl = pf.B; // C em corte: abas (B) encostadas no U, alma do C do lado de fora
+      for (const o of [0, D]) {
+        sg(o, yc0 + o, Cw - o, yc0 + o); sg(Cw - o, yc0 + o, Cw - o, yc1 - o); sg(Cw - o, yc1 - o, o, yc1 - o);
+        sg(o, yc0 + o, o, yc0 + Bl); sg(o, yc1 - o, o, yc1 - Bl);
+      }
+      sg(0, yc0 + Bl, D, yc0 + Bl); sg(0, yc1 - Bl, D, yc1 - Bl);
+      const espelho = mirrorX(clone(bl));
+      const almaT = r.planta.almaT, abreT = r.planta.abreT;
+      for (const yN of L.niveis) {
+        const yb = yN - offA;
+        almaT.forEach((xa, j) => {
+          // coluna abre para +x → alma à esquerda → C para −x (espelhado); abre para −x → C para +x
+          const esq = abreT[j] > 0;
+          put(clone(esq ? espelho : bl), cum[0] + xa, yb, 'BRACO_LT', nomeBloco('DI_LT_SUP_BRACO', 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X'), esq ? 'E' : 'D'));
+        });
+      }
     }
     // paletes (Gean): no nível de baixo (chão, + escravo) e no nível mais alto, ao longo de toda a profundidade, com hachura a 45°
     // (layer PALETE_HACHURA) para ler como palete; do fundo (x = 0) para a frente: palete + 25 mm cada
@@ -584,7 +611,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE_HACHURA: '#a5520a', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE_HACHURA: '#a5520a', BRACO_LT: '#f97316', LONGARINA_TUNEL: '#f97316', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)

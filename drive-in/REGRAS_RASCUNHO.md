@@ -444,3 +444,9 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 ## 31. Paletes na vista lateral (Gean)
 
 - Paletes no nível de baixo (chão e, com escravo, o segundo palete empilhado) e no nível mais alto, em toda a profundidade (do fundo para a frente, palete + 25 mm). Contorno na layer PALETE e hachura a 45° (a cada 120 mm) na layer PALETE_HACHURA (cor 32, marrom), só na carga (acima dos 150 mm da base do palete). Geometria do palete: tábua de baixo (22), 3 tacos de 100 (vãos para o garfo) e tabuado de cima (22); a mesma na frontal (rua 01).
+
+## 32. Suporte do braço na vista lateral (BRAÇO_LATERAL.dxf, Gean)
+
+- Em cada coluna e cada nível de braço: aba do U vista de lado (42,25 × 180, 2 oblongos a 15 mm do topo e da base) encostada na coluna a partir da alma, e o C do braço em corte por fora da alma (mesmo lado do braço na planta). O C segue o perfil do projeto (A, B, C, D); base do U = apoio − ((180 − A)/2 + A), igual à frontal.
+- Cor laranja: suporte na layer BRACO_LT (30) e longarina de túnel + emenda na layer LONGARINA_TUNEL (30).
+- O bloco do Gean tinha a chapa com 200 mm de altura (oblongos a 25 mm); o app usa 180 / 15 mm, como a frontal (confirmado).
