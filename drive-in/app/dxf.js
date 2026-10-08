@@ -113,6 +113,24 @@
     let r = translate(src, -c1[0], -c1[1]); r = rotate(r, -a0); r = stretchX(r, L0 / 2, L - L0); r = rotate(r, a);
     return translate(r, p1[0], p1[1]);
   }
+  // diagonal terminando rente à face interna das colunas (Gean): as bordas (linhas longas) são recortadas em x = xa…xb e cada ponta
+  // é fechada com um corte vertical entre as duas bordas; porcas e furos (dentro da coluna) continuam no desenho
+  function recortaDiag(prims, xa, xb) {
+    const out = [], bordas = [];
+    for (const q of prims) {
+      if (q.t === 'l' && Math.hypot(q.p[1][0] - q.p[0][0], q.p[1][1] - q.p[0][1]) > 100) {
+        let [a, b] = q.p[0][0] <= q.p[1][0] ? [q.p[0], q.p[1]] : [q.p[1], q.p[0]];
+        const yAt = (x) => a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]);
+        const x0 = xa, x1 = xb; if (b[0] < xa || a[0] > xb) continue; // a reta da borda vai exatamente de face a face (estende a borda que terminava antes)
+        const seg = { t: 'l', l: q.l, p: [[x0, yAt(x0)], [x1, yAt(x1)]] }; out.push(seg); bordas.push(seg);
+      } else out.push(q);
+    }
+    if (bordas.length >= 2) for (const k of [0, 1]) {
+      const ys = bordas.map((sg) => sg.p[k][1]), x = bordas[0].p[k][0];
+      if (bordas.every((sg) => Math.abs(sg.p[k][0] - x) < 0.01)) out.push({ t: 'l', l: bordas[0].l, p: [[x, Math.min(...ys)], [x, Math.max(...ys)]] });
+    }
+    return out;
+  }
   function uniao(distFuros) {
     // ancorada nos furos: 1º furo na coluna solteira; parafusos da chapa posterior na face de trás da coluna do quadro (eixo − 17,9), como no DXF "vista lateral com união"
     const src = clone(B().DI_UNIAO), cs = circles(src), c1 = cs[0], xPlaca = Math.max(...cs.map((c) => c[0]));
@@ -195,7 +213,7 @@
         ys.forEach((y) => put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE', nomeBloco('DI_TRAVESSA_H', 'CC' + nb(hxR - hxL))));
         for (let k = 0; k < nD; k++) {
           const p1 = [hxL, holeY(ys[k])], p2 = [hxR, holeY(ys[k + 1])];
-          put(translate(travessaD(p1, p2), -p1[0], -p1[1]), p1[0], p1[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(p2[0] - p1[0]) + 'X' + nb(p2[1] - p1[1])));
+          put(translate(recortaDiag(travessaD(p1, p2), xs[i] + CW / 2, xs[i + 1] - CW / 2), -p1[0], -p1[1]), p1[0], p1[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(p2[0] - p1[0]) + 'X' + nb(p2[1] - p1[1])));
         }
       }
       if (uni) ys.forEach((y) => put(uniao((xs[i + 1] - HOLE_DX) - hxL), hxL, holeY(y), 'MONTANTE', nomeBloco('DI_UNIAO', nb((xs[i + 1] - HOLE_DX) - hxL))));
