@@ -440,3 +440,7 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Frontal: longarina de fundo entre as pontas dos braços de cada nível, corpo de 76 mm centrado na altura do C. Comprimento acompanha o balanço do nível (rua 1400: 1035 no balanço 180, 935 no 230).
 - As duas peças de 180 mm em cima das pontas são o **stop palete** → lista: 2 por longarina de fundo = 2 × ruas × níveis de braço. Peso depois.
 - Códigos (longarina de fundo como peça própria por comprimento): depois (Gean). Na lista continua como TB 80 do comprimento da rua.
+
+## 31. Paletes na vista lateral (Gean)
+
+- Paletes no nível de baixo (chão e, com escravo, o segundo palete empilhado) e no nível mais alto, em toda a profundidade (do fundo para a frente, palete + 25 mm). Contorno na layer PALETE e hachura a 45° (a cada 120 mm) na layer PALETE_HACHURA (cor 252), só na carga (acima dos 150 mm da base do palete).

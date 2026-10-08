@@ -2,7 +2,7 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 252, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
   const LAYER_DXF = { MONTANTE_HACHURA: 'MONTANTE_HACHURA', BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
@@ -12,6 +12,15 @@
   // ---- utilitários de geometria sobre primitivas {t:'l'|'c'|'p', l:layer, p:[[x,y]..], c:[x,y], r}
   const clone = (prims) => prims.map((q) => ({ t: q.t, l: q.l, p: q.p ? q.p.map((v) => [v[0], v[1]]) : undefined, c: q.c ? [q.c[0], q.c[1]] : undefined, r: q.r }));
   const mapPts = (prims, fn) => { for (const q of prims) { if (q.p) q.p = q.p.map((v) => fn(v)); if (q.c) q.c = fn(q.c); } return prims; };
+  // hachura a 45° num retângulo (x0, y0, w, h), linhas a cada 'esp' mm (medido na horizontal): segmentos já recortados no retângulo
+  const hachura45 = (x0, y0, w, h, esp) => {
+    const out = [];
+    for (let c = -h + esp / 2; c < w; c += esp) { // reta x = c + (y − y0) local: começa em (c, 0) e sobe a 45°
+      const xa = Math.max(c, 0), xb = Math.min(c + h, w);
+      if (xb - xa > 1) out.push([[x0 + xa, y0 + (xa - c)], [x0 + xb, y0 + (xb - c)]]);
+    }
+    return out;
+  };
   const translate = (prims, dx, dy) => mapPts(prims, (v) => [v[0] + dx, v[1] + dy]);
   const mirrorX = (prims) => mapPts(prims, (v) => [-v[0], v[1]]);
   const rotate = (prims, ang) => { const c = Math.cos(ang), s = Math.sin(ang); return mapPts(prims, (v) => [v[0] * c - v[1] * s, v[0] * s + v[1] * c]); };
@@ -192,6 +201,16 @@
         put(ps, cum[0] + cortes[k], yN - h, 'LONGARINA', nomeBloco('DI_LG_TUNEL', 'U' + nb(h), nb(Lb)));
       }
       if (B().DI_EMENDA_LONG) for (const j of L.juntasTunel || []) put(clone(B().DI_EMENDA_LONG), cum[0] + j, yN - h / 2, 'LONGARINA', 'DI_EMENDA_LONG');
+    }
+    // paletes (Gean): no nível de baixo (chão, + escravo) e no nível mais alto, ao longo de toda a profundidade, com hachura a 45°
+    // (layer PALETE_HACHURA) para ler como palete; do fundo (x = 0) para a frente: palete + 25 mm cada
+    const Fr = r.frontal, hp = Fr.alturaPalete, pp = r.planta.profPalete, Pn = r.paletesPorRua;
+    if (hp > 0 && pp > 0 && Pn > 0) {
+      const camadas = [0, ...(Fr.escravo ? [hp] : [])];
+      if (L.niveis && L.niveis.length) camadas.push(L.niveis[L.niveis.length - 1]);
+      const pal = [[0, 0, pp, 0], [pp, 0, pp, hp], [pp, hp, 0, hp], [0, hp, 0, 0], [0, 150, pp, 150]].map(([a, b, c, d]) => ({ t: 'p', l: 'PALETE', p: [[a, b], [c, d]] }))
+        .concat(hachura45(0, 150, pp, hp - 150, 120).map((q) => ({ t: 'p', l: 'PALETE_HACHURA', p: q })));
+      for (const y0 of camadas) for (let k = 0; k < Pn; k++) put(clone(pal), cum[0] + k * r.ocupPalete, y0, 'PALETE', nomeBloco('DI_LT_PALETE', nb(pp) + 'X' + nb(hp)));
     }
     if (L.trilho && L.trilho.comp > 0) {
       const Tl = L.trilho.comp, th = L.trilho.alt;
@@ -536,7 +555,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE_HACHURA: '#6b7280', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
