@@ -315,9 +315,9 @@
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
-    // stop palete: 2 por rua por nível de braço (um em cada linha de braço, no fundo da rua)
+    // stop palete (Gean, bloco DI_LGFUNDO): 2 por longarina de fundo → 2 por rua em cada nível de braço
     const pesoStop = Number(inp.pesoStop) || null;
-    add('Stop palete', 'STOP-PALETE', 'Stop palete (fundo da rua)', SEM.SA, 2 * R, null, pesoStop, `2 por rua${pesoStop ? '' : '; peso unitário não informado'}`);
+    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (sobre a longarina de fundo)', SEM.SA, 2 * R * niveisArm.length, null, pesoStop, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is))${pesoStop ? '' : '; peso unitário não informado'}`);
     // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas — confirmado pelo Gean
     addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
     if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);

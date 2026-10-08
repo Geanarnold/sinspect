@@ -434,3 +434,9 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 
 - Vista superior usa DI_MONT_<col> (quadro) e DI_PL_SOLT_<col> (união + solteira) para 80, 101 e 122; a duplada usa os da COL 80 lado a lado. Trilho guia: DI_TRILHO_GUIA_<col> (80D para a duplada), interno = largura da coluna, externo = coluna + 2 × 43,5.
 - Comprimento do trilho pela regra: começa **50 mm à frente** da estrutura (confirmado pelo Gean; os ~150 mm dos desenhos VISTA_SUPERIOR/MONTANTES_DE_MODELO são só desenho) e vai até o fim do penúltimo palete.
+
+## 30. Longarina de fundo e stop palete (DI_LGFUNDO, Gean)
+
+- Frontal: longarina de fundo entre as pontas dos braços de cada nível, corpo de 76 mm centrado na altura do C. Comprimento acompanha o balanço do nível (rua 1400: 1035 no balanço 180, 935 no 230).
+- As duas peças de 180 mm em cima das pontas são o **stop palete** → lista: 2 por longarina de fundo = 2 × ruas × níveis de braço. Peso depois.
+- Códigos (longarina de fundo como peça própria por comprimento): depois (Gean). Na lista continua como TB 80 do comprimento da rua.
