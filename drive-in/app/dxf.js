@@ -333,6 +333,14 @@
     for (let i = 0; i < R; i++) {
       const src = B().DI_LGTOPO; if (!src) { faltam.add('DI_LGTOPO'); break; }
       const yLg = H - FR_TOPO_FURO - 100 + LG_DY, x1 = xs[i] + hx + LG_DX, x2 = xs[i + 1] - hx - LG_DX;
+      const LGC = B().DI_LGTOPO_CONTRAV;
+      if (LGC) {
+        // bloco do Gean (Drawing1.dxf): longarina de topo + contraventamento superior, só representativo; desenhado para rua 1400,
+        // ponto base no centro da rua; corpo da longarina 26,89 mm abaixo do furo de referência do DI_LGTOPO (mesma altura de antes);
+        // os ganchos ficam a ~18 mm da face da coluna (furos das COL 80/101/122) → estica o que está a mais de 100 mm do centro
+        const dR = (rua - 1400) / 2, xm = (xs[i] + xs[i + 1]) / 2;
+        put(mapPts(clone(LGC), (v) => [v[0] > 100 ? v[0] + dR : v[0] < -100 ? v[0] - dR : v[0], v[1]]), xm, yLg + 26.89, 'LONGARINA', nomeBloco('DI_LGTOPO_CONTRAV', 'RUA' + nb(rua)));
+      } else
       put(stretchX(clone(src), LG_VAO0 / 2, (x2 - x1) - LG_VAO0), x1, yLg, 'LONGARINA', nomeBloco('DI_LGTOPO', 'RUA' + nb(rua), 'COL' + col));
       cota(xs[i] + col / 2, H, xs[i + 1] - col / 2, H, 300, `${rua}`, false, 'p');
     }

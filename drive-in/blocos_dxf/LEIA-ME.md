@@ -27,6 +27,7 @@ Observações:
 - DI_COLUNA_FRONTAL_122.dxf veio como geometria solta; foi convertida em bloco e deslocada (+65,15; −1,40) para ficar igual às colunas 80/101.
 - DI_SECAO_COL80.dxf e DI_SECAO_COL122.dxf foram recortados de COLUNAS.dxf (blocos COL_80 e COL_122): centro da seção em x = 0, face externa da alma em y = 0, abertura para +y. Falta a COL 101.
 - DI_MONT_80, DI_PL_COL80_SOLT (COL_80_SOLT), DI_LONG_VIST_SUP, DI_TRAV_SUP e DI_TRILHO_GUIA vieram de VISTA_SUPERIOR.dxf (Gean). Hachuras sólidas viram SOLID (triângulos) no extrator; hachuras de padrão são ignoradas.
+- DI_LGTOPO_CONTRAV.dxf (Drawing1.dxf, Gean): vista frontal da longarina de topo + contraventamento superior, só representativo. Desenhado para rua 1400, ponto base no centro da rua; corpo 26,89 mm abaixo do furo de referência do DI_LGTOPO; o app estica o que está a mais de 100 mm do centro. DI_LGTOPO continua só na longarina de fundo.
 - Os arquivos DI_BRACO_*_DIR enviados não foram mantidos (o DIR é espelhado; o S230_DIR veio com o bloco S180 por engano).
 
 `../referencias_dxf/` guarda os desenhos de referência (DRIVE_IN, posições de sapata, vista lateral com união, posição dos braços, vista frontal com LGTOPO). Servem para conferir o app, não são lidos por ele.
