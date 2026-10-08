@@ -449,4 +449,6 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 
 - Em cada coluna e cada nível de braço: aba do U vista de lado (42,25 × 180, 2 oblongos a 15 mm do topo e da base) encostada na coluna a partir da alma, e o C do braço em corte por fora da alma (mesmo lado do braço na planta). O C segue o perfil do projeto (A, B, C, D); base do U = apoio − ((180 − A)/2 + A), igual à frontal.
 - Cor laranja: suporte na layer BRACO_LT (30) e longarina de túnel + emenda na layer LONGARINA_TUNEL (30).
-- O bloco do Gean tinha a chapa com 200 mm de altura (oblongos a 25 mm); o app usa 180 / 15 mm, como a frontal (confirmado).
+- Bloco atualizado (oblongos verticais, curso 5 mm, centros a 25 mm do topo e da base da chapa de 200 = ±75 do centro do C). Na lateral a chapa segue o bloco (200).
+- Compatível com a furação da coluna (Gean): os oblongos do suporte são ancorados nos oblongos da lateral da coluna (DI_COLUNA, módulo de 50 a partir da base, centros ≡ 29,2 mod 50); C, longarina de túnel e palete do último nível acompanham.
+- `[CONFIRMAR]` Diferença de ~4,2 mm entre as referências de furação: a frontal posiciona o braço pelos furos a 25 mm do topo da coluna (altura múltipla de 50 → furos ≡ 25 mod 50, apoio ≡ 47), a lateral pelos oblongos a partir da base (≡ 29,2). Falta a medida real do 1º furo a partir da base da coluna para unificar (muda o 1º nível em ~4 mm na frontal e na lista).

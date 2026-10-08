@@ -222,7 +222,13 @@
     }
     // longarina de túnel em cada nível (topo = apoio do palete), face a face da estrutura; trilho guia no piso a partir da frente (lado direito)
     const L = r.lateral, Lt = cum[n] - cum[0];
-    if (L.niveis && L.lgU) for (const yN of L.niveis) {
+    // compatibilidade com a furação da coluna (Gean): os oblongos do suporte (a ±75 do centro do C) caem nos oblongos da lateral da coluna
+    // (DI_COLUNA: módulo de 50 mm a partir da base) → o conjunto C + longarina de túnel desloca o necessário (|Δ| ≤ 25) em cada nível
+    const oblCol = (() => { const ys = []; for (const q of B().DI_COLUNA || []) { if (!q.p || q.p.length < 6) continue; const xs = q.p.map((v) => v[0]), yy = q.p.map((v) => v[1]); const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...yy) - Math.min(...yy); if (w > 10 && w < 14 && h > 7 && h < 11) ys.push((Math.max(...yy) + Math.min(...yy)) / 2); } return ys.length ? Math.min(...ys) : null; })();
+    const pfL = r.frontal.perfilC;
+    const deltaNivel = (yN) => { if (oblCol == null) return 0; const s0 = yN - pfL.A / 2 - 75, k = Math.round((s0 - oblCol) / 50); return +(oblCol + 50 * k - s0).toFixed(2); };
+    if (L.niveis && L.lgU) for (const yN0 of L.niveis) {
+      const yN = yN0 + deltaNivel(yN0);
       const h = L.lgU.A, e = L.lgU.e;
       const cortes = [0, ...(L.juntasTunel || []), Lt]; // barras ≤ 3000 com emenda sobre o braço
       for (let k = 0; k < cortes.length - 1; k++) {
@@ -236,12 +242,13 @@
     // na coluna a partir da alma, e o C do braço em corte (A × C, abas B, chapa D, pelo perfil do projeto) por fora da alma — o mesmo lado
     // do braço na planta; base do U = apoio − ((180 − A)/2 + A), igual à frontal. Laranja (BRACO_LT, cor 30)
     if (L.niveis && L.niveis.length && r.planta && r.planta.almaT) {
-      const pf = r.frontal.perfilC, ALT = 180, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1;
+      const pf = r.frontal.perfilC, ALT = 200, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1; // chapa de 200 (BRAÇO_LATERAL.dxf)
       const bl = []; const sg = (x1, y1, x2, y2) => bl.push({ t: 'p', l: 'BRACO_LT', p: [[x1, y1], [x2, y2]] });
       const arcL = (cx, cy, rr, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } bl.push({ t: 'p', l: 'BRACO_LT', p }); };
       // desenhado com a alma da coluna em x = 0, aba do U para −x (dentro da coluna) e C para +x (fora)
       sg(-ABA, 0, 0, 0); sg(0, 0, 0, ALT); sg(0, ALT, -ABA, ALT); sg(-ABA, ALT, -ABA, 0);
-      for (const cy of [15, ALT - 15]) { const cx = -ABA + 24.85 - 0.0; arcL(cx - 2.5, cy, 4, 90, 270); arcL(cx + 2.5, cy, 4, -90, 90); sg(cx - 2.5, cy + 4, cx + 2.5, cy + 4); sg(cx - 2.5, cy - 4, cx + 2.5, cy - 4); }
+      // oblongos verticais (curso de 5 mm), centros a 25 mm do topo e da base da chapa = ±75 do centro do C, a 24,85 da borda interna
+      for (const cy of [25, ALT - 25]) { const cx = -ABA + 24.85; arcL(cx, cy - 2.5, 4, 180, 360); arcL(cx, cy + 2.5, 4, 0, 180); sg(cx - 4, cy - 2.5, cx - 4, cy + 2.5); sg(cx + 4, cy - 2.5, cx + 4, cy + 2.5); }
       const Cw = pf.C, D = pf.D, Bl = pf.B; // C em corte: abas (B) encostadas no U, alma do C do lado de fora
       for (const o of [0, D]) {
         sg(o, yc0 + o, Cw - o, yc0 + o); sg(Cw - o, yc0 + o, Cw - o, yc1 - o); sg(Cw - o, yc1 - o, o, yc1 - o);
@@ -251,7 +258,7 @@
       const espelho = mirrorX(clone(bl));
       const almaT = r.planta.almaT, abreT = r.planta.abreT;
       for (const yN of L.niveis) {
-        const yb = yN - offA;
+        const yb = yN + deltaNivel(yN) - offA;
         almaT.forEach((xa, j) => {
           // coluna abre para +x → alma à esquerda → C para −x (espelhado); abre para −x → C para +x
           const esq = abreT[j] > 0;
@@ -264,7 +271,7 @@
     const Fr = r.frontal, hp = Fr.alturaPalete, pp = r.planta.profPalete, Pn = r.paletesPorRua;
     if (hp > 0 && pp > 0 && Pn > 0) {
       const camadas = [0, ...(Fr.escravo ? [hp] : [])];
-      if (L.niveis && L.niveis.length) camadas.push(L.niveis[L.niveis.length - 1]);
+      if (L.niveis && L.niveis.length) { const yT = L.niveis[L.niveis.length - 1]; camadas.push(yT + deltaNivel(yT)); }
       const pal = geoPalete(pp, hp, true);
       for (const y0 of camadas) for (let k = 0; k < Pn; k++) put(clone(pal), cum[0] + k * r.ocupPalete, y0, 'PALETE', nomeBloco('DI_LT_PALETE', nb(pp) + 'X' + nb(hp)));
     }
