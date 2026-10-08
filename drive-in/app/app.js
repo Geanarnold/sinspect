@@ -13,13 +13,19 @@
   const CHAVE = 'drivein_projeto_v1';
   let proj = null;
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
-  if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: 'A', qtd: 1, dados: null }] };
+  if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] };
+  // preenchimento (Gean): dados do projeto começam vazios e são obrigatórios; só os padrões da empresa vêm preenchidos (marcados "padrão")
+  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
+  const OBRIG_CAB = ['projeto', 'responsavel', 'nomeCorte', 'qtdCorte'];
+  const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8' };
+  const vazioDados = (d) => !d || !d.v || OBRIG_CALC.some((id) => d.v[id] === '' || d.v[id] == null) || (d.diferentes && (d.espacos || []).some((x) => x === '' || x == null));
   // nomes de corte únicos no projeto (Gean): nome vazio ou repetido não é aceito; projetos antigos com repetição ganham sufixo -2, -3…
   const normCorte = (v) => String(v || '').trim().toUpperCase();
   function nomesUnicos(p) {
     const usados = new Set();
     for (const c of p.cortes) {
-      let base = normCorte(c.nome) || 'A', nome = base, k = 2;
+      if (!normCorte(c.nome)) { c.nome = ''; continue; } // nome em branco fica em branco (obrigatório, o campo acusa)
+      let base = normCorte(c.nome), nome = base, k = 2;
       while (usados.has(nome)) nome = `${base}-${k++}`;
       c.nome = nome; usados.add(nome);
     }
@@ -40,8 +46,13 @@
     const v = {}; for (const id of IDS) v[id] = $(id).value;
     return { v, escravo: $('escravo').checked, diferentes: $('diferentes').checked, espacos: [...$('espacos').querySelectorAll('input')].map((i) => i.value) };
   }
+  function limparForm() {
+    for (const id of IDS) $(id).value = PADRAO[id] ?? '';
+    $('escravo').checked = false; $('diferentes').checked = false;
+    montarEspacos([]);
+  }
   function aplicarForm(d) {
-    if (!d) return;
+    if (!d) { limparForm(); return; }
     for (const id of IDS) if (d.v && d.v[id] !== undefined) $(id).value = d.v[id];
     $('escravo').checked = !!d.escravo; $('diferentes').checked = !!d.diferentes;
     montarEspacos(d.espacos);
@@ -157,7 +168,8 @@
   }
   // resultados de todos os cortes (o atual com o formulário na tela)
   function calcularProjeto() {
-    return proj.cortes.map((c, i) => ({ nome: c.nome, qtd: Math.max(1, Number(c.qtd) || 1), r: i === proj.atual ? last : Engine.calcular(entradasDe(c.dados || lerForm()), cat) }));
+    // cortes com campos obrigatórios em branco ficam fora (a tela e os botões avisam)
+    return proj.cortes.map((c, i) => ({ nome: c.nome, qtd: Math.max(1, Number(c.qtd) || 1), r: i === proj.atual ? last : vazioDados(c.dados) ? null : Engine.calcular(entradasDe(c.dados), cat) })).filter((x) => x.r);
   }
   function consolidar(lista) {
     const mapa = new Map();
@@ -176,8 +188,31 @@
     $('nomeCorte').classList.toggle('invalido', !livre);
     $('erroCorte').textContent = livre ? '' : (nv ? `Já existe um corte "${nv}" neste projeto. Use outro nome.` : 'Informe o nome do corte.');
     $('erroCorte').classList.toggle('hidden', livre);
-    c.dados = lerForm(); c.qtd = Math.max(1, Number($('qtdCorte').value) || 1);
+    c.dados = lerForm(); c.qtd = $('qtdCorte').value === '' ? '' : Math.max(1, Number($('qtdCorte').value) || 1);
     salvar(); renderCortes();
+    // campos obrigatórios em branco: destaca, não calcula e trava as saídas
+    const rotulo = (id) => { const l = document.querySelector(`label[for="${id}"]`); return l ? l.textContent.trim() : id; };
+    const etapa = (id) => { const f = $(id).closest('.form'); const k = f ? ['projeto', 'estrutura', 'lateral', 'braco'].indexOf(f.id.replace('passo-', '')) : -1; return k >= 0 ? ['Projeto', 'Estrutura', 'Lateral', 'Braço'][k] : ''; };
+    const vazio = (id) => String($(id).value).trim() === '';
+    for (const id of OBRIG_CALC.concat(OBRIG_CAB)) $(id).classList.toggle('vazio', vazio(id));
+    const espVazios = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].filter((i) => i.value === '') : [];
+    $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
+    const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);
+    const outrosIncompletos = proj.cortes.filter((x, i) => i !== proj.atual && (vazioDados(x.dados) || !x.nome || x.qtd === '')).map((x) => x.nome || '(sem nome)');
+    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
+    if (faltaCalc.length || espVazios.length) {
+      last = null;
+      const porEtapa = {}; for (const id of faltaCalc) (porEtapa[etapa(id)] = porEtapa[etapa(id)] || []).push(rotulo(id));
+      if (espVazios.length) (porEtapa.Lateral = porEtapa.Lateral || []).push(`medida de ${espVazios.length} espaço(s)`);
+      $('kpis').innerHTML = `<div class="pendente-box"><b>Preencha os campos obrigatórios para calcular este corte</b><ul>${Object.entries(porEtapa).sort((x, y) => ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(x[0]) - ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(y[0])).map(([e, l]) => `<li><b style="display:inline">${esc(e)}:</b> ${l.map(esc).join(', ')}</li>`).join('')}</ul></div>`;
+      const kp = document.getElementById('kpiProj'); if (kp) kp.innerHTML = '';
+      $('alertas').innerHTML = ''; $('vista').innerHTML = '<p class="nota">O desenho aparece quando os campos obrigatórios estiverem preenchidos.</p>';
+      $('notaQuadros').textContent = ''; if ($('croquiBraco')) $('croquiBraco').innerHTML = '';
+      ['tab-pecas', 'tab-pend', 'tab-proj'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
+      travar('Preencha os campos obrigatórios (*)');
+      return;
+    }
+    travar(faltaCab.length ? `Preencha: ${faltaCab.map(rotulo).join(', ')}` : outrosIncompletos.length ? `Corte(s) incompleto(s): ${outrosIncompletos.join(', ')}` : '');
     const inp = entradas();
     const r = Engine.calcular(inp, cat);
     last = r;
@@ -367,12 +402,9 @@
     const txt = DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })));
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-projeto.dxf`; a.click();
   });
-  $('btnNovoCorte').addEventListener('click', () => {
-    render();
-    const usados = new Set(proj.cortes.map((c) => c.nome)); let k = proj.cortes.length + 1, nome = 'A' + k; while (usados.has(nome)) nome = 'A' + (++k);
-    proj.cortes.push({ nome, qtd: 1, dados: JSON.parse(JSON.stringify(proj.cortes[proj.atual].dados)) });
-    selecionarCorte(proj.cortes.length - 1);
-  });
+  // novo corte em branco; "Duplicar" copia os dados do corte atual com o nome em branco (o operador nomeia e confere)
+  $('btnNovoCorte').addEventListener('click', () => { render(); proj.cortes.push({ nome: '', qtd: '', dados: null }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
+  $('btnDupCorte').addEventListener('click', () => { render(); const c = proj.cortes[proj.atual]; proj.cortes.push({ nome: '', qtd: c.qtd, dados: JSON.parse(JSON.stringify(c.dados)) }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
   $('btnSalvarProj').addEventListener('click', () => {
     render();
     const nome = ($('projeto').value || 'projeto').replace(/[^\w-]+/g, '_');
@@ -386,9 +418,8 @@
   });
   $('btnNovoProj').addEventListener('click', () => {
     if (!confirm('Começar um projeto novo? O projeto atual sai da tela (salve o arquivo antes, se precisar).')) return;
-    const dados = proj.cortes[proj.atual].dados;
     for (const k of CAB) $(k).value = k === 'revisao' ? 'REV.00' : '';
-    carregarProjeto({ atual: 0, cortes: [{ nome: 'A', qtd: 1, dados }] });
+    carregarProjeto({ atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] });
   });
   $('btnRemCorte').addEventListener('click', () => {
     if (proj.cortes.length < 2 || !confirm(`Remover o corte ${proj.cortes[proj.atual].nome}?`)) return;
@@ -404,7 +435,7 @@
   $('largura').addEventListener('input', () => { if (!$('diferentes').checked) montarEspacos(); });
   $('diferentes').addEventListener('change', () => { montarEspacos(); render(); });
   montarEspacos();
-  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; if (c.dados) aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(proj.cab[k]) : proj.cab[k]; }
+  { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(proj.cab[k]) : proj.cab[k]; }
   $('projeto').addEventListener('input', () => { const el = $('projeto'), v = limparProjeto(el.value); if (v !== el.value) el.value = v; });
   $('projeto').value = limparProjeto($('projeto').value);
   CAB.forEach((k) => $(k).addEventListener('input', salvar));

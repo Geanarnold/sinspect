@@ -20,7 +20,7 @@
         <div class="cortes-tit"><svg class="ic"><use href="#i-proj"/></svg>Projeto e cortes</div>
         <div id="listaCortes" class="lista-cortes"></div>
         <div class="cortes-arq"><button id="btnSalvarProj" title="Baixa um arquivo .drivein.json com todo o projeto"><svg class="ic"><use href="#i-down"/></svg>Salvar</button><label class="btn-arquivo" title="Abre um arquivo .drivein.json"><svg class="ic"><use href="#i-proj"/></svg>Abrir<input id="abrirProj" type="file" accept=".json" hidden/></label><button id="btnNovoProj" class="discreto" title="Começa um projeto em branco"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div>
-        <div class="cortes-acoes"><button id="btnNovoCorte"><svg class="ic"><use href="#i-plus"/></svg>Novo corte</button><button id="btnRemCorte" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div>
+        <div class="cortes-acoes"><button id="btnNovoCorte" title="Corte novo, em branco"><svg class="ic"><use href="#i-plus"/></svg>Novo corte</button><button id="btnDupCorte" title="Copia os dados do corte atual (o nome fica em branco)"><svg class="ic"><use href="#i-proj"/></svg>Duplicar</button><button id="btnRemCorte" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div>
       </div>
       <div class="passos">
         <div class="passo active" data-passo="projeto"><span class="n">1</span><span class="t">Projeto</span></div>
@@ -30,22 +30,22 @@
       </div>
       <div id="passo-projeto" class="form">
         <div class="sec full"><svg class="ic"><use href="#i-proj"/></svg>Identificação</div>
-        <div class="campo full"><label for="projeto" title="Projeto / cliente">Projeto / cliente</label><div class="in"><input id="projeto" type="text" maxlength="11" autocomplete="off" spellcheck="false" title="Até 11 letras ou números, sem espaço nem caracteres especiais"/></div></div>
-        <div class="campo"><label for="nomeCorte" title="Nome do corte">Nome do corte</label><div class="in"><input id="nomeCorte" type="text" value="A" placeholder="Ex.: A1"/></div><div id="erroCorte" class="msg-campo hidden"></div></div>
-        <div class="campo"><label for="qtdCorte" title="Blocos iguais">Blocos iguais</label><div class="in com-un"><input id="qtdCorte" type="number" min="1" value="1"/><span class="un">un</span></div></div>
-        <div class="campo"><label for="revisao" title="Revisão">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00"/></div></div>
-        <div class="campo"><label for="responsavel" title="Responsável">Responsável</label><div class="in"><input id="responsavel" type="text" placeholder="Nome"/></div></div>
+        <div class="campo full"><label class="obrig" for="projeto" title="Projeto / cliente">Projeto / cliente</label><div class="in"><input id="projeto" type="text" maxlength="11" autocomplete="off" spellcheck="false" title="Até 11 letras ou números, sem espaço nem caracteres especiais"/></div></div>
+        <div class="campo"><label class="obrig" for="nomeCorte" title="Nome do corte">Nome do corte</label><div class="in"><input id="nomeCorte" type="text" maxlength="12" autocomplete="off"/></div><div id="erroCorte" class="msg-campo hidden"></div></div>
+        <div class="campo"><label class="obrig" for="qtdCorte" title="Blocos iguais">Blocos iguais</label><div class="in com-un"><input id="qtdCorte" type="number" min="1"/><span class="un">un</span></div></div>
+        <div class="campo"><label class="padrao" for="revisao" title="Revisão">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00"/></div></div>
+        <div class="campo"><label class="obrig" for="responsavel" title="Responsável">Responsável</label><div class="in"><input id="responsavel" type="text"/></div></div>
         <div class="campo full"><label for="obs" title="Observações">Observações</label><div class="in"><input id="obs" type="text" placeholder="Opcional"/></div></div>
       </div>
       <div id="passo-estrutura" class="form hidden">
         <div class="sec full"><svg class="ic"><use href="#i-estr"/></svg>Estrutura</div>
-        <div class="campo"><label for="ruas" title="Ruas">Ruas</label><div class="in"><input id="ruas" type="number" min="1" value="1"/></div></div>
-        <div class="campo"><label for="niveis" title="Níveis (chão + níveis)">Níveis (chão + níveis)</label><div class="in"><input id="niveis" type="number" min="2" value="5"/></div></div><div class="campo"><label for="peDireito" title="Pé-direito livre do galpão">Pé-direito do galpão</label><div class="in com-un"><input id="peDireito" type="number" step="50" placeholder="opcional"/><span class="un">mm</span></div></div><div class="campo"></div>
+        <div class="campo"><label class="obrig" for="ruas" title="Ruas">Ruas</label><div class="in"><input id="ruas" type="number" min="1"/></div></div>
+        <div class="campo"><label class="obrig" for="niveis" title="Níveis (chão + níveis)">Níveis (chão + níveis)</label><div class="in"><input id="niveis" type="number" min="2"/></div></div><div class="campo"><label for="peDireito" title="Pé-direito livre do galpão">Pé-direito do galpão</label><div class="in com-un"><input id="peDireito" type="number" step="50" placeholder="opcional"/><span class="un">mm</span></div></div><div class="campo"></div>
         <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Palete</div>
-        <div class="campo"><label for="frentePalete" title="Frente">Frente</label><div class="in com-un"><input id="frentePalete" type="number" min="1" value="1200"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="profPalete" title="Profundidade">Profundidade</label><div class="in com-un"><input id="profPalete" type="number" min="1" value="1000"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="alturaPalete" title="Altura">Altura</label><div class="in com-un"><input id="alturaPalete" type="number" value="1600"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="cargaPalete" title="Carga">Carga</label><div class="in com-un"><input id="cargaPalete" type="number" value="1000"/><span class="un">kg</span></div></div>
+        <div class="campo"><label class="obrig" for="frentePalete" title="Frente">Frente</label><div class="in com-un"><input id="frentePalete" type="number" min="1"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="profPalete" title="Profundidade">Profundidade</label><div class="in com-un"><input id="profPalete" type="number" min="1"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="alturaPalete" title="Altura">Altura</label><div class="in com-un"><input id="alturaPalete" type="number"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="cargaPalete" title="Carga">Carga</label><div class="in com-un"><input id="cargaPalete" type="number"/><span class="un">kg</span></div></div>
         <div class="campo full"><label class="chk"><input id="escravo" type="checkbox"/> Palete escravo no 1º nível (2 empilhados no chão)</label></div>
         <div class="sec full"><svg class="ic"><use href="#i-alt"/></svg>Ajustes manuais (opcional)</div>
         <div class="campo"><label for="paletesInformados" title="Paletes por rua">Paletes por rua</label><div class="in"><input id="paletesInformados" type="number" min="1" placeholder="auto"/></div></div>
@@ -61,11 +61,11 @@
       </div>
       <div id="passo-lateral" class="form hidden">
         <div class="sec full"><svg class="ic"><use href="#i-col"/></svg>Coluna</div>
-        <div class="campo"><label for="coluna">Modelo</label><div class="in"><select id="coluna"><option value="80">AMPP COL 80</option><option value="80D">AMPP COL 80 DUPLADA (2 montantes)</option><option value="101">AMPP COL 101</option><option value="122" selected>AMPP COL 122</option></select></div></div>
-        <div class="campo"><label for="espessura">Espessura</label><div class="in com-un"><select id="espessura"><option>1.5</option><option>1.8</option><option>2.0</option><option selected>2.25</option><option>2.65</option></select><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="coluna">Modelo</label><div class="in"><select id="coluna"><option value="">Selecione…</option><option value="80">AMPP COL 80</option><option value="80D">AMPP COL 80 DUPLADA (2 montantes)</option><option value="101">AMPP COL 101</option><option value="122">AMPP COL 122</option></select></div></div>
+        <div class="campo"><label class="obrig" for="espessura">Espessura</label><div class="in com-un"><select id="espessura"><option value="">–</option><option>1.5</option><option>1.8</option><option>2.0</option><option>2.25</option><option>2.65</option></select><span class="un">mm</span></div></div>
         <div class="sec full"><svg class="ic"><use href="#i-prof"/></svg>Profundidade (lateral)</div>
-        <div class="campo"><label for="espacamentos" title="Espaços">Espaços</label><div class="in"><input id="espacamentos" type="number" min="1" max="30" value="5"/></div></div>
-        <div class="campo"><label for="largura" title="Medida do espaço">Medida do espaço</label><div class="in com-un"><input id="largura" type="number" step="1" value="820"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="espacamentos" title="Espaços">Espaços</label><div class="in"><input id="espacamentos" type="number" min="1" max="30"/></div></div>
+        <div class="campo"><label class="obrig" for="largura" title="Medida do espaço">Medida do espaço</label><div class="in com-un"><input id="largura" type="number" step="1"/><span class="un">mm</span></div></div>
         <div class="campo full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
         <div id="espacos" class="full espacos hidden"></div>
         <p class="nota full" id="notaQuadros"></p>
@@ -78,17 +78,17 @@
       <div id="passo-braco" class="form hidden">
         <div class="full croqui" id="croquiBraco"></div>
         <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Balanço do braço</div>
-        <div class="campo"><label for="balancoBaixo" title="1º nível">1º nível</label><div class="in com-un"><input id="balancoBaixo" type="number" min="1" value="180"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="balancoAlto" title="2º nível em diante">2º nível em diante</label><div class="in com-un"><input id="balancoAlto" type="number" min="1" value="230"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="balancoBaixo" title="1º nível">1º nível</label><div class="in com-un"><input id="balancoBaixo" type="number" min="1" value="180"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="balancoAlto" title="2º nível em diante">2º nível em diante</label><div class="in com-un"><input id="balancoAlto" type="number" min="1" value="230"/><span class="un">mm</span></div></div>
         <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Perfil C do braço</div>
-        <div class="campo"><label for="cA" title="A – altura">A – altura</label><div class="in com-un"><input id="cA" type="number" step="0.1" value="94"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="cC" title="C – aba">C – aba</label><div class="in com-un"><input id="cC" type="number" step="0.1" value="40"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="cB" title="B – dobra">B – dobra</label><div class="in com-un"><input id="cB" type="number" step="0.1" value="15"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="cD" title="D – espessura">D – espessura</label><div class="in com-un"><input id="cD" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="cA" title="A – altura">A – altura</label><div class="in com-un"><input id="cA" type="number" step="0.1" value="94"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="cC" title="C – aba">C – aba</label><div class="in com-un"><input id="cC" type="number" step="0.1" value="40"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="cB" title="B – dobra">B – dobra</label><div class="in com-un"><input id="cB" type="number" step="0.1" value="15"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="cD" title="D – espessura">D – espessura</label><div class="in com-un"><input id="cD" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
         <div class="sec full"><svg class="ic"><use href="#i-larg"/></svg>Longarina de túnel (perfil U)</div>
-        <div class="campo"><label for="uA" title="Alma">Alma</label><div class="in com-un"><input id="uA" type="number" step="0.1" value="100"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="uB" title="Aba">Aba</label><div class="in com-un"><input id="uB" type="number" step="0.1" value="38"/><span class="un">mm</span></div></div>
-        <div class="campo"><label for="uE" title="Chapa">Chapa</label><div class="in com-un"><input id="uE" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="uA" title="Alma">Alma</label><div class="in com-un"><input id="uA" type="number" step="0.1" value="100"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="uB" title="Aba">Aba</label><div class="in com-un"><input id="uB" type="number" step="0.1" value="38"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="padrao" for="uE" title="Chapa">Chapa</label><div class="in com-un"><input id="uE" type="number" step="0.05" value="1.8"/><span class="un">mm</span></div></div>
         <div class="campo"></div>
         <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Stop palete</div>
         <div class="campo"><label for="pesoStop" title="Peso unitário">Peso unitário</label><div class="in com-un"><input id="pesoStop" type="number" step="0.001" placeholder="informar"/><span class="un">kg</span></div></div>

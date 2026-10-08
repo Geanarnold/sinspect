@@ -452,3 +452,10 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Bloco atualizado (oblongos verticais, curso 5 mm, centros a 25 mm do topo e da base da chapa de 200 = ±75 do centro do C). Na lateral a chapa segue o bloco (200).
 - Compatível com a furação da coluna (Gean): os oblongos do suporte são ancorados nos oblongos da lateral da coluna (DI_COLUNA, módulo de 50 a partir da base, centros ≡ 29,2 mod 50); C, longarina de túnel e palete do último nível acompanham.
 - `[CONFIRMAR]` Diferença de ~4,2 mm entre as referências de furação: a frontal posiciona o braço pelos furos a 25 mm do topo da coluna (altura múltipla de 50 → furos ≡ 25 mod 50, apoio ≡ 47), a lateral pelos oblongos a partir da base (≡ 29,2). Falta a medida real do 1º furo a partir da base da coluna para unificar (muda o 1º nível em ~4 mm na frontal e na lista).
+
+## 33. Preenchimento sem valores de modelo (Gean)
+
+- Dados do projeto começam **vazios** e são obrigatórios (*): projeto/cliente, responsável, nome do corte, blocos iguais, ruas, níveis, frente/profundidade/altura/carga do palete, modelo e espessura da coluna, espaços e medida do espaço (e cada A quando "medidas diferentes").
+- Padrões da empresa vêm preenchidos e marcados "padrão": revisão REV.00, balanços 180/230, perfil C 94×40×15×1,8, U da longarina de túnel 100×38×1,8.
+- Enquanto faltar campo obrigatório: o corte não é calculado, a tela lista o que falta por etapa, os campos ficam amarelos, e PNG / DXF do projeto / CSV / Imprimir ficam bloqueados (sem nome do projeto, responsável, nome do corte ou blocos, ou com outro corte incompleto, também bloqueia, com o motivo no botão).
+- "Novo corte" vem em branco; "Duplicar" copia os dados do corte atual com o nome em branco. "Novo" projeto vem em branco.
