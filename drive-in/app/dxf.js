@@ -310,7 +310,14 @@
       }
     }
     // longarina de fundo: perfil da longarina de topo (DI_LGTOPO esticado pela rua), em cada nível de braço, layer laranja; topo no nível de apoio [CONFIRMAR altura]
-    if (F.lgFundo && B().DI_LGTOPO) for (let i = 0; i < R; i++) for (const yN of F.niveis) {
+    // bloco do Gean (DI_LGFUNDO.dxf): longarina de fundo apoiada sobre os braços, de ponta a ponta (desenhada para balanço 180 em rua 1400:
+    // pontas a ±519 do centro); chapas de apoio (8 mm) sobre o topo do C → y = 0 do bloco 8 mm acima do apoio do palete
+    const LGF = B().DI_LGFUNDO;
+    if (F.lgFundo && LGF) for (let i = 0; i < R; i++) F.niveis.forEach((yN, k) => {
+      const bal = k === 0 ? F.balBaixo : F.balAlto, ponta = rua / 2 - F.espU - bal, d = ponta - 519, xm = (xs[i] + xs[i + 1]) / 2;
+      put(mapPts(clone(LGF), (v) => [v[0] > 100 ? v[0] + d : v[0] < -100 ? v[0] - d : v[0], v[1]]), xm, snapApoio(yN) + offApoio + 8, 'LONGARINA_FUNDO', nomeBloco('DI_LGFUNDO', 'RUA' + nb(rua), 'BAL' + nb(bal)));
+    });
+    else if (F.lgFundo && B().DI_LGTOPO) for (let i = 0; i < R; i++) for (const yN of F.niveis) {
       const ya = snapApoio(yN) + offApoio, x1 = xs[i] + hx + 2.23, x2 = xs[i + 1] - hx - 2.23;
       put(stretchX(clone(B().DI_LGTOPO).map((q) => ({ ...q, l: 'LONGARINA_FUNDO' })), 1931.73 / 2, (x2 - x1) - 1931.73), x1, ya - 111.89, 'LONGARINA_FUNDO', nomeBloco('DI_LG_FUNDO', 'RUA' + nb(rua), 'COL' + col));
     }
