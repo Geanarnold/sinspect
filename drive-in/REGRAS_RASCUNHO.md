@@ -429,3 +429,8 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Vista superior: paletes **não** são desenhados; só a numeração dos cantos.
 - Vista frontal: paletes só na **1ª rua** do corte; nessa rua o zig-zag de fundo não é desenhado (continua na lista de peças). Carga e número da posição só nessa rua.
 - Vista frontal com mais de 5 ruas: desenha só as 5 primeiras, com linha de interrupção à direita e a nota "VISTA PARCIAL: 5 DE N RUAS - LARGURA TOTAL …". A última coluna desenhada é interna (braço duplo). A lista de peças e a vista superior continuam com todas as ruas.
+
+## 29. Montantes e trilho por modelo de coluna (MONTANTES_DE_MODELO.dxf)
+
+- Vista superior usa DI_MONT_<col> (quadro) e DI_PL_SOLT_<col> (união + solteira) para 80, 101 e 122; a duplada usa os da COL 80 lado a lado. Trilho guia: DI_TRILHO_GUIA_<col> (80D para a duplada), interno = largura da coluna, externo = coluna + 2 × 43,5.
+- Comprimento do trilho continua pela regra (até o fim do penúltimo palete, começando 50 mm à frente). `[CONFIRMAR]`: no VISTA_SUPERIOR.dxf e no MONTANTES_DE_MODELO.dxf o trilho começa ~150 mm à frente da face do quadro e os comprimentos são de desenho (iguais com e sem solteira no 122).

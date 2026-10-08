@@ -425,9 +425,10 @@
       const xt = lado === 1 ? xs[i] + uo + bal : xs[i + 1] - uo - bal, x0 = lado === 1 ? xt - lgB : xt;
       put(ret(lgB, D, 'LONGARINA', 'BRACO_HACHURA'), x0, 0, 'LONGARINA', nomeBloco('DI_PL_LG_TUNEL', nb(D)));
     }
-    // colunas: COL 80 (e duplada) com os blocos do Gean — quadro DI_MONT_80 (2 seções + contraventamento, esticado no A do quadro) e solteira
-    // DI_PL_COL80_SOLT; demais colunas: seção real (COLUNAS.dxf) e linha do contraventamento dentro do quadro
-    const MONT = B()['DI_MONT_' + cp], SOLT = B()['DI_PL_COL' + cp + '_SOLT'], SEC = B()['DI_SECAO_COL' + cp];
+    // colunas (MONTANTES_DE_MODELO.dxf, Gean): quadro DI_MONT_<col> (2 seções + contraventamento; alma de trás em y = 0, desenhado com A = 1025,
+    // esticado no A do quadro) e solteira DI_PL_SOLT_<col> (união + coluna solteira; y = 0 na alma da coluna vizinha do quadro, solteira em
+    // y = 1025, esticado no A da solteira); duplada = 2 blocos da COL 80 lado a lado. Sem bloco: seção real (COLUNAS.dxf) + linha do contraventamento
+    const MONT = B()['DI_MONT_' + cp], SOLT = B()['DI_PL_SOLT_' + cp], SEC = B()['DI_SECAO_COL' + cp];
     const secao = (sy) => SEC ? mapPts(clone(SEC), (v) => [v[0], sy * v[1]]) : mapPts(ret(cp, CW, 'MONTANTE', 'MONTANTE_HACHURA'), (v) => [v[0] - cp / 2, sy * v[1]]);
     const emQuadro = new Set();
     for (let k = 0; k < nEsp; k++) if (quadroEsp(k)) {
@@ -440,8 +441,15 @@
     }
     for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
       if (MONT && emQuadro.has(j)) return;
-      const ps = !emQuadro.has(j) && SOLT ? mapPts(clone(SOLT), (v) => [v[0], -abreY[j] * v[1]]) : secao(abreY[j]);
-      for (const dx of dxM) put(clone(ps), xs[i] + dx, yA, 'MONTANTE', nomeBloco(!emQuadro.has(j) && SOLT ? 'DI_PL_COL_SOLT' : 'DI_PL_COLUNA', cp, abreY[j] > 0 ? 'F' : 'T'));
+      const k = j + 1 < nRows ? j + 1 : j - 1; // coluna vizinha (do quadro) à qual a solteira se une
+      if (!emQuadro.has(j) && SOLT && k >= 0) {
+        const A = yA - almaY[k], sg = Math.sign(A) || 1;
+        const ps = mapPts(clone(SOLT), (v) => [v[0], sg * (v[1] > 512.5 ? v[1] + Math.abs(A) - 1025 : v[1])]);
+        for (const dx of dxM) put(clone(ps), xs[i] + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_SOLT', cp, nb(Math.abs(A)), sg > 0 ? 'F' : 'T'));
+        return;
+      }
+      const ps = secao(abreY[j]);
+      for (const dx of dxM) put(clone(ps), xs[i] + dx, yA, 'MONTANTE', nomeBloco('DI_PL_COLUNA', cp, abreY[j] > 0 ? 'F' : 'T'));
     });
     // longarina superior (DI_LONG_VIST_SUP, TB 80) em cada linha de coluna, esticada para a largura da rua (desenhada para rua 1400)
     const LGS = B().DI_LONG_VIST_SUP, dR = (rua - 1400) / 2;
@@ -461,9 +469,11 @@
       else line(p1[0], p1[1], p2[0], p2[1], 'Contraventamento');
     }
     // trilho guia (DI_TRILHO_GUIA): centrado na linha de colunas de cada lateral, começa à frente da estrutura e entra até o fim do penúltimo palete
-    const Tr = r.lateral.trilho, TRL = B().DI_TRILHO_GUIA, TL0 = 3265.6;
+    // trilho por modelo de coluna (DI_TRILHO_GUIA_80 / _101 / _122 / _80D, Gean); sem bloco do modelo: DI_TRILHO_GUIA genérico
+    const Tr = r.lateral.trilho, TRL = B()['DI_TRILHO_GUIA_' + cp + (dup ? 'D' : '')] || B().DI_TRILHO_GUIA;
+    const TL0 = TRL ? Math.max(...TRL.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : 0;
     if (Tr && Tr.comp > 100 && TRL) for (let i = 0; i <= R; i++)
-      put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), xs[i], -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', nb(Tr.comp)));
+      put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), xs[i], -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', cp + (dup ? 'D' : ''), nb(Tr.comp)));
     // entrada de cada rua: seta e número da rua
     for (let i = 0; i < R; i++) {
       const xm = (xs[i] + xs[i + 1]) / 2;
