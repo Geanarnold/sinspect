@@ -433,4 +433,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 ## 29. Montantes e trilho por modelo de coluna (MONTANTES_DE_MODELO.dxf)
 
 - Vista superior usa DI_MONT_<col> (quadro) e DI_PL_SOLT_<col> (união + solteira) para 80, 101 e 122; a duplada usa os da COL 80 lado a lado. Trilho guia: DI_TRILHO_GUIA_<col> (80D para a duplada), interno = largura da coluna, externo = coluna + 2 × 43,5.
-- Comprimento do trilho continua pela regra (até o fim do penúltimo palete, começando 50 mm à frente). `[CONFIRMAR]`: no VISTA_SUPERIOR.dxf e no MONTANTES_DE_MODELO.dxf o trilho começa ~150 mm à frente da face do quadro e os comprimentos são de desenho (iguais com e sem solteira no 122).
+- Comprimento do trilho pela regra: começa **50 mm à frente** da estrutura (confirmado pelo Gean; os ~150 mm dos desenhos VISTA_SUPERIOR/MONTANTES_DE_MODELO são só desenho) e vai até o fim do penúltimo palete.
