@@ -2,7 +2,7 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 252, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 32, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
   const LAYER_DXF = { MONTANTE_HACHURA: 'MONTANTE_HACHURA', BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
@@ -555,7 +555,7 @@
       '0', 'SECTION', '2', 'ENTITIES', ...out, '0', 'ENDSEC', '0', 'EOF'].join('\n');
   }
   // ---- a mesma vista em SVG (tela): fundo escuro como o AutoCAD, cores por layer
-  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE_HACHURA: '#6b7280', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
+  const COR = { MONTANTE_HACHURA: '#4f8cff', BRACO_PARAFUSO: '#000000', BRACO_HACHURA: '#f97316', LONGARINA_FUNDO: '#fb923c', TRILHO: '#eab308', PALETE_HACHURA: '#a5520a', PALETE: '#a78b6d', MONTANTE: '#4f8cff', Contraventamento: '#9aa0a6', LONGARINA: '#22c55e', BRACO: '#1f2937', CANELEIRA: '#1f2937', CANELEIRA_HACHURA: '#facc15', COTAS: '#e5e7eb', '4 - TEXTO DE ESCALA E VISTA': '#facc15', 0: '#e5e7eb' };
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)

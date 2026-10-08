@@ -443,4 +443,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 
 ## 31. Paletes na vista lateral (Gean)
 
-- Paletes no nível de baixo (chão e, com escravo, o segundo palete empilhado) e no nível mais alto, em toda a profundidade (do fundo para a frente, palete + 25 mm). Contorno na layer PALETE e hachura a 45° (a cada 120 mm) na layer PALETE_HACHURA (cor 252), só na carga (acima dos 150 mm da base do palete).
+- Paletes no nível de baixo (chão e, com escravo, o segundo palete empilhado) e no nível mais alto, em toda a profundidade (do fundo para a frente, palete + 25 mm). Contorno na layer PALETE e hachura a 45° (a cada 120 mm) na layer PALETE_HACHURA (cor 32, marrom), só na carga (acima dos 150 mm da base do palete).
