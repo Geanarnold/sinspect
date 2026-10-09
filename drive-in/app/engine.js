@@ -6,6 +6,8 @@
 
   const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado
   const AVISO_ESTRUTURAL = 'COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente.';
+  // nota fixa (Gean): o app é ferramenta de orçamento/desenho; verificações operacionais e estruturais ficam com os responsáveis
+  const NOTA_RESPONSABILIDADE = 'As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável.';
   const DENS = 7.85e-6;       // kg/mm³ (aço)
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
   const PASSO_COLUNA = 50;    // altura da coluna em múltiplos de 50 mm
@@ -328,7 +330,7 @@
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
     else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
-    alertas.unshift(AVISO_ESTRUTURAL); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
+    alertas.unshift(AVISO_ESTRUTURAL, NOTA_RESPONSABILIDADE); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
     if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço específico da duplada (sem desenho, SA nem peso cadastrados: peso estimado com U de ${colW} mm), zig-zag no oblongo externo. Faltam: desenho do braço específico, caneleira, fixação montante–montante e se a duplada vale para todas as laterais.`);
 
@@ -344,6 +346,6 @@
     };
   }
 
-  const Engine = { AVISO_ESTRUTURAL, calcular, posicoesHorizontais, buscaSA, KG_M_TRAVESSA, SEM };
+  const Engine = { AVISO_ESTRUTURAL, NOTA_RESPONSABILIDADE, calcular, posicoesHorizontais, buscaSA, KG_M_TRAVESSA, SEM };
   if (typeof module !== 'undefined' && module.exports) module.exports = Engine; else root.Engine = Engine;
 })(typeof window !== 'undefined' ? window : globalThis);

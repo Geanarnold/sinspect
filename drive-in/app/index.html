@@ -19,7 +19,8 @@
       <div class="cortes">
         <div class="cortes-tit"><svg class="ic"><use href="#i-proj"/></svg>Projeto e cortes</div>
         <div id="listaCortes" class="lista-cortes"></div>
-        <div class="cortes-arq"><button id="btnSalvarProj" title="Baixa um arquivo .drivein.json com todo o projeto"><svg class="ic"><use href="#i-down"/></svg>Salvar</button><label class="btn-arquivo" title="Abre um arquivo .drivein.json"><svg class="ic"><use href="#i-proj"/></svg>Abrir<input id="abrirProj" type="file" accept=".json" hidden/></label><button id="btnNovoProj" class="discreto" title="Começa um projeto em branco"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div>
+        <div class="cortes-arq"><button id="btnSalvarProj" title="Baixa um arquivo .drivein.json com todo o projeto"><svg class="ic"><use href="#i-down"/></svg>Salvar</button><button id="btnAbrirProj" title="Abre um projeto da pasta da empresa (ou um arquivo .drivein.json)"><svg class="ic"><use href="#i-proj"/></svg>Abrir</button><input id="abrirProj" type="file" accept=".json" hidden/><button id="btnNovoProj" class="discreto" title="Começa um projeto em branco"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div>
+        <div class="pasta-linha"><span id="pastaInfo" class="nota"></span><button id="btnPasta" class="discreto mini-btn"></button></div><div id="revInfo" class="nota rev-info"></div>
         <div class="cortes-acoes"><button id="btnNovoCorte" title="Corte novo, em branco"><svg class="ic"><use href="#i-plus"/></svg>Novo corte</button><button id="btnDupCorte" title="Copia os dados do corte atual (o nome fica em branco)"><svg class="ic"><use href="#i-proj"/></svg>Duplicar</button><button id="btnRemCorte" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div>
       </div>
       <div class="passos">
@@ -33,7 +34,7 @@
         <div class="campo full"><label class="obrig" for="projeto" title="Projeto / cliente">Projeto / cliente</label><div class="in"><input id="projeto" type="text" maxlength="11" autocomplete="off" spellcheck="false" title="Até 11 letras ou números, sem espaço nem caracteres especiais"/></div></div>
         <div class="campo"><label class="obrig" for="nomeCorte" title="Nome do corte">Nome do corte</label><div class="in"><input id="nomeCorte" type="text" maxlength="12" autocomplete="off"/></div><div id="erroCorte" class="msg-campo hidden"></div></div>
         <div class="campo"><label class="obrig" for="qtdCorte" title="Blocos iguais">Blocos iguais</label><div class="in com-un"><input id="qtdCorte" type="number" min="1"/><span class="un">un</span></div></div>
-        <div class="campo"><label class="padrao" for="revisao" title="Revisão">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00"/></div></div>
+        <div class="campo"><label for="revisao" title="Revisão (sobe sozinha a cada salvamento)">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00" readonly tabindex="-1"/></div></div>
         <div class="campo"><label class="obrig" for="responsavel" title="Responsável">Responsável</label><div class="in"><input id="responsavel" type="text"/></div></div>
         <div class="campo full"><label for="obs" title="Observações">Observações</label><div class="in"><input id="obs" type="text" placeholder="Opcional"/></div></div>
       </div>
@@ -116,7 +117,7 @@
           <div class="tab" data-tab="frontal"><svg class="ic"><use href="#i-estr"/></svg>Vista frontal</div>
           <div class="tab" data-tab="esquema"><svg class="ic"><use href="#i-vista"/></svg>Esquema</div>
           <div class="tab" data-tab="planta"><svg class="ic"><use href="#i-prof"/></svg>Planta</div>
-          <div class="acoes-tab"><button id="btnPng" title="Baixar imagem (PNG)"><svg class="ic"><use href="#i-img"/></svg>PNG</button><button id="btnDxfProj" class="primario"><svg class="ic"><use href="#i-down"/></svg>DXF do projeto</button></div>
+          <div class="acoes-tab"><button id="btnPng" title="Baixar imagem (PNG)"><svg class="ic"><use href="#i-img"/></svg>PNG</button><button id="btnEmitir" class="primario" title="Confere as pendências, registra a emissão e gera DXF + lista"><svg class="ic"><use href="#i-down"/></svg>Emitir</button><button id="btnDxfProj"><svg class="ic"><use href="#i-down"/></svg>DXF do projeto</button></div>
         </div>
         <div id="vista" class="vista"></div>
       </div>
@@ -134,6 +135,7 @@
     </section>
   </main>
 
+  <div id="modal" class="modal hidden"><div class="modal-caixa"><h3 id="modalTit"></h3><div id="modalCorpo" class="modal-corpo"></div><div id="modalAcoes" class="modal-acoes"></div></div></div>
   <section id="paginaCad" class="wrap hidden">
     <div class="card painel" style="margin-top:16px">
       <div class="tabs" id="cadAbas"></div>
@@ -142,14 +144,14 @@
         <span id="cadInfo" class="nota"></span>
         <span style="flex:1"></span>
         <button id="cadNovo">+ Nova linha</button>
-        <button id="cadSalvar" class="primario">Salvar</button>
+        <button id="cadDesbloquear" class="primario">Desbloquear edição (senha)</button><button id="cadSalvar">Aplicar</button><button id="cadPublicar" class="primario">Publicar nova versão</button>
         <button id="cadCsv">Exportar CSV</button>
         <button id="cadJson">Exportar catálogo (JSON)</button>
-        <label class="btn-arquivo">Importar JSON<input id="cadImportar" type="file" accept=".json" hidden/></label>
+        <label id="cadImportarLbl" class="btn-arquivo">Importar JSON<input id="cadImportar" type="file" accept=".json" hidden/></label>
         <button id="cadRestaurar">Restaurar padrão</button>
       </div>
-      <p class="nota" style="padding:0 16px">Código em branco = item sem cadastro (o BOM mostra SA04XXXX / COXXXXXX). As edições ficam salvas neste navegador; use "Exportar catálogo" para guardar ou levar para outro computador.</p>
-      <div id="cadMsg" class="nota" style="padding:0 16px 8px"></div>
+      <p class="nota" style="padding:0 16px">Código em branco = item sem cadastro (o BOM mostra SA04XXXX / COXXXXXX). Consulta livre; editar exige a senha do catálogo. "Aplicar" vale só nesta tela; "Publicar nova versão" grava a versão seguinte (autor, data e descrição) na pasta da empresa, para todos.</p>
+      <div id="cadVersao" class="nota" style="padding:0 16px 4px"></div><div id="cadMsg" class="nota" style="padding:0 16px 8px"></div>
       <div id="cadTabela" class="cad-tabela"></div>
     </div>
   </section>
@@ -158,6 +160,7 @@
   <script src="engine.js"></script>
   <script src="blocos.js"></script>
   <script src="dxf.js"></script>
+  <script src="pasta.js"></script>
   <script src="cadastro.js"></script>
   <script src="app.js"></script>
 </body>

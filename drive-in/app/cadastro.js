@@ -1,9 +1,10 @@
-// Cadastro de produtos: edita o catálogo dentro do app (salvo no navegador), com exportação/importação.
-// As tabelas editadas substituem window.CATALOGO; o motor passa a usar os valores novos imediatamente.
+// Cadastro de produtos com controle de versão (Gean): o catálogo oficial fica na pasta da empresa (catalogo/catalogo-drive-in.json).
+// Qualquer um consulta; editar exige a senha do catálogo. "Publicar nova versão" grava a versão N+1 com autor, data e descrição
+// (e uma cópia em catalogo/versoes/). Nada fica salvo só no navegador — evita catálogos diferentes em cada máquina.
+// A senha é uma trava contra edição acidental; a proteção de verdade é a permissão de escrita na pasta catalogo/ (administrador).
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const KEY = 'drivein.catalogo.v1';
   const PADRAO = JSON.parse(JSON.stringify(window.CATALOGO));
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -33,15 +34,60 @@
     composicao: { titulo: 'Composição (o que entra em cada conjunto)', cols: [['pai', 'Conjunto', 'text'], ['item', 'Item (ID em Produtos)', 'text'], ['qtd', 'Quantidade', 'number'], ['contagem', 'Contagem', 'text']], ler: (c) => c.composicao.map((x) => ({ ...x })), gravar: (c, rows) => { c.composicao = rows.filter((r) => r.pai && r.item).map((r) => ({ pai: r.pai, item: r.item, qtd: Number(r.qtd), contagem: r.contagem })); } },
   };
 
-  let atual = 'produtos', rows = [];
-  function carregar() {
-    try { const s = localStorage.getItem(KEY); if (s) { const c = JSON.parse(s); Object.assign(window.CATALOGO, c); window.CATALOGO.versao = (c.versao || PADRAO.versao) + ' (editado)'; } } catch (e) { /* sem storage */ }
+  let atual = 'produtos', rows = [], liberado = false, alterado = false;
+  const sha256 = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('drivein|' + t)))].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const meta = () => (window.CATALOGO.meta = window.CATALOGO.meta || { versao: 0, data: window.CATALOGO.versao, autor: 'catálogo base (planilha)', historico: [] });
+  function substituir(novo) { for (const k of Object.keys(window.CATALOGO)) delete window.CATALOGO[k]; Object.assign(window.CATALOGO, JSON.parse(JSON.stringify(novo))); }
+  async function carregarDaPasta() {
+    if (!(window.Pasta && Pasta.pronta)) return false;
+    const t = await Pasta.ler('catalogo/catalogo-drive-in.json');
+    if (!t) { msg('A pasta ainda não tem catálogo publicado: usando o catálogo base do app. Publique a v1 pelo Cadastro.'); return false; }
+    try { substituir(JSON.parse(t)); msg(`Catálogo v${meta().versao} carregado da pasta ${Pasta.nome()}.`); renderTabela(); if (window.recalcular) window.recalcular(); return true; } catch (e) { msg('Catálogo da pasta inválido: ' + e.message); return false; }
   }
-  function salvar() {
+  function msg(t) { const el = $('cadMsg'); if (el) el.textContent = t; }
+  async function desbloquear() {
+    const m = meta();
+    if (!m.senhaHash) {
+      const a = prompt('Este catálogo ainda não tem senha. Defina a senha de edição (mín. 6 caracteres):'); if (!a) return;
+      if (a.length < 6) { alert('Senha muito curta.'); return; }
+      if (prompt('Repita a senha:') !== a) { alert('As senhas não conferem.'); return; }
+      m.senhaHash = await sha256(a); alterado = true; liberado = true;
+      msg('Senha definida. Ela passa a valer quando a próxima versão for publicada.');
+    } else {
+      const a = prompt('Senha de edição do catálogo:'); if (a == null) return;
+      if ((await sha256(a)) !== m.senhaHash) { alert('Senha incorreta.'); return; }
+      liberado = true; msg('Edição liberada nesta sessão. Publique uma nova versão para valer para todos.');
+    }
+    estado();
+  }
+  async function publicar() {
+    if (!liberado) return;
     TABELAS[atual].gravar(window.CATALOGO, rows);
-    try { localStorage.setItem(KEY, JSON.stringify(window.CATALOGO)); } catch (e) { /* sem storage */ }
-    $('cadMsg').textContent = `Salvo ${new Date().toLocaleTimeString('pt-BR')}. O configurador já usa os valores novos.`;
-    if (window.recalcular) window.recalcular();
+    const autor = (prompt('Seu nome (autor desta versão):') || '').trim(); if (!autor) return;
+    const desc = (prompt('O que mudou nesta versão? (vai para o histórico)') || '').trim(); if (!desc) { alert('Descreva a alteração.'); return; }
+    const m = meta(), v = (m.versao || 0) + 1, hoje = new Date().toISOString().slice(0, 10);
+    m.historico = (m.historico || []).concat({ versao: v, data: hoje, autor, descricao: desc });
+    Object.assign(m, { versao: v, data: hoje, autor });
+    const txt = JSON.stringify(window.CATALOGO, null, 1);
+    try {
+      if (window.Pasta && Pasta.pronta) {
+        await Pasta.escrever('catalogo/catalogo-drive-in.json', txt);
+        await Pasta.escrever(`catalogo/versoes/catalogo_v${String(v).padStart(3, '0')}.json`, txt);
+        msg(`Versão v${v} publicada na pasta ${Pasta.nome()}.`);
+      } else {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = `catalogo_v${String(v).padStart(3, '0')}.json`; a.click();
+        msg(`Versão v${v} gerada como download (sem pasta conectada): copie para catalogo/catalogo-drive-in.json na pasta da empresa.`);
+      }
+    } catch (e) { alert('Não foi possível gravar na pasta: ' + e.message); return; }
+    alterado = false; estado(); if (window.recalcular) window.recalcular();
+  }
+  function estado() {
+    const m = meta();
+    $('cadVersao').innerHTML = `Catálogo <b>v${m.versao}</b> · ${m.data || ''} · ${m.autor || ''}${(m.historico || []).length ? ` · <a href="#" id="cadHist">histórico</a>` : ''}${liberado ? ' · <b style="color:#b45309">edição liberada</b>' : ''}${alterado ? ' · <b style="color:#b91c1c">alterações não publicadas</b>' : ''}`;
+    const h = $('cadHist'); if (h) h.addEventListener('click', (e) => { e.preventDefault(); alert((m.historico || []).slice().reverse().map((x) => `v${x.versao} – ${x.data} – ${x.autor}: ${x.descricao}`).join('\n')); });
+    for (const id of ['cadNovo', 'cadSalvar', 'cadRestaurar', 'cadImportarLbl']) { const el = $(id); if (el) el.classList.toggle('hidden', !liberado); }
+    $('cadDesbloquear').classList.toggle('hidden', liberado);
+    $('cadTabela').querySelectorAll('input,button.mini').forEach((el) => { el.disabled = !liberado; });
   }
   function renderTabela() {
     const T = TABELAS[atual]; rows = T.ler(window.CATALOGO);
@@ -52,7 +98,8 @@
     h += `</tbody></table>`;
     $('cadTabela').innerHTML = h;
     $('cadInfo').textContent = `${rows.length} linhas${vis.length < rows.length ? ` (mostrando ${vis.length})` : ''}`;
-    $('cadTabela').querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => { const i = Number(inp.closest('tr').dataset.i); rows[i][inp.dataset.k] = inp.type === 'number' ? (inp.value === '' ? '' : Number(inp.value)) : inp.value; }));
+    $('cadTabela').querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => { const i = Number(inp.closest('tr').dataset.i); rows[i][inp.dataset.k] = inp.type === 'number' ? (inp.value === '' ? '' : Number(inp.value)) : inp.value; alterado = true; }));
+    if ($('cadVersao')) estado();
     $('cadTabela').querySelectorAll('button[data-del]').forEach((b) => b.addEventListener('click', () => { rows.splice(Number(b.dataset.del), 1); TABELAS[atual].gravar(window.CATALOGO, rows); renderTabela(); }));
   }
   function exportarCsv() {
@@ -61,17 +108,18 @@
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = `cadastro-${atual}.csv`; a.click();
   }
   function init() {
-    carregar();
     $('cadAbas').innerHTML = Object.entries(TABELAS).map(([k, t]) => `<div class="tab ${k === atual ? 'active' : ''}" data-cad="${k}">${t.titulo}</div>`).join('');
     $('cadAbas').querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => { atual = t.dataset.cad; $('cadAbas').querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t)); renderTabela(); }));
     $('cadBusca').addEventListener('input', renderTabela);
     $('cadNovo').addEventListener('click', () => { rows.push({}); TABELAS[atual].gravar(window.CATALOGO, rows); renderTabela(); $('cadTabela').scrollTop = 1e9; });
-    $('cadSalvar').addEventListener('click', salvar);
+    $('cadSalvar').addEventListener('click', () => { TABELAS[atual].gravar(window.CATALOGO, rows); alterado = true; estado(); msg('Alterações aplicadas nesta tela (o configurador já usa). Publique uma nova versão para gravar na pasta.'); if (window.recalcular) window.recalcular(); });
+    $('cadDesbloquear').addEventListener('click', desbloquear);
+    $('cadPublicar').addEventListener('click', () => { if (!liberado) { alert('Desbloqueie a edição (senha) para publicar.'); return; } publicar(); });
     $('cadCsv').addEventListener('click', exportarCsv);
     $('cadJson').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(window.CATALOGO, null, 1)], { type: 'application/json' })); a.download = 'catalogo-drive-in.json'; a.click(); });
-    $('cadImportar').addEventListener('change', (ev) => { const f = ev.target.files[0]; if (!f) return; f.text().then((t) => { try { Object.assign(window.CATALOGO, JSON.parse(t)); localStorage.setItem(KEY, JSON.stringify(window.CATALOGO)); renderTabela(); $('cadMsg').textContent = 'Catálogo importado.'; if (window.recalcular) window.recalcular(); } catch (e) { $('cadMsg').textContent = 'Arquivo inválido.'; } }); });
-    $('cadRestaurar').addEventListener('click', () => { if (!confirm('Descartar todas as edições e voltar ao catálogo padrão?')) return; Object.assign(window.CATALOGO, JSON.parse(JSON.stringify(PADRAO))); try { localStorage.removeItem(KEY); } catch (e) {} renderTabela(); $('cadMsg').textContent = 'Catálogo padrão restaurado.'; if (window.recalcular) window.recalcular(); });
-    renderTabela();
+    $('cadImportar').addEventListener('change', (ev) => { const f = ev.target.files[0]; if (!f) return; f.text().then((t) => { try { const m0 = meta(), novo = JSON.parse(t); substituir(novo); window.CATALOGO.meta = m0; alterado = true; renderTabela(); estado(); $('cadMsg').textContent = 'Catálogo importado (mantida a versão/senha atuais). Publique para gravar na pasta.'; if (window.recalcular) window.recalcular(); } catch (e) { $('cadMsg').textContent = 'Arquivo inválido.'; } }); });
+    $('cadRestaurar').addEventListener('click', () => { if (!confirm('Descartar todas as edições e voltar ao catálogo padrão?')) return; const m0 = meta(); substituir(PADRAO); window.CATALOGO.meta = m0; alterado = true; renderTabela(); estado(); $('cadMsg').textContent = 'Valores do catálogo base restaurados (não publicado).'; if (window.recalcular) window.recalcular(); });
+    renderTabela(); estado();
   }
-  window.Cadastro = { init };
+  window.Cadastro = { init, carregarDaPasta };
 })();

@@ -627,6 +627,9 @@
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
     if (aviso) for (const mm of [mL, mF]) mm.textos.push({ x: (mm.bbox[0] + mm.bbox[2]) / 2, y: -800, h: 90, s: aviso, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
+    // nota de responsabilidade (Gean) embaixo da lateral, em 2 linhas
+    const nota = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).NOTA_RESPONSABILIDADE;
+    if (nota) { const i = nota.indexOf('. O ') + 1; [nota.slice(0, i), nota.slice(i + 1)].forEach((t, k) => mL.textos.push({ x: mL.bbox[0] + 400, y: -1250 - k * 140, h: 80, s: 'NOTA: '.slice(0, k ? 0 : 6) + t.trim(), l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 0 })); mL.bbox[1] = Math.min(mL.bbox[1], -1600); }
     const pd = Number(r.frontal.peDireito) || 0;
     if (pd > 0) { // linha de pé-direito com marcador, como no 260324
       const x0 = mL.bbox[0] + 400, x1 = mF.bbox[2] - 400;

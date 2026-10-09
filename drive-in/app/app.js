@@ -199,7 +199,7 @@
     $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
     const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);
     const outrosIncompletos = proj.cortes.filter((x, i) => i !== proj.atual && (vazioDados(x.dados) || !x.nome || x.qtd === '')).map((x) => x.nome || '(sem nome)');
-    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
+    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint', 'btnEmitir']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
     if (faltaCalc.length || espVazios.length) {
       last = null;
       const porEtapa = {}; for (const id of faltaCalc) (porEtapa[etapa(id)] = porEtapa[etapa(id)] || []).push(rotulo(id));
@@ -252,7 +252,7 @@
       }
     }
     html += `<tr class="grp"><td colspan="5">TOTAL (itens levantados)</td><td class="num">${fmt(r.pesoTotal)}</td><td></td></tr></tbody></table>`;
-    $('tab-pecas').innerHTML = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p>` + html;
+    $('tab-pecas').innerHTML = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 10px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p>` + html;
   }
 
   // ---- desenho (SVG): vista lateral de um pórtico, vista frontal e planta
@@ -339,7 +339,7 @@
 
   function renderProjeto(lp) {
     const itens = consolidar(lp), grupos = [...new Set(itens.map((p) => p.grupo))], total = itens.reduce((s, p) => s + (p.pesoTotal || 0), 0);
-    let html = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 10px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
+    let html = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 4px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p><p class="nota" style="padding:0 16px 10px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
     html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Compr. (mm)</th><th class="num">Peso unit. (kg)</th><th class="num">Peso total (kg)</th><th>Cortes</th></tr></thead><tbody>`;
     for (const g of grupos) {
       const ps = itens.filter((p) => p.grupo === g), sub = ps.reduce((s, p) => s + (p.pesoTotal || 0), 0);
@@ -361,18 +361,18 @@
       </ul>`;
   }
 
-  function csv() {
+  function csv(nomeArquivo) {
     if (!last) return;
     const cab = ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs / cortes'];
     const lp = calcularProjeto();
-    const rows = [[Engine.AVISO_ESTRUTURAL], [], ['PROJETO CONSOLIDADO', lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], cab];
+    const rows = [[Engine.AVISO_ESTRUTURAL], [Engine.NOTA_RESPONSABILIDADE], [], ['PROJETO CONSOLIDADO', lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], cab];
     for (const p of consolidar(lp)) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), [...new Set(p.cortes)].join(', ')]);
     for (const x of lp) {
       rows.push([], [`CORTE ${x.nome}`, `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], cab);
       for (const p of x.r.pecas) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
     }
     const txt = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.csv`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = typeof nomeArquivo === 'string' ? nomeArquivo : `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.csv`; a.click();
   }
 
   document.querySelectorAll('.painel .tab').forEach((t) => t.addEventListener('click', () => {
@@ -405,21 +405,162 @@
   // novo corte em branco; "Duplicar" copia os dados do corte atual com o nome em branco (o operador nomeia e confere)
   $('btnNovoCorte').addEventListener('click', () => { render(); proj.cortes.push({ nome: '', qtd: '', dados: null }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
   $('btnDupCorte').addEventListener('click', () => { render(); const c = proj.cortes[proj.atual]; proj.cortes.push({ nome: '', qtd: c.qtd, dados: JSON.parse(JSON.stringify(c.dados)) }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
-  $('btnSalvarProj').addEventListener('click', () => {
+  // ---------- pasta, revisões e histórico ----------
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const REV = (n) => `REV.${pad2(n)}`;
+  const nomeArq = () => ($('projeto').value || 'projeto').replace(/[^\w-]+/g, '_');
+  const snap = () => JSON.parse(JSON.stringify({ cab: Object.fromEntries(CAB.filter((k) => k !== 'revisao').map((k) => [k, $(k).value])), cortes: proj.cortes.map((c) => ({ nome: c.nome, qtd: c.qtd, dados: c.dados })) }));
+  const catVersaoTxt = () => (cat.meta && cat.meta.versao ? `v${cat.meta.versao} (${cat.meta.data || ''})` : `base ${cat.versao}`);
+  function rotuloCampo(id) { const l = document.querySelector(`label[for="${id}"]`); return l ? l.textContent.replace('padrão', '').trim() : id; }
+  // diferenças entre a última revisão salva e a tela, em texto (vai para o histórico)
+  function diferencas(a, b) {
+    if (!a) return ['Projeto criado'];
+    const out = [];
+    for (const k of Object.keys(b.cab)) if ((a.cab[k] || '') !== (b.cab[k] || '')) out.push(`${rotuloCampo(k)}: "${a.cab[k] || ''}" → "${b.cab[k] || ''}"`);
+    const porNome = (l) => Object.fromEntries(l.map((c) => [c.nome || '(sem nome)', c]));
+    const A = porNome(a.cortes), B = porNome(b.cortes);
+    for (const n of Object.keys(B)) if (!A[n]) out.push(`Corte ${n} incluído`);
+    for (const n of Object.keys(A)) if (!B[n]) out.push(`Corte ${n} removido`);
+    for (const n of Object.keys(B)) {
+      if (!A[n]) continue;
+      const ca = A[n], cb = B[n], va = (ca.dados && ca.dados.v) || {}, vb = (cb.dados && cb.dados.v) || {};
+      if (String(ca.qtd) !== String(cb.qtd)) out.push(`Corte ${n} – blocos iguais: ${ca.qtd} → ${cb.qtd}`);
+      for (const id of IDS) if ((va[id] ?? '') !== (vb[id] ?? '')) out.push(`Corte ${n} – ${rotuloCampo(id)}: ${va[id] || '–'} → ${vb[id] || '–'}`);
+      if (!!(ca.dados && ca.dados.escravo) !== !!(cb.dados && cb.dados.escravo)) out.push(`Corte ${n} – palete escravo: ${cb.dados && cb.dados.escravo ? 'sim' : 'não'}`);
+      if (JSON.stringify(ca.dados && ca.dados.diferentes && ca.dados.espacos) !== JSON.stringify(cb.dados && cb.dados.diferentes && cb.dados.espacos)) out.push(`Corte ${n} – medidas dos espaços alteradas`);
+    }
+    return out;
+  }
+  // itens usados (código e peso) para avisar, ao reabrir, se o catálogo mudou desde a revisão salva
+  function referenciaCatalogo() {
+    const itens = {};
+    for (const x of calcularProjeto()) for (const p of x.r.pecas) itens[`${p.grupo}|${p.desc}`] = [p.codigo || '', p.pesoUnit == null ? null : +Number(p.pesoUnit).toFixed(3)];
+    return { versao: catVersaoTxt(), itens };
+  }
+  function comparaCatalogo(ref) {
+    if (!ref || !ref.itens) return [];
+    const atual = referenciaCatalogo().itens, out = [];
+    for (const [k, [cod, peso]] of Object.entries(ref.itens)) {
+      const n = atual[k]; if (!n) continue;
+      if (n[0] !== cod) out.push(`${k.split('|')[1]}: código ${cod || '–'} → ${n[0] || '–'}`);
+      if ((n[1] ?? null) !== (peso ?? null)) out.push(`${k.split('|')[1]}: peso ${peso ?? '–'} → ${n[1] ?? '–'} kg`);
+    }
+    return out;
+  }
+  const usuarioSalvo = () => { try { return localStorage.getItem('drivein_usuario') || ''; } catch (e) { return ''; } };
+  function pedirUsuario() {
+    const u = (prompt('Seu nome (fica registrado no histórico de revisões):', usuarioSalvo() || $('responsavel').value) || '').trim();
+    if (u) try { localStorage.setItem('drivein_usuario', u); } catch (e) { /* sem storage */ }
+    return u;
+  }
+  function baixar(nome, txt, tipo) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: tipo })); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); }
+  // salva uma NOVA revisão (Gean: a revisão sobe a cada salvamento): histórico, quem salvou, o que mudou, versão do catálogo
+  async function salvarProjeto(opc = {}) {
     render();
-    const nome = ($('projeto').value || 'projeto').replace(/[^\w-]+/g, '_');
-    const arq = { formato: 'drivein-projeto', versao: 1, salvoEm: new Date().toISOString(), ...proj };
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(arq, null, 1)], { type: 'application/json' })); a.download = `${nome}.drivein.json`; a.click();
+    if (!$('projeto').value.trim()) { alert('Preencha o Projeto / cliente antes de salvar.'); return false; }
+    const atual = snap(), mud = diferencas(proj._base, atual);
+    if (!opc.emissao && proj._base && !mud.length && !confirm(`Nenhuma alteração desde a ${$('revisao').value}. Salvar assim mesmo como nova revisão?`)) return false;
+    const usuario = opc.por || pedirUsuario(); if (!usuario) { alert('Informe seu nome para salvar.'); return false; }
+    proj.rev = proj.historico && proj.historico.length ? (proj.rev ?? 0) + 1 : 0;
+    const agora = new Date().toISOString();
+    if (!proj.criado) proj.criado = { por: usuario, em: agora };
+    proj.historico = (proj.historico || []).concat({ rev: REV(proj.rev), por: usuario, em: agora, emissao: !!opc.emissao, mudancas: opc.emissao ? ['Emissão'].concat(mud) : (mud.length ? mud : ['Salvo sem alterações']) });
+    if (opc.emissao) proj.emitido = { rev: REV(proj.rev), por: usuario, em: agora };
+    $('revisao').value = REV(proj.rev);
+    proj.catalogoRef = referenciaCatalogo();
+    salvar();
+    const { _base, ...semBase } = proj;
+    const txt = JSON.stringify({ formato: 'drivein-projeto', versao: 2, salvoEm: agora, ...semBase }, null, 1);
+    try {
+      if (window.Pasta && Pasta.pronta) {
+        await Pasta.escrever(`projetos/${nomeArq()}.drivein.json`, txt);
+        await Pasta.escrever(`projetos/revisoes/${nomeArq()}_${REV(proj.rev)}.drivein.json`, txt);
+      } else baixar(`${nomeArq()}_${REV(proj.rev)}.drivein.json`, txt, 'application/json');
+    } catch (e) { alert('Não foi possível gravar na pasta (' + e.message + '). O arquivo será baixado.'); baixar(`${nomeArq()}_${REV(proj.rev)}.drivein.json`, txt, 'application/json'); }
+    proj._base = snap(); salvar(); renderRev();
+    return true;
+  }
+  function renderRev() {
+    const h = proj.historico || [], u = h[h.length - 1];
+    $('revInfo').innerHTML = u ? `${esc(u.rev)} salva por <b>${esc(u.por)}</b> em ${new Date(u.em).toLocaleString('pt-BR')}${proj.criado ? ` · criado por ${esc(proj.criado.por)}` : ''}${proj.emitido ? ` · emitido ${esc(proj.emitido.rev)}` : ''} · <a href="#" id="verHist">histórico</a>` : 'Projeto ainda não salvo.';
+    const vh = $('verHist'); if (vh) vh.addEventListener('click', (e) => { e.preventDefault(); modal('Histórico de revisões', `<ul>${h.slice().reverse().map((x) => `<li><b>${esc(x.rev)}</b>${x.emissao ? ' (EMISSÃO)' : ''} – ${esc(x.por)}, ${new Date(x.em).toLocaleString('pt-BR')}<ul>${x.mudancas.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></li>`).join('')}</ul>`, [{ txt: 'Fechar' }]); });
+  }
+  // janela simples (modal)
+  function modal(titulo, html, botoes) {
+    $('modalTit').textContent = titulo; $('modalCorpo').innerHTML = html; $('modalAcoes').innerHTML = '';
+    for (const b of botoes) { const el = document.createElement('button'); el.textContent = b.txt; if (b.cls) el.className = b.cls; if (b.id) el.id = b.id; el.addEventListener('click', async () => { if (b.fn && (await b.fn()) === false) return; fecharModal(); }); $('modalAcoes').appendChild(el); }
+    $('modal').classList.remove('hidden');
+  }
+  const fecharModal = () => $('modal').classList.add('hidden');
+  $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) fecharModal(); });
+  function abrirTexto(t) {
+    const p = JSON.parse(t); if (p.formato && p.formato !== 'drivein-projeto') throw new Error('não é um projeto Drive-In');
+    carregarProjeto(p);
+    if (p.cab && p.cab.revisao) $('revisao').value = p.cab.revisao; else if (p.rev != null) $('revisao').value = REV(p.rev);
+    proj._base = snap(); salvar(); renderRev();
+    const dif = comparaCatalogo(p.catalogoRef);
+    if (p.catalogoRef && (p.catalogoRef.versao !== catVersaoTxt() || dif.length)) modal('Catálogo diferente do usado na última revisão', `<p>Revisão salva com o catálogo <b>${esc(p.catalogoRef.versao)}</b>; catálogo atual <b>${esc(catVersaoTxt())}</b>.</p>${dif.length ? `<h4>Itens que mudaram</h4><ul>${dif.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '<p>Nenhum código ou peso dos itens deste projeto mudou.</p>'}<p class="nota">Ao salvar, a nova revisão passa a usar o catálogo atual.</p>`, [{ txt: 'Entendi', cls: 'primario' }]);
+  }
+  $('btnSalvarProj').addEventListener('click', () => salvarProjeto());
+  $('btnAbrirProj').addEventListener('click', async () => {
+    if (!(window.Pasta && Pasta.pronta)) { $('abrirProj').click(); return; }
+    const arqs = await Pasta.listar('projetos', '.drivein.json');
+    modal(`Projetos na pasta ${Pasta.nome()}`, arqs.length ? `<ul class="lista-arq">${arqs.map((a) => `<li data-n="${esc(a.nome)}"><span>${esc(a.nome.replace('.drivein.json', ''))}</span><span class="nota">${new Date(a.data).toLocaleString('pt-BR')}</span></li>`).join('')}</ul>` : '<p>Nenhum projeto salvo na pasta ainda.</p>', [{ txt: 'Arquivo do computador…', fn: () => { $('abrirProj').click(); } }, { txt: 'Cancelar' }]);
+    $('modalCorpo').querySelectorAll('li[data-n]').forEach((li) => li.addEventListener('click', async () => { fecharModal(); try { abrirTexto(await Pasta.ler('projetos/' + li.dataset.n)); } catch (e) { alert('Não foi possível abrir: ' + e.message); } }));
   });
   $('abrirProj').addEventListener('change', (ev) => {
     const f = ev.target.files[0]; if (!f) return;
-    f.text().then((t) => { const p = JSON.parse(t); if (p.formato && p.formato !== 'drivein-projeto') throw new Error('não é um projeto Drive-In'); carregarProjeto(p); })
-      .catch((e) => alert('Não foi possível abrir o projeto: ' + e.message)).finally(() => { ev.target.value = ''; });
+    f.text().then(abrirTexto).catch((e) => alert('Não foi possível abrir o projeto: ' + e.message)).finally(() => { ev.target.value = ''; });
+  });
+  // pasta da empresa
+  async function renderPasta() {
+    const P = window.Pasta, b = $('btnPasta');
+    if (!P || !P.suportado) { $('pastaInfo').textContent = 'Sem pasta (use Chrome ou Edge): salva como download'; b.classList.add('hidden'); return; }
+    if (P.pronta) { $('pastaInfo').innerHTML = `Pasta: <b>${esc(P.nome())}</b>`; b.textContent = 'Trocar'; }
+    else if (P.handle) { $('pastaInfo').innerHTML = `Pasta <b>${esc(P.nome())}</b> desconectada`; b.textContent = 'Reconectar'; }
+    else { $('pastaInfo').textContent = 'Nenhuma pasta definida'; b.textContent = 'Escolher pasta'; }
+  }
+  $('btnPasta').addEventListener('click', async () => {
+    try { if (Pasta.handle && !Pasta.pronta) await Pasta.permitir(); else await Pasta.escolher(); } catch (e) { /* cancelado */ }
+    await renderPasta(); if (Pasta.pronta && window.Cadastro) await Cadastro.carregarDaPasta();
+  });
+  // emissão: confere pendências de todos os cortes, exige ciência e nome, salva como revisão de emissão e gera DXF + lista
+  $('btnEmitir').addEventListener('click', () => {
+    render();
+    const incompletos = proj.cortes.filter((x) => vazioDados(x.dados) || !x.nome || x.qtd === '').map((x) => x.nome || '(sem nome)');
+    const lp = calcularProjeto(), bloq = [], li = (t) => `<li>${esc(t)}</li>`;
+    if (!$('projeto').value.trim() || !$('responsavel').value.trim()) bloq.push('Projeto / cliente e responsável');
+    if (incompletos.length) bloq.push(`Cortes com campos obrigatórios em branco: ${incompletos.join(', ')}`);
+    for (const x of lp) for (const e of x.r.erros) bloq.push(`Corte ${x.nome}: ${e}`);
+    const fixos = [Engine.AVISO_ESTRUTURAL, Engine.NOTA_RESPONSABILIDADE];
+    const alertas = lp.flatMap((x) => x.r.alertas.filter((a) => !fixos.includes(a)).map((a) => `Corte ${x.nome}: ${a}`));
+    const pend = [...new Set(lp.flatMap((x) => x.r.pendencias))];
+    const itens = lp.length ? consolidar(lp) : [];
+    const semCod = [...new Set(itens.filter((p) => !p.codigo || /XXXX/.test(p.codigo)).map((p) => `${p.codigo || Engine.SEM.SA} – ${p.desc}`))];
+    const semPeso = [...new Set(itens.filter((p) => p.pesoUnit == null).map((p) => p.desc))];
+    const est = [...new Set(itens.filter((p) => /ESTIMADO|estimad/i.test(p.obs || '')).map((p) => p.desc))];
+    const sec = (t, l) => l.length ? `<h4>${t} (${l.length})</h4><ul>${l.slice(0, 60).map(li).join('')}${l.length > 60 ? `<li>… mais ${l.length - 60}</li>` : ''}</ul>` : '';
+    const html = (bloq.length ? `<h4 class="bloq">Impede a emissão</h4><ul class="bloq">${bloq.map(li).join('')}</ul>` : '')
+      + sec('Atenção', alertas) + sec('Itens sem código cadastrado', semCod) + sec('Itens sem peso (não entram no total)', semPeso) + sec('Pesos estimados', est) + sec('Regras / dados ainda a confirmar', pend)
+      + `<h4>Responsabilidades</h4><ul>${fixos.map(li).join('')}</ul>`
+      + `<p style="margin-top:12px"><label><input type="checkbox" id="emCiente"> Li as pendências acima e assumo a emissão.</label></p><p><label>Seu nome: <input id="emNome" type="text" value="${esc(usuarioSalvo() || $('responsavel').value)}" style="width:260px"></label></p>`;
+    modal(`Emitir ${$('projeto').value || 'projeto'} – conferência de pendências`, html, [{ txt: 'Cancelar' }, {
+      txt: 'Emitir', cls: 'primario', id: 'emOk', fn: async () => {
+        if (bloq.length) { alert('Resolva os itens que impedem a emissão.'); return false; }
+        const nome = $('emNome').value.trim();
+        if (!$('emCiente').checked || !nome) { alert('Marque a ciência e informe seu nome.'); return false; }
+        try { localStorage.setItem('drivein_usuario', nome); } catch (e) { /* sem storage */ }
+        if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;
+        baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd }))), 'application/dxf');
+        csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.csv`);
+        return true;
+      } }]);
+    if (bloq.length) $('emOk').disabled = true;
   });
   $('btnNovoProj').addEventListener('click', () => {
     if (!confirm('Começar um projeto novo? O projeto atual sai da tela (salve o arquivo antes, se precisar).')) return;
     for (const k of CAB) $(k).value = k === 'revisao' ? 'REV.00' : '';
-    carregarProjeto({ atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] });
+    carregarProjeto({ atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] }); renderRev();
   });
   $('btnRemCorte').addEventListener('click', () => {
     if (proj.cortes.length < 2 || !confirm(`Remover o corte ${proj.cortes[proj.atual].nome}?`)) return;
@@ -441,11 +582,12 @@
   CAB.forEach((k) => $(k).addEventListener('input', salvar));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
-  $('catVersao').textContent = cat.versao;
-  window.recalcular = () => { $('catVersao').textContent = cat.versao; render(); };
+  $('catVersao').textContent = catVersaoTxt();
+  window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
   const mostrarPagina = (cad) => { $('paginaConfig').classList.toggle('hidden', cad); $('paginaCad').classList.toggle('hidden', !cad); $('navConfig').classList.toggle('active', !cad); $('navCad').classList.toggle('active', cad); };
   $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(false); });
   $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(true); });
   if (window.Cadastro) Cadastro.init();
-  render();
+  render(); renderRev();
+  if (window.Pasta) Pasta.restaurar().then(async (ok) => { await renderPasta(); if (ok && window.Cadastro) await Cadastro.carregarDaPasta(); }); else renderPasta();
 })();

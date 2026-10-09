@@ -459,3 +459,17 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Padrões da empresa vêm preenchidos e marcados "padrão": revisão REV.00, balanços 180/230, perfil C 94×40×15×1,8, U da longarina de túnel 100×38×1,8.
 - Enquanto faltar campo obrigatório: o corte não é calculado, a tela lista o que falta por etapa, os campos ficam amarelos, e PNG / DXF do projeto / CSV / Imprimir ficam bloqueados (sem nome do projeto, responsável, nome do corte ou blocos, ou com outro corte incompleto, também bloqueia, com o motivo no botão).
 - "Novo corte" vem em branco; "Duplicar" copia os dados do corte atual com o nome em branco. "Novo" projeto vem em branco.
+
+## 33. Preenchimento sem valores de modelo (Gean)
+
+- Dados do projeto começam **vazios** e são obrigatórios (*); padrões da empresa vêm preenchidos e marcados "padrão" (balanços, perfil C, U da longarina de túnel).
+- Faltando campo obrigatório: o corte não é calculado, a tela lista o que falta por etapa, e PNG / DXF / CSV / Imprimir / Emitir ficam bloqueados.
+- "Novo corte" vem em branco; "Duplicar" copia os dados com o nome em branco.
+
+## 34. Pasta da empresa, revisões, emissão e catálogo versionado (Gean)
+
+- **Pasta** (servidor ou OneDrive; Chrome/Edge): o administrador escolhe uma vez em "Escolher pasta". Estrutura: `catalogo/catalogo-drive-in.json`, `catalogo/versoes/catalogo_vNNN.json`, `projetos/<PROJETO>.drivein.json`, `projetos/revisoes/<PROJETO>_REV.NN.drivein.json`. Sem pasta (ou outro navegador), salva como download.
+- **Revisão sobe a cada salvamento** (REV.00 na criação). Cada revisão registra quem salvou (nome pedido no salvamento), data/hora e o que mudou (comparação automática campo a campo). O projeto guarda quem criou e a versão do catálogo usada; ao reabrir com outro catálogo, o app lista os itens que mudaram de código ou peso.
+- **Emitir**: confere todos os cortes e lista erros (impedem a emissão), alertas, itens sem código, itens sem peso, pesos estimados e regras a confirmar, mais as responsabilidades; exige "Li e assumo" e o nome; grava a revisão de emissão e baixa DXF do projeto + lista (CSV) com a revisão no nome.
+- **Nota de responsabilidade** fixa (tela, lista, CSV e DXF): verificações operacionais = operador do software, cliente e representante; dimensionamento estrutural = engenheiro responsável.
+- **Catálogo**: consulta livre; editar exige a senha (definida na primeira vez, guardada como hash no catálogo). "Aplicar" vale só na tela; "Publicar nova versão" grava a vN+1 com autor, data e descrição. Nada de catálogo fica salvo só no navegador. A senha é trava contra edição acidental — a proteção real é deixar a pasta `catalogo/` somente leitura para quem não é administrador.
