@@ -10,7 +10,8 @@
   const NOTA_RESPONSABILIDADE = 'As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável.';
   const DENS = 7.85e-6;       // kg/mm³ (aço)
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
-  const PASSO_COLUNA = 50;    // altura da coluna em múltiplos de 50 mm
+  const PASSO_COLUNA = 50;
+  const BASE_BARRA = 4.75, FURO_BASE = BASE_BARRA + 25; // barra da coluna sobre a chapa da sapata; 1º oblongo 25 mm acima da base da barra    // altura da coluna em múltiplos de 50 mm
   const TOL_SA = 3;           // ±3 mm para aceitar um SA de travessa/diagonal
   const LARGURA_RUA = 1400;   // padrão quando o operador não informa (vão livre entre colunas)
 
@@ -70,15 +71,17 @@
     const hp = Number(inp.alturaPalete), alturaBracoC = Number(inp.cA) || 94;
     const escravo = !!inp.escravo, ceil50 = (v) => Math.ceil(v / 50) * 50;
     const passoNivel = ceil50(hp + 100 + alturaBracoC);
-    // o apoio real depende da furação (furos a 25 mm do topo, passo 50; furo inferior do braço 15 mm acima da base do U de 180):
-    // topo do C = base do U + (180 − A)/2 + A → o 1º nível sobe até a próxima posição possível
-    const resto = ((10 + (180 - alturaBracoC) / 2 + alturaBracoC) % 50 + 50) % 50;
+    // o apoio real depende da furação da coluna (COL 80.DXF, Gean, padrão de todas as colunas): barra apoiada na chapa de 4,75 da sapata,
+    // 1º oblongo a 25 mm da base da barra, passo 50 → furos a 29,75 + 50k do piso. Os oblongos do suporte ficam a ±75 do centro do U
+    // (15 mm das bordas no U de 180, 25 mm no de 200) e o C é centrado no U → topo do C = furo inferior + 75 + A/2, qualquer que seja a altura do U
+    const resto = ((FURO_BASE + 75 + alturaBracoC / 2) % 50 + 50) % 50;
+    const altU = Number(inp.uAlt) || 180; // altura do suporte em U: informada pelo operador (180 ou 200)
     const snapFuro = (y) => { const k = Math.ceil((y - resto - 1e-6) / 50); return +(k * 50 + resto).toFixed(2); };
     const alt1Req = inp.alt1Nivel ? Number(inp.alt1Nivel) : ceil50((escravo ? 2 : 1) * hp + 100 + alturaBracoC);
     const alt1 = snapFuro(alt1Req);
     if (alt1 !== alt1Req) alertas.push(`1º nível ${alt1Req} mm ajustado para ${alt1} mm (furação de 50 mm da coluna).`);
     inp = { ...inp, alt1Nivel: alt1 };
-    const LGTOPO_ALT = 154.65;
+    const LGTOPO_ALT = 154.65; // topo da coluna = H + 4,75 (barra de H mm sobre a chapa da sapata); mantido o cálculo por H (a favor da folga)
     const Hcalc = ceil50(alt1 + (N - 2) * passoNivel + hp + 100 + LGTOPO_ALT);
     const H = inp.alturaManual ? r50(Number(inp.alturaManual)) : r50(Hcalc);
     if (!inp.alturaManual && H !== Hcalc) alertas.push(`Altura calculada ${Hcalc} mm arredondada para ${H} mm (múltiplo de 50).`);
@@ -185,12 +188,12 @@
     // simples nas laterais das pontas (1ª e última), duplo nas laterais internas (entre duas ruas) [CONFIRMAR leitura de "montantes das pontas"]
     // 1 braço por coluna por nível de armazenagem (níveis acima do chão); nível ≤ 2500 mm → 180; acima → escolha do operador (180 ou 230)
     const niveisArm = []; for (let k = 0; k < N - 1; k++) niveisArm.push(Number(inp.alt1Nivel) + k * passoNivel);
-    // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa 2,65, altura 180) abraçando a coluna + perfil C informado pelo operador
+    // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa 2,65, altura 180 ou 200, informada pelo operador) abraçando a coluna + perfil C informado pelo operador
     // balanço medido da face externa do U até a ponta do C; 1º nível usa o balanço "baixo" (180), 2º em diante o "alto" (230) — treinamento slide 17
     const balBaixo = Number(inp.balancoBaixo) || 180, balAlto = Number(inp.balancoAlto || inp.bracoAcima) || 230;
     const modeloAlto = String(balAlto);
     const perfilC = { A: alturaBracoC, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 1.8 };
-    const ESP_U = 2.65, ALT_BRACO = 180, ABA_U = 42.65;
+    const ESP_U = 2.65, ALT_BRACO = altU, ABA_U = 42.65;
     const uExt = colW + 2 * ESP_U; // duplada: braço específico (Gean); sem desenho ainda → peso estimado com U abraçando as 2 montantes (160)
     const pesoU = (colW + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
     const desenvC = perfilC.A + 2 * perfilC.C + 2 * perfilC.B - 4 * perfilC.D;          // desenvolvimento aproximado do C (linha média)
@@ -277,10 +280,10 @@
     const ccZ = larguraRua + colW - 2 * HX;
     // FUNDO (plano do fundo, vista frontal): SEM horizontais (no lugar delas entra a longarina de fundo); uma diagonal por painel, alternada,
     // do ponto 50 mm acima da sapata / do suporte do braço até 50 mm abaixo do próximo suporte do braço / da longarina de topo (Gean)
-    const offApoioZ = (180 - perfilC.A) / 2 + perfilC.A, SAPATA_TOPO = 104.76, LGTOPO_BASE = H - 154.65;
+    const offApoioZ = (altU - perfilC.A) / 2 + perfilC.A, SAPATA_TOPO = 104.76, LGTOPO_BASE = H + BASE_BARRA - 154.65;
     const basesU = niveisArm.map((y) => y - offApoioZ);
     const panZ = []; let ySup = SAPATA_TOPO + 50;
-    for (const yb of basesU) { panZ.push([ySup, yb - 50]); ySup = yb + 180 + 50; }
+    for (const yb of basesU) { panZ.push([ySup, yb - 50]); ySup = yb + altU + 50; }
     panZ.push([ySup, LGTOPO_BASE - 50]);
     const diagZ = panZ.filter(([a1, b1]) => b1 > a1).map(([a1, b1]) => +(Math.hypot(ccZ, b1 - a1) + 30.5).toFixed(1));
     const addZ = (grupo, tipo, tot, qtd, obs) => {
@@ -341,7 +344,7 @@
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       planta: { eixos: eixosLat, faces, almaT, abreT, cw: CW_LAT, furoLg: { dentro: FURO_LG_DENTRO, fora: FURO_LG_FORA, x: FURO_LG_X }, profPalete: Number(inp.profPalete || 1000) },
       lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
-      frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
+      frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, uAlt: altU, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };
   }

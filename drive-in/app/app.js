@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'pesoStop', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'uAlt', 'pesoStop', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -15,7 +15,7 @@
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] };
   // preenchimento (Gean): dados do projeto começam vazios e são obrigatórios; só os padrões da empresa vêm preenchidos (marcados "padrão")
-  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
+  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura', 'uAlt'];
   const OBRIG_CAB = ['projeto', 'cliente', 'cidade', 'uf', 'responsavel', 'nomeCorte', 'qtdCorte'];
   const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8' };
   const vazioDados = (d) => !d || !d.v || OBRIG_CALC.some((id) => d.v[id] === '' || d.v[id] == null) || (d.diferentes && (d.espacos || []).some((x) => x === '' || x == null));
@@ -123,13 +123,13 @@
     g1 += `<polyline points="${f1(pr[0])},${f1(pr[1])} ${f1(SX(C) + 6)},${f1(SY(0) + 14)} ${f1(SX(C) + 34)},${f1(SY(0) + 14)}"/><circle cx="${f1(pr[0])}" cy="${f1(pr[1])}" r="1.1" fill="${LF}"/></g>`;
     g1 += `<text x="${f1(SX(C) + 8)}" y="${f1(SY(A / 2) + 12)}" font-size="8.5" fill="${LG}">ch. ${n(t)}</text><text x="${f1(SX(C) + 8)}" y="${f1(SY(0) + 12)}" font-size="8.5" fill="${LG}">Ri ${n(ri)}</text>`;
     // ---------- VISTA FRONTAL (braço simples do 1º nível + coluna), mesma geometria do bloco do DXF
-    const br = DXF.bracoParam(col, bal, 1, pf, esp), uo = col / 2 + esp, yc0 = (180 - A) / 2, yc1 = yc0 + A, tip = uo + bal;
-    const xmin = -uo - 40, xmax = tip + 30, ymin = -55, ymax = 235;
+    const alt = r.frontal.uAlt || 180, br = DXF.bracoParam(col, bal, 1, pf, esp, alt), uo = col / 2 + esp, yc0 = (alt - A) / 2, yc1 = yc0 + A, tip = uo + bal;
+    const xmin = -uo - 40, xmax = tip + 30, ymin = -55, ymax = alt + 55;
     const sB = Math.min(270 / (xmax - xmin), 215 / (ymax - ymin)), bx = 150 - (xmax - xmin) * Math.min(270 / (xmax - xmin), 215 / (ymax - ymin)) / 2, FX = (x) => bx + (x - xmin) * sB, FY = (y) => 248 - (y - ymin) * sB;
     let g2 = `<text x="150" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="${LG}" letter-spacing=".5">VISTA FRONTAL · BRAÇO SIMPLES 1º NÍVEL</text>`;
     // coluna (contorno fino) e eixo
     g2 += `<rect x="${f1(FX(-col / 2))}" y="${f1(FY(ymax - 25))}" width="${f1(col * sB)}" height="${f1((ymax - 25 + 14) * sB)}" fill="none" stroke="${LF}" stroke-width=".6"/>`;
-    g2 += `<line x1="${f1(FX(0))}" y1="${f1(FY(198))}" x2="${f1(FX(0))}" y2="${f1(FY(-8))}" stroke="${CT}" stroke-width=".45" stroke-dasharray="10 2 2 2"/>`;
+    g2 += `<line x1="${f1(FX(0))}" y1="${f1(FY(alt + 18))}" x2="${f1(FX(0))}" y2="${f1(FY(-8))}" stroke="${CT}" stroke-width=".45" stroke-dasharray="10 2 2 2"/>`;
     // braço: contorno grosso; linhas de tangência das dobras finas; rasgos
     for (const q of br.prims) if (q.t === 'c') g2 += `<circle cx="${f1(FX(q.c[0]))}" cy="${f1(FY(q.c[1]))}" r="${f1(q.r * sB)}" fill="none" stroke="${LG}" stroke-width=".6"/>`;
     for (const q of br.prims) {
@@ -139,7 +139,7 @@
     }
     // linhas de centro dos rasgos
     const sx = (col - 40) / 2;
-    for (const cy of [15, 165]) for (const cx of [-sx, sx]) g2 += `<g stroke="${CT}" stroke-width=".4"><line x1="${f1(FX(cx - 9))}" y1="${f1(FY(cy))}" x2="${f1(FX(cx + 9))}" y2="${f1(FY(cy))}"/><line x1="${f1(FX(cx))}" y1="${f1(FY(cy - 7))}" x2="${f1(FX(cx))}" y2="${f1(FY(cy + 7))}"/></g>`;
+    for (const cy of [alt / 2 - 75, alt / 2 + 75]) for (const cx of [-sx, sx]) g2 += `<g stroke="${CT}" stroke-width=".4"><line x1="${f1(FX(cx - 9))}" y1="${f1(FY(cy))}" x2="${f1(FX(cx + 9))}" y2="${f1(FY(cy))}"/><line x1="${f1(FX(cx))}" y1="${f1(FY(cy - 7))}" x2="${f1(FX(cx))}" y2="${f1(FY(cy + 7))}"/></g>`;
     // corte A-A no C
     const xa = uo + bal * .6;
     g2 += `<g stroke="${LG}" stroke-width=".8"><line x1="${f1(FX(xa))}" y1="${f1(FY(yc1 + 22))}" x2="${f1(FX(xa))}" y2="${f1(FY(yc0 - 22))}" stroke-dasharray="10 2 2 2" stroke-width=".5"/>`;
@@ -148,9 +148,9 @@
     // cotas
     g2 += cota(FX(uo), FY(yc0), FX(tip), FY(yc0), 0, FY(-32) - FY(yc0), `${n(bal)}`);
     g2 += cota(FX(-uo), FY(0), FX(uo), FY(0), 0, FY(-32) - FY(0), `${n(2 * uo)}`);
-    g2 += cota(FX(-uo), FY(0), FX(-uo), FY(180), -18, 0, '180');
+    g2 += cota(FX(-uo), FY(0), FX(-uo), FY(alt), -18, 0, `${alt}`);
     g2 += cota(FX(tip), FY(yc0), FX(tip), FY(yc1), 16, 0, `${n(A)}`);
-    g2 += cota(FX(-sx), FY(165), FX(sx), FY(165), 0, FY(205) - FY(165), `${n(2 * sx)}`);
+    g2 += cota(FX(-sx), FY(alt / 2 + 75), FX(sx), FY(alt / 2 + 75), 0, FY(alt + 25) - FY(alt / 2 + 75), `${n(2 * sx)}`);
     const defs = `<defs><marker id="seta" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 1.8L10 5L0 8.2z" fill="${LF}"/></marker></defs>`;
     const svg = (h, corpo, rod) => `<svg viewBox="0 0 300 ${h}" xmlns="http://www.w3.org/2000/svg" font-family="'Arial Narrow', 'Roboto Condensed', Arial, sans-serif">${defs}<rect x=".5" y=".5" width="299" height="${h - 1}" fill="#fff" stroke="#cbd5e1" stroke-width=".8"/>${corpo}${rod ? `<text x="294" y="${h - 5}" text-anchor="end" font-size="7.5" fill="#64748b">${rod}</text>` : ''}</svg>`;
     el.innerHTML = svg(240, g1, '') + svg(262, g2, `COL ${col} · suporte U chapa ${n(esp)} · medidas em mm`);

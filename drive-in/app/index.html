@@ -86,6 +86,8 @@
         <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Balanço do braço</div>
         <div class="campo"><label class="padrao" for="balancoBaixo" title="1º nível">1º nível</label><div class="in com-un"><input id="balancoBaixo" type="number" min="1" value="180"/><span class="un">mm</span></div></div>
         <div class="campo"><label class="padrao" for="balancoAlto" title="2º nível em diante">2º nível em diante</label><div class="in com-un"><input id="balancoAlto" type="number" min="1" value="230"/><span class="un">mm</span></div></div>
+        <div class="campo"><label class="obrig" for="uAlt" title="Altura do suporte em U">Altura do suporte U</label><div class="in com-un"><select id="uAlt"><option value="">–</option><option>180</option><option>200</option></select><span class="un">mm</span></div></div>
+        <div class="campo"></div>
         <div class="sec full"><svg class="ic"><use href="#i-braco"/></svg>Perfil C do braço</div>
         <div class="campo"><label class="padrao" for="cA" title="A – altura">A – altura</label><div class="in com-un"><input id="cA" type="number" step="0.1" value="94"/><span class="un">mm</span></div></div>
         <div class="campo"><label class="padrao" for="cC" title="C – aba">C – aba</label><div class="in com-un"><input id="cC" type="number" step="0.1" value="40"/><span class="un">mm</span></div></div>
@@ -99,7 +101,8 @@
         <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Stop palete</div>
         <div class="campo"><label for="pesoStop" title="Peso unitário">Peso unitário</label><div class="in com-un"><input id="pesoStop" type="number" step="0.001" placeholder="informar"/><span class="un">kg</span></div></div>
         <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
-          <li>Suporte em U: interno = largura da coluna, chapa 2,65, altura 180, rasgos a 15 mm das bordas.</li>
+          <li>Suporte em U: interno = largura da coluna, chapa 2,65, altura 180 ou 200 (operador informa), rasgos a ±75 mm do centro (15 mm das bordas no 180, 25 no 200).</li>
+          <li>Furação da coluna (padrão de todas): barra sobre a chapa de 4,75 da sapata, 1º oblongo a 25 mm da base da barra, passo 50 → 29,75 + 50k do piso; topo da coluna = H + 4,75.</li>
           <li>Balanço medido da face externa do U até a ponta do C; apoio mínimo do palete 80 mm por lado.</li>
           <li>Simples nas laterais das pontas, duplo nas internas. Peso calculado pela geometria.</li>
           <li>Longarina de túnel: barras de até 3000 mm, emenda (PK041366) sempre sobre um suporte de braço.</li>

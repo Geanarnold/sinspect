@@ -47,6 +47,10 @@
   const nomeBloco = (...partes) => limitarNome(partes.filter((p) => p !== '' && p != null).join('_').toUpperCase().replace(/[^A-Z0-9_$-]/g, '_'));
   const circles = (prims) => prims.filter((q) => q.t === 'c').map((q) => q.c);
 
+  // ---- furação da coluna (COL 80.DXF, Gean — padrão de todas as colunas, frontal e lateral): a barra (H mm, múltiplo de 50) apoia na chapa
+  // de 4,75 da sapata; 1º oblongo a 25 mm da base da barra e passo 50 → oblongos a 29,75 + 50k do piso e a 25 mm das duas pontas; topo = H + 4,75
+  const BASE_BARRA = 4.75, FURO_BASE = BASE_BARRA + 25;
+  const mmTxt = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
   // ---- peças paramétricas
   function coluna(H, holesRight) {
     // DI_COLUNA: 1000 mm (linhas 4,75..1004,75), furos a cada 50 a partir de 54,75, largura -19,85..49,9 (eixo em x = 15)
@@ -63,14 +67,17 @@
       }
       // demais módulos já cobertos pela replicação do primeiro; ignora
     }
+    // oblongos da lateral: no DI_COLUNA estão a 29,2 + 50k; a medida da COL 80.DXF é 29,75 + 50k → corrige só os oblongos
+    for (const q of out) { if (!q.p || q.p.length < 6) continue; const xs = q.p.map((v) => v[0]), yy = q.p.map((v) => v[1]), w = Math.max(...xs) - Math.min(...xs), h = Math.max(...yy) - Math.min(...yy);
+      if (w > 10 && w < 14 && h > 7 && h < 11) { const cy = (Math.max(...yy) + Math.min(...yy)) / 2, d = FURO_BASE + 50 * Math.round((cy - FURO_BASE) / 50) - cy; q.p = q.p.map((v) => [v[0], v[1] + d]); } }
     let r = translate(out, -15, 0); // eixo da coluna em x = 0
     if (!holesRight) r = mirrorX(r);
     return r;
   }
 
   // coluna na vista frontal (com sapata), conforme VISTA_FRONTAL_COM_DI_LGTOPO.dxf:
-  // base da chapa da sapata em y = 0 (piso) e topo da coluna em H; furação oblonga a cada 50 mm com o 1º furo a 25 mm do topo
-  // (como a coluna é cortada em múltiplos de 50, os furos ficam a 25 mm das duas pontas)
+  // base da chapa da sapata em y = 0 (piso) e topo da coluna em H + 4,75; furação oblonga a cada 50 mm com o 1º furo a 25 mm do topo
+  // (como a coluna é cortada em múltiplos de 50, os furos ficam a 25 mm das duas pontas: 29,75 + 50k do piso)
   const FR_TOPO_FURO = 25;
   const yrq = (q) => { const ys = q.p ? q.p.map((v) => v[1]) : [q.c[1]]; return [Math.min(...ys), Math.max(...ys)]; };
   const longq = (q) => q.p && yrq(q)[1] - yrq(q)[0] > 500;
@@ -81,7 +88,7 @@
   }
   function colunaFrontal(c, H) {
     const src = B()['DI_COLUNA_FRONTAL_' + c]; if (!src) return [];
-    const { Y0, Ht, Hb } = geoFrontal(src), T = H - Y0, dH = T - Ht, out = [];
+    const { Y0, Ht, Hb } = geoFrontal(src), T = H + BASE_BARRA - Y0, dH = T - Ht, out = [];
     const m0 = Ht - FR_TOPO_FURO - 50;                                    // furo-modelo: 2º de cima no bloco
     for (const q of src) {
       if (longq(q)) { const cq = clone([q])[0]; cq.p = cq.p.map((v) => [v[0], v[1] > Ht - 1 ? v[1] + dH : v[1]]); out.push(cq); continue; }
@@ -98,7 +105,7 @@
   function furosFrontal(c, H) {
     const src = B()['DI_COLUNA_FRONTAL_' + c], ys = []; if (!src) return ys;
     const { Y0, Hb } = geoFrontal(src);
-    for (let cy = H - FR_TOPO_FURO; cy >= Hb + Y0 + FR_TOPO_FURO - 1; cy -= 50) ys.unshift(cy);
+    for (let cy = H + BASE_BARRA - FR_TOPO_FURO; cy >= Hb + Y0 + FR_TOPO_FURO - 1; cy -= 50) ys.unshift(cy);
     return ys;
   }
   const HOLE_DX = 17.9; // furo a 17,9 mm do eixo (32,9 - 15)
@@ -224,7 +231,7 @@
     const L = r.lateral, Lt = cum[n] - cum[0];
     // compatibilidade com a furação da coluna (Gean): os oblongos do suporte (a ±75 do centro do C) caem nos oblongos da lateral da coluna
     // (DI_COLUNA: módulo de 50 mm a partir da base) → o conjunto C + longarina de túnel desloca o necessário (|Δ| ≤ 25) em cada nível
-    const oblCol = (() => { const ys = []; for (const q of B().DI_COLUNA || []) { if (!q.p || q.p.length < 6) continue; const xs = q.p.map((v) => v[0]), yy = q.p.map((v) => v[1]); const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...yy) - Math.min(...yy); if (w > 10 && w < 14 && h > 7 && h < 11) ys.push((Math.max(...yy) + Math.min(...yy)) / 2); } return ys.length ? Math.min(...ys) : null; })();
+    const oblCol = FURO_BASE; // mesma referência da frontal e do cálculo (níveis já saem na furação → Δ = 0)
     const pfL = r.frontal.perfilC;
     const deltaNivel = (yN) => { if (oblCol == null) return 0; const s0 = yN - pfL.A / 2 - 75, k = Math.round((s0 - oblCol) / 50); return +(oblCol + 50 * k - s0).toFixed(2); };
     if (L.niveis && L.lgU) for (const yN0 of L.niveis) {
@@ -238,17 +245,17 @@
       }
       if (B().DI_EMENDA_LONG) for (const j of L.juntasTunel || []) put(clone(B().DI_EMENDA_LONG), cum[0] + j, yN - h / 2, 'LONGARINA_TUNEL', 'DI_EMENDA_LONG');
     }
-    // suporte do braço visto de lado (BRAÇO_LATERAL.dxf, Gean): aba do U (42,25 × 180) com 2 oblongos a 15 mm do topo e da base, encostada
+    // suporte do braço visto de lado (BRAÇO_LATERAL.dxf, Gean): aba do U (42,25 × altura do U, 180 ou 200) com 2 oblongos a ±75 do centro, encostada
     // na coluna a partir da alma, e o C do braço em corte (A × C, abas B, chapa D, pelo perfil do projeto) por fora da alma — o mesmo lado
-    // do braço na planta; base do U = apoio − ((180 − A)/2 + A), igual à frontal. Laranja (BRACO_LT, cor 30)
+    // do braço na planta; base do U = apoio − ((altU − A)/2 + A), igual à frontal. Laranja (BRACO_LT, cor 30)
     if (L.niveis && L.niveis.length && r.planta && r.planta.almaT) {
-      const pf = r.frontal.perfilC, ALT = 200, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1; // chapa de 200 (BRAÇO_LATERAL.dxf)
+      const pf = r.frontal.perfilC, ALT = r.frontal.uAlt || 180, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1; // altura do U informada pelo operador (BRAÇO_LATERAL.dxf: 200)
       const bl = []; const sg = (x1, y1, x2, y2) => bl.push({ t: 'p', l: 'BRACO_LT', p: [[x1, y1], [x2, y2]] });
       const arcL = (cx, cy, rr, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } bl.push({ t: 'p', l: 'BRACO_LT', p }); };
       // desenhado com a alma da coluna em x = 0, aba do U para −x (dentro da coluna) e C para +x (fora)
       sg(-ABA, 0, 0, 0); sg(0, 0, 0, ALT); sg(0, ALT, -ABA, ALT); sg(-ABA, ALT, -ABA, 0);
-      // oblongos verticais (curso de 5 mm), centros a 25 mm do topo e da base da chapa = ±75 do centro do C, a 24,85 da borda interna
-      for (const cy of [25, ALT - 25]) { const cx = -ABA + 24.85; arcL(cx, cy - 2.5, 4, 180, 360); arcL(cx, cy + 2.5, 4, 0, 180); sg(cx - 4, cy - 2.5, cx - 4, cy + 2.5); sg(cx + 4, cy - 2.5, cx + 4, cy + 2.5); }
+      // oblongos verticais (curso de 5 mm), centros a ±75 do centro do C (25 mm das bordas no U de 200, 15 no de 180), a 24,85 da borda interna
+      for (const cy of [ALT / 2 - 75, ALT / 2 + 75]) { const cx = -ABA + 24.85; arcL(cx, cy - 2.5, 4, 180, 360); arcL(cx, cy + 2.5, 4, 0, 180); sg(cx - 4, cy - 2.5, cx - 4, cy + 2.5); sg(cx + 4, cy - 2.5, cx + 4, cy + 2.5); }
       const Cw = pf.C, D = pf.D, Bl = pf.B; // C em corte: abas (B) encostadas no U, alma do C do lado de fora
       for (const o of [0, D]) {
         sg(o, yc0 + o, Cw - o, yc0 + o); sg(Cw - o, yc0 + o, Cw - o, yc1 - o); sg(Cw - o, yc1 - o, o, yc1 - o);
@@ -262,7 +269,7 @@
         almaT.forEach((xa, j) => {
           // coluna abre para +x → alma à esquerda → C para −x (espelhado); abre para −x → C para +x
           const esq = abreT[j] > 0;
-          put(clone(esq ? espelho : bl), cum[0] + xa, yb, 'BRACO_LT', nomeBloco('DI_LT_SUP_BRACO', 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X'), esq ? 'E' : 'D'));
+          put(clone(esq ? espelho : bl), cum[0] + xa, yb, 'BRACO_LT', nomeBloco('DI_LT_SUP_BRACO', 'U' + ALT, 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X'), esq ? 'E' : 'D'));
         });
       }
     }
@@ -283,9 +290,10 @@
     }
     cota(cum[0], H, cum[n], H, 650, `${Math.round(cum[n] - cum[0])}`, false, 'g');
     // corrente das travessas (piso → 1ª, vãos, última → topo) e altura total, à esquerda
-    const marcasY = [0, ...ys, H].filter((v, k, a) => k === 0 || v - a[k - 1] > 1);
+    const Htop = H + BASE_BARRA; // topo da coluna: barra de H mm sobre a chapa de 4,75 da sapata
+    const marcasY = [0, ...ys, Htop].filter((v, k, a) => k === 0 || v - a[k - 1] > 1);
     for (let k = 0; k < marcasY.length - 1; k++) cota(cum[0], marcasY[k], cum[0], marcasY[k + 1], 300, `${Math.round(marcasY[k + 1] - marcasY[k])}`, true, 'c');
-    cota(cum[0], 0, cum[0], H, 750, `${H}`, true, 'g');
+    cota(cum[0], 0, cum[0], Htop, 750, mmTxt(Htop), true, 'g');
     const x0p = xs[0] - 1500, nP = Math.ceil((xs[n] + 1500 - x0p) / 1000);
     for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === nP - 1 ? 'FIM' : '')); // topo do concreto (y local 0) na base da sapata
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
@@ -297,7 +305,7 @@
   // ---- vista frontal (olhando para dentro das ruas)
   // braço paramétrico na vista frontal (modelo 0004.0003.01.008 SUP BRAÇO DRIVE IN)
   // origem: eixo da coluna, base do U. lado: +1 = C para a direita, -1 = esquerda, 0 = duplo (os dois lados)
-  // U: interno = largura da coluna, chapa 2,65, altura 180; rasgos 14 x 9 a 15 mm das bordas, c/c = largura − 40 (40 na COL 80)
+  // U: interno = largura da coluna, chapa 2,65, altura 180 ou 200 (operador); rasgos 14 x 9 a ±75 do centro (15 mm das bordas no 180), c/c = largura − 40
   // C: altura A centralizada no U, passa na frente do U (esconde o U nesse trecho); linhas de dobra a D + 2,3 das bordas
   function bracoParam(col, bal, lado, pf, esp = 2.65, alt = 180) {
     const L = [], ln = (x1, y1, x2, y2) => L.push({ t: 'p', l: 'BRACO', p: [[x1, y1], [x2, y2]] });
@@ -312,9 +320,9 @@
     ln(-uo, 0, uo, 0); ln(-uo, alt, uo, alt);
     // rasgos oblongos
     const sx = (col - 40) / 2;
-    for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) { arc(cx - 2.5, cy, 4.5, 90, 270); arc(cx + 2.5, cy, 4.5, -90, 90); ln(cx - 2.5, cy + 4.5, cx + 2.5, cy + 4.5); ln(cx - 2.5, cy - 4.5, cx + 2.5, cy - 4.5); }
+    for (const cy of [alt / 2 - 75, alt / 2 + 75]) for (const cx of [-sx, sx]) { arc(cx - 2.5, cy, 4.5, 90, 270); arc(cx + 2.5, cy, 4.5, -90, 90); ln(cx - 2.5, cy + 4.5, cx + 2.5, cy + 4.5); ln(cx - 2.5, cy - 4.5, cx + 2.5, cy - 4.5); }
     // parafusos nos rasgos da frente (INT0648 5/16" + arruela INT0812 Ø20): arruela, cabeça sextavada (1/2" entre faces) e ponta do parafuso
-    for (const cy of [15, alt - 15]) for (const cx of [-sx, sx]) {
+    for (const cy of [alt / 2 - 75, alt / 2 + 75]) for (const cx of [-sx, sx]) {
       L.push({ t: 'c', l: 'BRACO_PARAFUSO', c: [cx, cy], r: 10 }, { t: 'c', l: 'BRACO_PARAFUSO', c: [cx, cy], r: 3.97 });
       const hx = []; for (let k = 0; k <= 6; k++) { const a = (30 + 60 * k) * Math.PI / 180; hx.push([cx + 7.33 * Math.cos(a), cy + 7.33 * Math.sin(a)]); }
       L.push({ t: 'p', l: 'BRACO_PARAFUSO', p: hx });
@@ -354,10 +362,9 @@
     const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2); // eixos das colunas (rua = vão livre entre faces)
     const hy = furosFrontal(cp, H), hx1 = HOLE_FX[cp] || cp / 2 - 18, hx = dup ? cp / 2 + hx1 : hx1; // duplada: oblongo externo da montante do lado da rua
     const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
-    // braço: o topo do C (apoio do palete) deve ficar no nível ou logo acima (furação de 50 em 50; furo inferior do braço 15 mm acima da base)
-    const offApoio = (180 - F.perfilC.A) / 2 + F.perfilC.A;
-    const snapApoio = (y) => { for (const h of hy) if (h - 15 + offApoio >= y - 0.01) return h - 15; return hy[hy.length - 1] - 15; };
-    const snapBraco = (y) => { let best = hy[0]; for (const h of hy) if (Math.abs(h - 15 - y) < Math.abs(best - 15 - y)) best = h; return best - 15; };
+    // braço: o topo do C (apoio do palete) deve ficar no nível ou logo acima (furação de 50 em 50; furo inferior do braço a altU/2 − 75 da base do U)
+    const altU = F.uAlt || 180, fU = altU / 2 - 75, offApoio = (altU - F.perfilC.A) / 2 + F.perfilC.A, Htop = H + BASE_BARRA;
+    const snapApoio = (y) => { for (const h of hy) if (h - fU + offApoio >= y - 0.01) return h - fU; return hy[hy.length - 1] - fU; };
     const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {
       // duplada: duas montantes grudadas, eixos a ±cp/2 do centro da posição
@@ -373,9 +380,9 @@
       const externa = i === 0 || i === RT; // a última coluna desenhada de uma vista parcial é interna (braço duplo)
       for (const yNivel of F.niveis) {
         const bal = yNivel === F.niveis[0] ? F.balBaixo : F.balAlto, yb = snapApoio(yNivel);
-        const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU);
+        const br = bracoParam(col, bal, externa ? (i === 0 ? 1 : -1) : 0, F.perfilC, F.espU, altU);
         const ladoB = externa ? (i === 0 ? 'ESQ' : 'DIR') : '', pf = F.perfilC;
-        put(br.prims, x, yb, 'BRACO', nomeBloco('DI_BR', (externa ? 'S' : 'D') + nb(bal), col + (ladoB ? ladoB[0] : ''), 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X')));
+        put(br.prims, x, yb, 'BRACO', nomeBloco('DI_BR', (externa ? 'S' : 'D') + nb(bal), col + (ladoB ? ladoB[0] : ''), 'U' + altU, 'C' + [pf.A, pf.C, pf.B, pf.D].map(nb).join('X')));
         if (i === 0) topoBraco.push(yb + br.topoC);
       }
     });
@@ -421,7 +428,7 @@
     const LG_DX = 2.23, LG_DY = 8.46, LG_VAO0 = 1931.73;
     for (let i = 0; i < R; i++) {
       const src = B().DI_LGTOPO; if (!src) { faltam.add('DI_LGTOPO'); break; }
-      const yLg = H - FR_TOPO_FURO - 100 + LG_DY, x1 = xs[i] + hx + LG_DX, x2 = xs[i + 1] - hx - LG_DX;
+      const yLg = Htop - FR_TOPO_FURO - 100 + LG_DY, x1 = xs[i] + hx + LG_DX, x2 = xs[i + 1] - hx - LG_DX;
       const LGC = B().DI_LGTOPO_CONTRAV;
       if (LGC) {
         // bloco do Gean (Drawing1.dxf): longarina de topo + contraventamento superior, só representativo; desenhado para rua 1400,
@@ -438,11 +445,11 @@
     for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === nP - 1 ? 'FIM' : ''));
     cota(0, H, W, H, 650, `${Math.round(W)}`, false, 'g');
     // à esquerda: corrente palete + folga (por dentro), corrente dos níveis e altura total (como no 260324)
-    const niv = [0, ...topoBraco, H];
+    const niv = [0, ...topoBraco, Htop];
     for (let k = 0; k < niv.length - 1; k++) cota(0, niv[k], 0, niv[k + 1], 600, `${Math.round(niv[k + 1] - niv[k])}`, true, 'p');
-    cota(0, 0, 0, H, 1050, `${H}`, true, 'g');
+    cota(0, 0, 0, Htop, 1050, mmTxt(Htop), true, 'g'); // piso → topo da coluna (barra H + chapa da sapata)
     if (F.alturaPalete > 0) {
-      const hp = F.alturaPalete, baseC = (y) => y - F.perfilC.A, lgBase = H - 154.65;
+      const hp = F.alturaPalete, baseC = (y) => y - F.perfilC.A, lgBase = Htop - 154.65;
       const apoios = [0, ...topoBraco];
       apoios.forEach((y0, k) => {
         const yp = y0 + (k === 0 && F.escravo ? 2 * hp : hp), prox = k + 1 < apoios.length ? baseC(apoios[k + 1]) : lgBase;

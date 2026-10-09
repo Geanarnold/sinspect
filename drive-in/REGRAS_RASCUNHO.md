@@ -451,7 +451,7 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Cor laranja: suporte na layer BRACO_LT (30) e longarina de túnel + emenda na layer LONGARINA_TUNEL (30).
 - Bloco atualizado (oblongos verticais, curso 5 mm, centros a 25 mm do topo e da base da chapa de 200 = ±75 do centro do C). Na lateral a chapa segue o bloco (200).
 - Compatível com a furação da coluna (Gean): os oblongos do suporte são ancorados nos oblongos da lateral da coluna (DI_COLUNA, módulo de 50 a partir da base, centros ≡ 29,2 mod 50); C, longarina de túnel e palete do último nível acompanham.
-- `[CONFIRMAR]` Diferença de ~4,2 mm entre as referências de furação: a frontal posiciona o braço pelos furos a 25 mm do topo da coluna (altura múltipla de 50 → furos ≡ 25 mod 50, apoio ≡ 47), a lateral pelos oblongos a partir da base (≡ 29,2). Falta a medida real do 1º furo a partir da base da coluna para unificar (muda o 1º nível em ~4 mm na frontal e na lista).
+- [RESOLVIDO] Diferença de ~4,2 mm entre as referências de furação: unificada pela COL 80.DXF (seção 36).
 
 ## 33. Preenchimento sem valores de modelo (Gean)
 
@@ -481,3 +481,11 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Campos preenchidos automaticamente: cliente, cidade, UF, representante, responsável técnico, desenhista, nº do processo, data, revisão (REV-NN), escala, unidade, folha (i/N); linha de revisões (nº, responsável, data, alteração resumida); detalhamento do pallet (P01/P02: largura, profundidade, altura, peso); descrição técnica do bloco (bloco, larg/comp/alt, empilhamento, carga, pallets por rua, ruas, total); capacidade total do projeto.
 - Novos campos no projeto: Cliente, Cidade, UF (obrigatórios para exportar), Representante, Responsável técnico; "Responsável" passou a "Desenhista".
 - Proposta comercial: modelo de estrutura em `proposta/MODELO_PROPOSTA.md` — em stand-by.
+
+## 36. Furação da coluna e altura do suporte U (COL 80.DXF, Gean)
+- Medida padrão de todas as colunas (80/101/122), frontal e lateral: 1º oblongo a **25 mm da base da barra**, passo 50. A barra (H, múltiplo de 50) apoia na chapa de 4,75 da sapata → oblongos a **29,75 + 50k do piso** e a 25 mm das duas pontas; topo da coluna = **H + 4,75**.
+- Frontal: furos gerados do topo (H + 4,75 − 25 − 50k). Lateral: oblongos do DI_COLUNA (29,2) corrigidos para 29,75. Cota de altura total mostra H + 4,75.
+- Níveis: topo do C = furo inferior do suporte + 75 + A/2 (oblongos do suporte a ±75 do centro do U) → ≡ 104,75 + A/2 (mod 50). Ex.: A = 94 → níveis terminam em ...1,75 (antes ...47). Muda o 1º nível em +4,75 mm em relação à versão anterior.
+- Altura do suporte U: **campo obrigatório do operador** (180 ou 200), vazio por padrão. Rasgos a ±75 do centro (15 mm das bordas no 180, 25 no 200). Usada no desenho (frontal, lateral, croqui), no peso do U e nos painéis do zig-zag de fundo. Nome do bloco leva U180/U200.
+- Pendentes (Gean: depois): braço específico da duplada; dimensões do trilho.
+
