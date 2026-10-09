@@ -256,7 +256,7 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
 - Recebidos: DI_COLUNA (1000 mm, furos Ø9 a cada 50 a partir de 54,75, fileira a 17,9 mm do eixo; eixo do bloco em x = 15, compensado no app), DI_TRAVESSA_H (furos c/c 714,5), DI_TRAVESSA_D (furos c/c 714,5 a 45°), DI_SAPATA (155 mm, chumbadores 80 mm abaixo da base), DI_PISO (trecho de 1000), DI_TOPO (775 mm, suposto para passo 820 `[CONFIRMAR]`), DI_UNIAO (modelo 1,02: furos em 15 e 971, chapa posterior em 1007,5). Coluna solteira = mesma coluna.
 - `extrair_blocos.py` → `app/blocos.js` (primitivas flattenadas). `dxf.js` monta: coluna por altura (módulo de 50 replicado), travessa/diagonal esticadas pela distância entre furos, união ancorada nos furos das duas colunas, topo esticado por passo, sapata e piso.
 - Travessas alinhadas aos furos: nível y → furo mais próximo (y + 4,75). Diagonal: furo inferior da coluna esquerda → furo superior da direita.
-- Pendência: no desenho a união é ancorada nos furos (chapa posterior na coluna do quadro); a regra de comprimento para o BOM (A − 69,8) dá outro valor. `[CONFIRMAR]` qual cota é A − 69,8.
+- Pendência: no desenho a união é ancorada nos furos (chapa posterior na coluna do quadro); a regra de comprimento para o BOM (A − 69,8) dá outro valor. [RESOLVIDO] (Gean): A − 69,8 é o comprimento da união na lista; o desenho segue ancorado nos furos.
 - **DI_TOPO (confirmado):** acompanha o comprimento do passo; há **dois modelos**: um para o passo da montante (dentro do quadro) e outro para o passo entre duas montantes. O app lista os dois separadamente por passo (SA e peso a informar). Passo da coluna solteira: tratado como "entre montantes" `[CONFIRMAR]`.
 
 ## 14. Cadastro de produtos no app
@@ -271,7 +271,7 @@ Correções a aplicar no app a partir disso: (1) lateral = quadros de 2 colunas 
   - **coluna solteira:** face esquerda da solteira até face esquerda da 1ª coluna do quadro (eixo a eixo = A); vão livre = A − 69,8 = comprimento da união.
 - **Profundidade = Σ A1..An** (sem coluna extra, sem +100). Ex.: 5 × 820 = 4100; 6 × 820 = 4920.
 - 69,8 = largura da coluna na vista lateral (DI_COLUNA).
-- Pendente: o bloco DI_TRAVESSA_H tem furos c/c 714,5 para A = 820 (= A − 105,5), e a regra/cadastro usa A − 109,1 (= 710,9). Diferença de 3,6 mm `[CONFIRMAR]`.
+- Pendente: o bloco DI_TRAVESSA_H tem furos c/c 714,5 para A = 820 (= A − 105,5), e a regra/cadastro usa A − 109,1 (= 710,9). Diferença de 3,6 mm — [RESOLVIDO] (Gean): a furação varia com o comprimento; vale c/c = A − 109,1 (confere com o cadastro: 0,80 → 690,9; 0,90 → 790,9). O bloco é só gabarito e é esticado pela regra.
 
 ### 13.6 Decisões (02/10)
 - Travessa horizontal: vale a **regra A − 109,1** (c/c dos furos) para lista e desenho; no desenho a travessa fica centrada no quadro.
