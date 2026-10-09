@@ -31,11 +31,16 @@
       </div>
       <div id="passo-projeto" class="form">
         <div class="sec full"><svg class="ic"><use href="#i-proj"/></svg>Identificação</div>
-        <div class="campo full"><label class="obrig" for="projeto" title="Projeto / cliente">Projeto / cliente</label><div class="in"><input id="projeto" type="text" maxlength="11" autocomplete="off" spellcheck="false" title="Até 11 letras ou números, sem espaço nem caracteres especiais"/></div></div>
+        <div class="campo full"><label class="obrig" for="projeto" title="Nº do processo (ex.: SUPRA263020)">Projeto (nº do processo)</label><div class="in"><input id="projeto" type="text" maxlength="11" autocomplete="off" spellcheck="false" title="Até 11 letras ou números, sem espaço nem caracteres especiais"/></div></div>
+        <div class="campo full"><label class="obrig" for="cliente" title="Razão social do cliente">Cliente</label><div class="in"><input id="cliente" type="text" maxlength="60" autocomplete="off"/></div></div>
+        <div class="campo"><label class="obrig" for="cidade" title="Cidade da obra">Cidade</label><div class="in"><input id="cidade" type="text" maxlength="40" autocomplete="off"/></div></div>
+        <div class="campo"><label class="obrig" for="uf" title="UF">UF</label><div class="in"><input id="uf" type="text" maxlength="2" autocomplete="off"/></div></div>
+        <div class="campo"><label for="representante" title="Representante">Representante</label><div class="in"><input id="representante" type="text" maxlength="40"/></div></div>
+        <div class="campo"><label for="rt" title="Responsável técnico (vai no carimbo)">Responsável técnico</label><div class="in"><input id="rt" type="text" maxlength="40"/></div></div>
         <div class="campo"><label class="obrig" for="nomeCorte" title="Nome do corte">Nome do corte</label><div class="in"><input id="nomeCorte" type="text" maxlength="12" autocomplete="off"/></div><div id="erroCorte" class="msg-campo hidden"></div></div>
         <div class="campo"><label class="obrig" for="qtdCorte" title="Blocos iguais">Blocos iguais</label><div class="in com-un"><input id="qtdCorte" type="number" min="1"/><span class="un">un</span></div></div>
         <div class="campo"><label for="revisao" title="Revisão (sobe sozinha a cada salvamento)">Revisão</label><div class="in"><input id="revisao" type="text" value="REV.00" readonly tabindex="-1"/></div></div>
-        <div class="campo"><label class="obrig" for="responsavel" title="Responsável">Responsável</label><div class="in"><input id="responsavel" type="text"/></div></div>
+        <div class="campo"><label class="obrig" for="responsavel" title="Desenhista / responsável pelo projeto (vai no carimbo)">Desenhista</label><div class="in"><input id="responsavel" type="text"/></div></div>
         <div class="campo full"><label for="obs" title="Observações">Observações</label><div class="in"><input id="obs" type="text" placeholder="Opcional"/></div></div>
       </div>
       <div id="passo-estrutura" class="form hidden">
@@ -160,6 +165,7 @@
   <script src="engine.js"></script>
   <script src="blocos.js"></script>
   <script src="dxf.js"></script>
+  <script src="folha.js"></script>
   <script src="pasta.js"></script>
   <script src="cadastro.js"></script>
   <script src="app.js"></script>

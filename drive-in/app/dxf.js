@@ -2,7 +2,7 @@
 // Layers: MONTANTE (170), Contraventamento (9), COTAS (7), "4 - TEXTO DE ESCALA E VISTA" (2).
 (function (root) {
   'use strict';
-  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 32, BRACO_LT: 30, LONGARINA_TUNEL: 30, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
+  const LAYERS = { MONTANTE_HACHURA: 170, BRACO_PARAFUSO: 250, BRACO_HACHURA: 30, LONGARINA_FUNDO: 30, TRILHO: 50, PALETE: 8, PALETE_HACHURA: 32, FOLHA: 2, FOLHA_LINHA: 7, FOLHA_LOGO: 30, FOLHA_NOTA: 1, FOLHA_CAMPO: 2, BRACO_LT: 30, LONGARINA_TUNEL: 30, MONTANTE: 170, Contraventamento: 9, LONGARINA: 3, BRACO: 7, CANELEIRA: 7, CANELEIRA_HACHURA: 2, COTAS: 7, '4 - TEXTO DE ESCALA E VISTA': 2, 0: 7 };
   // DXF R12 não aceita espaços em nomes de layer: nome gravado no arquivo (o AutoCAD mostra estes)
   const LAYER_DXF = { MONTANTE_HACHURA: 'MONTANTE_HACHURA', BRACO_PARAFUSO: 'BRACO_PARAFUSO', CANELEIRA_HACHURA: 'CANELEIRA_HACHURA', BRACO_HACHURA: 'BRACO_HACHURA', LONGARINA_FUNDO: 'LONGARINA_FUNDO', TRILHO: 'TRILHO', PALETE: 'PALETE', MONTANTE: 'MONTANTE', Contraventamento: 'CONTRAVENTAMENTO', LONGARINA: 'LONGARINA', BRACO: 'BRACO', CANELEIRA: 'CANELEIRA', COTAS: 'COTAS', '4 - TEXTO DE ESCALA E VISTA': 'TEXTO_ESCALA_VISTA', 0: '0' };
   const ld = (l) => LAYER_DXF[l] || String(l).replace(/[^A-Za-z0-9_$-]/g, '_');
@@ -601,12 +601,12 @@
         emit(blocos, it.local, 0, 0, it.l);
         blocos.push('0', 'ENDBLK', '8', '0');
       }
-      out.push('0', 'INSERT', '8', ld(it.l), '2', nome, '10', f(it.x), '20', f(it.y), '30', '0');
+      out.push('0', 'INSERT', '8', ld(it.l), '2', nome, '10', f(it.x), '20', f(it.y), '30', '0', ...(it.esc ? ['41', f(it.esc), '42', f(it.esc), '43', f(it.esc)] : []));
     }
     emit(out, m.prims.filter((q) => !q.blk), 0, 0, '0');
     for (const q of m.linhas) out.push('0', 'LINE', '8', ld(q.l), '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
     const asc = (s) => String(s).replace(/[^\x00-\x7F]/g, (c) => '\\U+' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')); // acentos no padrão do AutoCAD
-    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), ...(t.st ? ['7', t.st] : []), '72', String(t.just), '11', f(t.x), '21', f(t.y), '31', '0');
+    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), ...(t.st ? ['7', t.st] : []), '72', String(t.just || 0), '11', f(t.x), '21', f(t.y), '31', '0', ...(t.v ? ['73', String(t.v)] : []));
     const layers = Object.entries(LAYERS).filter(([n]) => n !== '0').flatMap(([name, c]) => ['0', 'LAYER', '2', ld(name), '70', '0', '62', String(c), '6', 'CONTINUOUS']);
     return ['0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'TABLES',
@@ -645,16 +645,56 @@
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] };
   }
   function dxfCompleto(r, corte) { return dxfLateral(r, corte, modeloCorte(r, corte)); }
-  // projeto com vários cortes: um DXF só, cortes empilhados de cima para baixo (mesma origem X), 3000 mm entre eles
-  function dxfProjeto(lista) {
+  // ---- folha padrão (FOLHA_A0_SUPRA.dxf → folha.js): cada corte numa folha A0, na menor escala padrão em que as vistas cabem;
+  // a geometria da folha vai como bloco FOLHA_A0 (inserido com a escala), textos e campos preenchidos como TEXT soltos
+  const ESCALAS = [10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 750, 1000];
+  const FOLHA = () => root.FOLHA || (typeof global !== 'undefined' && global.window && global.window.FOLHA) || null;
+  function montarFolha(mc, dd) {
+    const Fo = FOLHA(); if (!Fo) return null;
+    const [bx0, by0, bx1, by1] = Fo.borda, ax0 = bx0 + 28, ax1 = Fo.carimbo_x - 12, ay0 = by0 + 18, ay1 = by1 - 18;
+    const W = mc.bbox[2] - mc.bbox[0], H = mc.bbox[3] - mc.bbox[1];
+    const S = ESCALAS.find((e) => W / e <= ax1 - ax0 && H / e <= ay1 - ay0) || Math.ceil(Math.max(W / (ax1 - ax0), H / (ay1 - ay0)) / 50) * 50;
+    const cxP = (ax0 + ax1) / 2, cyP = (ay0 + ay1) / 2, cxM = (mc.bbox[0] + mc.bbox[2]) / 2, cyM = (mc.bbox[1] + mc.bbox[3]) / 2;
+    const T = (x, y) => [cxM + (x - cxP) * S, cyM + (y - cyP) * S];
+    // títulos das vistas com a escala
+    for (const t of mc.textos) if (/^VISTA (LATERAL|FRONTAL|SUPERIOR)/.test(t.s)) t.s += ` - ESC. 1/${S}`;
+    const [ox, oy] = T(0, 0);
+    mc.items.push({ nome: 'FOLHA_A0_SUPRA', local: Fo.prims, x: ox, y: oy, l: 'FOLHA', esc: S });
+    for (const t of Fo.textos) { const [x, y] = T(t.x, t.y); mc.textos.push({ x, y, h: t.h * S, s: t.s, l: t.l, rot: t.rot, just: t.j, v: t.v, st: 'ROMANS' }); }
+    // campos: valores do projeto nas posições dos atributos da folha
+    const porBloco = {}; for (const c of Fo.campos) (porBloco[c.bloco] = porBloco[c.bloco] || []).push(c);
+    const put = (c, valor, hMax) => { if (valor == null || valor === '') return; const [x, y] = T(c.x, c.y); mc.textos.push({ x, y, h: Math.min(c.h, hMax || c.h) * S, s: String(valor), l: 'FOLHA_CAMPO', rot: c.rot, just: c.j, v: c.v, st: 'ROMANS' }); };
+    const cab = { CIDADE: dd.cidade, FOLHA: dd.folha, CADASTRO: dd.processo, 'REVISÃO': dd.revisao, DATA: dd.data, UNIDADE: 'mm', ESCALA: `1/${S}`, DESENHISTA: dd.desenhista, RT: dd.rt, REPRESENTANTE: dd.representante, CLIENTE: dd.cliente, UF: dd.uf };
+    for (const c of porBloco['CABEÇALHO'] || []) put(c, cab[c.tag]);
+    const rv = (porBloco['Bloco Revisões de Projeto'] || []).slice().sort((a, b) => a.x - b.x);
+    if (rv.length === 4 && dd.rev) { put(rv[0], dd.rev.num); put(rv[1], dd.rev.por); put(rv[2], dd.rev.data); put(rv[3], dd.rev.alteracao); }
+    for (const c of porBloco['CAPCIDADE TOTAL'] || []) put(c, dd.capTotal);
+    const pl = porBloco['Bloco 01 Pallet'] || [], linhasP = [...new Set(pl.map((c) => c.y))].sort((a, b) => b - a);
+    linhasP.forEach((y, k) => { const p = (dd.paletes || [])[k]; if (!p) return; const cs = pl.filter((c) => c.y === y).sort((a, b) => a.x - b.x); [p.modelo, p.larg, p.prof, p.alt, p.peso].forEach((v, i) => cs[i] && put(cs[i], v)); });
+    const ds = (porBloco['Bloco Descrição Drive In'] || []).slice().sort((a, b) => a.x - b.x), D = dd.descricao || {};
+    [D.bloco, D.dims, D.empilhamento, D.carga, D.porRua, D.ruas, D.total].forEach((v, i) => ds[i] && put(ds[i], v));
+    const [fx0, fy0] = T(bx0, by0), [fx1, fy1] = T(bx1, by1);
+    mc.bbox = [Math.min(mc.bbox[0], fx0), Math.min(mc.bbox[1], fy0), Math.max(mc.bbox[2], fx1), Math.max(mc.bbox[3], fy1)];
+    return S;
+  }
+  // projeto com vários cortes: com a folha padrão, uma folha A0 por corte, lado a lado; sem ela, cortes empilhados (3000 mm entre eles)
+  // folhaDados(corte, i, n) devolve os campos da folha daquele corte (cliente, revisão, paletes, descrição…)
+  function dxfProjeto(lista, folhaDados) {
     const m = { prims: [], items: [], linhas: [], textos: [] };
-    let topo = 0;
-    lista.forEach(({ r, corte, qtd }) => {
+    let topo = 0, dir = 0;
+    const comFolha = !!(FOLHA() && folhaDados);
+    lista.forEach(({ r, corte, qtd }, i) => {
       const mc = modeloCorte(r, corte);
       if (qtd > 1) mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
-      shiftModel(mc, -mc.bbox[0], topo - mc.bbox[3] - 400);
+      if (comFolha) {
+        montarFolha(mc, folhaDados(corte, i, lista.length));
+        shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]);
+        dir = mc.bbox[2] + 0.1 * (mc.bbox[2] - mc.bbox[0]);
+      } else {
+        shiftModel(mc, -mc.bbox[0], topo - mc.bbox[3] - 400);
+        topo = mc.bbox[1] - 3000;
+      }
       for (const k of ['prims', 'items', 'linhas', 'textos']) m[k] = m[k].concat(mc[k]);
-      topo = mc.bbox[1] - 3000;
     });
     return dxfLateral(lista[0] && lista[0].r, '', m);
   }

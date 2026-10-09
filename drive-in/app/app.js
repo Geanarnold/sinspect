@@ -16,7 +16,7 @@
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] };
   // preenchimento (Gean): dados do projeto começam vazios e são obrigatórios; só os padrões da empresa vêm preenchidos (marcados "padrão")
   const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
-  const OBRIG_CAB = ['projeto', 'responsavel', 'nomeCorte', 'qtdCorte'];
+  const OBRIG_CAB = ['projeto', 'cliente', 'cidade', 'uf', 'responsavel', 'nomeCorte', 'qtdCorte'];
   const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8' };
   const vazioDados = (d) => !d || !d.v || OBRIG_CALC.some((id) => d.v[id] === '' || d.v[id] == null) || (d.diferentes && (d.espacos || []).some((x) => x === '' || x == null));
   // nomes de corte únicos no projeto (Gean): nome vazio ou repetido não é aceito; projetos antigos com repetição ganham sufixo -2, -3…
@@ -32,7 +32,7 @@
   }
   nomesUnicos(proj);
   const nomeCorteLivre = (nome, i) => !!nome && !proj.cortes.some((c, j) => j !== i && c.nome === nome);
-  const CAB = ['projeto', 'revisao', 'responsavel', 'obs'];
+  const CAB = ['projeto', 'cliente', 'cidade', 'uf', 'representante', 'rt', 'revisao', 'responsavel', 'obs'];
   // nome do projeto (padrão SUPRA + número, ex. SUPRA263020): até 11 letras ou números, sem espaço nem caracteres especiais, em maiúsculas
   const limparProjeto = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 11);
   const salvar = () => { proj.cab = Object.fromEntries(CAB.map((k) => [k, $(k).value])); try { localStorage.setItem(CHAVE, JSON.stringify(proj)); } catch (e) { /* navegador sem armazenamento */ } };
@@ -396,10 +396,30 @@
   $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
   $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
   $('btnPng').addEventListener('click', baixarPng);
+  // dados da folha padrão (carimbo, revisão, pallet, descrição técnica, capacidade total) para cada corte do DXF
+  function dadosFolha() {
+    const lp = calcularProjeto(), hoje = new Date().toLocaleDateString('pt-BR'), h = proj.historico || [], u = h[h.length - 1];
+    const revTxt = ($('revisao').value || 'REV.00').replace('.', '-'), revNum = revTxt.replace(/^REV-?/, '');
+    const alteracao = (u && u.rev !== 'REV.00' ? (u.mudancas || []).filter((m) => m !== 'Emissão').slice(0, 2).join('; ') || (u.emissao ? 'Emissão' : '') : 'Emissão inicial').toUpperCase();
+    const capTotal = lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0);
+    const maius = (v) => String(v || '').trim().toUpperCase();
+    // modelos de pallet do projeto (até 2 linhas na tabela da folha): P01, P02 na ordem dos cortes
+    const pals = []; for (const x of lp) { const F = x.r.frontal, k = [F.frentePalete, x.r.planta.profPalete, F.alturaPalete, F.cargaPalete].join('|'); if (!pals.some((p) => p.k === k)) pals.push({ k, modelo: `P${String(pals.length + 1).padStart(2, '0')}`, larg: F.frentePalete, prof: x.r.planta.profPalete, alt: F.alturaPalete, peso: F.cargaPalete }); }
+    return (corte, i, n) => {
+      const x = lp[i], r = x.r, F = r.frontal, camadas = 1 + (F.escravo ? 1 : 0) + F.niveis.length;
+      return {
+        cliente: maius($('cliente').value), cidade: maius($('cidade').value), uf: maius($('uf').value), representante: maius($('representante').value), rt: maius($('rt').value),
+        desenhista: maius($('responsavel').value), processo: maius($('projeto').value), revisao: revTxt, data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, folha: `${i + 1}/${n}`,
+        rev: { num: revNum, por: maius(u ? u.por : $('responsavel').value), data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, alteracao: alteracao.length > 70 ? alteracao.slice(0, 67) + '...' : alteracao },
+        capTotal: `${capTotal} PALLETS`, paletes: pals.slice(0, 2),
+        descricao: { bloco: `BLOCO ${corte}${x.qtd > 1 ? ` (x${x.qtd})` : ''}`, dims: `${Math.round(r.dimensoes.largura)}/${Math.round(r.dimensoes.profundidade)}/${r.dimensoes.altura}`, empilhamento: `PISO${F.escravo ? '(2)' : ''}+${String(F.niveis.length).padStart(2, '0')} NÍVEIS`, carga: `${F.cargaPalete} KG`, porRua: `${r.paletesPorRua * camadas} PALLETS`, ruas: `${r.entradas.ruas} RUAS`, total: `${r.posicoes * x.qtd} PALLETS` },
+      };
+    };
+  }
   $('btnDxfProj').addEventListener('click', () => {
     if (!last) return;
     const nome = ($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_');
-    const txt = DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })));
+    const txt = DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha());
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-projeto.dxf`; a.click();
   });
   // novo corte em branco; "Duplicar" copia os dados do corte atual com o nome em branco (o operador nomeia e confere)
@@ -551,7 +571,7 @@
         if (!$('emCiente').checked || !nome) { alert('Marque a ciência e informe seu nome.'); return false; }
         try { localStorage.setItem('drivein_usuario', nome); } catch (e) { /* sem storage */ }
         if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;
-        baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd }))), 'application/dxf');
+        baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha()), 'application/dxf');
         csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.csv`);
         return true;
       } }]);
@@ -579,7 +599,8 @@
   { const c = proj.cortes[proj.atual] || proj.cortes[0]; $('nomeCorte').value = c.nome; $('qtdCorte').value = c.qtd; aplicarForm(c.dados); for (const k of CAB) if (proj.cab && proj.cab[k] != null) $(k).value = k === 'projeto' ? limparProjeto(proj.cab[k]) : proj.cab[k]; }
   $('projeto').addEventListener('input', () => { const el = $('projeto'), v = limparProjeto(el.value); if (v !== el.value) el.value = v; });
   $('projeto').value = limparProjeto($('projeto').value);
-  CAB.forEach((k) => $(k).addEventListener('input', salvar));
+  $('uf').addEventListener('input', () => { const el = $('uf'), v = el.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 2); if (v !== el.value) el.value = v; });
+  CAB.forEach((k) => $(k).addEventListener('input', () => { salvar(); if (OBRIG_CAB.includes(k)) render(); }));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt();

@@ -473,3 +473,11 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - **Emitir**: confere todos os cortes e lista erros (impedem a emissão), alertas, itens sem código, itens sem peso, pesos estimados e regras a confirmar, mais as responsabilidades; exige "Li e assumo" e o nome; grava a revisão de emissão e baixa DXF do projeto + lista (CSV) com a revisão no nome.
 - **Nota de responsabilidade** fixa (tela, lista, CSV e DXF): verificações operacionais = operador do software, cliente e representante; dimensionamento estrutural = engenheiro responsável.
 - **Catálogo**: consulta livre; editar exige a senha (definida na primeira vez, guardada como hash no catálogo). "Aplicar" vale só na tela; "Publicar nova versão" grava a vN+1 com autor, data e descrição. Nada de catálogo fica salvo só no navegador. A senha é trava contra edição acidental — a proteção real é deixar a pasta `catalogo/` somente leitura para quem não é administrador.
+
+## 35. Folha padrão no DXF (FOLHA_A0_SUPRA.dxf, Gean)
+
+- `folha/FOLHA_A0_SUPRA.dxf` → `extrair_folha.py` → `app/folha.js` (geometria, textos fixos e posição dos campos/atributos).
+- DXF do projeto: **uma folha A0 por corte**, lado a lado, na menor escala padrão em que as vistas cabem na área livre (1/10…1/1000); a folha entra como bloco `FOLHA_A0_SUPRA` inserido com a escala; títulos das vistas recebem "ESC. 1/N".
+- Campos preenchidos automaticamente: cliente, cidade, UF, representante, responsável técnico, desenhista, nº do processo, data, revisão (REV-NN), escala, unidade, folha (i/N); linha de revisões (nº, responsável, data, alteração resumida); detalhamento do pallet (P01/P02: largura, profundidade, altura, peso); descrição técnica do bloco (bloco, larg/comp/alt, empilhamento, carga, pallets por rua, ruas, total); capacidade total do projeto.
+- Novos campos no projeto: Cliente, Cidade, UF (obrigatórios para exportar), Representante, Responsável técnico; "Responsável" passou a "Desenhista".
+- Proposta comercial: modelo de estrutura em `proposta/MODELO_PROPOSTA.md` — em stand-by.
