@@ -409,7 +409,7 @@
       const x = lp[i], r = x.r, F = r.frontal, camadas = 1 + (F.escravo ? 1 : 0) + F.niveis.length;
       return {
         cliente: maius($('cliente').value), cidade: maius($('cidade').value), uf: maius($('uf').value), representante: maius($('representante').value), rt: maius($('rt').value),
-        desenhista: maius($('responsavel').value), processo: maius($('projeto').value), revisao: revTxt, data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, folha: `${i + 1}/${n}`,
+        desenhista: maius(u ? u.por : $('responsavel').value), // Gean: no carimbo vai quem fez a última revisão processo: maius($('projeto').value), revisao: revTxt, data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, folha: `${i + 1}/${n}`,
         rev: { num: revNum, por: maius(u ? u.por : $('responsavel').value), data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, alteracao: alteracao.length > 70 ? alteracao.slice(0, 67) + '...' : alteracao },
         capTotal: `${capTotal} PALLETS`, paletes: pals.slice(0, 2),
         descricao: { bloco: `BLOCO ${corte}${x.qtd > 1 ? ` (x${x.qtd})` : ''}`, dims: `${Math.round(r.dimensoes.largura)}/${Math.round(r.dimensoes.profundidade)}/${r.dimensoes.altura}`, empilhamento: `PISO${F.escravo ? '(2)' : ''}+${String(F.niveis.length).padStart(2, '0')} NÍVEIS`, carga: `${F.cargaPalete} KG`, porRua: `${r.paletesPorRua * camadas} PALLETS`, ruas: `${r.entradas.ruas} RUAS`, total: `${r.posicoes * x.qtd} PALLETS` },
