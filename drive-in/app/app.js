@@ -181,7 +181,14 @@
     }
     return [...mapa.values()];
   }
+  // resumo dos grupos recolhíveis do braço (mostra os valores com o grupo fechado)
+  function resumoGrupos() {
+    const v = (id) => ($(id).value || '–').replace('.', ',');
+    if ($('resSuporte')) $('resSuporte').textContent = `chapa ${v('espU')} mm`;
+    if ($('resPerfilC')) $('resPerfilC').textContent = `${v('cA')} × ${v('cC')} × ${v('cB')} # ${v('cD')} mm`;
+  }
   function render() {
+    resumoGrupos();
     const c = proj.cortes[proj.atual];
     const nv = normCorte($('nomeCorte').value), livre = nomeCorteLivre(nv, proj.atual);
     if (livre) c.nome = nv; // nome repetido/vazio: o corte mantém o nome anterior até o operador corrigir
@@ -192,7 +199,7 @@
     salvar(); renderCortes();
     // campos obrigatórios em branco: destaca, não calcula e trava as saídas
     const rotulo = (id) => { const l = document.querySelector(`label[for="${id}"]`); return l ? l.textContent.trim() : id; };
-    const etapa = (id) => { const f = $(id).closest('.form'); const k = f ? ['projeto', 'estrutura', 'lateral', 'braco'].indexOf(f.id.replace('passo-', '')) : -1; return k >= 0 ? ['Projeto', 'Estrutura', 'Lateral', 'Braço'][k] : ''; };
+    const etapa = (id) => { const f = $(id).closest('[id^="passo-"]'); const k = f ? ['projeto', 'estrutura', 'lateral', 'braco'].indexOf(f.id.replace('passo-', '')) : -1; return k >= 0 ? ['Projeto', 'Estrutura', 'Lateral', 'Braço'][k] : ''; };
     const vazio = (id) => String($(id).value).trim() === '';
     for (const id of OBRIG_CALC.concat(OBRIG_CAB)) $(id).classList.toggle('vazio', vazio(id));
     const espVazios = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].filter((i) => i.value === '') : [];
