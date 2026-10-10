@@ -479,8 +479,9 @@
 
   // ---- vista superior (planta), no padrão do projeto 260324: frente embaixo (y = 0), fundo em cima
   // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
-  function montarPlanta(r, titulo, corte) {
-    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, R = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+  // maxRuas (opcional): vista superior parcial, como a frontal (Gean) — desenha só as primeiras ruas; cota total = todas as ruas
+  function montarPlanta(r, titulo, corte, maxRuas) {
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, RT = Number(r.entradas.ruas), R = maxRuas ? Math.min(RT, maxRuas) : RT, F = r.frontal, rua = F.larguraRua;
     const D = r.dimensoes.profundidade, CW = 69.8;
     const dxM = dup ? [-cp / 2, cp / 2] : [0]; // eixos das montantes em relação ao centro da posição (duplada: 2 montantes grudadas)
     const prims = [], linhas = [], textos = [], items = [];
@@ -501,7 +502,7 @@
     if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       // número da posição (vale para todos os níveis deste ponto da rua): só nos cantos — 1º e último palete da 1ª e da última rua (Gean)
-      if ((i === 0 || i === R - 1) && (k === 0 || k === P - 1)) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
+      if ((i === 0 || i === RT - 1) && (k === 0 || k === P - 1)) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
     }
     // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
     // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
@@ -512,9 +513,9 @@
     const espMont = (ps, dA) => mapPts(ps, (v) => [v[0], v[1] < -512.5 ? v[1] - dA : v[1]]); // DI_MONT_80 desenhado com quadro de 1025
     // braços (vistos de cima: aba do C, largura = aba C do perfil): simples nas laterais das pontas (cobrem a coluna até a ponta), duplos nas internas
     for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
-      const y0 = abreY[j] > 0 ? yA - pf.C : yA, simples = i === 0 || i === R;
+      const y0 = abreY[j] > 0 ? yA - pf.C : yA, simples = i === 0 || i === RT; // vista parcial: a última coluna desenhada é interna (duplo)
       const L = simples ? translate(ret(col / 2 + uo + bal, pf.C, 'BRACO', 'BRACO_HACHURA'), -col / 2, 0) : translate(ret(2 * (uo + bal), pf.C, 'BRACO', 'BRACO_HACHURA'), -(uo + bal), 0);
-      put(simples && i === R ? mirrorX(L) : L, xs[i], y0, 'BRACO', nomeBloco('DI_PL_BRACO', (simples ? 'S' : 'D') + nb(bal), col + (simples ? (i === 0 ? 'D' : 'E') : '')));
+      put(simples && i === RT ? mirrorX(L) : L, xs[i], y0, 'BRACO', nomeBloco('DI_PL_BRACO', (simples ? 'S' : 'D') + nb(bal), col + (simples ? (i === 0 ? 'D' : 'E') : '')));
     });
     // longarinas de túnel: ao longo de toda a profundidade, na ponta do braço, nos dois lados de cada rua
     const lgB = r.lateral.lgU ? r.lateral.lgU.B : 38;
@@ -580,12 +581,17 @@
     text(W / 2, -1450, 110, 'FRENTE (ENTRADA DA EMPILHADEIRA)', 'COTAS', 0, 1, 'ROMANS');
     // cotas: ruas e largura total em cima; espaços (A1…An, do fundo para a frente) e profundidade total à esquerda
     for (let i = 0; i < R; i++) cota(xs[i] + col / 2, D, xs[i + 1] - col / 2, D, 300, `${rua}`, false, 'p');
-    cota(0, D, W, D, 700, `${Math.round(W)}`, false, 'g');
+    cota(0, D, W, D, 700, RT > R ? `${Math.round(r.dimensoes.largura)} (${RT} RUAS)` : `${Math.round(W)}`, false, 'g');
+    if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
+      const xb = W + 350, z = [[xb, -400], [xb, D * 0.45], [xb - 120, D * 0.48], [xb + 120, D * 0.52], [xb, D * 0.55], [xb, D + 300]];
+      for (let k = 0; k < z.length - 1; k++) line(z[k][0], z[k][1], z[k + 1][0], z[k + 1][1], 'COTAS');
+      text(W / 2, -2350, 110, `VISTA PARCIAL: ${R} DE ${RT} RUAS - LARGURA TOTAL ${Math.round(r.dimensoes.largura)} mm`, 'COTAS', 0, 1, 'ROMANS');
+    }
     const esp = r.lateral.espacos; let acc = 0;
     esp.forEach((a) => { cota(0, D - acc, 0, D - acc - a, 300, `${Math.round(a)}`, true, 'c'); acc += a; });
     cota(0, D, 0, 0, 750, `${Math.round(D)}`, true, 'g');
     text(W / 2, -2000, 120, titulo || 'VISTA SUPERIOR', '4 - TEXTO DE ESCALA E VISTA');
-    return { prims, items, linhas, textos, bbox: [-1900, -2300, W + 900, D + 1150] };
+    return { prims, items, linhas, textos, bbox: [-1900, RT > R ? -2600 : -2300, W + 900, D + 1150] };
   }
   function shiftModel(m, dx, dy = 0) {
     for (const q of m.prims) { if (q.p) q.p = q.p.map((v) => [v[0] + dx, v[1] + dy]); if (q.c) q.c = [q.c[0] + dx, q.c[1] + dy]; }
@@ -630,8 +636,8 @@
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
-  // separar = true (projeto com folha): devolve [lateral + frontal, superior] para irem em folhas separadas, cada uma com a sua escala
-  function modeloCorte(r, corte, separar) {
+  // maxRuasPlanta: vista superior parcial (só as primeiras ruas), para a folha sair numa escala maior
+  function modeloCorte(r, corte, maxRuasPlanta) {
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte), corte);
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
@@ -647,11 +653,10 @@
       mL.bbox[3] = Math.max(mL.bbox[3], pd + 700); mF.bbox[3] = Math.max(mF.bbox[3], pd + 700);
     }
     // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
-    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte), corte);
+    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte) + (maxRuasPlanta && Number(r.entradas.ruas) > maxRuasPlanta ? ' (PARCIAL)' : ''), corte, maxRuasPlanta);
     shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
     const junta = (ms) => ({ prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] });
-    if (separar) return [junta([mL, mF]), junta([mP])];
     const ms = [mL, mF, mP];
     return { prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] };
@@ -695,18 +700,19 @@
     mc.bbox = [Math.min(mc.bbox[0], fx0), Math.min(mc.bbox[1], fy0), Math.max(mc.bbox[2], fx1), Math.max(mc.bbox[3], fy1)];
     return S;
   }
-  // projeto com vários cortes: com a folha padrão, duas folhas A0 por corte (lateral + frontal; superior), lado a lado; sem ela, cortes empilhados (3000 mm entre eles)
+  // projeto com vários cortes: com a folha padrão, folhas A0 lado a lado (1 por corte, ou 2 com mais de 5 ruas: superior parcial / completa); sem ela, cortes empilhados
   // folhaDados(corte, i, n) devolve os campos da folha daquele corte (cliente, revisão, paletes, descrição…)
   function dxfProjeto(lista, folhaDados) {
     const m = { prims: [], items: [], linhas: [], textos: [] };
     let topo = 0, dir = 0;
     const comFolha = !!(FOLHA() && folhaDados);
-    // com a folha (Gean): por corte, uma folha com lateral + frontal e outra com a vista superior, cada uma na sua escala
-    // (lateral e frontal ficam maiores, para ler cotas e detalhes); folhas numeradas 1/N… na ordem
-    const nFolhas = lista.length * 2; let nf = 0;
+    // com a folha (Gean): as 3 vistas na mesma folha. Com mais de 5 ruas saem duas folhas por corte — uma com a vista superior parcial
+    // (5 ruas, como a frontal; escala maior para ler cotas e detalhes) e outra com a estrutura completa; o operador usa a que quiser
+    const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_FRONTAL;
+    const nFolhas = lista.reduce((s2, x) => s2 + (parcial(x.r) ? 2 : 1), 0); let nf = 0;
     lista.forEach(({ r, corte, qtd }, i) => {
-      const blocos = comFolha ? modeloCorte(r, corte, true) : [modeloCorte(r, corte)];
-      if (qtd > 1) { const mc = blocos[0]; mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 }); }
+      const blocos = comFolha && parcial(r) ? [modeloCorte(r, corte, MAX_RUAS_FRONTAL), modeloCorte(r, corte)] : [modeloCorte(r, corte)];
+      if (qtd > 1) for (const mc of blocos) { mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 }); }
       for (const mc of blocos) if (comFolha) {
         montarFolha(mc, { ...folhaDados(corte, i, lista.length), folha: `${++nf}/${nFolhas}` });
         shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]);
