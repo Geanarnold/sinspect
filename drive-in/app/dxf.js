@@ -481,7 +481,9 @@
   // x: mesmas posições da frontal (eixos das colunas); y: posições das colunas na lateral, medidas a partir da frente
   // maxRuas (opcional): vista superior parcial, como a frontal (Gean) — desenha só as primeiras ruas; cota total = todas as ruas
   function montarPlanta(r, titulo, corte, maxRuas) {
-    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, RT = Number(r.entradas.ruas), R = maxRuas ? Math.min(RT, maxRuas) : RT, F = r.frontal, rua = F.larguraRua;
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, col = r.dimensoes.colW || cp, RT = Number(r.entradas.ruas), F = r.frontal, rua = F.larguraRua;
+    // vista parcial (Gean): ruas 1…R, interrupção e a última rua (RT); com RT ≤ R + 1 desenha tudo
+    const R = maxRuas && RT > maxRuas + 1 ? maxRuas : RT, GAP = 1200;
     const D = r.dimensoes.profundidade, CW = 69.8;
     const dxM = dup ? [-cp / 2, cp / 2] : [0]; // eixos das montantes em relação ao centro da posição (duplada: 2 montantes grudadas)
     const prims = [], linhas = [], textos = [], items = [];
@@ -494,15 +496,16 @@
     const text = (x, y, h, s, layer, rot = 0, just = 1, st) => textos.push({ x, y, h, s, l: layer, rot, just, st });
     const cota = fazCota(line, text);
     const ret = (w, h, layer, sol) => { const L = [[0, 0, w, 0], [w, 0, w, h], [w, h, 0, h], [0, h, 0, 0]].map(([a, b, c, d]) => ({ t: 'p', l: layer, p: [[a, b], [c, d]] })); if (sol) L.unshift({ t: 's', l: sol, p: [[0, 0], [w, 0], [0, h], [w, h]] }); return L; };
-    const xs = []; for (let i = 0; i <= R; i++) xs.push(i * (rua + col) + col / 2);
-    const W = xs[R] + col / 2;
+    const X = (g) => (g <= R ? g * (rua + col) + col / 2 : R * (rua + col) + col / 2 + GAP + (g - (RT - 1)) * (rua + col)); // eixo da coluna g (0…RT)
+    const COLS = [...Array(R + 1).keys()].concat(RT > R ? [RT - 1, RT] : []), RUAS = [...Array(R).keys()].concat(RT > R ? [RT - 1] : []);
+    const W = X(COLS[COLS.length - 1]) + col / 2;
     const uo = col / 2 + F.espU, bal = F.balAlto, pf = F.perfilC;
     // paletes não são desenhados na planta (projeto leve, Gean); só a numeração dos cantos, no lugar de cada palete (do fundo para a frente, palete + 25)
     const prof = r.planta.profPalete, P = r.paletesPorRua;
-    if (F.frentePalete > 0) for (let i = 0; i < R; i++) for (let k = 0; k < P; k++) {
+    if (F.frentePalete > 0) for (const i of RUAS) for (let k = 0; k < P; k++) {
       const yTopo = D - k * r.ocupPalete;
       // número da posição (vale para todos os níveis deste ponto da rua): só nos cantos — 1º e último palete da 1ª e da última rua (Gean)
-      if ((i === 0 || i === RT - 1) && (k === 0 || k === P - 1)) text(xs[i] + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
+      if ((i === 0 || i === RT - 1) && (k === 0 || k === P - 1)) text(X(i) + col / 2 + F.folgaPalete + F.frentePalete / 2, yTopo - prof / 2 - 60, 150, numPos(r, corte, i, P - 1 - k), 'PALETE', 0, 1, 'ROMANS');
     }
     // linhas de coluna (VISTA_SUPERIOR.dxf): cada coluna tem a alma para fora do quadro e a abertura para dentro (a solteira abre para a vizinha);
     // o braço fica encostado na alma, por fora; a longarina superior fica na linha da alma, para o lado da abertura
@@ -512,15 +515,15 @@
     const quadroEsp = (k) => k >= 0 && k < nEsp && (Lt.solteira ? k % 2 === 1 : k % 2 === 0);
     const espMont = (ps, dA) => mapPts(ps, (v) => [v[0], v[1] < -512.5 ? v[1] - dA : v[1]]); // DI_MONT_80 desenhado com quadro de 1025
     // braços (vistos de cima: aba do C, largura = aba C do perfil): simples nas laterais das pontas (cobrem a coluna até a ponta), duplos nas internas
-    for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
+    for (const i of COLS) almaY.forEach((yA, j) => {
       const y0 = abreY[j] > 0 ? yA - pf.C : yA, simples = i === 0 || i === RT; // vista parcial: a última coluna desenhada é interna (duplo)
       const L = simples ? translate(ret(col / 2 + uo + bal, pf.C, 'BRACO', 'BRACO_HACHURA'), -col / 2, 0) : translate(ret(2 * (uo + bal), pf.C, 'BRACO', 'BRACO_HACHURA'), -(uo + bal), 0);
-      put(simples && i === RT ? mirrorX(L) : L, xs[i], y0, 'BRACO', nomeBloco('DI_PL_BRACO', (simples ? 'S' : 'D') + nb(bal), col + (simples ? (i === 0 ? 'D' : 'E') : '')));
+      put(simples && i === RT ? mirrorX(L) : L, X(i), y0, 'BRACO', nomeBloco('DI_PL_BRACO', (simples ? 'S' : 'D') + nb(bal), col + (simples ? (i === 0 ? 'D' : 'E') : '')));
     });
     // longarinas de túnel: ao longo de toda a profundidade, na ponta do braço, nos dois lados de cada rua
     const lgB = r.lateral.lgU ? r.lateral.lgU.B : 38;
-    for (let i = 0; i < R; i++) for (const lado of [1, -1]) {
-      const xt = lado === 1 ? xs[i] + uo + bal : xs[i + 1] - uo - bal, x0 = lado === 1 ? xt - lgB : xt;
+    for (const i of RUAS) for (const lado of [1, -1]) {
+      const xt = lado === 1 ? X(i) + uo + bal : X(i + 1) - uo - bal, x0 = lado === 1 ? xt - lgB : xt;
       put(ret(lgB, D, 'LONGARINA', 'BRACO_HACHURA'), x0, 0, 'LONGARINA', nomeBloco('DI_PL_LG_TUNEL', nb(D)));
     }
     // colunas (MONTANTES_DE_MODELO.dxf, Gean): quadro DI_MONT_<col> (2 seções + contraventamento; alma de trás em y = 0, desenhado com A = 1025,
@@ -532,35 +535,35 @@
     for (let k = 0; k < nEsp; k++) if (quadroEsp(k)) {
       emQuadro.add(k); emQuadro.add(k + 1);
       const A = almaY[k] - almaY[k + 1];
-      for (let i = 0; i <= R; i++) for (const dx of dxM) {
-        if (MONT) put(espMont(clone(MONT), A - 1025), xs[i] + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_QUADRO', cp, nb(A)));
-        else line(xs[i] + dx, almaY[k] - CW, xs[i] + dx, almaY[k + 1] + CW, 'Contraventamento');
+      for (const i of COLS) for (const dx of dxM) {
+        if (MONT) put(espMont(clone(MONT), A - 1025), X(i) + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_QUADRO', cp, nb(A)));
+        else line(X(i) + dx, almaY[k] - CW, X(i) + dx, almaY[k + 1] + CW, 'Contraventamento');
       }
     }
-    for (let i = 0; i <= R; i++) almaY.forEach((yA, j) => {
+    for (const i of COLS) almaY.forEach((yA, j) => {
       if (MONT && emQuadro.has(j)) return;
       const k = j + 1 < nRows ? j + 1 : j - 1; // coluna vizinha (do quadro) à qual a solteira se une
       if (!emQuadro.has(j) && SOLT && k >= 0) {
         const A = yA - almaY[k], sg = Math.sign(A) || 1;
         const ps = mapPts(clone(SOLT), (v) => [v[0], sg * (v[1] > 512.5 ? v[1] + Math.abs(A) - 1025 : v[1])]);
-        for (const dx of dxM) put(clone(ps), xs[i] + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_SOLT', cp, nb(Math.abs(A)), sg > 0 ? 'F' : 'T'));
+        for (const dx of dxM) put(clone(ps), X(i) + dx, almaY[k], 'MONTANTE', nomeBloco('DI_PL_SOLT', cp, nb(Math.abs(A)), sg > 0 ? 'F' : 'T'));
         return;
       }
       const ps = secao(abreY[j]);
-      for (const dx of dxM) put(clone(ps), xs[i] + dx, yA, 'MONTANTE', nomeBloco('DI_PL_COLUNA', cp, abreY[j] > 0 ? 'F' : 'T'));
+      for (const dx of dxM) put(clone(ps), X(i) + dx, yA, 'MONTANTE', nomeBloco('DI_PL_COLUNA', cp, abreY[j] > 0 ? 'F' : 'T'));
     });
     // longarina superior (DI_LONG_VIST_SUP, TB 80) em cada linha de coluna, esticada para a largura da rua (desenhada para rua 1400)
     const LGS = B().DI_LONG_VIST_SUP, dR = (rua - 1400) / 2;
-    for (let i = 0; i < R; i++) almaY.forEach((yA, j) => {
-      const xm = (xs[i] + xs[i + 1]) / 2, sy = abreY[j];
+    for (const i of RUAS) almaY.forEach((yA, j) => {
+      const xm = (X(i) + X(i + 1)) / 2, sy = abreY[j];
       const ps = LGS ? mapPts(clone(LGS), (v) => [v[0] > 100 ? v[0] + dR : v[0] < -100 ? v[0] - dR : v[0], sy * v[1]]) : mapPts(ret(rua, 40, 'LONGARINA'), (v) => [v[0] - rua / 2, sy * v[1]]);
       put(ps, xm, yA, 'LONGARINA', nomeBloco('DI_PL_LGSUP', nb(rua), sy > 0 ? 'F' : 'T'));
     });
     // travamento de topo em zig-zag: diagonais (DI_TRAV_SUP esticada) entre os furos das chapas de ponta das longarinas superiores,
     // alternando o lado a partir da frente (linha da frente: furo do lado direito)
     const TRV = B().DI_TRAV_SUP, CC0 = 1561.87, dxh = rua / 2 - FL.x;
-    for (let i = 0; i < R; i++) for (let j = 0; j < nRows - 1; j++) {
-      const xm = (xs[i] + xs[i + 1]) / 2, dirJ = (nRows - 1 - j) % 2 === 0 ? 1 : -1; // lado do furo na linha j (+1 = direita)
+    for (const i of RUAS) for (let j = 0; j < nRows - 1; j++) {
+      const xm = (X(i) + X(i + 1)) / 2, dirJ = (nRows - 1 - j) % 2 === 0 ? 1 : -1; // lado do furo na linha j (+1 = direita)
       const p1 = [xm + dirJ * dxh, furoY(j, -1)], p2 = [xm - dirJ * dxh, furoY(j + 1, 1)];
       const cc = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), ang = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
       if (TRV) put(rotate(mapPts(clone(TRV), (v) => [v[0] > CC0 / 2 ? v[0] + cc - CC0 : v[0], v[1]]), ang), p1[0], p1[1], 'Contraventamento', nomeBloco('DI_PL_DIAG_TOPO', nb(cc), dirJ > 0 ? 'A' : 'B'));
@@ -570,22 +573,22 @@
     // trilho por modelo de coluna (DI_TRILHO_GUIA_80 / _101 / _122 / _80D, Gean); sem bloco do modelo: DI_TRILHO_GUIA genérico
     const Tr = r.lateral.trilho, TRL = B()['DI_TRILHO_GUIA_' + cp + (dup ? 'D' : '')] || B().DI_TRILHO_GUIA;
     const TL0 = TRL ? Math.max(...TRL.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : 0;
-    if (Tr && Tr.comp > 100 && TRL) for (let i = 0; i <= R; i++)
-      put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), xs[i], -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', cp + (dup ? 'D' : ''), nb(Tr.comp)));
+    if (Tr && Tr.comp > 100 && TRL) for (const i of COLS)
+      put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), X(i), -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', cp + (dup ? 'D' : ''), nb(Tr.comp)));
     // entrada de cada rua: seta e número da rua
-    for (let i = 0; i < R; i++) {
-      const xm = (xs[i] + xs[i + 1]) / 2;
+    for (const i of RUAS) {
+      const xm = (X(i) + X(i + 1)) / 2;
       line(xm, -900, xm, -250, 'COTAS'); line(xm, -250, xm - 90, -420, 'COTAS'); line(xm, -250, xm + 90, -420, 'COTAS');
       text(xm, -1150, 150, `RUA ${String(i + 1).padStart(2, '0')}`, 'COTAS', 0, 1, 'ROMANS');
     }
     text(W / 2, -1450, 110, 'FRENTE (ENTRADA DA EMPILHADEIRA)', 'COTAS', 0, 1, 'ROMANS');
     // cotas: ruas e largura total em cima; espaços (A1…An, do fundo para a frente) e profundidade total à esquerda
-    for (let i = 0; i < R; i++) cota(xs[i] + col / 2, D, xs[i + 1] - col / 2, D, 300, `${rua}`, false, 'p');
+    for (const i of RUAS) cota(X(i) + col / 2, D, X(i + 1) - col / 2, D, 300, `${rua}`, false, 'p');
     cota(0, D, W, D, 700, RT > R ? `${Math.round(r.dimensoes.largura)} (${RT} RUAS)` : `${Math.round(W)}`, false, 'g');
     if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
-      const xb = W + 350, z = [[xb, -400], [xb, D * 0.45], [xb - 120, D * 0.48], [xb + 120, D * 0.52], [xb, D * 0.55], [xb, D + 300]];
+      const xb = (X(R) + X(RT - 1)) / 2, z = [[xb, -400], [xb, D * 0.45], [xb - 120, D * 0.48], [xb + 120, D * 0.52], [xb, D * 0.55], [xb, D + 300]]; // interrupção entre a 5ª e a última rua
       for (let k = 0; k < z.length - 1; k++) line(z[k][0], z[k][1], z[k + 1][0], z[k + 1][1], 'COTAS');
-      text(W / 2, -2350, 110, `VISTA PARCIAL: ${R} DE ${RT} RUAS - LARGURA TOTAL ${Math.round(r.dimensoes.largura)} mm`, 'COTAS', 0, 1, 'ROMANS');
+      text(W / 2, -2350, 110, `VISTA PARCIAL: RUAS 1 A ${R} E ${RT} (DE ${RT}) - LARGURA TOTAL ${Math.round(r.dimensoes.largura)} mm`, 'COTAS', 0, 1, 'ROMANS');
     }
     const esp = r.lateral.espacos; let acc = 0;
     esp.forEach((a) => { cota(0, D - acc, 0, D - acc - a, 300, `${Math.round(a)}`, true, 'c'); acc += a; });
@@ -653,7 +656,7 @@
       mL.bbox[3] = Math.max(mL.bbox[3], pd + 700); mF.bbox[3] = Math.max(mF.bbox[3], pd + 700);
     }
     // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
-    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte) + (maxRuasPlanta && Number(r.entradas.ruas) > maxRuasPlanta ? ' (PARCIAL)' : ''), corte, maxRuasPlanta);
+    const mP = montarPlanta(r, tituloVista('SUPERIOR', corte) + (maxRuasPlanta && Number(r.entradas.ruas) > maxRuasPlanta + 1 ? ' (PARCIAL)' : ''), corte, maxRuasPlanta);
     shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
     const junta = (ms) => ({ prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] });
@@ -708,7 +711,7 @@
     const comFolha = !!(FOLHA() && folhaDados);
     // com a folha (Gean): as 3 vistas na mesma folha. Com mais de 5 ruas saem duas folhas por corte — uma com a vista superior parcial
     // (5 ruas, como a frontal; escala maior para ler cotas e detalhes) e outra com a estrutura completa; o operador usa a que quiser
-    const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_FRONTAL;
+    const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_FRONTAL + 1;
     const nFolhas = lista.reduce((s2, x) => s2 + (parcial(x.r) ? 2 : 1), 0); let nf = 0;
     lista.forEach(({ r, corte, qtd }, i) => {
       const blocos = comFolha && parcial(r) ? [modeloCorte(r, corte, MAX_RUAS_FRONTAL), modeloCorte(r, corte)] : [modeloCorte(r, corte)];
