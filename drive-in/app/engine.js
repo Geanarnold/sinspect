@@ -10,7 +10,6 @@
   const NOTA_RESPONSABILIDADE = 'As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável.';
   const DENS = 7.85e-6;       // kg/mm³ (aço)
   const MAX_PECA = 8500;      // limite da cabine de pintura (mm)
-  const PESO_TRILHO = 35.02;  // guia palete (trilho): kg por montante/lateral (Gean, 10/10/2026)
   const PASSO_COLUNA = 50;
   const BASE_BARRA = 4.75, FURO_BASE = BASE_BARRA + 25; // barra da coluna sobre a chapa da sapata; 1º oblongo 25 mm acima da base da barra    // altura da coluna em múltiplos de 50 mm
   const TOL_SA = 3;           // ±3 mm para aceitar um SA de travessa/diagonal
@@ -320,7 +319,7 @@
     if (folgaUC < -1) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm não comporta o C do braço (A = ${perfilC.A} mm; tolerância ± 1 mm).`);
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
-    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, PESO_TRILHO, '1 por lateral (linha de montantes), centrado na linha de colunas (VISTA_SUPERIOR.dxf); peso 35,02 kg por montante (Gean, valor fixo — não varia com o comprimento) [CONFIRMAR perfil/SA]');
+    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
     // stop palete (Gean, bloco DI_LGFUNDO): 2 por longarina de fundo → 2 por rua em cada nível de braço
     const pesoStop = Number(inp.pesoStop) || null;
     if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (sobre a longarina de fundo)', SEM.SA, 2 * R * niveisArm.length, null, pesoStop, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is))${pesoStop ? '' : '; peso unitário não informado'}`);
