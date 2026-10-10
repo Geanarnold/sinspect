@@ -443,7 +443,8 @@
     const W = xs[R] + col / 2;
     const x0p = -1500, nP = Math.ceil((W + 3000) / 1000);
     for (let k = 0; k < nP; k++) put(piso(k === 0, k === nP - 1), x0p + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === nP - 1 ? 'FIM' : ''));
-    cota(0, H, W, H, 650, `${Math.round(W)}`, false, 'g');
+    // cota total (Gean): sempre a largura de TODAS as ruas do corte, mesmo quando a vista mostra só parte delas (texto da cota = medida real)
+    cota(0, H, W, H, 650, RT > R ? `${Math.round(r.dimensoes.largura)} (${RT} RUAS)` : `${Math.round(W)}`, false, 'g');
     // à esquerda: corrente palete + folga (por dentro), corrente dos níveis e altura total (como no 260324)
     const niv = [0, ...topoBraco, Htop];
     for (let k = 0; k < niv.length - 1; k++) cota(0, niv[k], 0, niv[k + 1], 600, `${Math.round(niv[k + 1] - niv[k])}`, true, 'p');
