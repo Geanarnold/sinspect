@@ -276,6 +276,7 @@
       $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte', 'croquiTunel']) if ($(k)) $(k).innerHTML = '';
       ['tab-pecas', 'tab-pend', 'tab-proj'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
       travar('Preencha os campos obrigatórios (*)');
+      { const mb = $('mobBadge'); if (mb) { mb.textContent = String(faltaCalc.length + espVazios.length); mb.classList.add('alerta'); } }
       return;
     }
     travar(faltaCab.length ? `Preencha: ${faltaCab.map(rotulo).join(', ')}` : outrosIncompletos.length ? `Corte(s) incompleto(s): ${outrosIncompletos.join(', ')}` : '');
@@ -292,6 +293,7 @@
       kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), d.montantes && d.montantes !== d.colunas ? `${d.colunas} colunas duplas (${d.montantes} montantes)` : `${d.colunas} colunas`),
     ].join('');
 
+    { const mb = $('mobBadge'); if (mb) { mb.textContent = `${fmt0(r.posicoes)} pos.`; mb.classList.remove('alerta'); } }
     const lp = calcularProjeto();
     const posP = lp.reduce((s, x) => s + x.r.posicoes * x.qtd, 0), pesoP = lp.reduce((s, x) => s + x.r.pesoTotal * x.qtd, 0), errP = lp.filter((x) => x.r.erros.length).map((x) => x.nome);
     let kp = document.getElementById('kpiProj'); if (!kp) { kp = document.createElement('p'); kp.id = 'kpiProj'; kp.className = 'kpi-proj'; $('kpis').after(kp); }
@@ -467,7 +469,11 @@
   document.querySelectorAll('.passo').forEach((el, k) => el.addEventListener('click', () => mostrarPasso(k)));
   $('btnVoltar').addEventListener('click', () => mostrarPasso(passo - 1));
   $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
-  $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
+  // celular: barra fixa alterna entre o formulário e o resultado
+  const mobAba = (q) => { $('paginaConfig').dataset.mob = q; $('mobDados').classList.toggle('ativo', q === 'dados'); $('mobResult').classList.toggle('ativo', q === 'result'); window.scrollTo(0, 0); };
+  $('mobDados').addEventListener('click', () => mobAba('dados'));
+  $('mobResult').addEventListener('click', () => mobAba('result'));
+  $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); mobAba('result'); $('bom').scrollIntoView({ behavior: 'smooth' }); });
   $('btnPng').addEventListener('click', baixarPng);
   $('btnAprovar').addEventListener('click', () => $('btnEmitir').click()); // aprovação do operador = conferência do Emitir
   // dados da folha padrão (carimbo, revisão, pallet, descrição técnica, capacidade total) para cada corte do DXF
