@@ -1,0 +1,504 @@
+{
+ "id": "c02_col122_63ruas_rua1900",
+ "descricao": "Validação 2 (planilha F379 REV.01): COL 122 #2,25, 63 ruas, 14 espaços de 788, 7 níveis, palete 1700x1200x1350 600 kg, altura 10900 (emenda)",
+ "validado": false,
+ "dimensoes": {
+  "largura": 127508,
+  "profundidade": 11032,
+  "altura": 10900
+ },
+ "niveis": [
+  1451.75,
+  3001.75,
+  4551.75,
+  6101.75,
+  7651.75,
+  9201.75
+ ],
+ "posicoes": 3969,
+ "paletesPorRua": 9,
+ "pesoTotalKg": 113192.208,
+ "erros": [],
+ "alertas": [
+  "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
+  "Altura acima de 8500 mm: a planilha antiga exigia análise de engenharia. Emenda incluída.",
+  "ATENÇÃO – braço 1º nível: apoio do palete de 82.7 mm por lado, menor que 100 mm. Conferir; para 100 mm o balanço deve ser de pelo menos 198 mm.",
+  "Longarina de túnel U 100x38x1.8: altura interna 96.4 mm deixa folga de 2.4 mm sobre o C do braço (A = 94 mm), acima da tolerância de ± 1 mm."
+ ],
+ "pecas": [
+  {
+   "grupo": "Colunas",
+   "codigo": "SA040130",
+   "desc": "AMPP COL 122 C/ABA #2.25 mm – 8500 mm (inferior)",
+   "qtd": 960,
+   "compr": 8500,
+   "pesoUnit": 44.815
+  },
+  {
+   "grupo": "Colunas",
+   "codigo": "SA040611",
+   "desc": "AMPP COL 122 C/ABA #2.25 mm – 2400 mm (superior)",
+   "qtd": 960,
+   "compr": 2400,
+   "pesoUnit": 12.654
+  },
+  {
+   "grupo": "Emenda de coluna",
+   "codigo": "SA040045",
+   "desc": "PP EMENDA COLUNA",
+   "qtd": 1920,
+   "compr": null,
+   "pesoUnit": 0.448
+  },
+  {
+   "grupo": "Emenda de coluna",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 15360,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Emenda de coluna",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 15360,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Emenda de coluna",
+   "codigo": "INT0812",
+   "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
+   "qtd": 30720,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "SA041442",
+   "desc": "PP BASE SAPATA (comum às 3 colunas)",
+   "qtd": 960,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "SA041652",
+   "desc": "Perfil U sapata 122",
+   "qtd": 960,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "SA041649",
+   "desc": "Placa niveladora COL 122",
+   "qtd": 1920,
+   "compr": null,
+   "pesoUnit": 0.231
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0654",
+   "desc": "Chumbador PBA 3/8\" x 3.1/2\"",
+   "qtd": 3840,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 3840,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 3840,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0812",
+   "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
+   "qtd": 7680,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "CO040544",
+   "desc": "Sapata Drive-In COL 122 (conjunto)",
+   "qtd": 960,
+   "compr": null,
+   "pesoUnit": 1.35
+  },
+  {
+   "grupo": "Travessas",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa horizontal – passo 788 mm (total 709.4 mm, c/c 678.9 mm)",
+   "qtd": 5824,
+   "compr": 709.4,
+   "pesoUnit": 0.624
+  },
+  {
+   "grupo": "Travessas",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal – passo 788, vão 600 mm (total 936.5 mm, c/c 906 mm)",
+   "qtd": 1344,
+   "compr": 936.5,
+   "pesoUnit": 0.823
+  },
+  {
+   "grupo": "Travessas",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal – passo 788, vão 900 mm (total 1157.8 mm, c/c 1127.3 mm)",
+   "qtd": 4032,
+   "compr": 1157.8,
+   "pesoUnit": 1.018
+  },
+  {
+   "grupo": "Travessas",
+   "codigo": "SA040046",
+   "desc": "PP TUBO COMPLEMENTO TRAVESSA COL 122",
+   "qtd": 896,
+   "compr": null,
+   "pesoUnit": 0.027
+  },
+  {
+   "grupo": "Coluna solteira",
+   "codigo": "COXXXXXX",
+   "desc": "Travessa união COL 122 – passo 788 mm (total 718.2 mm)",
+   "qtd": 832,
+   "compr": 718.2,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Coluna solteira",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 4992,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Coluna solteira",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 4992,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Topo",
+   "codigo": "SA04XXXX",
+   "desc": "Topo (DI_TOPO) da montante (dentro do quadro) – passo 788 mm",
+   "qtd": 448,
+   "compr": 788,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Topo",
+   "codigo": "SA04XXXX",
+   "desc": "Topo (DI_TOPO) entre montantes – passo 788 mm",
+   "qtd": 448,
+   "compr": 788,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores das travessas",
+   "codigo": "INT0973",
+   "desc": "Parafuso sextavado 5/16\" x 4\" ZNC",
+   "qtd": 11648,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores das travessas",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 11648,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Braços",
+   "codigo": "SA04XXXX",
+   "desc": "Braço simples balanço 180 – COL 122 – C 94x40x15x1.8 (comp. C 307.3)",
+   "qtd": 30,
+   "compr": 307.3,
+   "pesoUnit": 1.734
+  },
+  {
+   "grupo": "Braços",
+   "codigo": "SA04XXXX",
+   "desc": "Braço duplo balanço 180 – COL 122 – C 94x40x15x1.8 (comp. C 487.3)",
+   "qtd": 930,
+   "compr": 487.3,
+   "pesoUnit": 2.235
+  },
+  {
+   "grupo": "Braços",
+   "codigo": "SA04XXXX",
+   "desc": "Braço simples balanço 230 – COL 122 – C 94x40x15x1.8 (comp. C 357.3)",
+   "qtd": 150,
+   "compr": 357.3,
+   "pesoUnit": 1.873
+  },
+  {
+   "grupo": "Braços",
+   "codigo": "SA04XXXX",
+   "desc": "Braço duplo balanço 230 – COL 122 – C 94x40x15x1.8 (comp. C 587.3)",
+   "qtd": 4650,
+   "compr": 587.3,
+   "pesoUnit": 2.513
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 46080,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 46080,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT0812",
+   "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
+   "qtd": 92160,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Protetores",
+   "codigo": "SA04XXXX",
+   "desc": "Caneleira (protetor de coluna) 700 mm",
+   "qtd": 64,
+   "compr": 700,
+   "pesoUnit": 2.5
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de túnel U 100x38x1.8 – 2398.9 mm",
+   "qtd": 756,
+   "compr": 2398.9,
+   "pesoUnit": 5.844
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de túnel U 100x38x1.8 – 2294.2 mm",
+   "qtd": 1512,
+   "compr": 2294.2,
+   "pesoUnit": 5.589
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de túnel U 100x38x1.8 – 2433.8 mm",
+   "qtd": 756,
+   "compr": 2433.8,
+   "pesoUnit": 5.929
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de túnel U 100x38x1.8 – 1610.9 mm",
+   "qtd": 756,
+   "compr": 1610.9,
+   "pesoUnit": 3.924
+  },
+  {
+   "grupo": "Emendas da longarina de túnel",
+   "codigo": "PK041366",
+   "desc": "Tala de junção 300 x 94 x 30 x 15 (kit com fixadores)",
+   "qtd": 3024,
+   "compr": 300,
+   "pesoUnit": 1.34
+  },
+  {
+   "grupo": "Emendas da longarina de túnel",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 42336,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Emendas da longarina de túnel",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 42336,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Emendas da longarina de túnel",
+   "codigo": "INT0812",
+   "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
+   "qtd": 42336,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Travamento de fundo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 2256.1 mm",
+   "qtd": 63,
+   "compr": 2256.1,
+   "pesoUnit": 1.984
+  },
+  {
+   "grupo": "Travamento de fundo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 2332.7 mm",
+   "qtd": 315,
+   "compr": 2332.7,
+   "pesoUnit": 2.051
+  },
+  {
+   "grupo": "Travamento de fundo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 2415.7 mm",
+   "qtd": 63,
+   "compr": 2415.7,
+   "pesoUnit": 2.124
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "PKXXXXXX",
+   "desc": "Longarina de fundo TB 80 – 1900 mm (fora dos modelos cadastrados)",
+   "qtd": 378,
+   "compr": 1900,
+   "pesoUnit": 4.171
+  },
+  {
+   "grupo": "Travamento de topo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 1942.5 mm",
+   "qtd": 63,
+   "compr": 1942.5,
+   "pesoUnit": 1.708
+  },
+  {
+   "grupo": "Travamento de topo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 1928.2 mm",
+   "qtd": 441,
+   "compr": 1928.2,
+   "pesoUnit": 1.695
+  },
+  {
+   "grupo": "Travamento de topo (zig-zag)",
+   "codigo": "SA04XXXX",
+   "desc": "Travessa diagonal zig-zag – total 1957.4 mm",
+   "qtd": 378,
+   "compr": 1957.4,
+   "pesoUnit": 1.721
+  },
+  {
+   "grupo": "Fixadores do zig-zag",
+   "codigo": "INT1193",
+   "desc": "Parafuso sextavado 5/16\" x 1\"",
+   "qtd": 2646,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores do zig-zag",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 2646,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Trilho guia",
+   "codigo": "SA04XXXX",
+   "desc": "Trilho guia – até o fim do 8º palete",
+   "qtd": 64,
+   "compr": 9850,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Stop palete",
+   "codigo": "SA04XXXX",
+   "desc": "Stop palete (sobre a longarina de fundo)",
+   "qtd": 756,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "PKXXXXXX",
+   "desc": "Longarina de topo TB 80 – 1900 mm (fora dos modelos cadastrados)",
+   "qtd": 945,
+   "compr": 1900,
+   "pesoUnit": 4.171
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 2646,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 2646,
+   "compr": null,
+   "pesoUnit": null
+  }
+ ],
+ "dxf": {
+  "tamanhoKB": 3050,
+  "inserts": {
+   "DI_BR": 72,
+   "DI_CANELEIRA": 12,
+   "DI_COLUNA": 42,
+   "DI_EMENDA": 48,
+   "DI_LG": 60,
+   "DI_LGFUNDO": 60,
+   "DI_LGTOPO": 10,
+   "DI_LT": 216,
+   "DI_PALETE": 14,
+   "DI_PISO": 56,
+   "DI_PL": 3867,
+   "DI_SAPATA": 30,
+   "DI_TOPO": 28,
+   "DI_TRAVESSA": 350,
+   "DI_TRILHO": 2,
+   "DI_UNIAO": 26,
+   "DI_ZIGZAG": 56,
+   "FOLHA_A0_SUPRA": 2
+  },
+  "textos": [
+   "VISTA FRONTAL CORTE A - ESC. 1/200",
+   "VISTA FRONTAL CORTE A - ESC. 1/50",
+   "VISTA LATERAL CORTE A - ESC. 1/200",
+   "VISTA LATERAL CORTE A - ESC. 1/50",
+   "VISTA PARCIAL: 5 DE 63 RUAS - LARGURA TOTAL 127508 mm",
+   "VISTA PARCIAL: RUAS 1 A 5 E 63 (DE 63) - LARGURA TOTAL 127508 mm",
+   "VISTA SUPERIOR CORTE A (PARCIAL) - ESC. 1/50",
+   "VISTA SUPERIOR CORTE A - ESC. 1/200"
+  ],
+  "problemas": []
+ }
+}
