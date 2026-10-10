@@ -216,11 +216,13 @@
         dup ? 'braço específico da coluna duplada (sem desenho/SA): peso ESTIMADO com U de 160 abraçando as 2 montantes + perfil C' : 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }
     // apoio do palete sobre o braço: o palete fica a 100 mm da face da coluna; o braço avança 2,65 (U) + balanço
-    const APOIO_MIN = 80; // apoio mínimo do palete sobre o braço, por lado (definido pelo Gean)
+    const APOIO_MIN = 80;     // apoio mínimo do palete sobre o braço, por lado (definido pelo Gean) → erro
+    const APOIO_AVISO = 100;  // abaixo disto (por lado) → aviso ao operador (Gean, 10/10/2026)
     const apoioBaixo = ESP_U + balBaixo - FOLGA_PALETE_COLUNA, apoioAlto = ESP_U + balAlto - FOLGA_PALETE_COLUNA;
     for (const [nome, ap, usa] of [['1º nível', apoioBaixo, niveisArm.length > 0], ['2º nível em diante', apoioAlto, niveisArm.length > 1]]) {
       if (!usa) continue;
       if (ap < APOIO_MIN) erros.push(`Braço ${nome}: apoio do palete ${ap.toFixed(1)} mm por lado, abaixo do mínimo de ${APOIO_MIN} mm. Aumente o balanço (mínimo ${Math.ceil(APOIO_MIN + FOLGA_PALETE_COLUNA - ESP_U)} mm).`);
+      else if (ap < APOIO_AVISO) alertas.push(`ATENÇÃO – braço ${nome}: apoio do palete de ${ap.toFixed(1)} mm por lado, menor que ${APOIO_AVISO} mm. Conferir; para ${APOIO_AVISO} mm o balanço deve ser de pelo menos ${Math.ceil(APOIO_AVISO + FOLGA_PALETE_COLUNA - ESP_U)} mm.`);
     }
     if (totBracos) {
       add('Fixadores dos braços', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 8 * totBracos, null, null, '8 por braço');

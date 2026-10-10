@@ -494,3 +494,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Valores informados e retirados a pedido do Gean até refinar os dados: união 2,06 kg; topo pelo kg/m da diagonal; sapata COL 122 1,294 kg/un; stop palete 2,5 kg; caneleira 1,506 kg.
 - Dúvida registrada: união 1,02 COL 122 (CO040543) tem total 1017,8 no cadastro, e a regra A − 69,8 dá 955,2 no passo 1025.
 - Guia palete 35,02 kg por montante: em validação com a tabela do Gean — NÃO aplicado no app.
+- [IMPLEMENTADO] Aviso de apoio (Gean, 10/10/2026): balanço continua informado pelo operador (sem regra palete → braço). Apoio por lado < 100 mm → aviso; < 80 mm → erro.
