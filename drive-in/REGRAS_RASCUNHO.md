@@ -498,3 +498,6 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - [IMPLEMENTADO] Stop palete: peso fixo 2,5 kg/un no código (campo retirado da tela) (Gean, 10/10/2026).
 - [IMPLEMENTADO] Etapa Braço (Gean, 10/10/2026): grupos recolhíveis "Dados do suporte do braço (U)" (com desenho do U visto de cima) e "Dados do perfil C do braço" (com a seção A-A); etiqueta muda de "padrão" para "personalizado" quando o valor sai do padrão (grupo fechado fica destacado).
 - [IMPLEMENTADO] Emitir: conferência final com todos os dados do projeto e de cada corte (por etapa; personalizados em amarelo) + caixa obrigatória "Conferi todos os dados acima e estão corretos", além da ciência das pendências.
+- [IMPLEMENTADO] Rascunho (Gean, opção 1): "DXF do projeto" e a lista CSV fora do Emitir saem como RASCUNHO – NÃO EMITIDO (arquivo `_RASCUNHO`, carimbo "REV-xx RASCUNHO" e faixa vermelha na folha; 1ª linha da lista). Só o Emitir (com conferência) gera a versão oficial.
+- Stop palete: voltou a ficar sem peso (Gean) — "peso a definir"; campo continua fora da tela.
+- Corrigido: CADASTRO (nº do projeto), REVISÃO, DATA e FOLHA não eram preenchidos no carimbo (comentário no código engolia esses campos).

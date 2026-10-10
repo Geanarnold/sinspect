@@ -680,6 +680,12 @@
     linhasP.forEach((y, k) => { const p = (dd.paletes || [])[k]; if (!p) return; const cs = pl.filter((c) => c.y === y).sort((a, b) => a.x - b.x); [p.modelo, p.larg, p.prof, p.alt, p.peso].forEach((v, i) => cs[i] && put(cs[i], v)); });
     const ds = (porBloco['Bloco Descrição Drive In'] || []).slice().sort((a, b) => a.x - b.x), D = dd.descricao || {};
     [D.bloco, D.dims, D.empilhamento, D.carga, D.porRua, D.ruas, D.total].forEach((v, i) => ds[i] && put(ds[i], v));
+    // rascunho: carimbo marcado e faixa "RASCUNHO – NÃO EMITIDO" sobre a folha (layer FOLHA_NOTA, vermelho)
+    if (dd.rascunho) {
+      for (const c of (porBloco['CABEÇALHO'] || []).filter((c) => c.tag === 'REVISÃO')) put(c, `${dd.revisao} RASCUNHO`);
+      const [rx, ry] = T((ax0 + ax1) / 2, ay1 - 40);
+      mc.textos.push({ x: rx, y: ry, h: 30 * S, s: 'RASCUNHO - NÃO EMITIDO - SEM CONFERÊNCIA', l: 'FOLHA_NOTA', rot: 0, just: 1, v: 2, st: 'ROMANS' });
+    }
     const [fx0, fy0] = T(bx0, by0), [fx1, fy1] = T(bx1, by1);
     mc.bbox = [Math.min(mc.bbox[0], fx0), Math.min(mc.bbox[1], fy0), Math.max(mc.bbox[2], fx1), Math.max(mc.bbox[3], fy1)];
     return S;
