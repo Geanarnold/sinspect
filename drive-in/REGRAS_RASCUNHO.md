@@ -490,10 +490,6 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Pendentes (Gean: depois): braço específico da duplada; dimensões do trilho.
 
 
-## 37. Pesos informados (Gean, 10/10/2026)
-- Travessa união: 2,06 kg = CO040543 (PP TRAVESSA UNIAO 1,02 COL 122, 2,059 kg no cadastro). Quando A − 69,8 não acha união no cadastro (±3 mm), o app escolhe pelo modelo do nome (0,70/0,76/1,02 → passo 700/760/1020, ±30 mm). `[CONFIRMAR]` o total do cadastro (1017,8) não bate com A − 69,8 (955,2 no passo 1025).
-- Topo DI_TOPO (os dois modelos): kg/m da travessa diagonal (0,879) × passo.
-- Stop palete: 2,5 kg/un (padrão; o campo do formulário substitui).
-- Caneleira: 1,506 kg/un.
-- Sapata COL 122 "1,294 kg/un": `[CONFIRMAR]` se é o conjunto (cadastro hoje: SAP-122 = 1,35 kg) ou o Perfil U SA041652.
-- Trilho: depois.
+## 37. Pesos em refinamento (Gean, 10/10/2026) — NÃO aplicados no app
+- Valores informados e retirados a pedido do Gean até refinar os dados: união 2,06 kg; topo pelo kg/m da diagonal; sapata COL 122 1,294 kg/un; stop palete 2,5 kg; caneleira 1,506 kg.
+- Dúvida registrada: união 1,02 COL 122 (CO040543) tem total 1017,8 no cadastro, e a regra A − 69,8 dá 955,2 no passo 1025.
