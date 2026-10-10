@@ -1,0 +1,4 @@
+Bibliotecas de terceiros usadas pelo relatório de emissão em PDF (relatorio.js):
+- jsPDF 2.5.1 (licença MIT) — https://github.com/parallax/jsPDF
+- jsPDF-AutoTable 3.8.2 (licença MIT) — https://github.com/simonbengtsson/jsPDF-AutoTable
+Ficam no próprio app (sem internet).

@@ -609,23 +609,45 @@
   // conferência final (Gean): todos os dados digitados, por corte e por etapa; valores fora do padrão destacados
   const NOMES_CONF = { espU: 'Suporte U – chapa', cA: 'Perfil C – A (altura)', cC: 'Perfil C – C (aba)', cB: 'Perfil C – B (dobra)', cD: 'Perfil C – D (espessura)',
     balancoBaixo: 'Balanço do braço – 1º nível', coluna: 'Coluna – modelo', espessura: 'Coluna – espessura', frentePalete: 'Palete – frente', profPalete: 'Palete – profundidade', alturaPalete: 'Palete – altura', cargaPalete: 'Palete – carga', alt1Nivel: '1º nível (apoio)', alturaManual: 'Altura total (manual)', balancoAlto: 'Balanço do braço – 2º nível em diante', uA: 'Longarina de túnel – alma', uB: 'Longarina de túnel – aba', uE: 'Longarina de túnel – chapa' };
-  function conferenciaHTML() {
+  // dados da conferência: [{ titulo, linhas: [[rótulo, valor, personalizado]] }] — linhas "§..." são subtítulos (etapa)
+  function conferenciaDados() {
     const nomeC = (id) => NOMES_CONF[id] || rotuloCampo(id), etapaDe = (id) => { const f = $(id).closest('[id^="passo-"]'); return f ? f.id.replace('passo-', '') : ''; };
     const ETAPAS = [['estrutura', 'Estrutura'], ['lateral', 'Lateral'], ['braco', 'Braço']];
-    const linha = (k, v, pers) => `<tr${pers ? ' class="pers"' : ''}><td>${esc(k)}</td><td>${esc(v === '' || v == null ? '—' : /^-?\d+(\.\d+)?$/.test(String(v).trim()) ? String(v).replace('.', ',') : String(v))}${pers ? ' <b>(personalizado)</b>' : ''}</td></tr>`;
-    let h = '<table class="conf-tab"><tr class="et"><td colspan="2">Projeto</td></tr>' + CAB.filter((k) => k !== 'obs').map((k) => linha(rotuloCampo(k), $(k).value)).join('') + '</table>';
+    const val = (v) => (v === '' || v == null ? '—' : /^-?\d+(\.\d+)?$/.test(String(v).trim()) ? String(v).replace('.', ',') : String(v));
+    const blocos = [{ titulo: 'Projeto', linhas: CAB.filter((k) => k !== 'obs').map((k) => [rotuloCampo(k), val($(k).value), false]) }];
     for (const c of proj.cortes) {
       const d = c.dados; if (!d) continue;
-      h += `<table class="conf-tab"><tr class="et"><td colspan="2">Corte ${esc(c.nome || '?')} × ${esc(c.qtd || '?')}</td></tr>`;
+      const linhas = [];
       for (const [et, tit] of ETAPAS) {
-        h += `<tr class="et"><td colspan="2" style="font-weight:600">${tit}</td></tr>`;
-        for (const id of IDS.filter((x) => etapaDe(x) === et).sort((a, b) => ($(a).compareDocumentPosition($(b)) & 4 ? -1 : 1))) h += linha(nomeC(id), d.v[id], ehPersonalizado(id, d.v[id]));
-        if (et === 'estrutura') h += linha('Palete escravo no chão', d.escravo ? 'Sim' : 'Não');
-        if (et === 'lateral' && d.diferentes) h += linha('Espaços (A1, A2…)', (d.espacos || []).join(' / '));
+        linhas.push(['§' + tit, '', false]);
+        for (const id of IDS.filter((x) => etapaDe(x) === et).sort((a, b) => ($(a).compareDocumentPosition($(b)) & 4 ? -1 : 1))) linhas.push([nomeC(id), val(d.v[id]), ehPersonalizado(id, d.v[id])]);
+        if (et === 'estrutura') linhas.push(['Palete escravo no chão', d.escravo ? 'Sim' : 'Não', false]);
+        if (et === 'lateral' && d.diferentes) linhas.push(['Espaços (A1, A2…)', (d.espacos || []).join(' / '), false]);
       }
-      h += '</table>';
+      blocos.push({ titulo: `Corte ${c.nome || '?'} × ${c.qtd || '?'}`, linhas });
     }
-    return h;
+    return blocos;
+  }
+  function conferenciaHTML() {
+    return conferenciaDados().map((b) => `<table class="conf-tab"><tr class="et"><td colspan="2">${esc(b.titulo)}</td></tr>` + b.linhas.map(([k, v, pers]) => k.startsWith('§')
+      ? `<tr class="et"><td colspan="2" style="font-weight:600">${esc(k.slice(1))}</td></tr>`
+      : `<tr${pers ? ' class="pers"' : ''}><td>${esc(k)}</td><td>${esc(v)}${pers ? ' <b>(personalizado)</b>' : ''}</td></tr>`).join('') + '</table>').join('');
+  }
+  // relatório de emissão em PDF (relatorio.js): baixa e, com a pasta da empresa conectada, grava em projetos/emissoes/
+  async function relatorioPdf(info) {
+    if (!(window.Relatorio && window.jspdf)) { alert('Biblioteca de PDF não carregada (pasta lib/). O relatório não foi gerado.'); return; }
+    const lp = calcularProjeto(), itens = consolidar(lp), pesoDe = (pecas) => pecas.reduce((s2, p) => s2 + (p.pesoTotal || 0), 0);
+    const D = {
+      cab: Object.fromEntries(CAB.map((k) => [k, $(k).value])), data: new Date().toLocaleString('pt-BR'), aprovador: info.nome, catalogo: catVersaoTxt(),
+      responsabilidades: [Engine.AVISO_ESTRUTURAL, Engine.NOTA_RESPONSABILIDADE],
+      cortes: lp.map((x) => ({ nome: x.nome, qtd: x.qtd, posicoes: x.r.posicoes * x.qtd, dims: `${Math.round(x.r.dimensoes.largura)} × ${Math.round(x.r.dimensoes.profundidade)} × ${x.r.dimensoes.altura}`, peso: pesoDe(x.r.pecas) * x.qtd })),
+      totais: { posicoes: lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0), peso: pesoDe(itens), semPeso: info.pend.semPeso.length },
+      conferencia: conferenciaDados(), pend: info.pend, historico: proj.historico || [],
+      itens: itens.map((p) => ({ grupo: p.grupo, codigo: p.codigo || Engine.SEM.SA, desc: p.desc, qtd: p.qtd, compr: p.compr, pesoUnit: p.pesoUnit, pesoTotal: p.pesoTotal })),
+    };
+    const doc = Relatorio.gerar(D), nome = `${nomeArq()}_${$('revisao').value}-relatorio-emissao.pdf`;
+    doc.save(nome);
+    if (window.Pasta && Pasta.pronta) { try { await Pasta.escrever(`projetos/emissoes/${nome}`, doc.output('arraybuffer')); } catch (e) { /* fica só o download */ } }
   }
   // emissão: confere pendências de todos os cortes, exige ciência e nome, salva como revisão de emissão e gera DXF + lista
   $('btnEmitir').addEventListener('click', () => {
@@ -660,6 +682,7 @@
         if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;
         baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha()), 'application/dxf');
         csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.csv`);
+        await relatorioPdf({ nome, pend: { alertas, semCod, semPeso, est, confirmar: pend } });
         return true;
       } }]);
     if (bloq.length) $('emOk').disabled = true;
