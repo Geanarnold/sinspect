@@ -153,7 +153,23 @@
     g2 += cota(FX(-sx), FY(alt / 2 + 75), FX(sx), FY(alt / 2 + 75), 0, FY(alt + 25) - FY(alt / 2 + 75), `${n(2 * sx)}`);
     const defs = `<defs><marker id="seta" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 1.8L10 5L0 8.2z" fill="${LF}"/></marker></defs>`;
     const svg = (h, corpo, rod) => `<svg viewBox="0 0 300 ${h}" xmlns="http://www.w3.org/2000/svg" font-family="'Arial Narrow', 'Roboto Condensed', Arial, sans-serif">${defs}<rect x=".5" y=".5" width="299" height="${h - 1}" fill="#fff" stroke="#cbd5e1" stroke-width=".8"/>${corpo}${rod ? `<text x="294" y="${h - 5}" text-anchor="end" font-size="7.5" fill="#64748b">${rod}</text>` : ''}</svg>`;
-    el.innerHTML = svg(240, g1, '') + svg(262, g2, `COL ${col} · suporte U chapa ${n(esp)} · medidas em mm`);
+    el.innerHTML = svg(262, g2, `COL ${col} · suporte U chapa ${n(esp)} · medidas em mm`);
+    if ($('croquiSecao')) $('croquiSecao').innerHTML = svg(240, g1, 'perfil C do braço · medidas em mm');
+    // ---------- SUPORTE U visto de cima (abraça a coluna por trás): interno = coluna, abas de 42,65, chapa esp
+    if ($('croquiSuporte')) {
+      const ABA = 42.65, xmn = -uo - 30, xmx = uo + 30, ymn = -22, ymx = ABA + 34;
+      const sU = Math.min(270 / (xmx - xmn), 120 / (ymx - ymn)), ux = 150 - (xmx - xmn) * sU / 2, X = (x) => ux + (x - xmn) * sU, Y = (y) => 36 + (y - ymn) * sU;
+      const pts = [[-uo, ABA], [-uo, 0], [uo, 0], [uo, ABA], [col / 2, ABA], [col / 2, esp], [-col / 2, esp], [-col / 2, ABA]];
+      let g3 = `<text x="150" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="${LG}" letter-spacing=".5">SUPORTE U · VISTA SUPERIOR</text>`;
+      g3 += `<rect x="${f1(X(-col / 2))}" y="${f1(Y(esp))}" width="${f1(col * sU)}" height="${f1((ABA + 20 - esp) * sU)}" fill="none" stroke="${LF}" stroke-width=".6" stroke-dasharray="4 2"/>`;
+      g3 += `<path d="M${pts.map(([x, y]) => `${f1(X(x))} ${f1(Y(y))}`).join('L')}Z" fill="#fdba74" stroke="${LG}" stroke-width="1"/>`;
+      g3 += `<text x="${f1(X(0))}" y="${f1(Y(ABA + 14))}" text-anchor="middle" font-size="8.5" fill="${LF}">coluna ${col}</text>`;
+      g3 += cota(X(-col / 2), Y(ABA), X(col / 2), Y(ABA), 0, 24, `${n(col)} interno`);
+      g3 += cota(X(uo), Y(0), X(uo), Y(ABA), 16, 0, `${n(ABA)}`);
+      g3 += cota(X(-uo), Y(0), X(uo), Y(0), 0, -14, `${n(2 * uo)}`);
+      g3 += `<text x="150" y="${f1(Y(ABA) + 44)}" text-anchor="middle" font-size="9" fill="${LG}">chapa ${n(esp)} · altura do U = A + 110 = ${n(Number(A) + 110)}</text>`;
+      $('croquiSuporte').innerHTML = svg(Math.round(Y(ABA) + 54), g3, '');
+    }
   }
 
   function renderCortes() {
@@ -186,7 +202,11 @@
     const v = (id) => ($(id).value || '–').replace('.', ',');
     if ($('resSuporte')) $('resSuporte').textContent = `chapa ${v('espU')} mm`;
     if ($('resPerfilC')) $('resPerfilC').textContent = `${v('cA')} × ${v('cC')} × ${v('cB')} # ${v('cD')} mm`;
+    // etiqueta: "padrão" enquanto o valor é o padrão; "personalizado" quando o operador muda
+    for (const id of Object.keys(PADRAO)) { const l = document.querySelector(`label[for="${id}"]`); if (l) l.classList.toggle('personalizado', ehPersonalizado(id, $(id).value)); }
+    for (const g of document.querySelectorAll('details.grupo')) g.classList.toggle('personalizado', !!g.querySelector('label.personalizado'));
   }
+  const ehPersonalizado = (id, val) => PADRAO[id] != null && String(val).trim() !== '' && Number(val) !== Number(PADRAO[id]);
   function render() {
     resumoGrupos();
     const c = proj.cortes[proj.atual];
@@ -214,7 +234,7 @@
       $('kpis').innerHTML = `<div class="pendente-box"><b>Preencha os campos obrigatórios para calcular este corte</b><ul>${Object.entries(porEtapa).sort((x, y) => ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(x[0]) - ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(y[0])).map(([e, l]) => `<li><b style="display:inline">${esc(e)}:</b> ${l.map(esc).join(', ')}</li>`).join('')}</ul></div>`;
       const kp = document.getElementById('kpiProj'); if (kp) kp.innerHTML = '';
       $('alertas').innerHTML = ''; $('vista').innerHTML = '<p class="nota">O desenho aparece quando os campos obrigatórios estiverem preenchidos.</p>';
-      $('notaQuadros').textContent = ''; if ($('croquiBraco')) $('croquiBraco').innerHTML = '';
+      $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte']) if ($(k)) $(k).innerHTML = '';
       ['tab-pecas', 'tab-pend', 'tab-proj'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
       travar('Preencha os campos obrigatórios (*)');
       return;
@@ -551,6 +571,27 @@
     try { if (Pasta.handle && !Pasta.pronta) await Pasta.permitir(); else await Pasta.escolher(); } catch (e) { /* cancelado */ }
     await renderPasta(); if (Pasta.pronta && window.Cadastro) await Cadastro.carregarDaPasta();
   });
+  // conferência final (Gean): todos os dados digitados, por corte e por etapa; valores fora do padrão destacados
+  const NOMES_CONF = { espU: 'Suporte U – chapa', cA: 'Perfil C – A (altura)', cC: 'Perfil C – C (aba)', cB: 'Perfil C – B (dobra)', cD: 'Perfil C – D (espessura)',
+    balancoBaixo: 'Balanço do braço – 1º nível', coluna: 'Coluna – modelo', espessura: 'Coluna – espessura', frentePalete: 'Palete – frente', profPalete: 'Palete – profundidade', alturaPalete: 'Palete – altura', cargaPalete: 'Palete – carga', alt1Nivel: '1º nível (apoio)', alturaManual: 'Altura total (manual)', balancoAlto: 'Balanço do braço – 2º nível em diante', uA: 'Longarina de túnel – alma', uB: 'Longarina de túnel – aba', uE: 'Longarina de túnel – chapa' };
+  function conferenciaHTML() {
+    const nomeC = (id) => NOMES_CONF[id] || rotuloCampo(id), etapaDe = (id) => { const f = $(id).closest('[id^="passo-"]'); return f ? f.id.replace('passo-', '') : ''; };
+    const ETAPAS = [['estrutura', 'Estrutura'], ['lateral', 'Lateral'], ['braco', 'Braço']];
+    const linha = (k, v, pers) => `<tr${pers ? ' class="pers"' : ''}><td>${esc(k)}</td><td>${esc(v === '' || v == null ? '—' : /^-?\d+(\.\d+)?$/.test(String(v).trim()) ? String(v).replace('.', ',') : String(v))}${pers ? ' <b>(personalizado)</b>' : ''}</td></tr>`;
+    let h = '<table class="conf-tab"><tr class="et"><td colspan="2">Projeto</td></tr>' + CAB.filter((k) => k !== 'obs').map((k) => linha(rotuloCampo(k), $(k).value)).join('') + '</table>';
+    for (const c of proj.cortes) {
+      const d = c.dados; if (!d) continue;
+      h += `<table class="conf-tab"><tr class="et"><td colspan="2">Corte ${esc(c.nome || '?')} × ${esc(c.qtd || '?')}</td></tr>`;
+      for (const [et, tit] of ETAPAS) {
+        h += `<tr class="et"><td colspan="2" style="font-weight:600">${tit}</td></tr>`;
+        for (const id of IDS.filter((x) => etapaDe(x) === et).sort((a, b) => ($(a).compareDocumentPosition($(b)) & 4 ? -1 : 1))) h += linha(nomeC(id), d.v[id], ehPersonalizado(id, d.v[id]));
+        if (et === 'estrutura') h += linha('Palete escravo no chão', d.escravo ? 'Sim' : 'Não');
+        if (et === 'lateral' && d.diferentes) h += linha('Espaços (A1, A2…)', (d.espacos || []).join(' / '));
+      }
+      h += '</table>';
+    }
+    return h;
+  }
   // emissão: confere pendências de todos os cortes, exige ciência e nome, salva como revisão de emissão e gera DXF + lista
   $('btnEmitir').addEventListener('click', () => {
     render();
@@ -565,16 +606,20 @@
     const itens = lp.length ? consolidar(lp) : [];
     const semCod = [...new Set(itens.filter((p) => !p.codigo || /XXXX/.test(p.codigo)).map((p) => `${p.codigo || Engine.SEM.SA} – ${p.desc}`))];
     const semPeso = [...new Set(itens.filter((p) => p.pesoUnit == null).map((p) => p.desc))];
-    const est = [...new Set(itens.filter((p) => /ESTIMADO|estimad/i.test(p.obs || '')).map((p) => p.desc))];
+    const est = [...new Set(itens.filter((p) => /ESTIMADO|estimad/i.test(p.obs || '') && !/não estimad/i.test(p.obs || '')).map((p) => p.desc))];
     const sec = (t, l) => l.length ? `<h4>${t} (${l.length})</h4><ul>${l.slice(0, 60).map(li).join('')}${l.length > 60 ? `<li>… mais ${l.length - 60}</li>` : ''}</ul>` : '';
     const html = (bloq.length ? `<h4 class="bloq">Impede a emissão</h4><ul class="bloq">${bloq.map(li).join('')}</ul>` : '')
+      + `<h4>1. Conferência dos dados do projeto</h4><p class="nota">Confira todos os campos antes de gerar a lista e o projeto. Linhas em amarelo foram alteradas do padrão.</p>${conferenciaHTML()}`
+      + `<h4 style="margin-top:14px">2. Pendências</h4>`
       + sec('Atenção', alertas) + sec('Itens sem código cadastrado', semCod) + sec('Itens sem peso (não entram no total)', semPeso) + sec('Pesos estimados', est) + sec('Regras / dados ainda a confirmar', pend)
       + `<h4>Responsabilidades</h4><ul>${fixos.map(li).join('')}</ul>`
-      + `<p style="margin-top:12px"><label><input type="checkbox" id="emCiente"> Li as pendências acima e assumo a emissão.</label></p><p><label>Seu nome: <input id="emNome" type="text" value="${esc(usuarioSalvo() || $('responsavel').value)}" style="width:260px"></label></p>`;
+      + `<p style="margin-top:12px"><label class="chk-conf"><input type="checkbox" id="emConferi"> Conferi todos os dados acima e estão corretos.</label></p>`
+      + `<p><label class="chk-conf"><input type="checkbox" id="emCiente"> Li as pendências acima e assumo a emissão.</label></p><p><label>Seu nome: <input id="emNome" type="text" value="${esc(usuarioSalvo() || $('responsavel').value)}" style="width:260px"></label></p>`;
     modal(`Emitir ${$('projeto').value || 'projeto'} – conferência de pendências`, html, [{ txt: 'Cancelar' }, {
       txt: 'Emitir', cls: 'primario', id: 'emOk', fn: async () => {
         if (bloq.length) { alert('Resolva os itens que impedem a emissão.'); return false; }
         const nome = $('emNome').value.trim();
+        if (!$('emConferi').checked) { alert('Marque que conferiu os dados do projeto.'); return false; }
         if (!$('emCiente').checked || !nome) { alert('Marque a ciência e informe seu nome.'); return false; }
         try { localStorage.setItem('drivein_usuario', nome); } catch (e) { /* sem storage */ }
         if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;

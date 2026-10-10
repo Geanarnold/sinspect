@@ -496,3 +496,5 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - Guia palete 35,02 kg por montante: em validação com a tabela do Gean — NÃO aplicado no app.
 - [IMPLEMENTADO] Aviso de apoio (Gean, 10/10/2026): balanço continua informado pelo operador (sem regra palete → braço). Apoio por lado < 100 mm → aviso; < 80 mm → erro.
 - [IMPLEMENTADO] Stop palete: peso fixo 2,5 kg/un no código (campo retirado da tela) (Gean, 10/10/2026).
+- [IMPLEMENTADO] Etapa Braço (Gean, 10/10/2026): grupos recolhíveis "Dados do suporte do braço (U)" (com desenho do U visto de cima) e "Dados do perfil C do braço" (com a seção A-A); etiqueta muda de "padrão" para "personalizado" quando o valor sai do padrão (grupo fechado fica destacado).
+- [IMPLEMENTADO] Emitir: conferência final com todos os dados do projeto e de cada corte (por etapa; personalizados em amarelo) + caixa obrigatória "Conferi todos os dados acima e estão corretos", além da ciência das pendências.
