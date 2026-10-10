@@ -35,6 +35,7 @@ def add_texto(s, x, y, h, rot, hj, vj, cor):
     textos.append({'s': s, 'x': R(x), 'y': R(y), 'h': R(h), 'rot': R(rot), 'j': hj, 'v': vj, 'l': camada(cor)})
 def visita(ents, herdado=7, bloco_pai=None):
     for e in ents:
+        if e.dxf.get('invisible', 0): continue  # bloco dinâmico: entidade de outro estado de visibilidade (oculta no AutoCAD)
         t = e.dxftype(); c = aci(e, herdado)
         if t == 'INSERT':
             nome = e.dxf.name; ci = aci(e, herdado)

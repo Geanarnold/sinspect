@@ -6,6 +6,7 @@ pasta=sys.argv[1]; out={}
 def prim(b):
     P=[]
     for e in b:
+        if e.dxf.get('invisible',0): continue  # bloco dinâmico: entidade oculta (outro estado de visibilidade)
         t=e.dxftype(); lay=e.dxf.layer
         if t=='LINE': P.append({'t':'l','l':lay,'p':[[e.dxf.start.x,e.dxf.start.y],[e.dxf.end.x,e.dxf.end.y]]})
         elif t=='CIRCLE': P.append({'t':'c','l':lay,'c':[e.dxf.center.x,e.dxf.center.y],'r':e.dxf.radius})
