@@ -75,7 +75,8 @@
     // 1º oblongo a 25 mm da base da barra, passo 50 → furos a 29,75 + 50k do piso. Os oblongos do suporte ficam a ±75 do centro do U
     // (15 mm das bordas no U de 180, 25 mm no de 200) e o C é centrado no U → topo do C = furo inferior + 75 + A/2, qualquer que seja a altura do U
     const resto = ((FURO_BASE + 75 + alturaBracoC / 2) % 50 + 50) % 50;
-    const altU = Number(inp.uAlt) || 180; // altura do suporte em U: informada pelo operador (180 ou 200)
+    // suporte em U (Gean): altura = A do C + 110 (55 acima e 55 abaixo, C centralizado); chapa padrão 2,65 (o operador pode mudar)
+    const altU = alturaBracoC + 110, espU = Number(inp.espU) || 2.65;
     const snapFuro = (y) => { const k = Math.ceil((y - resto - 1e-6) / 50); return +(k * 50 + resto).toFixed(2); };
     const alt1Req = inp.alt1Nivel ? Number(inp.alt1Nivel) : ceil50((escravo ? 2 : 1) * hp + 100 + alturaBracoC);
     const alt1 = snapFuro(alt1Req);
@@ -188,12 +189,12 @@
     // simples nas laterais das pontas (1ª e última), duplo nas laterais internas (entre duas ruas) [CONFIRMAR leitura de "montantes das pontas"]
     // 1 braço por coluna por nível de armazenagem (níveis acima do chão); nível ≤ 2500 mm → 180; acima → escolha do operador (180 ou 230)
     const niveisArm = []; for (let k = 0; k < N - 1; k++) niveisArm.push(Number(inp.alt1Nivel) + k * passoNivel);
-    // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa 2,65, altura 180 ou 200, informada pelo operador) abraçando a coluna + perfil C informado pelo operador
+    // braço paramétrico (modelo 0004.0003.01.008): suporte em U (chapa padrão 2,65, altura = A + 110) abraçando a coluna + perfil C informado pelo operador
     // balanço medido da face externa do U até a ponta do C; 1º nível usa o balanço "baixo" (180), 2º em diante o "alto" (230) — treinamento slide 17
     const balBaixo = Number(inp.balancoBaixo) || 180, balAlto = Number(inp.balancoAlto || inp.bracoAcima) || 230;
     const modeloAlto = String(balAlto);
     const perfilC = { A: alturaBracoC, B: Number(inp.cB) || 15, C: Number(inp.cC) || 40, D: Number(inp.cD) || 1.8 };
-    const ESP_U = 2.65, ALT_BRACO = altU, ABA_U = 42.65;
+    const ESP_U = espU, ALT_BRACO = altU, ABA_U = 42.65;
     const uExt = colW + 2 * ESP_U; // duplada: braço específico (Gean); sem desenho ainda → peso estimado com U abraçando as 2 montantes (160)
     const pesoU = (colW + 2 * ABA_U) * ALT_BRACO * ESP_U * DENS;                       // chapa desenvolvida, sem descontar furos
     const desenvC = perfilC.A + 2 * perfilC.C + 2 * perfilC.B - 4 * perfilC.D;          // desenvolvimento aproximado do C (linha média)

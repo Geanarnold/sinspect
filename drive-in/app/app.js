@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'uAlt', 'pesoStop', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'espU', 'pesoStop', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -15,9 +15,9 @@
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] };
   // preenchimento (Gean): dados do projeto começam vazios e são obrigatórios; só os padrões da empresa vêm preenchidos (marcados "padrão")
-  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura', 'uAlt'];
+  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
   const OBRIG_CAB = ['projeto', 'cliente', 'cidade', 'uf', 'responsavel', 'nomeCorte', 'qtdCorte'];
-  const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8' };
+  const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8', espU: '2.65' };
   const vazioDados = (d) => !d || !d.v || OBRIG_CALC.some((id) => d.v[id] === '' || d.v[id] == null) || (d.diferentes && (d.espacos || []).some((x) => x === '' || x == null));
   // nomes de corte únicos no projeto (Gean): nome vazio ou repetido não é aceito; projetos antigos com repetição ganham sufixo -2, -3…
   const normCorte = (v) => String(v || '').trim().toUpperCase();
@@ -86,6 +86,7 @@
   function croquiBraco(r) {
     const el = $('croquiBraco'); if (!el || !window.DXF) return;
     const pf = r.frontal.perfilC, col = r.dimensoes.colW || Number(r.entradas.coluna), bal = r.frontal.balBaixo, esp = r.frontal.espU;
+    const nU = $('notaAltU'); if (nU) nU.textContent = `Altura do suporte U = A + 110 = ${Number(pf.A) + 110} mm (55 acima e 55 abaixo do C).`;
     const n = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
     const LG = '#111827', LF = '#374151', CT = '#1d4ed8';
     const f1 = (v) => (+v).toFixed(2);

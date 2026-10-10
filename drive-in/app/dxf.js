@@ -249,7 +249,7 @@
     // na coluna a partir da alma, e o C do braço em corte (A × C, abas B, chapa D, pelo perfil do projeto) por fora da alma — o mesmo lado
     // do braço na planta; base do U = apoio − ((altU − A)/2 + A), igual à frontal. Laranja (BRACO_LT, cor 30)
     if (L.niveis && L.niveis.length && r.planta && r.planta.almaT) {
-      const pf = r.frontal.perfilC, ALT = r.frontal.uAlt || 180, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1; // altura do U informada pelo operador (BRAÇO_LATERAL.dxf: 200)
+      const pf = r.frontal.perfilC, ALT = r.frontal.uAlt || pf.A + 110, ABA = 42.25, yc0 = (ALT - pf.A) / 2, yc1 = yc0 + pf.A, offA = yc1; // altura do U = A + 110 (Gean)
       const bl = []; const sg = (x1, y1, x2, y2) => bl.push({ t: 'p', l: 'BRACO_LT', p: [[x1, y1], [x2, y2]] });
       const arcL = (cx, cy, rr, a0, a1) => { const p = []; for (let k = 0; k <= 8; k++) { const a = (a0 + (a1 - a0) * k / 8) * Math.PI / 180; p.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } bl.push({ t: 'p', l: 'BRACO_LT', p }); };
       // desenhado com a alma da coluna em x = 0, aba do U para −x (dentro da coluna) e C para +x (fora)
@@ -363,7 +363,7 @@
     const hy = furosFrontal(cp, H), hx1 = HOLE_FX[cp] || cp / 2 - 18, hx = dup ? cp / 2 + hx1 : hx1; // duplada: oblongo externo da montante do lado da rua
     const pe = hy.length ? hy[0] - FR_TOPO_FURO : 185; // pé da coluna (acima da sapata)
     // braço: o topo do C (apoio do palete) deve ficar no nível ou logo acima (furação de 50 em 50; furo inferior do braço a altU/2 − 75 da base do U)
-    const altU = F.uAlt || 180, fU = altU / 2 - 75, offApoio = (altU - F.perfilC.A) / 2 + F.perfilC.A, Htop = H + BASE_BARRA;
+    const altU = F.uAlt || F.perfilC.A + 110, fU = altU / 2 - 75, offApoio = (altU - F.perfilC.A) / 2 + F.perfilC.A, Htop = H + BASE_BARRA;
     const snapApoio = (y) => { for (const h of hy) if (h - fU + offApoio >= y - 0.01) return h - fU; return hy[hy.length - 1] - fU; };
     const topoBraco = []; // altura do apoio do palete em cada nível
     xs.forEach((x, i) => {

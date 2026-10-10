@@ -6,7 +6,7 @@ const path = require('path'), dir = path.join(__dirname, '..', 'app');
 require(path.join(dir, 'catalogo.js'));
 const E = require(path.join(dir, 'engine.js'));
 const cat = Object.values(window).find((v) => v && v.colunas);
-const BASE = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8', uAlt: '180', escravo: false };
+const BASE = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8', escravo: false };
 const CASOS = {
   1: { ...BASE, coluna: '122', espessura: '1.8', ruas: '12', profPalete: '1000', paletesInformados: '4', niveis: '3', espacamentos: 4, largura: '1025', frentePalete: '1200', cargaPalete: '1600', alturaPalete: '2000', alt1Nivel: '2300', alturaManual: '6900', espacos: Array(4).fill(1025) },
   2: { ...BASE, coluna: '122', espessura: '2.25', ruas: '63', profPalete: '1200', paletesInformados: '9', niveis: '7', espacamentos: 14, largura: '788', frentePalete: '1700', cargaPalete: '600', alturaPalete: '1350', alt1Nivel: '1450', alturaManual: '10900', espacos: Array(14).fill(788) },

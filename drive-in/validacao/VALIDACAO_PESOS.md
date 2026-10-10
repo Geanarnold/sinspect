@@ -122,3 +122,6 @@ Leitura: os totais ficam perto por **compensação**. No caso 2 o app tem ~10,5 
 ## 6. Próximo passo sugerido
 
 Responder 1 a 3 (são ~16 t das diferenças do caso 2), corrigir os erros 1–4 da planilha, e então lançar os pesos definitivos pelo cadastro (com senha → versão de catálogo registrada). Rodar `simular.js` de novo e atualizar este documento.
+
+## 7. Alteração posterior (10/10/2026)
+Suporte U passou a ter altura = A do C + 110 (Gean) e chapa padrão 2,65 editável. Com A = 94 o U fica com 204 mm (antes 180): braços do caso 1 sobem de 283,7 para 297,2 kg (app caso 1: 3.722,8 kg). As tabelas acima foram feitas com U 180.
