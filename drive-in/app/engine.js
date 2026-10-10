@@ -166,8 +166,14 @@
     add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal (1ª e última horizontais)');
     if (solteira) {
       const a = passoSolteira, totU = r1(a - 69.8);
-      const itU = (cat.uniao || []).filter((u) => u.col === col).find((u) => Math.abs(u.total - totU) <= TOL_SA);
-      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais * nM, totU, itU ? itU.peso : null, itU ? itU.nome : 'sem CO cadastrado para este comprimento (±3 mm); peso não estimado');
+      const unCol = (cat.uniao || []).filter((u) => u.col === col);
+      // 1º pelo comprimento (A − 69,8, ±3 mm); senão pelo modelo do nome (0,70 / 0,76 / 1,02 → passo nominal 700 / 760 / 1020, ±30 mm):
+      // a união de 1,02 da COL 122 (CO040543, 2,059 kg) é a do passo 1025 (Gean: 2,06 kg) — o total do cadastro (1017,8) não bate com A − 69,8 [CONFIRMAR]
+      const nomU = (u) => { const m = /(\d+),(\d+)/.exec(u.nome || ''); return m ? Number(m[1] + '.' + m[2]) * 1000 : null; };
+      let itU = unCol.find((u) => Math.abs(u.total - totU) <= TOL_SA), porNome = false;
+      if (!itU) { itU = unCol.filter((u) => nomU(u) != null && Math.abs(nomU(u) - a) <= 30).sort((x, y) => Math.abs(nomU(x) - a) - Math.abs(nomU(y) - a))[0]; porNome = !!itU; }
+      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${porNome ? itU.total : totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais * nM, porNome ? itU.total : totU, itU ? itU.peso : null,
+        itU ? itU.nome + (porNome ? `; escolhida pelo modelo do passo (A − 69,8 = ${totU} mm não confere com o total do cadastro) [CONFIRMAR]` : '') : 'sem CO cadastrado para este passo; peso não estimado');
       const q = nH * laterais * nM;
       add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
       add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
@@ -175,7 +181,8 @@
     // elemento de topo: dois modelos, um para o passo dentro do quadro e outro para o passo entre quadros (inclui o passo da solteira [CONFIRMAR])
     const porPassoTopo = (lista, rotulo, id) => {
       const c = {}; for (const a of lista) c[a] = (c[a] || 0) + 1;
-      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais * nM, Number(a), null, 'SA e peso a confirmar');
+      // peso (Gean): kg/m da travessa diagonal (sliter 80 × 1,40) × passo — aproximação até ter o desenvolvimento real da peça
+      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais * nM, Number(a), +(KG_M_TRAVESSA * Number(a) / 1000).toFixed(3), 'SA a confirmar; peso = kg/m da travessa diagonal × passo');
     };
     porPassoTopo(passosQuadro, 'da montante (dentro do quadro)', 'TOPO-Q');
     porPassoTopo(espacos.filter((_, i) => solteira ? i % 2 === 0 : i % 2 === 1), 'entre montantes', 'TOPO-E');
@@ -227,7 +234,7 @@
       add('Fixadores dos braços', 'INT0812', prodOf(cat, 'INT0812').desc, 'INT0812', 16 * totBracos, null, null, '16 por braço');
     }
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
-    add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
+    add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 1.506, 'peso 1,506 kg (Gean); 1 por lateral, na frente [CONFIRMAR quantidade]');
     // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
     // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
     const TRILHO_ALT = 75, TRILHO_FRENTE = 50;
@@ -321,8 +328,8 @@
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
     // stop palete (Gean, bloco DI_LGFUNDO): 2 por longarina de fundo → 2 por rua em cada nível de braço
-    const pesoStop = Number(inp.pesoStop) || null;
-    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (sobre a longarina de fundo)', SEM.SA, 2 * R * niveisArm.length, null, pesoStop, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is))${pesoStop ? '' : '; peso unitário não informado'}`);
+    const pesoStop = Number(inp.pesoStop) || 2.5; // Gean: 2,5 kg/un (o campo do formulário substitui)
+    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (sobre a longarina de fundo)', SEM.SA, 2 * R * niveisArm.length, null, pesoStop, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is)); ${Number(inp.pesoStop) ? 'peso informado no projeto' : 'peso padrão 2,5 kg'}`);
     // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas — confirmado pelo Gean
     addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
     if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
