@@ -228,7 +228,7 @@
         if (inp.type === 'checkbox') { if (inp.checked) partes.push(c.textContent.trim().split('(')[0].trim()); continue; }
         if (inp.value === '') continue;
         const l = c.querySelector('label'), un = c.querySelector('.un');
-        partes.push(`${l ? l.textContent.replace(/padrão|personalizado/g, '').trim() : ''} ${(inp.tagName === 'SELECT' ? inp.options[inp.selectedIndex].text : inp.value).replace('.', ',')}${un ? ' ' + un.textContent : ''}`);
+        partes.push(`${l ? l.textContent.replace(/padrão|personalizado/g, '').trim() : ''} ${(() => { const t = inp.tagName === 'SELECT' ? inp.options[inp.selectedIndex].text : inp.value; return /^-?\d+(\.\d+)?$/.test(t) ? t.replace('.', ',') : t; })()}${un ? ' ' + un.textContent : ''}`);
       }
       sp.textContent = partes.join(' · ');
     }
@@ -256,6 +256,14 @@
     const espVazios = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].filter((i) => i.value === '') : [];
     $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
     const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);
+    // etapas: nº de campos obrigatórios em branco (vermelho) ou ✓ quando a etapa está completa
+    const faltaPorEtapa = {}; for (const id of faltaCalc.concat(faltaCab)) { const e = etapa(id); faltaPorEtapa[e] = (faltaPorEtapa[e] || 0) + 1; }
+    if (espVazios.length) faltaPorEtapa.Lateral = (faltaPorEtapa.Lateral || 0) + espVazios.length;
+    document.querySelectorAll('.passo').forEach((el, k) => {
+      const n = faltaPorEtapa[['Projeto', 'Estrutura', 'Lateral', 'Braço'][k]] || 0; let b = el.querySelector('.pend, .ok'); if (b) b.remove();
+      b = document.createElement('span'); b.className = n ? 'pend' : 'ok'; b.textContent = n ? String(n) : '✓'; b.title = n ? `${n} campo(s) obrigatório(s) em branco` : 'Etapa completa'; el.appendChild(b);
+    });
+    const cp = $('cabProjeto'); if (cp) { const pj = $('projeto').value.trim(); cp.innerHTML = pj ? `<b>${esc(pj)}</b><span class="chip">${esc($('revisao').value)}</span>${proj.emitido ? `<span class="chip emit">emitido ${esc(proj.emitido.rev)}</span>` : '<span class="chip">não emitido</span>'}` : ''; }
     const outrosIncompletos = proj.cortes.filter((x, i) => i !== proj.atual && (vazioDados(x.dados) || !x.nome || x.qtd === '')).map((x) => x.nome || '(sem nome)');
     const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnPdfProj', 'btnCsv', 'btnPrint', 'btnEmitir', 'btnAprovar']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
     if (faltaCalc.length || espVazios.length) {
@@ -287,8 +295,12 @@
     const lp = calcularProjeto();
     const posP = lp.reduce((s, x) => s + x.r.posicoes * x.qtd, 0), pesoP = lp.reduce((s, x) => s + x.r.pesoTotal * x.qtd, 0), errP = lp.filter((x) => x.r.erros.length).map((x) => x.nome);
     let kp = document.getElementById('kpiProj'); if (!kp) { kp = document.createElement('p'); kp.id = 'kpiProj'; kp.className = 'kpi-proj'; $('kpis').after(kp); }
-    kp.innerHTML = `${ic('proj')} Projeto: <b>${lp.length} corte(s)</b>, ${lp.reduce((s, x) => s + x.qtd, 0)} bloco(s) · <b>${fmt0(posP)}</b> posições · <b>${fmt(pesoP, 1)} kg</b> (itens levantados)${errP.length ? ` · <span style="color:#b91c1c">erro nos cortes ${esc(errP.join(', '))}</span>` : ''}`;
-    $('alertas').innerHTML = (r.erros.length ? `<div class="erro">${ic('erro')}<b>Corrigir antes de usar</b><ul>${r.erros.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '') + (r.alertas.length ? `<div class="alerta">${ic('alerta')}<b>Atenção</b><ul>${r.alertas.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '');
+    kp.innerHTML = `${ic('proj')} Projeto: <b>${lp.length} corte(s)</b> · ${lp.reduce((s, x) => s + x.qtd, 0)} bloco(s) · <b>${fmt0(posP)}</b> posições · <b>${fmt(pesoP, 1)} kg</b> (itens levantados)${errP.length ? ` · <span style="color:#b91c1c">erro nos cortes ${esc(errP.join(', '))}</span>` : ''}`;
+    // avisos do projeto em destaque; as duas notas fixas de responsabilidade (iguais em todo projeto) numa linha discreta
+    const fixosA = [Engine.AVISO_ESTRUTURAL, Engine.NOTA_RESPONSABILIDADE], alertasP = r.alertas.filter((a) => !fixosA.includes(a));
+    $('alertas').innerHTML = (r.erros.length ? `<div class="erro">${ic('erro')}<b>Corrigir antes de usar</b><ul>${r.erros.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '')
+      + (alertasP.length ? `<div class="alerta">${ic('alerta')}<b>Atenção (${alertasP.length})</b><ul>${alertasP.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '')
+      + `<div class="notas-fixas"><b>Responsabilidades:</b> ${fixosA.map(esc).join(' ')}</div>`;
 
     const L = r.lateral;
     $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
@@ -726,9 +738,57 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
-  const mostrarPagina = (cad) => { $('paginaConfig').classList.toggle('hidden', cad); $('paginaCad').classList.toggle('hidden', !cad); $('navConfig').classList.toggle('active', !cad); $('navCad').classList.toggle('active', cad); };
-  $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(false); });
-  $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina(true); });
+  const PAGINAS = { config: ['paginaConfig', 'navConfig'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); };
+  $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('config'); });
+  $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('cad'); });
+  $('navProj').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('proj'); });
+  // ---------- painel de projetos (lê a pasta da empresa): quem criou, última revisão, situação, posições e peso ----------
+  let painel = [];
+  async function carregarPainel() {
+    const info = $('pjInfo');
+    if (!(window.Pasta && Pasta.pronta)) { painel = []; info.textContent = 'Conecte a pasta da empresa (botão "Escolher pasta" no Configurador) para ver os projetos salvos.'; $('pjTabela').innerHTML = ''; $('pjResumo').innerHTML = ''; return; }
+    info.textContent = 'Lendo projetos da pasta…';
+    const arqs = await Pasta.listar('projetos', '.drivein.json'), out = [];
+    for (const a of arqs) {
+      const txt = await Pasta.ler('projetos/' + a.nome); if (!txt) continue;
+      let p; try { p = JSON.parse(txt); } catch (e) { continue; }
+      if (!p || !Array.isArray(p.cortes)) continue;
+      const h = p.historico || [], u = h[h.length - 1], cab = p.cab || {};
+      let pos = 0, peso = 0, incompletos = 0;
+      for (const c of p.cortes) {
+        if (vazioDados(c.dados)) { incompletos++; continue; }
+        try { const r = Engine.calcular(entradasDe(c.dados), cat), q = Math.max(1, Number(c.qtd) || 1); pos += r.posicoes * q; peso += r.pesoTotal * q; } catch (e) { incompletos++; }
+      }
+      const sit = !p.emitido ? 'Em andamento' : (u && u.rev !== p.emitido.rev ? 'Alterado após emissão' : 'Emitido');
+      out.push({ arq: a.nome, txt, projeto: cab.projeto || a.nome.replace('.drivein.json', ''), cliente: cab.cliente || '', local: [cab.cidade, cab.uf].filter(Boolean).join('/'), representante: cab.representante || '',
+        criadoPor: (p.criado && p.criado.por) || '', criadoEm: p.criado && p.criado.em, rev: u ? u.rev : (cab.revisao || ''), revPor: u ? u.por : '', revEm: u ? u.em : a.data,
+        sit, emitido: p.emitido ? p.emitido.rev : '', cortes: p.cortes.length, incompletos, pos, peso });
+    }
+    painel = out;
+    const nomes = [...new Set(out.flatMap((x) => [x.criadoPor, x.revPor]).filter(Boolean))].sort(), sel = $('pjProjetista'), atual = sel.value;
+    sel.innerHTML = '<option value="">Todos os projetistas</option>' + nomes.map((n) => `<option${n === atual ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    renderPainel();
+  }
+  function renderPainel() {
+    const busca = $('pjBusca').value.trim().toLowerCase(), quem = $('pjProjetista').value, sit = $('pjSituacao').value;
+    const lista = painel.filter((x) => (!busca || [x.projeto, x.cliente, x.local, x.representante].join(' ').toLowerCase().includes(busca)) && (!quem || x.criadoPor === quem || x.revPor === quem) && (!sit || x.sit === sit))
+      .sort((a, b) => String(b.revEm || '').localeCompare(String(a.revEm || '')));
+    const dt = (v) => (v ? new Date(v).toLocaleDateString('pt-BR') : '–'), cls = { 'Em andamento': 'and', Emitido: 'emit', 'Alterado após emissão': 'alt' };
+    $('pjInfo').textContent = `${lista.length} de ${painel.length} projeto(s) na pasta ${Pasta.nome()}. Clique numa linha para abrir. Quem criou e quem revisou vêm do histórico de cada arquivo (nome informado ao salvar).`;
+    const porQuem = {}; for (const x of lista) porQuem[x.criadoPor || '(sem nome)'] = (porQuem[x.criadoPor || '(sem nome)'] || 0) + 1;
+    $('pjResumo').innerHTML = `<div><b>${lista.length}</b>projetos</div><div><b>${lista.filter((x) => x.sit === 'Emitido').length}</b>emitidos</div><div><b>${lista.filter((x) => x.sit !== 'Emitido').length}</b>em andamento / alterados</div><div><b>${fmt0(lista.reduce((s2, x) => s2 + x.pos, 0))}</b>posições</div><div><b>${fmt(lista.reduce((s2, x) => s2 + x.peso, 0) / 1000, 1)} t</b>peso (itens com peso)</div>`
+      + Object.entries(porQuem).sort((a, b) => b[1] - a[1]).map(([n, q]) => `<div><b>${q}</b>criados por ${esc(n)}</div>`).join('');
+    $('pjTabela').innerHTML = `<table><thead><tr><th>Projeto</th><th>Cliente</th><th>Cidade/UF</th><th>Criado por</th><th>Criado em</th><th>Última revisão</th><th>Por</th><th>Em</th><th>Situação</th><th class="num">Cortes</th><th class="num">Posições</th><th class="num">Peso (kg)</th></tr></thead><tbody>`
+      + lista.map((x) => `<tr class="pj-linha" data-arq="${esc(x.arq)}"><td><b>${esc(x.projeto)}</b></td><td>${esc(x.cliente)}</td><td>${esc(x.local)}</td><td>${esc(x.criadoPor || '–')}</td><td>${dt(x.criadoEm)}</td><td>${esc(x.rev)}</td><td>${esc(x.revPor || '–')}</td><td>${dt(x.revEm)}</td><td><span class="sit ${cls[x.sit]}">${esc(x.sit)}${x.sit !== 'Em andamento' ? ' ' + esc(x.emitido) : ''}</span></td><td class="num">${x.cortes}${x.incompletos ? ` <span title="cortes incompletos" style="color:#b45309">(${x.incompletos} inc.)</span>` : ''}</td><td class="num">${fmt0(x.pos)}</td><td class="num">${fmt(x.peso, 0)}</td></tr>`).join('')
+      + `</tbody></table>` + (lista.length ? '' : '<p class="nota" style="padding:12px 16px">Nenhum projeto com esses filtros.</p>');
+    $('pjTabela').querySelectorAll('tr.pj-linha').forEach((tr) => tr.addEventListener('click', () => {
+      const x = painel.find((y) => y.arq === tr.dataset.arq); if (!x) return;
+      try { abrirTexto(x.txt); mostrarPagina('config'); } catch (e) { alert('Não foi possível abrir: ' + e.message); }
+    }));
+  }
+  ['pjBusca', 'pjProjetista', 'pjSituacao'].forEach((id) => $(id).addEventListener('input', renderPainel));
+  $('pjAtualizar').addEventListener('click', carregarPainel);
   if (window.Cadastro) Cadastro.init();
   render(); renderRev();
   if (window.Pasta) Pasta.restaurar().then(async (ok) => { await renderPasta(); if (ok && window.Cadastro) await Cadastro.carregarDaPasta(); }); else renderPasta();

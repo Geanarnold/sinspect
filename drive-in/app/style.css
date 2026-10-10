@@ -121,7 +121,19 @@ main.wrap{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;paddin
 .tab{display:flex;align-items:center;gap:7px;padding:12px 14px;font-size:13px;font-weight:600;border-bottom:2px solid transparent;color:var(--cinza);cursor:pointer;margin-bottom:-1px}
 .tab:hover{color:var(--texto)}
 .tab.active{color:var(--laranja);border-color:var(--laranja)}
-.acoes-tab{margin-left:auto;display:flex;gap:8px;align-items:center;padding:8px 6px}
+.acoes-tab{margin-left:auto;display:flex;gap:8px;align-items:center;padding:8px 6px;flex-wrap:wrap}
+.rotulo-saidas{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--cinza)}
+.acoes-tab #btnEmitir{order:9;margin-left:6px}
+button.aprovar-top{background:#15803d;border-color:#15803d;color:#fff;font-weight:700}button.aprovar-top:hover{background:#166534}button.aprovar-top:disabled{opacity:.5}
+.passo{position:relative}
+.passo .pend{position:absolute;top:4px;right:6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.passo .ok{position:absolute;top:5px;right:8px;color:#16a34a;font-size:13px;font-weight:900}
+.notas-fixas{margin-top:12px;padding:8px 12px;border-radius:var(--raio);background:#f1f5f9;border:1px solid var(--borda);font-size:11.5px;color:#475569;line-height:1.45}
+.notas-fixas b{color:#334155}
+.cab-projeto{margin-left:18px;display:flex;align-items:center;gap:8px;font-size:12px;color:#cbd5e1}
+.cab-projeto b{color:#fff;font-size:13px}.cab-projeto .chip{background:rgba(255,255,255,.1);border-radius:6px;padding:2px 8px}
+.cab-projeto .chip.emit{background:#166534;color:#dcfce7}
+.rodape-app{text-align:center;font-size:11px;color:var(--cinza);padding:14px 0 22px}
 .vista{padding:18px}
 .vista h3{font-size:14px;margin:0 0 2px;color:var(--tinta)}
 .vista .s{font-size:12px;color:var(--cinza);margin-bottom:10px}
@@ -148,6 +160,10 @@ tr.grp td{background:#f1f5f9;font-weight:700;color:var(--tinta);border-top:1px s
 .btn-arquivo{margin:0;text-transform:none}
 .cad-tabela{overflow:auto;max-height:70vh}.cad-tabela input{height:28px;padding:0 6px;font-size:12px;min-width:70px}.cad-tabela td{padding:3px 4px}
 #paginaCad{padding:20px}
+#paginaProj{padding:20px}
+.pj-resumo{display:flex;gap:10px;flex-wrap:wrap;padding:0 16px 12px}.pj-resumo div{background:#f8fafc;border:1px solid var(--borda);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cinza)}.pj-resumo b{display:block;font-size:16px;color:var(--tinta)}
+#pjTabela tr.pj-linha{cursor:pointer}#pjTabela tr.pj-linha:hover td{background:#fff7ed}
+.sit{font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap}.sit.emit{background:#dcfce7;color:#166534}.sit.and{background:#e0f2fe;color:#075985}.sit.alt{background:#fef3c7;color:#92400e}
 
 @media print{.topo,aside,.tabs,.kpi-proj{display:none!important}main{grid-template-columns:1fr;padding:0}#tab-pecas,#tab-proj{max-height:none;overflow:visible}.card{box-shadow:none;border:0}}
 
@@ -179,3 +195,9 @@ input[readonly]{background:#f3f4f6;color:#374151}
 .modal-acoes{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid #e5e7eb;flex-wrap:wrap}
 .lista-arq{list-style:none;padding:0!important}.lista-arq li{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin:6px 0;cursor:pointer}.lista-arq li:hover{background:#fff7ed;border-color:#fdba74}
 .chk-conf{display:flex!important;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tinta);cursor:pointer}.chk-conf input{width:18px!important;height:18px;flex:none;margin:0}
+
+.grupo>summary .ic-grupo{width:17px;height:17px;color:var(--laranja)}
+.grupo[open]>summary .resumo{display:none}
+.grupo>summary .t{flex:none}
+.grupo:not([open])>summary .resumo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:60%}
+#paginaProj .cad-barra select{width:auto;min-width:210px}#paginaProj .cad-barra input[type=text]{width:280px}
