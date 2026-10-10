@@ -630,7 +630,8 @@
   // título das vistas com o nome do corte informado pelo operador: "VISTA LATERAL CORTE A", "VISTA FRONTAL CORTE A" (e "VISTA SUPERIOR CORTE A" quando existir)
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
-  function modeloCorte(r, corte) {
+  // separar = true (projeto com folha): devolve [lateral + frontal, superior] para irem em folhas separadas, cada uma com a sua escala
+  function modeloCorte(r, corte, separar) {
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte), corte);
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
@@ -648,6 +649,9 @@
     // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
     const mP = montarPlanta(r, tituloVista('SUPERIOR', corte), corte);
     shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
+    const junta = (ms) => ({ prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
+      bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] });
+    if (separar) return [junta([mL, mF]), junta([mP])];
     const ms = [mL, mF, mP];
     return { prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] };
@@ -691,24 +695,29 @@
     mc.bbox = [Math.min(mc.bbox[0], fx0), Math.min(mc.bbox[1], fy0), Math.max(mc.bbox[2], fx1), Math.max(mc.bbox[3], fy1)];
     return S;
   }
-  // projeto com vários cortes: com a folha padrão, uma folha A0 por corte, lado a lado; sem ela, cortes empilhados (3000 mm entre eles)
+  // projeto com vários cortes: com a folha padrão, duas folhas A0 por corte (lateral + frontal; superior), lado a lado; sem ela, cortes empilhados (3000 mm entre eles)
   // folhaDados(corte, i, n) devolve os campos da folha daquele corte (cliente, revisão, paletes, descrição…)
   function dxfProjeto(lista, folhaDados) {
     const m = { prims: [], items: [], linhas: [], textos: [] };
     let topo = 0, dir = 0;
     const comFolha = !!(FOLHA() && folhaDados);
+    // com a folha (Gean): por corte, uma folha com lateral + frontal e outra com a vista superior, cada uma na sua escala
+    // (lateral e frontal ficam maiores, para ler cotas e detalhes); folhas numeradas 1/N… na ordem
+    const nFolhas = lista.length * 2; let nf = 0;
     lista.forEach(({ r, corte, qtd }, i) => {
-      const mc = modeloCorte(r, corte);
-      if (qtd > 1) mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 });
-      if (comFolha) {
-        montarFolha(mc, folhaDados(corte, i, lista.length));
+      const blocos = comFolha ? modeloCorte(r, corte, true) : [modeloCorte(r, corte)];
+      if (qtd > 1) { const mc = blocos[0]; mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 }); }
+      for (const mc of blocos) if (comFolha) {
+        montarFolha(mc, { ...folhaDados(corte, i, lista.length), folha: `${++nf}/${nFolhas}` });
         shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]);
         dir = mc.bbox[2] + 0.1 * (mc.bbox[2] - mc.bbox[0]);
-      } else {
+      }
+      const mc = blocos[0];
+      if (!comFolha) {
         shiftModel(mc, -mc.bbox[0], topo - mc.bbox[3] - 400);
         topo = mc.bbox[1] - 3000;
       }
-      for (const k of ['prims', 'items', 'linhas', 'textos']) m[k] = m[k].concat(mc[k]);
+      for (const b of blocos) for (const k of ['prims', 'items', 'linhas', 'textos']) m[k] = m[k].concat(b[k]);
     });
     return dxfLateral(lista[0] && lista[0].r, '', m);
   }
