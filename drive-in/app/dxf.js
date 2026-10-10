@@ -336,6 +336,7 @@
   }
   const HOLE_FX = { 80: 21.9, 101: 32.4, 122: 43.05 };
   const MAX_RUAS_FRONTAL = 5; // Gean: projetos com mais de 5 ruas mostram só 5 na frontal
+  const MAX_RUAS_SUPERIOR = 10; // Gean: vista superior parcial (ruas 1–5 + última) só acima de 10 ruas; até 10 desenha todas
   // numeração das posições em planta (Gean): a fileira da frente leva o número da rua (01…R); a fileira seguinte continua (R+1…2R)
   // e assim até o fundo → último palete da última rua = R × P. O número vale para a pilha toda (todos os níveis daquele ponto).
   // Ex.: 28 ruas × 2 paletes: rua 01 = 01 (frente) e 29 (fundo); rua 28 = 28 e 56. Prefixo = nome do corte [CONFIRMAR]
@@ -709,9 +710,9 @@
     const m = { prims: [], items: [], linhas: [], textos: [] };
     let topo = 0, dir = 0;
     const comFolha = !!(FOLHA() && folhaDados);
-    // com a folha (Gean): as 3 vistas na mesma folha. Com mais de 5 ruas saem duas folhas por corte — uma com a vista superior parcial
+    // com a folha (Gean): as 3 vistas na mesma folha. Com mais de 10 ruas saem duas folhas por corte — uma com a vista superior parcial
     // (5 ruas, como a frontal; escala maior para ler cotas e detalhes) e outra com a estrutura completa; o operador usa a que quiser
-    const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_FRONTAL + 1;
+    const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_SUPERIOR;
     const nFolhas = lista.reduce((s2, x) => s2 + (parcial(x.r) ? 2 : 1), 0); let nf = 0;
     lista.forEach(({ r, corte, qtd }, i) => {
       const blocos = comFolha && parcial(r) ? [modeloCorte(r, corte, MAX_RUAS_FRONTAL), modeloCorte(r, corte)] : [modeloCorte(r, corte)];
