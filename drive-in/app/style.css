@@ -201,3 +201,46 @@ input[readonly]{background:#f3f4f6;color:#374151}
 .grupo>summary .t{flex:none}
 .grupo:not([open])>summary .resumo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:60%}
 #paginaProj .cad-barra select{width:auto;min-width:210px}#paginaProj .cad-barra input[type=text]{width:280px}
+
+/* ---------- celular e tablet (Gean: app hospedado, uso também pelo celular) ---------- */
+@media (max-width: 900px) {
+  .hdr{height:auto;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:8px 12px}
+  .nav{margin-left:0;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .nav a{white-space:nowrap;flex:1;justify-content:center}
+  .cab-projeto{margin-left:auto}
+  .tabs{flex-wrap:wrap}
+  .tabs .tab{white-space:nowrap}
+  .acoes-tab{width:100%;justify-content:flex-start}
+}
+@media (max-width: 700px) {
+  .wrap{padding-left:12px;padding-right:12px}
+  main.wrap{padding:12px 12px 32px;gap:12px}
+  .marca .sub{display:none}
+  .marca h1{font-size:15px}
+  .cab-projeto{margin-left:0;width:100%;order:3;font-size:11px}
+  .nav a{padding:8px 10px;font-size:12px}
+  /* campos: 1 coluna, fonte 16 px (evita o zoom automático do iPhone) e alvos de toque maiores */
+  .form{grid-template-columns:1fr}
+  input,select{font-size:16px;height:42px}
+  button,.btn-arquivo{min-height:40px}
+  .passos{gap:4px}.passo{font-size:11px;padding:6px 0}
+  .kpi .v{font-size:20px}
+  .acoes-tab{gap:6px}.acoes-tab button{flex:1 1 45%}
+  .acoes-tab #btnEmitir{flex-basis:100%;margin-left:0;order:9}
+  .rotulo-saidas{width:100%}
+  .espacos{grid-template-columns:repeat(2,1fr)}
+  .rodape-form{grid-template-columns:1fr 1fr}
+  /* janela (conferência/aprovação) ocupa a tela */
+  .modal{padding:0;align-items:stretch}
+  .modal-caixa{max-width:none;max-height:none;height:100%;border-radius:0}
+  .modal-acoes{position:sticky;bottom:0;background:#fff}
+  .modal-acoes button{flex:1}
+  .conf-tab td:first-child{width:50%}
+  /* tabelas: rolam de lado em vez de espremer */
+  #tab-pecas,#tab-proj,.cad-tabela,#pjTabela{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #tab-pecas table,#tab-proj table,#pjTabela table{min-width:640px}
+  #paginaProj,#paginaCad{padding:12px}
+  #paginaProj .cad-barra select,#paginaProj .cad-barra input[type=text]{width:100%;min-width:0}
+  .cad-barra{padding:10px 12px}
+  .grupo:not([open])>summary .resumo{display:none}
+}

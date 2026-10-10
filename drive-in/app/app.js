@@ -693,8 +693,8 @@
       + `<h4>Responsabilidades</h4><ul>${fixos.map(li).join('')}</ul>`
       + `<p style="margin-top:12px"><label class="chk-conf"><input type="checkbox" id="emConferi"> Conferi todos os dados acima e estão corretos.</label></p>`
       + `<p><label class="chk-conf"><input type="checkbox" id="emCiente"> Li as pendências acima e assumo a emissão.</label></p><p><label>Seu nome: <input id="emNome" type="text" value="${esc(usuarioSalvo() || $('responsavel').value)}" style="width:260px"></label></p>`;
-    modal(`Emitir ${$('projeto').value || 'projeto'} – conferência de pendências`, html, [{ txt: 'Cancelar' }, {
-      txt: 'Emitir', cls: 'primario', id: 'emOk', fn: async () => {
+    modal(`Conferir e aprovar ${$('projeto').value || 'projeto'}`, html, [{ txt: 'Cancelar' }, {
+      txt: 'Aprovar e emitir', cls: 'primario', id: 'emOk', fn: async () => {
         if (bloq.length) { alert('Resolva os itens que impedem a emissão.'); return false; }
         const nome = $('emNome').value.trim();
         if (!$('emConferi').checked) { alert('Marque que conferiu os dados do projeto.'); return false; }
