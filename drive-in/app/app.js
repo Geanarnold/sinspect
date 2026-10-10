@@ -219,6 +219,18 @@
     if ($('resPerfilC')) $('resPerfilC').textContent = `${v('cA')} × ${v('cC')} × ${v('cB')} # ${v('cD')} mm`;
     if ($('resBalanco')) $('resBalanco').textContent = `1º nível ${v('balancoBaixo')} · demais ${v('balancoAlto')} mm`;
     if ($('resTunel')) $('resTunel').textContent = `U ${v('uA')} × ${v('uB')} # ${v('uE')} mm`;
+    // resumo automático dos demais grupos: "rótulo valor unidade" dos campos preenchidos
+    for (const sp of document.querySelectorAll('.resumo[data-auto]')) {
+      const g = sp.closest('details'), partes = [];
+      for (const c of g.querySelectorAll('.campo')) {
+        const inp = c.querySelector('input, select'); if (!inp) continue;
+        if (inp.type === 'checkbox') { if (inp.checked) partes.push(c.textContent.trim().split('(')[0].trim()); continue; }
+        if (inp.value === '') continue;
+        const l = c.querySelector('label'), un = c.querySelector('.un');
+        partes.push(`${l ? l.textContent.replace(/padrão|personalizado/g, '').trim() : ''} ${(inp.tagName === 'SELECT' ? inp.options[inp.selectedIndex].text : inp.value).replace('.', ',')}${un ? ' ' + un.textContent : ''}`);
+      }
+      sp.textContent = partes.join(' · ');
+    }
     // etiqueta: "padrão" enquanto o valor é o padrão; "personalizado" quando o operador muda
     for (const id of Object.keys(PADRAO)) { const l = document.querySelector(`label[for="${id}"]`); if (l) l.classList.toggle('personalizado', ehPersonalizado(id, $(id).value)); }
     for (const g of document.querySelectorAll('details.grupo')) g.classList.toggle('personalizado', !!g.querySelector('label.personalizado'));
@@ -239,6 +251,7 @@
     const etapa = (id) => { const f = $(id).closest('[id^="passo-"]'); const k = f ? ['projeto', 'estrutura', 'lateral', 'braco'].indexOf(f.id.replace('passo-', '')) : -1; return k >= 0 ? ['Projeto', 'Estrutura', 'Lateral', 'Braço'][k] : ''; };
     const vazio = (id) => String($(id).value).trim() === '';
     for (const id of OBRIG_CALC.concat(OBRIG_CAB)) $(id).classList.toggle('vazio', vazio(id));
+    for (const g of document.querySelectorAll('details.grupo')) if (g.querySelector('.vazio')) g.open = true; // campo obrigatório em branco: grupo abre sozinho
     const espVazios = $('diferentes').checked ? [...$('espacos').querySelectorAll('input')].filter((i) => i.value === '') : [];
     $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
     const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);

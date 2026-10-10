@@ -44,19 +44,22 @@
         <div class="campo full"><label for="obs" title="Observações">Observações</label><div class="in"><input id="obs" type="text" placeholder="Opcional"/></div></div>
       </div>
       <div id="passo-estrutura" class="form hidden">
-        <div class="sec full"><svg class="ic"><use href="#i-estr"/></svg>Estrutura</div>
+        <details class="grupo full" id="grpEstrutura"><summary><svg class="ic seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="t">Estrutura</span><span class="resumo" data-auto="1"></span></summary><div class="form">
         <div class="campo"><label class="obrig" for="ruas" title="Ruas">Ruas</label><div class="in"><input id="ruas" type="number" min="1"/></div></div>
         <div class="campo"><label class="obrig" for="niveis" title="Níveis (chão + níveis)">Níveis (chão + níveis)</label><div class="in"><input id="niveis" type="number" min="2"/></div></div><div class="campo"><label for="peDireito" title="Pé-direito livre do galpão">Pé-direito do galpão</label><div class="in com-un"><input id="peDireito" type="number" step="50" placeholder="opcional"/><span class="un">mm</span></div></div><div class="campo"></div>
-        <div class="sec full"><svg class="ic"><use href="#i-pallet"/></svg>Palete</div>
+        </div></details>
+        <details class="grupo full" id="grpPalete"><summary><svg class="ic seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="t">Palete</span><span class="resumo" data-auto="1"></span></summary><div class="form">
         <div class="campo"><label class="obrig" for="frentePalete" title="Frente">Frente</label><div class="in com-un"><input id="frentePalete" type="number" min="1"/><span class="un">mm</span></div></div>
         <div class="campo"><label class="obrig" for="profPalete" title="Profundidade">Profundidade</label><div class="in com-un"><input id="profPalete" type="number" min="1"/><span class="un">mm</span></div></div>
         <div class="campo"><label class="obrig" for="alturaPalete" title="Altura">Altura</label><div class="in com-un"><input id="alturaPalete" type="number"/><span class="un">mm</span></div></div>
         <div class="campo"><label class="obrig" for="cargaPalete" title="Carga">Carga</label><div class="in com-un"><input id="cargaPalete" type="number"/><span class="un">kg</span></div></div>
         <div class="campo full"><label class="chk"><input id="escravo" type="checkbox"/> Palete escravo no 1º nível (2 empilhados no chão)</label></div>
-        <div class="sec full"><svg class="ic"><use href="#i-alt"/></svg>Ajustes manuais (opcional)</div>
+        </div></details>
+        <details class="grupo full" id="grpAjustes"><summary><svg class="ic seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="t">Ajustes manuais (opcional)</span><span class="resumo" data-auto="1"></span></summary><div class="form">
         <div class="campo"><label for="paletesInformados" title="Paletes por rua">Paletes por rua</label><div class="in"><input id="paletesInformados" type="number" min="1" placeholder="auto"/></div></div>
         <div class="campo"><label for="alt1Nivel" title="1º nível (apoio)">1º nível (apoio)</label><div class="in com-un"><input id="alt1Nivel" type="number" step="50" placeholder="auto"/><span class="un">mm</span></div></div>
         <div class="campo"><label for="alturaManual" title="Altura total">Altura total</label><div class="in com-un"><input id="alturaManual" type="number" step="50" placeholder="auto"/><span class="un">mm</span></div></div>
+        </div></details>
         <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
           <li>Largura da rua = frente do palete + 100 mm de cada lado (palete centralizado).</li>
           <li>Paletes por rua = profundidade da estrutura ÷ (palete + 25 mm), para baixo.</li>
@@ -66,15 +69,17 @@
         </ul></details>
       </div>
       <div id="passo-lateral" class="form hidden">
-        <div class="sec full"><svg class="ic"><use href="#i-col"/></svg>Coluna</div>
+        <details class="grupo full" id="grpColuna"><summary><svg class="ic seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="t">Coluna</span><span class="resumo" data-auto="1"></span></summary><div class="form">
         <div class="campo"><label class="obrig" for="coluna">Modelo</label><div class="in"><select id="coluna"><option value="">Selecione…</option><option value="80">AMPP COL 80</option><option value="80D">AMPP COL 80 DUPLADA (2 montantes)</option><option value="101">AMPP COL 101</option><option value="122">AMPP COL 122</option></select></div></div>
         <div class="campo"><label class="obrig" for="espessura">Espessura</label><div class="in com-un"><select id="espessura"><option value="">–</option><option>1.5</option><option>1.8</option><option>2.0</option><option>2.25</option><option>2.65</option></select><span class="un">mm</span></div></div>
-        <div class="sec full"><svg class="ic"><use href="#i-prof"/></svg>Profundidade (lateral)</div>
+        </div></details>
+        <details class="grupo full" id="grpProfundidade"><summary><svg class="ic seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span class="t">Profundidade (lateral)</span><span class="resumo" data-auto="1"></span></summary><div class="form">
         <div class="campo"><label class="obrig" for="espacamentos" title="Espaços">Espaços</label><div class="in"><input id="espacamentos" type="number" min="1" max="30"/></div></div>
         <div class="campo"><label class="obrig" for="largura" title="Medida do espaço">Medida do espaço</label><div class="in com-un"><input id="largura" type="number" step="1"/><span class="un">mm</span></div></div>
         <div class="campo full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
         <div id="espacos" class="full espacos hidden"></div>
         <p class="nota full" id="notaQuadros"></p>
+        </div></details>
         <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
           <li>Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal.</li>
           <li>Códigos SA de travessa e diagonal buscados no cadastro a ±3 mm.</li>
