@@ -86,7 +86,6 @@
   function croquiBraco(r) {
     const el = $('croquiBraco'); if (!el || !window.DXF) return;
     const pf = r.frontal.perfilC, col = r.dimensoes.colW || Number(r.entradas.coluna), bal = r.frontal.balBaixo, esp = r.frontal.espU;
-    const nU = $('notaAltU'); if (nU) nU.textContent = `Altura do suporte U = A + 110 = ${Number(pf.A) + 110} mm (55 acima e 55 abaixo do C).`;
     const n = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
     const LG = '#111827', LF = '#374151', CT = '#1d4ed8';
     const f1 = (v) => (+v).toFixed(2);
