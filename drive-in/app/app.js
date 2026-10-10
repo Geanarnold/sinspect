@@ -53,7 +53,8 @@
   }
   function aplicarForm(d) {
     if (!d) { limparForm(); return; }
-    for (const id of IDS) if (d.v && d.v[id] !== undefined) $(id).value = d.v[id];
+    // campo que não existia quando o corte foi salvo (ex.: chapa do suporte U) volta ao padrão, e não fica com o valor do corte anterior
+    for (const id of IDS) $(id).value = d.v && d.v[id] !== undefined ? d.v[id] : (PADRAO[id] ?? '');
     $('escravo').checked = !!d.escravo; $('diferentes').checked = !!d.diferentes;
     montarEspacos(d.espacos);
   }
@@ -279,7 +280,7 @@
       kpi('alt', 'Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'coluna em peça única'),
       kpi('larg', 'Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais · rua ${r.frontal.larguraRua} mm`),
       kpi('prof', 'Profundidade', `${fmt0(d.profundidade)} mm`, `${inp.espacamentos} espaços · sobra ${fmt0(r.sobraProfundidade)} mm`),
-      kpi('peso', 'Peso do corte', `${fmt(r.pesoTotal, 1)} kg`, 'longarinas topo/fundo e trilho sem peso'),
+      kpi('peso', 'Peso do corte', `${fmt(r.pesoTotal, 1)} kg`, (() => { const n = r.pecas.filter((p) => p.pesoUnit == null && !/^INT/.test(p.codigo || '')).length; return n ? `${n} peça(s) sem peso não entram (fora fixadores)` : 'todas as peças com peso (fora fixadores)'; })()),
       kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), d.montantes && d.montantes !== d.colunas ? `${d.colunas} colunas duplas (${d.montantes} montantes)` : `${d.colunas} colunas`),
     ].join('');
 
@@ -409,12 +410,13 @@
   function renderPend(r) {
     $('tab-pend').innerHTML = `<h3>Pendências</h3><ul>${r.pendencias.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
       <h3 style="margin-top:16px">Regras aplicadas neste cálculo</h3><ul>
-      <li>Altura = 1º nível + (níveis − 2) × (altura do palete + 200) + 1400, em múltiplos de 50 mm; máximo 8500 mm por peça, uma emenda por estrutura (2 talas SA040045 + 16 INT0648 + 16 INT0650 + 32 INT0812).</li>
-      <li>Laterais = ruas + 1 <b>[a confirmar]</b>; colunas por lateral = espaçamentos + 1; A1..An são medidas face a face (externas): quadro = face externa a face externa; vão = vão livre; profundidade = Σ A.</li>
-      <li>Travessas horizontais: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm, última no topo; comprimento total = largura − 78,6 mm; diagonal = √((largura − 109,1)² + vão²) + 30,5 mm; vão de topo sem diagonal.</li>
-      <li>SA de travessa/diagonal: item do cadastro com comprimento total a ±3 mm; senão <span class="code semcod">SA04XXXX</span>. Tubo complemento = 2 − diagonais que chegam ao nó. Parafuso por travessa: 2 (+2 porcas); diagonais sem fixador próprio.</li>
-      <li>Sapata por coluna: base + perfil U + 2 placas niveladoras + 4 chumbadores INT0654 + 4 INT0648 + 4 INT0650 + 8 INT0812. Peso da sapata = planilha (1,25 / 1,30 / 1,35 kg).</li>
-      <li>Pesos: coluna = sliter × espessura × 7,85e-6 (sem descontar furos); travessa/diagonal = 0,879 kg/m (sliter 80 × 1,4). Fixadores sem peso; sem acréscimo de 8%.</li>
+      <li>Níveis: passo = palete + 100 + A do perfil C, para cima em 50 mm; 1º nível = palete (× 2 com escravo) + 100 + A, ajustado à furação da coluna (oblongos a 29,75 + 50k do piso).</li>
+      <li>Altura (barra da coluna) = último nível + palete + 100 + longarina de topo (154,65), em múltiplos de 50 mm; topo da coluna = altura + 4,75 (chapa da sapata). Acima de 8500 mm: coluna com emenda (8500 + restante).</li>
+      <li>Laterais = ruas + 1 <b>[a confirmar]</b>; colunas por lateral = espaços + 1; nº par de espaços → coluna solteira com travessa união (A − 69,8).</li>
+      <li>Travessas: 1ª a 100 mm, 3 vãos de 600, depois 900; horizontal total = A − 78,6 (c/c A − 109,1); diagonal = √(c/c² + vão²) + 30,5; vão de topo sem diagonal. Código SA buscado no cadastro a ±3 mm.</li>
+      <li>Braço: suporte U (chapa padrão 2,65, altura = A + 110) + perfil C; simples nas laterais das pontas, duplo nas internas; apoio mínimo do palete 80 mm por lado (aviso abaixo de 100).</li>
+      <li>Longarina de túnel em barras de até 3000 mm com tala (PK041366) sobre o braço; longarina de topo por rua em cada linha de coluna; longarina de fundo e zig-zag de fundo por rua e nível; zig-zag de topo nas chapas das longarinas superiores.</li>
+      <li>Pesos: coluna e travessas pela geometria (aço 7,85 g/cm³, sem descontar furos); itens sem peso cadastrado não entram no total; fixadores sem peso.</li>
       </ul>`;
   }
 
@@ -507,7 +509,7 @@
       if (!A[n]) continue;
       const ca = A[n], cb = B[n], va = (ca.dados && ca.dados.v) || {}, vb = (cb.dados && cb.dados.v) || {};
       if (String(ca.qtd) !== String(cb.qtd)) out.push(`Corte ${n} – blocos iguais: ${ca.qtd} → ${cb.qtd}`);
-      for (const id of IDS) if ((va[id] ?? '') !== (vb[id] ?? '')) out.push(`Corte ${n} – ${rotuloCampo(id)}: ${va[id] || '–'} → ${vb[id] || '–'}`);
+      for (const id of IDS) if ((va[id] ?? '') !== (vb[id] ?? '')) out.push(`Corte ${n} – ${NOMES_CONF[id] || rotuloCampo(id)}: ${va[id] || '–'} → ${vb[id] || '–'}`);
       if (!!(ca.dados && ca.dados.escravo) !== !!(cb.dados && cb.dados.escravo)) out.push(`Corte ${n} – palete escravo: ${cb.dados && cb.dados.escravo ? 'sim' : 'não'}`);
       if (JSON.stringify(ca.dados && ca.dados.diferentes && ca.dados.espacos) !== JSON.stringify(cb.dados && cb.dados.diferentes && cb.dados.espacos)) out.push(`Corte ${n} – medidas dos espaços alteradas`);
     }
