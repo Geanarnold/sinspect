@@ -493,3 +493,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 ## 37. Pesos em refinamento (Gean, 10/10/2026) — NÃO aplicados no app
 - Valores informados e retirados a pedido do Gean até refinar os dados: união 2,06 kg; topo pelo kg/m da diagonal; sapata COL 122 1,294 kg/un; stop palete 2,5 kg; caneleira 1,506 kg.
 - Dúvida registrada: união 1,02 COL 122 (CO040543) tem total 1017,8 no cadastro, e a regra A − 69,8 dá 955,2 no passo 1025.
+- [IMPLEMENTADO] Guia palete (trilho): 35,02 kg por montante (1 por lateral / linha de montantes), valor fixo, independente do comprimento (Gean, 10/10/2026). `[CONFIRMAR]` perfil e SA.
