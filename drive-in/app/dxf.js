@@ -624,7 +624,7 @@
     emit(out, m.prims.filter((q) => !q.blk), 0, 0, '0');
     for (const q of m.linhas) out.push('0', 'LINE', '8', ld(q.l), '10', f(q.p[0][0]), '20', f(q.p[0][1]), '30', '0', '11', f(q.p[1][0]), '21', f(q.p[1][1]), '31', '0');
     const asc = (s) => String(s).replace(/[^\x00-\x7F]/g, (c) => '\\U+' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')); // acentos no padrão do AutoCAD
-    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), ...(t.st ? ['7', t.st] : []), '72', String(t.just || 0), '11', f(t.x), '21', f(t.y), '31', '0', ...(t.v ? ['73', String(t.v)] : []));
+    for (const t of m.textos) out.push('0', 'TEXT', '8', ld(t.l), '10', f(t.x), '20', f(t.y), '30', '0', '40', f(t.h), '1', asc(t.s), '50', f(t.rot), ...(t.wf ? ['41', f(t.wf)] : []), ...(t.obl ? ['51', f(t.obl)] : []), ...(t.st ? ['7', t.st] : []), '72', String(t.just || 0), '11', f(t.x), '21', f(t.y), '31', '0', ...(t.v ? ['73', String(t.v)] : []));
     const layers = Object.entries(LAYERS).filter(([n]) => n !== '0').flatMap(([name, c]) => ['0', 'LAYER', '2', ld(name), '70', '0', '62', String(c), '6', 'CONTINUOUS']);
     return ['0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$INSUNITS', '70', '4', '0', 'ENDSEC',
       '0', 'SECTION', '2', 'TABLES',
@@ -681,7 +681,7 @@
     for (const t of mc.textos) if (/^VISTA (LATERAL|FRONTAL|SUPERIOR)/.test(t.s)) t.s += ` - ESC. 1/${S}`;
     const [ox, oy] = T(0, 0);
     mc.items.push({ nome: 'FOLHA_A0_SUPRA', local: Fo.prims, x: ox, y: oy, l: 'FOLHA', esc: S });
-    for (const t of Fo.textos) { const [x, y] = T(t.x, t.y); mc.textos.push({ x, y, h: t.h * S, s: t.s, l: t.l, rot: t.rot, just: t.j, v: t.v, st: 'ROMANS' }); }
+    for (const t of Fo.textos) { const [x, y] = T(t.x, t.y); mc.textos.push({ x, y, h: t.h * S, s: t.s, l: t.l, rot: t.rot, just: t.j, v: t.v, st: 'ROMANS', obl: t.obl, wf: t.wf }); }
     // campos: valores do projeto nas posições dos atributos da folha
     const porBloco = {}; for (const c of Fo.campos) (porBloco[c.bloco] = porBloco[c.bloco] || []).push(c);
     const put = (c, valor, hMax) => { if (valor == null || valor === '') return; const [x, y] = T(c.x, c.y); mc.textos.push({ x, y, h: Math.min(c.h, hMax || c.h) * S, s: String(valor), l: 'FOLHA_CAMPO', rot: c.rot, just: c.j, v: c.v, st: 'ROMANS' }); };

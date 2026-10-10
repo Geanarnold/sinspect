@@ -29,10 +29,13 @@ def camada(c):
     return {30: 'FOLHA_LOGO', 1: 'FOLHA_NOTA', 2: 'FOLHA'}.get(c, 'FOLHA_LINHA' if c in (7, 8, 250, 251, 252, 253, 254, 255) else ('FOLHA_LOGO' if c in range(10, 40) else 'FOLHA'))
 R = lambda v: round(v, 2)
 def pts_poly(p): return [[R(v.x), R(v.y)] for v in p]
-def add_texto(s, x, y, h, rot, hj, vj, cor):
+def add_texto(s, x, y, h, rot, hj, vj, cor, obl=0, wf=1):
     s = s.strip()
     if not s or any(s.startswith(k) for k in REMOVER_TEXTOS): return
-    textos.append({'s': s, 'x': R(x), 'y': R(y), 'h': R(h), 'rot': R(rot), 'j': hj, 'v': vj, 'l': camada(cor)})
+    t = {'s': s, 'x': R(x), 'y': R(y), 'h': R(h), 'rot': R(rot), 'j': hj, 'v': vj, 'l': camada(cor)}
+    if abs(obl) > 0.01: t['obl'] = R(obl)  # texto isométrico (inclinação)
+    if abs(wf - 1) > 0.001: t['wf'] = R(wf)
+    textos.append(t)
 def visita(ents, herdado=7, bloco_pai=None):
     for e in ents:
         if e.dxf.get('invisible', 0): continue  # bloco dinâmico: entidade de outro estado de visibilidade (oculta no AutoCAD)
@@ -71,7 +74,7 @@ def visita(ents, herdado=7, bloco_pai=None):
         elif t == 'TEXT':
             al = e.dxf.get('halign', 0); va = e.dxf.get('valign', 0)
             p = e.dxf.align_point if (al or va) and e.dxf.hasattr('align_point') else e.dxf.insert
-            add_texto(e.dxf.text, p.x, p.y, e.dxf.height, e.dxf.get('rotation', 0), min(al, 2) if al in (0, 1, 2) else 1, va, c)
+            add_texto(e.dxf.text, p.x, p.y, e.dxf.height, e.dxf.get('rotation', 0), min(al, 2) if al in (0, 1, 2) else 1, va, c, e.dxf.get('oblique', 0), e.dxf.get('width', 1))
         elif t == 'MTEXT':
             linhas = e.plain_text(split=True); h = e.dxf.char_height; att = e.dxf.get('attachment_point', 1)
             hj = (att - 1) % 3; vrow = (att - 1) // 3  # 0 topo, 1 meio, 2 base
