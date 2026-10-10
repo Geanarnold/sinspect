@@ -501,3 +501,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - [IMPLEMENTADO] Rascunho (Gean, opção 1): "DXF do projeto" e a lista CSV fora do Emitir saem como RASCUNHO – NÃO EMITIDO (arquivo `_RASCUNHO`, carimbo "REV-xx RASCUNHO" e faixa vermelha na folha; 1ª linha da lista). Só o Emitir (com conferência) gera a versão oficial.
 - Stop palete: voltou a ficar sem peso (Gean) — "peso a definir"; campo continua fora da tela.
 - Corrigido: CADASTRO (nº do projeto), REVISÃO, DATA e FOLHA não eram preenchidos no carimbo (comentário no código engolia esses campos).
+- [IMPLEMENTADO] Braço: "Balanço do braço" e "Longarina de túnel" também recolhíveis (túnel com desenho da seção e folga sobre o C). Botão verde "Conferir e aprovar projeto" no fim da etapa Braço abre a conferência final (mesma do Emitir).

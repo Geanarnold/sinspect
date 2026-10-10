@@ -91,6 +91,8 @@ main.wrap{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;paddin
 .croqui-leg{font-size:11px;color:var(--cinza);text-align:center;margin-top:4px;line-height:1.35}
 .rodape-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--borda)}
 .rodape-form #btnBom{grid-column:2}
+.rodape-form #btnAprovar{grid-column:1/-1;background:#15803d;border-color:#15803d;color:#fff;font-weight:700;padding:11px}
+.rodape-form #btnAprovar:hover{background:#166534}.rodape-form #btnAprovar:disabled{opacity:.5}
 
 /* ---- indicadores */
 .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}

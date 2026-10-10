@@ -155,6 +155,21 @@
     const svg = (h, corpo, rod) => `<svg viewBox="0 0 300 ${h}" xmlns="http://www.w3.org/2000/svg" font-family="'Arial Narrow', 'Roboto Condensed', Arial, sans-serif">${defs}<rect x=".5" y=".5" width="299" height="${h - 1}" fill="#fff" stroke="#cbd5e1" stroke-width=".8"/>${corpo}${rod ? `<text x="294" y="${h - 5}" text-anchor="end" font-size="7.5" fill="#64748b">${rod}</text>` : ''}</svg>`;
     el.innerHTML = svg(262, g2, `COL ${col} · suporte U chapa ${n(esp)} · medidas em mm`);
     if ($('croquiSecao')) $('croquiSecao').innerHTML = svg(240, g1, 'perfil C do braço · medidas em mm');
+    // ---------- LONGARINA DE TÚNEL: seção do U (alma vertical, abas para dentro do túnel), com o C do braço por baixo para mostrar a folga
+    if ($('croquiTunel')) {
+      const ua = Number($('uA').value) || 0, ub = Number($('uB').value) || 0, ue = Number($('uE').value) || 0;
+      if (ua > 0 && ub > 0 && ue > 0) {
+        const sT = Math.min(150 / ua, 150 / (ub + 60)), tx = 150 - (ub * sT) / 2, ty = 48, TX = (x) => tx + x * sT, TY = (y) => ty + (ua - y) * sT;
+        const pu = [[ub, 0], [0, 0], [0, ua], [ub, ua], [ub, ua - ue], [ue, ua - ue], [ue, ue], [ub, ue]];
+        let g4 = `<text x="150" y="16" text-anchor="middle" font-size="10" font-weight="700" fill="${LG}" letter-spacing=".5">LONGARINA DE TÚNEL · SEÇÃO</text>`;
+        g4 += `<path d="M${pu.map(([x, y]) => `${f1(TX(x))} ${f1(TY(y))}`).join('L')}Z" fill="${LF}" stroke="${LG}" stroke-width=".8"/>`;
+        g4 += cota(TX(0), TY(0), TX(0), TY(ua), -18, 0, `${n(ua)}`);
+        g4 += cota(TX(0), TY(ua), TX(ub), TY(ua), 0, -14, `${n(ub)}`);
+        g4 += `<text x="${f1(TX(ub) + 8)}" y="${f1(TY(ua / 2))}" font-size="8.5" fill="${LG}">ch. ${n(ue)}</text>`;
+        g4 += `<text x="150" y="${f1(TY(0) + 22)}" text-anchor="middle" font-size="9" fill="${LG}">interno ${n(ua - 2 * ue)} · C do braço A = ${n(A)} (folga ${n(+(ua - 2 * ue - A).toFixed(2))})</text>`;
+        $('croquiTunel').innerHTML = svg(Math.round(TY(0) + 32), g4, '');
+      } else $('croquiTunel').innerHTML = '';
+    }
     // ---------- SUPORTE U visto de cima (abraça a coluna por trás): interno = coluna, abas de 42,65, chapa esp
     if ($('croquiSuporte')) {
       const ABA = 42.65, xmn = -uo - 30, xmx = uo + 30, ymn = -22, ymx = ABA + 34;
@@ -202,6 +217,8 @@
     const v = (id) => ($(id).value || '–').replace('.', ',');
     if ($('resSuporte')) $('resSuporte').textContent = `chapa ${v('espU')} mm`;
     if ($('resPerfilC')) $('resPerfilC').textContent = `${v('cA')} × ${v('cC')} × ${v('cB')} # ${v('cD')} mm`;
+    if ($('resBalanco')) $('resBalanco').textContent = `1º nível ${v('balancoBaixo')} · demais ${v('balancoAlto')} mm`;
+    if ($('resTunel')) $('resTunel').textContent = `U ${v('uA')} × ${v('uB')} # ${v('uE')} mm`;
     // etiqueta: "padrão" enquanto o valor é o padrão; "personalizado" quando o operador muda
     for (const id of Object.keys(PADRAO)) { const l = document.querySelector(`label[for="${id}"]`); if (l) l.classList.toggle('personalizado', ehPersonalizado(id, $(id).value)); }
     for (const g of document.querySelectorAll('details.grupo')) g.classList.toggle('personalizado', !!g.querySelector('label.personalizado'));
@@ -226,7 +243,7 @@
     $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
     const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);
     const outrosIncompletos = proj.cortes.filter((x, i) => i !== proj.atual && (vazioDados(x.dados) || !x.nome || x.qtd === '')).map((x) => x.nome || '(sem nome)');
-    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint', 'btnEmitir']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
+    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint', 'btnEmitir', 'btnAprovar']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
     if (faltaCalc.length || espVazios.length) {
       last = null;
       const porEtapa = {}; for (const id of faltaCalc) (porEtapa[etapa(id)] = porEtapa[etapa(id)] || []).push(rotulo(id));
@@ -234,7 +251,7 @@
       $('kpis').innerHTML = `<div class="pendente-box"><b>Preencha os campos obrigatórios para calcular este corte</b><ul>${Object.entries(porEtapa).sort((x, y) => ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(x[0]) - ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(y[0])).map(([e, l]) => `<li><b style="display:inline">${esc(e)}:</b> ${l.map(esc).join(', ')}</li>`).join('')}</ul></div>`;
       const kp = document.getElementById('kpiProj'); if (kp) kp.innerHTML = '';
       $('alertas').innerHTML = ''; $('vista').innerHTML = '<p class="nota">O desenho aparece quando os campos obrigatórios estiverem preenchidos.</p>';
-      $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte']) if ($(k)) $(k).innerHTML = '';
+      $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte', 'croquiTunel']) if ($(k)) $(k).innerHTML = '';
       ['tab-pecas', 'tab-pend', 'tab-proj'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
       travar('Preencha os campos obrigatórios (*)');
       return;
@@ -418,12 +435,14 @@
     $('btnVoltar').disabled = passo === 0;
     $('btnAvancar').classList.toggle('hidden', passo === PASSOS.length - 1);
     $('btnBom').classList.toggle('hidden', passo !== PASSOS.length - 1);
+    $('btnAprovar').classList.toggle('hidden', passo !== PASSOS.length - 1);
   }
   document.querySelectorAll('.passo').forEach((el, k) => el.addEventListener('click', () => mostrarPasso(k)));
   $('btnVoltar').addEventListener('click', () => mostrarPasso(passo - 1));
   $('btnAvancar').addEventListener('click', () => mostrarPasso(passo + 1));
   $('btnBom').addEventListener('click', () => { $('bom').classList.remove('hidden'); render(); $('bom').scrollIntoView({ behavior: 'smooth' }); });
   $('btnPng').addEventListener('click', baixarPng);
+  $('btnAprovar').addEventListener('click', () => $('btnEmitir').click()); // aprovação do operador = conferência do Emitir
   // dados da folha padrão (carimbo, revisão, pallet, descrição técnica, capacidade total) para cada corte do DXF
   function dadosFolha(opc = {}) {
     const lp = calcularProjeto(), hoje = new Date().toLocaleDateString('pt-BR'), h = proj.historico || [], u = h[h.length - 1];
