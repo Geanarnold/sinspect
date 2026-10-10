@@ -257,7 +257,7 @@
     $('espacos').querySelectorAll('input').forEach((i) => i.classList.toggle('vazio', $('diferentes').checked && i.value === ''));
     const faltaCalc = OBRIG_CALC.filter(vazio), faltaCab = OBRIG_CAB.filter(vazio).filter((id) => id !== 'nomeCorte' || !c.nome);
     const outrosIncompletos = proj.cortes.filter((x, i) => i !== proj.atual && (vazioDados(x.dados) || !x.nome || x.qtd === '')).map((x) => x.nome || '(sem nome)');
-    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnCsv', 'btnPrint', 'btnEmitir', 'btnAprovar']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
+    const travar = (msg) => { for (const id of ['btnPng', 'btnDxfProj', 'btnPdfProj', 'btnCsv', 'btnPrint', 'btnEmitir', 'btnAprovar']) { $(id).disabled = !!msg; $(id).title = msg || ''; } };
     if (faltaCalc.length || espVazios.length) {
       last = null;
       const porEtapa = {}; for (const id of faltaCalc) (porEtapa[etapa(id)] = porEtapa[etapa(id)] || []).push(rotulo(id));
@@ -486,6 +486,13 @@
     const txt = DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha({ rascunho: true }));
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/dxf' })); a.download = `${nome}-projeto_RASCUNHO.dxf`; a.click();
   });
+  // PDF das folhas (desenhopdf.js): mesmas folhas A0 do DXF; fora do Emitir sai como rascunho
+  function pdfProjeto(nomeArquivo, opc = {}) {
+    if (!(window.DesenhoPdf && window.jspdf)) { alert('Biblioteca de PDF não carregada (pasta lib/). O PDF do projeto não foi gerado.'); return null; }
+    try { return DesenhoPdf.gerar(DXF.projetoModelo(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha(opc)), nomeArquivo); }
+    catch (e) { alert('Não foi possível gerar o PDF do projeto: ' + e.message); return null; }
+  }
+  $('btnPdfProj').addEventListener('click', () => { if (last) pdfProjeto(`${nomeArq()}-projeto_RASCUNHO.pdf`, { rascunho: true }); });
   // novo corte em branco; "Duplicar" copia os dados do corte atual com o nome em branco (o operador nomeia e confere)
   $('btnNovoCorte').addEventListener('click', () => { render(); proj.cortes.push({ nome: '', qtd: '', dados: null }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
   $('btnDupCorte').addEventListener('click', () => { render(); const c = proj.cortes[proj.atual]; proj.cortes.push({ nome: '', qtd: c.qtd, dados: JSON.parse(JSON.stringify(c.dados)) }); selecionarCorte(proj.cortes.length - 1); $('nomeCorte').focus(); });
@@ -684,6 +691,8 @@
         if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;
         baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha()), 'application/dxf');
         csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.csv`);
+        const pdfP = pdfProjeto(`${nomeArq()}_${$('revisao').value}-projeto.pdf`);
+        if (pdfP && window.Pasta && Pasta.pronta) { try { await Pasta.escrever(`projetos/emissoes/${nomeArq()}_${$('revisao').value}-projeto.pdf`, pdfP.output('arraybuffer')); } catch (e) { /* fica só o download */ } }
         await relatorioPdf({ nome, pend: { alertas, semCod, semPeso, est, confirmar: pend } });
         return true;
       } }]);

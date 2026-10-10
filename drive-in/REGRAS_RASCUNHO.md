@@ -510,3 +510,4 @@ Modelos de clientes usados só como referência (260324, 260250, 260642, 260572 
 - [IMPLEMENTADO] Vista superior parcial (Gean): ruas 1 a 5, interrupção (barra de corte) e a última rua desenhada em seguida (com a numeração dos cantos, ex. A063 / A567). Com até 6 ruas desenha todas.
 - [IMPLEMENTADO] Vista superior parcial só acima de 10 ruas (Gean): até 10 ruas desenha todas (1 folha); acima de 10, folha parcial (ruas 1–5 + última) + folha completa. Frontal continua com 5 ruas.
 - Corrigido: palete isométrico do carimbo saía duplicado (bloco dinâmico com 2 estados de visibilidade). extrair_folha.py e extrair_blocos.py ignoram entidades ocultas (invisible).
+- [IMPLEMENTADO] PDF do projeto (Gean): as mesmas folhas A0 do DXF em PDF vetorial (desenhopdf.js). Botões separados "DXF do projeto" e "PDF do projeto" (rascunho); na emissão saem os dois oficiais (e cópia em projetos/emissoes/ com a pasta conectada).

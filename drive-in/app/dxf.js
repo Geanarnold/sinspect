@@ -706,7 +706,8 @@
   }
   // projeto com vários cortes: com a folha padrão, folhas A0 lado a lado (1 por corte, ou 2 com mais de 5 ruas: superior parcial / completa); sem ela, cortes empilhados
   // folhaDados(corte, i, n) devolve os campos da folha daquele corte (cliente, revisão, paletes, descrição…)
-  function dxfProjeto(lista, folhaDados) {
+  // modelo do projeto (todas as folhas/cortes juntos): usado pelo DXF e pelo PDF das folhas (desenhopdf.js)
+  function projetoModelo(lista, folhaDados) {
     const m = { prims: [], items: [], linhas: [], textos: [] };
     let topo = 0, dir = 0;
     const comFolha = !!(FOLHA() && folhaDados);
@@ -729,8 +730,9 @@
       }
       for (const b of blocos) for (const k of ['prims', 'items', 'linhas', 'textos']) m[k] = m[k].concat(b[k]);
     });
-    return dxfLateral(lista[0] && lista[0].r, '', m);
+    return m;
   }
+  function dxfProjeto(lista, folhaDados) { return dxfLateral(lista[0] && lista[0].r, '', projetoModelo(lista, folhaDados)); }
   function svgFrontal(r, titulo, corte) { return svgModelo(montarFrontal(r, titulo, corte)); }
   function svgLateral(r, titulo) { return svgModelo(montarLateral(r, titulo)); }
   function svgPlanta(r, titulo, corte) { return svgModelo(montarPlanta(r, titulo, corte)); }
@@ -753,6 +755,6 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { svgPlanta, montarPlanta, dxfProjeto, tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  const DXF = { svgPlanta, montarPlanta, dxfProjeto, projetoModelo, folhaPadrao: () => FOLHA(), tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);
