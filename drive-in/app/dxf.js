@@ -689,7 +689,7 @@
     if (dd.rascunho) {
       for (const c of (porBloco['CABEÇALHO'] || []).filter((c) => c.tag === 'REVISÃO')) put(c, `${dd.revisao} RASCUNHO`);
       const [rx, ry] = T((ax0 + ax1) / 2, ay1 - 40);
-      mc.textos.push({ x: rx, y: ry, h: 30 * S, s: 'RASCUNHO - NÃO EMITIDO - SEM CONFERÊNCIA', l: 'FOLHA_NOTA', rot: 0, just: 1, v: 2, st: 'ROMANS' });
+      mc.textos.push({ x: rx, y: ry, h: 15 * S, s: 'RASCUNHO - NÃO EMITIDO - SEM CONFERÊNCIA', l: 'FOLHA_NOTA', rot: 0, just: 1, v: 2, st: 'ROMANS' });
     }
     const [fx0, fy0] = T(bx0, by0), [fx1, fy1] = T(bx1, by1);
     mc.bbox = [Math.min(mc.bbox[0], fx0), Math.min(mc.bbox[1], fy0), Math.max(mc.bbox[2], fx1), Math.max(mc.bbox[3], fy1)];
