@@ -1,0 +1,7 @@
+# Cabeçalhos de segurança no Cloudflare Pages (equivalente ao globalHeaders do staticwebapp.config.json do Azure).
+# O controle de acesso (login) é feito pelo Cloudflare Access, não por este arquivo.
+/*
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: same-origin
