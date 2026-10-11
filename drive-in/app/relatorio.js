@@ -57,7 +57,7 @@
 
     // rodapé em todas as páginas
     const n = doc.getNumberOfPages();
-    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...CINZA); doc.text(`${D.cab.projeto || ''} · ${D.cab.revisao || ''} · Configurador Drive-In`, M, 290); doc.text(`Página ${i} de ${n}`, W - M, 290, { align: 'right' }); }
+    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...CINZA); doc.text(`${D.cab.projeto || ''} · ${D.cab.revisao || ''} · Tessera Drive-In`, M, 290); doc.text(`Página ${i} de ${n}`, W - M, 290, { align: 'right' }); }
     return doc;
   }
   window.Relatorio = { gerar };
