@@ -13,7 +13,7 @@
  ],
  "posicoes": 144,
  "paletesPorRua": 4,
- "pesoTotalKg": 3776.062,
+ "pesoTotalKg": 3825.958,
  "erros": [],
  "alertas": [
   "1º nível 2300 mm ajustado para 2301.75 mm (furação de 50 mm da coluna).",
@@ -322,7 +322,7 @@
    "grupo": "Longarinas",
    "codigo": "PK041335",
    "desc": "Longarina de fundo – LONGARINA TRAVAMENTO FUNDO 1,40 MT – kit CO040546 + 4 INT0812 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.015 REV.04)",
-   "qtd": 24,
+   "qtd": 36,
    "compr": 1400,
    "pesoUnit": 4.158
   },
@@ -330,7 +330,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0812",
    "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
-   "qtd": 96,
+   "qtd": 144,
    "compr": null,
    "pesoUnit": null
   },
@@ -338,7 +338,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 96,
+   "qtd": 144,
    "compr": null,
    "pesoUnit": null
   },
@@ -346,7 +346,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 96,
+   "qtd": 144,
    "compr": null,
    "pesoUnit": null
   },

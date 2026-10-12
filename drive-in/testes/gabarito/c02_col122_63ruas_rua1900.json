@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 114296.327,
+ "pesoTotalKg": 114641.063,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -382,7 +382,7 @@
    "grupo": "Longarinas",
    "codigo": "PKXXXXXX",
    "desc": "Longarina travamento fundo – rua 1900 mm (fora dos modelos cadastrados)",
-   "qtd": 378,
+   "qtd": 441,
    "compr": 1900,
    "pesoUnit": 5.472
   },
@@ -390,7 +390,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0812",
    "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
-   "qtd": 1512,
+   "qtd": 1764,
    "compr": null,
    "pesoUnit": null
   },
@@ -398,7 +398,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 1512,
+   "qtd": 1764,
    "compr": null,
    "pesoUnit": null
   },
@@ -406,7 +406,7 @@
    "grupo": "Longarinas",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 1512,
+   "qtd": 1764,
    "compr": null,
    "pesoUnit": null
   },

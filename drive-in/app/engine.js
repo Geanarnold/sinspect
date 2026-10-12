@@ -306,7 +306,8 @@
     // longarina de fundo = LONGARINA TRAVAMENTO FUNDO (des. 0004.0003.01.015 REV.04), produto próprio (não é a TB 80 de topo): kit por largura de rua
     // com 4 INT0812 + 4 INT0648 + 4 INT0650; rua sem modelo: peso pela reta dos 4 modelos (0,481 + 2,627 kg/m × rua), marcado como estimado
     if (niveisArm.length) {
-      const nF = R * niveisArm.length, obsF = `1 por rua × ${niveisArm.length} nível(is)`;
+      // + 1 por rua no nível do chão, a 300 mm do piso (Gean) — só na lista; o desenho não muda
+      const nF = R * (niveisArm.length + 1), obsF = `1 por rua × (${niveisArm.length} nível(is) de braço + 1 no chão, a 300 mm do piso)`;
       const lf = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGFUNDO-') && p.dim != null).map(([id, p]) => ({ id, ...p })).find((p) => Math.abs(p.dim - larguraRua) <= 5);
       if (lf) add('Longarinas', 'LG-FUNDO', `Longarina de fundo – ${lf.desc}`, lf.codigo, nF, lf.dim, lf.peso, obsF);
       else add('Longarinas', 'LG-FUNDO', `Longarina travamento fundo – rua ${larguraRua} mm (fora dos modelos cadastrados)`, SEM.PK, nF, larguraRua, +(0.481 + 0.002627 * larguraRua).toFixed(3), `${obsF}; peso ESTIMADO pela reta dos modelos 1350/1400/1480/1570`);
