@@ -14,7 +14,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 3,
- "pesoTotalKg": 903.152,
+ "pesoTotalKg": 909.977,
  "erros": [],
  "alertas": [
   "1º nível 1700 mm ajustado para 1701.75 mm (furação de 50 mm da coluna).",
@@ -300,7 +300,7 @@
    "desc": "Longarina de fundo – PP LONG 1,40 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "qtd": 9,
    "compr": 1400,
-   "pesoUnit": 3.215
+   "pesoUnit": 3.54
   },
   {
    "grupo": "Travamento de topo (zig-zag)",
@@ -364,7 +364,7 @@
    "desc": "Longarina de topo – PP LONG 1,40 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "qtd": 12,
    "compr": 1400,
-   "pesoUnit": 3.215
+   "pesoUnit": 3.54
   },
   {
    "grupo": "Longarinas",

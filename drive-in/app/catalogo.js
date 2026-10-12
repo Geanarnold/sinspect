@@ -1370,7 +1370,7 @@ window.CATALOGO = {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,35 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "codigo": "PK041365",
-   "peso": 3.119,
+   "peso": 3.444,
    "unid": "kg",
    "aco": "",
    "dim": 1350
@@ -1379,7 +1379,7 @@ window.CATALOGO = {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,40 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "codigo": "PK041334",
-   "peso": 3.215,
+   "peso": 3.54,
    "unid": "kg",
    "aco": "",
    "dim": 1400
@@ -1388,7 +1388,7 @@ window.CATALOGO = {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,48 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "codigo": "PK041634",
-   "peso": 3.369,
+   "peso": 3.693,
    "unid": "kg",
    "aco": "",
    "dim": 1480
@@ -1397,7 +1397,7 @@ window.CATALOGO = {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,57 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",
    "codigo": "PK041446",
-   "peso": 3.541,
+   "peso": 3.866,
    "unid": "kg",
    "aco": "",
    "dim": 1570
@@ -1406,7 +1406,7 @@ window.CATALOGO = {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,00 TB 80 - ESP DRIVE IN TRAVAMENTO – kit com 2 INT0648 + 2 INT0650",
    "codigo": "PK041536",
-   "peso": 2.499,
+   "peso": 2.824,
    "unid": "kg",
    "aco": "",
    "dim": 996.3
