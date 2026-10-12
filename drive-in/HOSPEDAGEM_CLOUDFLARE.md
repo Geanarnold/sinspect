@@ -1,4 +1,4 @@
-# Hospedagem do Tessera (módulo Drive-In) no Cloudflare (Pages + Access)
+# Hospedagem do PaletCad (módulo Drive-In) no Cloudflare (Pages + Access)
 
 Alternativa ao Azure (`HOSPEDAGEM_AZURE.md`): sem custo até 50 usuários e sem precisar registrar app no Entra ID.
 

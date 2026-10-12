@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" role="img" aria-label="PaletCad">
+<rect width="280" height="64" rx="14" fill="#1e293b"/>
+<g transform="translate(8 0)">
+<rect x="0" y="0" width="64" height="64" rx="14" fill="#E8520A"/>
+<g fill="#fff"><rect x="10" y="9" width="5" height="46" rx="1.5"/><rect x="49" y="9" width="5" height="46" rx="1.5"/><rect x="10" y="29" width="44" height="4" rx="1"/><rect x="10" y="48" width="44" height="4" rx="1"/></g>
+<g fill="#1e293b"><rect x="18" y="14" width="12" height="13" rx="1.5"/><rect x="34" y="17" width="11" height="10" rx="1.5"/><rect x="18" y="35" width="11" height="11" rx="1.5"/><rect x="33" y="33" width="12" height="13" rx="1.5"/></g>
+</g>
+<text x="86" y="43" font-family="Segoe UI,Roboto,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff">Palet<tspan fill="#E8520A">Cad</tspan></text>
+</svg>
