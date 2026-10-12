@@ -190,7 +190,6 @@
       </div>
     </section>
   </main>
-  <div class="rodape-app" id="rodapeApp">PaletCad · módulo Drive-In · uso interno · o dimensionamento estrutural é de responsabilidade do engenheiro responsável · <a href="#" id="adminLink">acesso do administrador</a></div>
 
   <div id="modal" class="modal hidden"><div class="modal-caixa"><h3 id="modalTit"></h3><div id="modalCorpo" class="modal-corpo"></div><div id="modalAcoes" class="modal-acoes"></div></div></div>
   <section id="paginaTrein" class="trein hidden">
@@ -222,6 +221,15 @@
       <p class="trein-alerta"><b>O app não faz dimensionamento estrutural.</b> Ele monta a estrutura com as peças padrão; a verificação de cargas, folgas, empilhadeira e interferências do galpão é de quem projeta e aprova.</p>
 
       <h2 id="t-fluxo">2. Passo a passo rápido</h2>
+      <div class="trein-fluxo">
+        <div><span>1</span><b>Início</b><small>escolher a estrutura</small></div>
+        <div><span>2</span><b>Pasta</b><small>escolher a pasta da empresa</small></div>
+        <div><span>3</span><b>4 etapas</b><small>Projeto · Estrutura · Lateral · Braço</small></div>
+        <div><span>4</span><b>Resultado</b><small>indicadores, alertas e desenho</small></div>
+        <div><span>5</span><b>Lista</b><small>peças, fixadores, pendências</small></div>
+        <div><span>6</span><b>Aprovar</b><small>conferir e emitir</small></div>
+      </div>
+            <figure class="trein-fig larga"><img loading="lazy" src="img/trein/01-inicio.jpg" alt="Página inicial: escolha o tipo de estrutura (Drive-In) e clique em Novo projeto"><figcaption>Página inicial: escolha o tipo de estrutura (Drive-In) e clique em Novo projeto</figcaption></figure>
       <ol class="trein-passos">
         <li>Na <b>página inicial</b>, no card do tipo de estrutura (Drive-In), clique em <b>Novo projeto</b> (ou <b>Continuar o atual</b>).</li>
         <li>Clique em <b>Escolher pasta</b> e selecione a pasta de projetos da empresa (uma vez por computador).</li>
@@ -233,6 +241,7 @@
       </ol>
 
       <h2 id="t-pasta">3. Pasta da empresa e projetos</h2>
+      <div class="trein-dupla"><div>
       <ul>
         <li><b>Escolher pasta</b> (no quadro "Projeto e cortes"): liga o app à pasta da empresa. Funciona no <b>Chrome</b> ou no <b>Edge</b>. Sem a pasta, o app baixa os arquivos no seu computador.</li>
         <li><b>Salvar</b>: grava o projeto (<code>projetos/NOME.drivein.json</code>) e uma cópia da revisão (<code>projetos/revisoes/</code>). <b>Cada salvamento gera uma nova revisão</b> (REV.00, REV.01…), com quem salvou e o que mudou.</li>
@@ -240,6 +249,8 @@
         <li>Na página <b>Projetos</b> (menu de cima) aparecem todos os projetos da pasta, com quem criou, última revisão, situação (em andamento, emitido, alterado após emissão), posições e peso. Clique numa linha para abrir.</li>
         <li>A <b>página inicial</b> mostra os projetos recentes.</li>
       </ul>
+
+      </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/12-celular.jpg" alt="No celular: barra de baixo com Preencher e Resultado."><figcaption>No celular: barra de baixo com Preencher e Resultado.</figcaption></figure></div>
 
       <h2 id="t-cortes">4. Cortes e blocos iguais</h2>
       <ul>
@@ -249,6 +260,7 @@
       </ul>
 
       <h2 id="t-projeto">5. Etapa 1 – Projeto</h2>
+      <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Projeto (nº do processo)</th><td>Número do processo. Vai no carimbo e no nome dos arquivos.</td></tr>
         <tr><th>Cliente, Cidade, UF</th><td>Vão para o carimbo da folha.</td></tr>
@@ -260,7 +272,10 @@
         <tr><th>Observações</th><td>Livre, fica no projeto.</td></tr>
       </tbody></table>
 
+      </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/02-etapa-projeto.jpg" alt="Etapa 1 – Projeto: dados do cliente, corte e desenhista. Os números nas etapas mostram o que falta preencher."><figcaption>Etapa 1 – Projeto: dados do cliente, corte e desenhista. Os números nas etapas mostram o que falta preencher.</figcaption></figure></div>
+
       <h2 id="t-estrutura">6. Etapa 2 – Estrutura</h2>
+      <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Ruas</th><td>Quantidade de ruas (entradas da empilhadeira). Laterais = ruas + 1.</td></tr>
         <tr><th>Níveis (chão + níveis)</th><td>Total de paletes na altura, contando o do chão.</td></tr>
@@ -270,7 +285,10 @@
         <tr><th>Ajustes manuais (opcional)</th><td><b>Paletes por rua</b>, <b>1º nível (apoio)</b> e <b>Altura total</b>: só preencha se quiser forçar um valor diferente do calculado. Em branco, o app calcula.</td></tr>
       </tbody></table>
 
+      </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/03-etapa-estrutura.jpg" alt="Etapa 2 – Estrutura: ruas, níveis e palete."><figcaption>Etapa 2 – Estrutura: ruas, níveis e palete.</figcaption></figure></div>
+
       <h2 id="t-lateral">7. Etapa 3 – Lateral</h2>
+      <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Coluna – modelo e espessura</th><td>COL 80, 101, 122 ou 80 duplada, e a chapa da coluna. O modelo define sapata, braço padrão, caneleira e travessas.</td></tr>
         <tr><th>Espaços</th><td>Quantidade de espaços entre colunas na profundidade (colunas por lateral = espaços + 1).</td></tr>
@@ -279,7 +297,10 @@
       </tbody></table>
       <p>Com número <b>par</b> de espaços, a última coluna fica solteira e o app coloca a <b>travessa união</b>.</p>
 
+      </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/04-etapa-lateral.jpg" alt="Etapa 3 – Lateral: modelo da coluna e espaços na profundidade."><figcaption>Etapa 3 – Lateral: modelo da coluna e espaços na profundidade.</figcaption></figure></div>
+
       <h2 id="t-braco">8. Etapa 4 – Braço</h2>
+      <div class="trein-dupla"><div>
       <p>Os grupos vêm fechados mostrando o resumo; clique na setinha para abrir. O desenho ao lado mostra o que você está ajustando. Campo diferente do padrão fica marcado como <b>personalizado</b>.</p>
       <table class="trein-tab"><tbody>
         <tr><th>Suporte do braço (U) – chapa</th><td>Padrão #2,65. Altura do U = A do perfil C + 110 (automático).</td></tr>
@@ -289,7 +310,10 @@
       </tbody></table>
       <p>Com tudo no padrão, sai o <b>braço cadastrado</b> (código CO e peso do desenho). Qualquer valor diferente gera <b>braço especial</b>, calculado e com código SA04XXXX.</p>
 
+      </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/05-etapa-braco.jpg" alt="Etapa 4 – Braço: o desenho mostra o braço que você está ajustando."><figcaption>Etapa 4 – Braço: o desenho mostra o braço que você está ajustando.</figcaption></figure></div>
+
       <h2 id="t-resultado">9. Resultado e lista de peças</h2>
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/06-resultado.jpg" alt="Resultado: indicadores, total do projeto, alertas e botões de rascunho/aprovação"><figcaption>Resultado: indicadores, total do projeto, alertas e botões de rascunho/aprovação</figcaption></figure><figure class="trein-fig larga"><img loading="lazy" src="img/trein/07-vista.jpg" alt="Vista na tela (lateral, frontal, esquema, planta), atualizada a cada campo"><figcaption>Vista na tela (lateral, frontal, esquema, planta), atualizada a cada campo</figcaption></figure>
       <ul>
         <li><b>Indicadores</b>: posições, altura, largura, profundidade, peso do corte e kg por posição. Embaixo, o total do projeto (todos os cortes) e o valor dos fixadores.</li>
         <li><b>Alertas</b> em vermelho/amarelo: leia sempre. "Corrigir antes de usar" bloqueia a emissão.</li>
@@ -302,12 +326,15 @@
           </ul></li>
       </ul>
 
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/08-lista-pecas.jpg" alt="Lista de peças: só a estrutura, com código, quantidade e peso. Botão Excel para baixar a planilha."><figcaption>Lista de peças: só a estrutura, com código, quantidade e peso. Botão Excel para baixar a planilha.</figcaption></figure><figure class="trein-fig larga"><img loading="lazy" src="img/trein/09-fixadores.jpg" alt="Aba Fixadores: quantidade, preço por peça e valor total (preços de exemplo)"><figcaption>Aba Fixadores: quantidade, preço por peça e valor total (preços de exemplo)</figcaption></figure>
+
       <h2 id="t-saidas">10. Rascunho × emissão oficial</h2>
       <table class="trein-tab"><tbody>
         <tr><th>Rascunho</th><td>Botões <b>DXF do projeto</b>, <b>PDF do projeto</b>, <b>Excel</b> e <b>PNG</b>. Saem marcados como <b>RASCUNHO – NÃO EMITIDO</b> (faixa vermelha, carimbo "REV-xx RASCUNHO" e "_RASCUNHO" no nome do arquivo). Use só para análise interna.</td></tr>
         <tr><th>Emissão oficial</th><td>Botão <b>Conferir e aprovar</b>: mostra a tabela de conferência de todos os dados (personalizados em destaque) e as pendências. Marque <b>"Conferi os dados"</b> e <b>"Estou ciente das pendências"</b>, informe seu nome e clique em <b>Aprovar e emitir</b>.</td></tr>
         <tr><th>O que a emissão gera</th><td>Nova revisão salva como emissão + DXF + PDF das folhas + Excel + relatório de emissão em PDF (com cópia em <code>projetos/emissoes/</code> se a pasta estiver ligada). As folhas saem com <b>"PROJETO CONFERIDO E APROVADO POR [nome] EM [data]"</b>.</td></tr>
       </tbody></table>
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/10-conferir-aprovar.jpg" alt="Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita"><figcaption>Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita</figcaption></figure>
       <p class="trein-alerta">Alterou o projeto depois de emitir? Ele aparece como <b>"Alterado após emissão"</b>. Emita de novo para gerar a revisão oficial.</p>
 
       <h2 id="t-folhas">11. Folhas A0 (DXF e PDF)</h2>
@@ -318,6 +345,8 @@
         <li>A vista frontal mostra 5 ruas; a cota total mostra a largura de todas as ruas ("18386 (12 RUAS)").</li>
         <li>Cotas sempre em milímetros inteiros. No DXF, cada peça é um bloco.</li>
       </ul>
+
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/11-folha-a0.jpg" alt="Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app"><figcaption>Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app</figcaption></figure>
 
       <h2 id="t-pecas">12. Peças cadastradas e especiais</h2>
       <ul>
@@ -376,6 +405,7 @@
     </div>
   </section>
 
+  <div class="rodape-app" id="rodapeApp">PaletCad · módulo Drive-In · uso interno · o dimensionamento estrutural é de responsabilidade do engenheiro responsável · <a href="#" id="adminLink">acesso do administrador</a></div>
   <script src="catalogo.js"></script>
   <script src="engine.js"></script>
   <script src="blocos.js"></script>
