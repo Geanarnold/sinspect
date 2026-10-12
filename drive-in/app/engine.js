@@ -201,8 +201,9 @@
       if (lateraisPonta) contBraco['S|' + bal] = (contBraco['S|' + bal] || 0) + lateraisPonta * colPorLateral;
       if (lateraisInternas) contBraco['D|' + bal] = (contBraco['D|' + bal] || 0) + lateraisInternas * colPorLateral;
     }
-    // braço padrão = perfil C 94x40x15 #1,8 e U #2,65 (valores padrão da tela) [CONFIRMAR que é o C dos braços cadastrados]
-    const bracoPadrao = perfilC.A === 94 && perfilC.C === 40 && perfilC.B === 15 && perfilC.D === 1.8 && ESP_U === 2.65;
+    // braço padrão (des. 0004.0003.03.004 REV.05, perfil U engate braço): C 94 x 40 x 15, chapa #1,8 nas COL 80/122 e #2,0 na COL 101; U #2,65
+    const ESP_C_PADRAO = { 80: 1.8, 101: 2.0, 122: 1.8 };
+    const bracoPadrao = perfilC.A === 94 && perfilC.C === 40 && perfilC.B === 15 && perfilC.D === ESP_C_PADRAO[col] && ESP_U === 2.65;
     let totBracos = 0;
     const cTxt = `C ${perfilC.A}x${perfilC.C}x${perfilC.B}x${perfilC.D}`;
     for (const [m, q] of Object.entries(contBraco)) {

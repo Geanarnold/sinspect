@@ -145,7 +145,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040537",
-   "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 8,
    "compr": 265.3,
    "pesoUnit": 1.385
@@ -153,7 +153,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040538",
-   "desc": "SUP BRAÇO DUP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041641 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO DUP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041641 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 8,
    "compr": 445.3,
    "pesoUnit": 1.942
@@ -161,7 +161,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040536",
-   "desc": "SUP BRAÇO SIMP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041638 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041638 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 16,
    "compr": 315.3,
    "pesoUnit": 1.534
@@ -169,7 +169,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040530",
-   "desc": "SUP BRAÇO DUP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041630 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO DUP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041630 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 16,
    "compr": 545.3,
    "pesoUnit": 2.241

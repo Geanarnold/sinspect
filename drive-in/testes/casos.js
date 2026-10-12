@@ -16,7 +16,7 @@ module.exports = [
   { id: 'c04_col80D_duplada', descricao: 'COL 80 duplada #2,0, 6 ruas, 2 espaços de 1025 (solteira), 3 níveis, PBR 1200x1000x1600 1200 kg', validado: false,
     inp: { ...BRACO, coluna: '80D', espessura: '2.0', ruas: '6', niveis: '3', espacamentos: 2, largura: '1025', espacos: esp(2, 1025), frentePalete: '1200', profPalete: '1000', alturaPalete: '1600', cargaPalete: '1200', escravo: false } },
   { id: 'c05_col101_escravo', descricao: 'COL 101 #2,25, 8 ruas, 5 espaços de 1025, 4 níveis com palete escravo no chão, PBR 1200x1000x1300 900 kg', validado: false,
-    inp: { ...BRACO, coluna: '101', espessura: '2.25', ruas: '8', niveis: '4', espacamentos: 5, largura: '1025', espacos: esp(5, 1025), frentePalete: '1200', profPalete: '1000', alturaPalete: '1300', cargaPalete: '900', escravo: true } },
+    inp: { ...BRACO, cD: '2.0', coluna: '101', espessura: '2.25', ruas: '8', niveis: '4', espacamentos: 5, largura: '1025', espacos: esp(5, 1025), frentePalete: '1200', profPalete: '1000', alturaPalete: '1300', cargaPalete: '900', escravo: true } },
   { id: 'c06_col101_espacos_diferentes', descricao: 'COL 101 #1,8, 5 ruas, espaços diferentes (1025/788/1025/788), 3 níveis, palete 1000x1200x1400 800 kg, C 2,25, balanço 200/230', validado: false,
     inp: { ...BRACO, cD: '2.25', balancoBaixo: '200', coluna: '101', espessura: '1.8', ruas: '5', niveis: '3', espacamentos: 4, largura: '1025', espacos: [1025, 788, 1025, 788], frentePalete: '1000', profPalete: '1200', alturaPalete: '1400', cargaPalete: '800', escravo: false } },
 ];

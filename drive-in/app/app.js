@@ -18,6 +18,9 @@
   const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
   const OBRIG_CAB = ['projeto', 'cliente', 'cidade', 'uf', 'responsavel', 'nomeCorte', 'qtdCorte'];
   const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8', espU: '2.65' };
+  // chapa padrão do perfil C do braço depende da coluna (des. 0004.0003.03.004 REV.05): #2,0 na COL 101, #1,8 nas demais
+  const padraoCD = (colv) => (String(colv) === '101' ? '2.0' : '1.8');
+  const padrao = (id) => (id === 'cD' ? padraoCD($('coluna').value) : PADRAO[id]);
   const vazioDados = (d) => !d || !d.v || OBRIG_CALC.some((id) => d.v[id] === '' || d.v[id] == null) || (d.diferentes && (d.espacos || []).some((x) => x === '' || x == null));
   // nomes de corte únicos no projeto (Gean): nome vazio ou repetido não é aceito; projetos antigos com repetição ganham sufixo -2, -3…
   const normCorte = (v) => String(v || '').trim().toUpperCase();
@@ -47,14 +50,14 @@
     return { v, escravo: $('escravo').checked, diferentes: $('diferentes').checked, espacos: [...$('espacos').querySelectorAll('input')].map((i) => i.value) };
   }
   function limparForm() {
-    for (const id of IDS) $(id).value = PADRAO[id] ?? '';
+    for (const id of IDS) $(id).value = padrao(id) ?? '';
     $('escravo').checked = false; $('diferentes').checked = false;
     montarEspacos([]);
   }
   function aplicarForm(d) {
     if (!d) { limparForm(); return; }
     // campo que não existia quando o corte foi salvo (ex.: chapa do suporte U) volta ao padrão, e não fica com o valor do corte anterior
-    for (const id of IDS) $(id).value = d.v && d.v[id] !== undefined ? d.v[id] : (PADRAO[id] ?? '');
+    for (const id of IDS) $(id).value = d.v && d.v[id] !== undefined ? d.v[id] : (padrao(id) ?? '');
     $('escravo').checked = !!d.escravo; $('diferentes').checked = !!d.diferentes;
     montarEspacos(d.espacos);
   }
@@ -251,7 +254,10 @@
     for (const id of Object.keys(PADRAO)) { const l = document.querySelector(`label[for="${id}"]`); if (l) l.classList.toggle('personalizado', ehPersonalizado(id, $(id).value)); }
     for (const g of document.querySelectorAll('details.grupo')) g.classList.toggle('personalizado', !!g.querySelector('label.personalizado'));
   }
-  const ehPersonalizado = (id, val) => PADRAO[id] != null && String(val).trim() !== '' && Number(val) !== Number(PADRAO[id]);
+  const ehPersonalizado = (id, val) => padrao(id) != null && String(val).trim() !== '' && Number(val) !== Number(padrao(id));
+  // ao trocar a coluna, a chapa do C acompanha o padrão da nova coluna se o operador não tinha personalizado
+  let colAnterior = $('coluna').value;
+  $('coluna').addEventListener('change', () => { if (Number($('cD').value) === Number(padraoCD(colAnterior))) { $('cD').value = padraoCD($('coluna').value); $('cD').dispatchEvent(new Event('input', { bubbles: true })); } colAnterior = $('coluna').value; });
   function render() {
     resumoGrupos();
     const c = proj.cortes[proj.atual];

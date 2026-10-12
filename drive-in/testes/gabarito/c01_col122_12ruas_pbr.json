@@ -169,7 +169,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040539",
-   "desc": "SUP BRAÇO SIMP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041643 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041643 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 10,
    "compr": 307.3,
    "pesoUnit": 1.76
@@ -177,7 +177,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040540",
-   "desc": "SUP BRAÇO DUP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041644 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO DUP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041644 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 55,
    "compr": 487.3,
    "pesoUnit": 2.298
@@ -185,7 +185,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040542",
-   "desc": "SUP BRAÇO SIMP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041646 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041646 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 10,
    "compr": 357.3,
    "pesoUnit": 1.909
@@ -193,7 +193,7 @@
   {
    "grupo": "Braços",
    "codigo": "CO040541",
-   "desc": "SUP BRAÇO DUP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041645 (des. 0004.0003.02.002 REV.03)",
+   "desc": "SUP BRAÇO DUP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041645 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
    "qtd": 55,
    "compr": 587.3,
    "pesoUnit": 2.599
