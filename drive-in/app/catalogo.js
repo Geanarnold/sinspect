@@ -1276,6 +1276,24 @@ window.CATALOGO = {
    "aco": "(não especificado no desenho)",
    "dim": null
   },
+  "STOP-PALETE": {
+   "tipo": "Stop palete",
+   "desc": "STOP PALETE DRIVE IN – kit CO040442 + 1 INT1132 (des. 0004.0003.01.007 REV.01)",
+   "codigo": "PA042118",
+   "peso": 0.424,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "INT1132": {
+   "tipo": "Fixador",
+   "desc": "Parafuso autobrocante sextavado 1/4\" x 1\"",
+   "codigo": "INT1132",
+   "peso": null,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
   "LGTB80-1350": {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,35 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",

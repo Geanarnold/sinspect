@@ -13,7 +13,7 @@
  ],
  "posicoes": 30,
  "paletesPorRua": 2,
- "pesoTotalKg": 1248.06,
+ "pesoTotalKg": 1256.54,
  "erros": [],
  "alertas": [
   "1º nível 1600 mm ajustado para 1601.75 mm (furação de 50 mm da coluna).",
@@ -375,8 +375,16 @@
   },
   {
    "grupo": "Stop palete",
-   "codigo": "SA04XXXX",
-   "desc": "Stop palete (sobre a longarina de fundo)",
+   "codigo": "PA042118",
+   "desc": "STOP PALETE DRIVE IN – kit CO040442 + 1 INT1132 (des. 0004.0003.01.007 REV.01)",
+   "qtd": 20,
+   "compr": null,
+   "pesoUnit": 0.424
+  },
+  {
+   "grupo": "Stop palete",
+   "codigo": "INT1132",
+   "desc": "Parafuso autobrocante sextavado 1/4\" x 1\"",
    "qtd": 20,
    "compr": null,
    "pesoUnit": null

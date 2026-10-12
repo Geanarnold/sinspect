@@ -324,15 +324,19 @@
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
     // stop palete (Gean, bloco DI_LGFUNDO): 2 por longarina de fundo → 2 por rua em cada nível de braço
-    const pesoStop = null; // Gean: stop palete sem peso por enquanto (campo retirado da tela)
-    if (niveisArm.length) add('Stop palete', 'STOP-PALETE', 'Stop palete (sobre a longarina de fundo)', SEM.SA, 2 * R * niveisArm.length, null, pesoStop, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is)); peso a definir`);
+    // desenho 0004.0003.01.007 REV.01: kit PA042118 = stop CO040442 + 1 parafuso autobrocante INT1132, 0,424 kg (existe também o invertido PA042271, mesmo peso)
+    if (niveisArm.length) {
+      const st = prodOf(cat, 'STOP-PALETE'), nSt = 2 * R * niveisArm.length;
+      add('Stop palete', 'STOP-PALETE', st.desc, st.codigo, nSt, null, st.peso, `2 por longarina de fundo (2 por rua × ${niveisArm.length} nível(is))`);
+      add('Stop palete', 'INT1132', prodOf(cat, 'INT1132').desc, 'INT1132', nSt, null, null, '1 por stop (já incluído no PA042118)');
+    }
     // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas — confirmado pelo Gean
     addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
     if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união, topo (DI_TOPO), trilho guia e stop palete saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados e caneleira com peso provisório. Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união, topo (DI_TOPO) e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados e caneleira com peso provisório. Fixadores sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
