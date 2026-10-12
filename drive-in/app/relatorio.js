@@ -45,7 +45,7 @@
     if (!pend.length) paragrafo('Nenhuma pendência.', 9);
     for (const [t, l] of pend) tabela({ head: [[`${t} (${l.length})`]], body: l.map((x) => [x]) });
 
-    titulo('Lista de peças consolidada');
+    titulo('Lista de peças consolidada (estrutura; fixadores na seção "Fixadores — custo")');
     tabela({ head: [['Grupo', 'Código', 'Descrição', 'Qtd', 'Compr. (mm)', 'kg/un', 'kg total']], body: D.itens.map((p) => [p.grupo, p.codigo, p.desc, p.qtd, p.compr ?? '', p.pesoUnit == null ? '—' : fmt(p.pesoUnit, 3), p.pesoTotal == null ? '—' : fmt(p.pesoTotal)]),
       styles: { fontSize: 7, cellPadding: 1 }, columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 20 }, 3: { halign: 'right', cellWidth: 12 }, 4: { halign: 'right', cellWidth: 16 }, 5: { halign: 'right', cellWidth: 14 }, 6: { halign: 'right', cellWidth: 16 } } });
 

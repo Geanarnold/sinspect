@@ -311,3 +311,4 @@ input[readonly]{background:#f3f4f6;color:#374151}
 td.cad-ro{padding:7px 10px;font-size:13px;color:var(--texto)}
 td.cad-ro.num{text-align:right}
 td.cad-ro .vazio{color:var(--cinza-claro)}
+#tab-fix td.num,#tab-fix th.num{white-space:nowrap}

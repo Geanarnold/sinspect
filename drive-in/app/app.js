@@ -215,11 +215,12 @@
   }
   // fixadores (INT) somados por código em todos os grupos, com o preço unitário do Cadastro → valor total
   // (os fixadores que vêm dentro dos kits PK também entram: o kit não tem preço próprio no app)
-  const ehFixador = (p) => (cat.produtos[p.id] && cat.produtos[p.id].tipo === 'Fixador') || /^INT/.test(p.codigo || '');
+  const ehFixador = (p) => (cat.produtos[p.id] && cat.produtos[p.id].tipo === 'Fixador') || /^IN[TD]/.test(p.codigo || '');
+  const semFix = (lista) => lista.filter((p) => !ehFixador(p)); // listas de peças sem os fixadores (eles têm aba própria)
   function custoFixadores(itens) {
     const m = new Map();
     for (const p of itens) if (ehFixador(p)) {
-      const cod = p.codigo || p.id, pr = cat.produtos[p.id] || cat.produtos[cod] || {};
+      const cod = p.codigo || p.id, pr = cat.produtos[p.id] || cat.produtos[cod] || Object.values(cat.produtos).find((x) => x.codigo === cod) || {};
       const e = m.get(cod) || { codigo: cod, desc: pr.desc || p.desc, qtd: 0, preco: pr.custo > 0 ? Number(pr.custo) : null, grupos: new Set() };
       e.qtd += p.qtd; e.grupos.add(p.grupo); m.set(cod, e);
     }
@@ -288,7 +289,7 @@
       const kp = document.getElementById('kpiProj'); if (kp) kp.innerHTML = '';
       $('alertas').innerHTML = ''; $('vista').innerHTML = '<p class="nota">O desenho aparece quando os campos obrigatórios estiverem preenchidos.</p>';
       $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte', 'croquiTunel']) if ($(k)) $(k).innerHTML = '';
-      ['tab-pecas', 'tab-pend', 'tab-proj'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
+      ['tab-pecas', 'tab-pend', 'tab-proj', 'tab-fix'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
       travar('Preencha os campos obrigatórios (*)');
       { const mb = $('mobBadge'); if (mb) { mb.textContent = String(faltaCalc.length + espVazios.length); mb.classList.add('alerta'); } }
       return;
@@ -322,14 +323,14 @@
     $('notaQuadros').textContent = `${L.quadros} quadro(s) de 2 colunas${L.solteira ? ' + 1 coluna solteira com travessa união (nº par de espaços)' : ''} · ${L.nH} horizontais e ${L.nD} diagonais por quadro.`;
     renderVista(r);
     croquiBraco(r);
-    if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); renderProjeto(lp); }
+    if (!$('bom').classList.contains('hidden')) { renderPecas(r); renderPend(r); renderProjeto(lp); renderFix(r, lp); }
   }
 
   function renderPecas(r) {
-    const grupos = [...new Set(r.pecas.map((p) => p.grupo))];
+    const pecas = semFix(r.pecas), grupos = [...new Set(pecas.map((p) => p.grupo))];
     let html = `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Compr. (mm)</th><th class="num">Peso unit. (kg)</th><th class="num">Peso total (kg)</th><th>Obs.</th></tr></thead><tbody>`;
     for (const g of grupos) {
-      const ps = r.pecas.filter((p) => p.grupo === g);
+      const ps = pecas.filter((p) => p.grupo === g);
       const sub = ps.reduce((s, p) => s + (p.pesoTotal || 0), 0);
       html += `<tr class="grp"><td colspan="5">${esc(g)}</td><td class="num">${fmt(sub)}</td><td></td></tr>`;
       for (const p of ps) {
@@ -338,7 +339,7 @@
       }
     }
     html += `<tr class="grp"><td colspan="5">TOTAL (itens levantados)</td><td class="num">${fmt(r.pesoTotal)}</td><td></td></tr></tbody></table>`;
-    $('tab-pecas').innerHTML = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 10px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p>` + html;
+    $('tab-pecas').innerHTML = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 4px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p><p class="nota" style="padding:0 16px 10px">Fixadores (INT/IND) na aba "Fixadores".</p>` + html;
   }
 
   // ---- desenho (SVG): vista lateral de um pórtico, vista frontal e planta
@@ -424,8 +425,8 @@
   }
 
   function renderProjeto(lp) {
-    const itens = consolidar(lp), grupos = [...new Set(itens.map((p) => p.grupo))], total = itens.reduce((s, p) => s + (p.pesoTotal || 0), 0);
-    let html = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 4px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p><p class="nota" style="padding:0 16px 10px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais.</p>`;
+    const itens = semFix(consolidar(lp)), grupos = [...new Set(itens.map((p) => p.grupo))], total = itens.reduce((s, p) => s + (p.pesoTotal || 0), 0);
+    let html = `<p class="aviso-estr">${ic('alerta')}${esc(Engine.AVISO_ESTRUTURAL)}</p><p class="nota" style="padding:0 16px 4px">${esc(Engine.NOTA_RESPONSABILIDADE)}</p><p class="nota" style="padding:0 16px 10px">Cortes: ${lp.map((x) => `${esc(x.nome)} ×${x.qtd}`).join(' · ')} — quantidades já multiplicadas pelos blocos iguais. Fixadores (INT/IND) na aba "Fixadores".</p>`;
     html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Compr. (mm)</th><th class="num">Peso unit. (kg)</th><th class="num">Peso total (kg)</th><th>Cortes</th></tr></thead><tbody>`;
     for (const g of grupos) {
       const ps = itens.filter((p) => p.grupo === g), sub = ps.reduce((s, p) => s + (p.pesoTotal || 0), 0);
@@ -433,14 +434,23 @@
       for (const p of ps) html += `<tr><td><span class="code ${!p.codigo || /XXXX/.test(p.codigo) ? 'semcod' : ''}">${esc(p.codigo || Engine.SEM.SA)}</span></td><td>${esc(p.desc)}</td><td class="num">${fmt0(p.qtd)}</td><td class="num">${p.compr == null ? '' : fmt(p.compr)}</td><td class="num">${p.pesoUnit == null ? '' : fmt(p.pesoUnit, 3)}</td><td class="num">${p.pesoTotal == null ? '' : fmt(p.pesoTotal)}</td><td class="obs">${esc([...new Set(p.cortes)].join(', '))}</td></tr>`;
     }
     html += `<tr class="grp"><td colspan="5">TOTAL DO PROJETO (itens levantados)</td><td class="num">${fmt(total)}</td><td></td></tr></tbody></table>`;
-    const cf = custoFixadores(itens);
-    if (cf.lista.length) {
-      html += `<h3 style="margin:18px 16px 4px">Fixadores — custo</h3><p class="nota" style="padding:0 16px 8px">Quantidade total de cada fixador no projeto (todos os grupos, inclusive os que vêm nos kits) × preço unitário do Cadastro de produtos (aba "Fixadores").${cf.semPreco.length ? ` <b style="color:#b91c1c">${cf.semPreco.length} fixador(es) sem preço não entram no total.</b>` : ''}</p>`;
-      html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Preço unit.</th><th class="num">Valor</th><th>Onde entra</th></tr></thead><tbody>`
-        + cf.lista.map((e) => `<tr><td><span class="code">${esc(e.codigo)}</span></td><td>${esc(e.desc)}</td><td class="num">${fmt0(e.qtd)}</td><td class="num">${e.preco == null ? '<span style="color:#b91c1c">sem preço</span>' : brl(e.preco)}</td><td class="num">${brl(e.valor)}</td><td class="obs">${esc(e.grupos.join(', '))}</td></tr>`).join('')
-        + `<tr class="grp"><td colspan="4">TOTAL DOS FIXADORES${cf.semPreco.length ? ' (sem os itens sem preço)' : ''}</td><td class="num">${brl(cf.total)}</td><td></td></tr></tbody></table>`;
-    }
     $('tab-proj').innerHTML = html;
+  }
+  // aba "Fixadores": custo do projeto (todos os cortes × blocos) e detalhe do corte atual por grupo
+  function renderFix(r, lp) {
+    const cf = custoFixadores(consolidar(lp));
+    let html = '';
+    if (!cf.lista.length) { $('tab-fix').innerHTML = '<p class="nota" style="padding:12px 16px">Nenhum fixador neste projeto.</p>'; return; }
+    html += `<h3 style="margin:14px 16px 4px">Fixadores do projeto — quantidade e custo</h3><p class="nota" style="padding:0 16px 8px">Quantidade total de cada fixador no projeto (todos os cortes e blocos, inclusive os que vêm nos kits) × preço por peça do Cadastro de produtos (aba "Fixadores").${cf.semPreco.length ? ` <b style="color:#b91c1c">${cf.semPreco.length} fixador(es) sem preço não entram no total.</b>` : ''}</p>`;
+    html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th class="num">Preço unit.</th><th class="num">Valor</th><th>Onde entra</th></tr></thead><tbody>`
+      + cf.lista.map((e) => `<tr><td><span class="code">${esc(e.codigo)}</span></td><td>${esc(e.desc)}</td><td class="num">${fmt0(e.qtd)}</td><td class="num">${e.preco == null ? '<span style="color:#b91c1c">sem preço</span>' : brl(e.preco)}</td><td class="num">${brl(e.valor)}</td><td class="obs">${esc(e.grupos.join(', '))}</td></tr>`).join('')
+      + `<tr class="grp"><td colspan="4">TOTAL DOS FIXADORES${cf.semPreco.length ? ' (sem os itens sem preço)' : ''}</td><td class="num">${brl(cf.total)}</td><td></td></tr></tbody></table>`;
+    const fx = r.pecas.filter(ehFixador), gr = [...new Set(fx.map((p) => p.grupo))];
+    html += `<h3 style="margin:18px 16px 4px">Fixadores do corte atual, por grupo</h3><p class="nota" style="padding:0 16px 8px">Quantidade por bloco do corte que está na tela, com a regra de cada um, para conferência.</p>`;
+    html += `<table><thead><tr><th>Código</th><th>Descrição</th><th class="num">Qtd</th><th>Regra / obs.</th></tr></thead><tbody>`
+      + gr.map((g) => `<tr class="grp"><td colspan="4">${esc(g)}</td></tr>` + fx.filter((p) => p.grupo === g).map((p) => `<tr><td><span class="code">${esc(p.codigo || p.id)}</span></td><td>${esc(p.desc)}</td><td class="num">${fmt0(p.qtd)}</td><td class="obs">${esc(p.obs)}</td></tr>`).join('')).join('')
+      + `</tbody></table>`;
+    $('tab-fix').innerHTML = html;
   }
   function renderPend(r) {
     $('tab-pend').innerHTML = `<h3>Pendências</h3><ul>${r.pendencias.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
@@ -461,7 +471,7 @@
     const cab = ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs / cortes'];
     const lp = calcularProjeto();
     const rows = [...(rascunho ? [['RASCUNHO – NÃO EMITIDO (lista gerada fora do Emitir, sem conferência)'], []] : []), [Engine.AVISO_ESTRUTURAL], [Engine.NOTA_RESPONSABILIDADE], [], ['PROJETO CONSOLIDADO', lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], cab];
-    for (const p of consolidar(lp)) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), [...new Set(p.cortes)].join(', ')]);
+    for (const p of semFix(consolidar(lp))) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), [...new Set(p.cortes)].join(', ')]);
     const cf = custoFixadores(consolidar(lp));
     if (cf.lista.length) {
       rows.push([], ['FIXADORES — CUSTO (quantidade total do projeto × preço unitário do cadastro)'], ['Código', 'Descrição', 'Qtd', 'Preço por peça (R$)', 'Valor (R$)', 'Onde entra']);
@@ -470,7 +480,9 @@
     }
     for (const x of lp) {
       rows.push([], [`CORTE ${x.nome}`, `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], cab);
-      for (const p of x.r.pecas) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
+      for (const p of semFix(x.r.pecas)) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
+      const fxc = x.r.pecas.filter(ehFixador);
+      if (fxc.length) { rows.push([], [`FIXADORES DO CORTE ${x.nome}`, 'quantidades por bloco'], ['Grupo', 'Código', 'Descrição', 'Qtd', 'Regra / obs.']); for (const p of fxc) rows.push([p.grupo, p.codigo || p.id, p.desc, p.qtd, p.obs]); }
     }
     const txt = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = !rascunho ? nomeArquivo : `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}_RASCUNHO.csv`; a.click();
@@ -480,7 +492,7 @@
     const grupo = t.closest('.painel');
     grupo.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
     if (VISTAS[t.dataset.tab]) { vistaAtual = t.dataset.tab; if (last) renderVista(last); }
-    else ['pecas', 'pend', 'proj'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
+    else ['pecas', 'pend', 'proj', 'fix'].forEach((k) => $('tab-' + k).classList.toggle('hidden', k !== t.dataset.tab));
   }));
   const PASSOS = ['projeto', 'estrutura', 'lateral', 'braco'];
   let passo = 0;
@@ -697,7 +709,7 @@
       cortes: lp.map((x) => ({ nome: x.nome, qtd: x.qtd, posicoes: x.r.posicoes * x.qtd, dims: `${Math.round(x.r.dimensoes.largura)} × ${Math.round(x.r.dimensoes.profundidade)} × ${x.r.dimensoes.altura}`, peso: pesoDe(x.r.pecas) * x.qtd })),
       totais: { posicoes: lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0), peso: pesoDe(itens), semPeso: info.pend.semPeso.length },
       conferencia: conferenciaDados(), pend: info.pend, historico: proj.historico || [],
-      itens: itens.map((p) => ({ grupo: p.grupo, codigo: p.codigo || Engine.SEM.SA, desc: p.desc, qtd: p.qtd, compr: p.compr, pesoUnit: p.pesoUnit, pesoTotal: p.pesoTotal })),
+      itens: semFix(itens).map((p) => ({ grupo: p.grupo, codigo: p.codigo || Engine.SEM.SA, desc: p.desc, qtd: p.qtd, compr: p.compr, pesoUnit: p.pesoUnit, pesoTotal: p.pesoTotal })),
       fixadores: custoFixadores(itens),
     };
     const doc = Relatorio.gerar(D), nome = `${nomeArq()}_${$('revisao').value}-relatorio-emissao.pdf`;
