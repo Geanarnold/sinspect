@@ -1305,7 +1305,7 @@ window.CATALOGO = {
   },
   "CAN-80D": {
    "tipo": "Caneleira",
-   "desc": "PP PROTETOR CANELEIRA 80 DUP 700 mm – kit SA040173 [CONFIRMAR: o desenho repete o SA da 122] + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
+   "desc": "PP PROTETOR CANELEIRA 80 DUP 700 mm – kit SA04XXXX (sem cadastro) + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
    "codigo": "PK04XXXX",
    "peso": 2.088,
    "unid": "kg",
