@@ -294,6 +294,7 @@
       $('kpis').innerHTML = `<div class="pendente-box"><b>Preencha os campos obrigatórios para calcular este corte</b><ul>${Object.entries(porEtapa).sort((x, y) => ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(x[0]) - ['Projeto', 'Estrutura', 'Lateral', 'Braço'].indexOf(y[0])).map(([e, l]) => `<li><b style="display:inline">${esc(e)}:</b> ${l.map(esc).join(', ')}</li>`).join('')}</ul></div>`;
       const kp = document.getElementById('kpiProj'); if (kp) kp.innerHTML = '';
       $('alertas').innerHTML = ''; $('vista').innerHTML = '<p class="nota">O desenho aparece quando os campos obrigatórios estiverem preenchidos.</p>';
+    { const al = $('alertas').querySelector('.alerta'); if (al) { al.title = 'Clique para ler os avisos completos'; al.addEventListener('click', () => al.classList.toggle('aberto')); } }
       $('notaQuadros').textContent = ''; for (const k of ['croquiBraco', 'croquiSecao', 'croquiSuporte', 'croquiTunel']) if ($(k)) $(k).innerHTML = '';
       ['tab-pecas', 'tab-pend', 'tab-proj', 'tab-fix'].forEach((id) => { if ($(id)) $(id).innerHTML = ''; });
       travar('Preencha os campos obrigatórios (*)');
@@ -305,14 +306,16 @@
     const r = Engine.calcular(inp, cat);
     last = r;
     const d = r.dimensoes;
-    $('kpis').innerHTML = [
+    const K = [
       kpi('pallet', 'Posições', fmt0(r.posicoes), `${inp.ruas} ruas × ${r.paletesPorRua} paletes × ${Number(inp.niveis) + (inp.escravo ? 1 : 0)} no chão e níveis`),
       kpi('alt', 'Altura', `${fmt0(d.altura)} mm`, d.emendas ? `com emenda (8500 + ${d.altura - 8500})` : 'coluna em peça única'),
       kpi('larg', 'Largura', `${fmt0(d.largura)} mm`, `${d.laterais} laterais · rua ${r.frontal.larguraRua} mm`),
       kpi('prof', 'Profundidade', `${fmt0(d.profundidade)} mm`, `${inp.espacamentos} espaços · sobra ${fmt0(r.sobraProfundidade)} mm`),
       kpi('peso', 'Peso do corte', `${fmt(r.pesoTotal, 1)} kg`, (() => { const n = r.pecas.filter((p) => p.pesoUnit == null && !/^INT/.test(p.codigo || '')).length; return n ? `${n} peça(s) sem peso não entram (fora fixadores)` : 'todas as peças com peso (fora fixadores)'; })()),
       kpi('taxa', 'kg / posição', fmt(r.kgPorPosicao, 2), d.montantes && d.montantes !== d.colunas ? `${d.colunas} colunas duplas (${d.montantes} montantes)` : `${d.colunas} colunas`),
-    ].join('');
+    ];
+    // hierarquia (Gean): em destaque o que importa ao orçamento (posições, peso, kg/posição); dimensões numa linha menor
+    $('kpis').innerHTML = `<div class="kpis-pri">${[K[0], K[4], K[5]].join('')}</div><div class="kpis-sec">${[K[1], K[2], K[3]].join('')}</div>`;
 
     { const mb = $('mobBadge'); if (mb) { mb.textContent = `${fmt0(r.posicoes)} pos.`; mb.classList.remove('alerta'); } }
     const lp = calcularProjeto();
@@ -477,6 +480,7 @@
     if (!last) return;
     const rascunho = typeof nomeArquivo !== 'string'; // botão da lista = rascunho; o Emitir passa o nome oficial
     const lp = calcularProjeto(), B = (v) => ({ v, b: true });
+    const cabDoc = (titulo) => [[{ v: `PaletCad – ${titulo}`, fmt: 'tit' }], [{ v: `Projeto ${$('projeto').value || '—'} · ${$('cliente').value || '—'} · ${$('revisao').value} · gerado em ${new Date().toLocaleDateString('pt-BR')} · catálogo ${catVersaoTxt()}`, fmt: 'sub' }], []];
     const topo = [...(rascunho ? [[B('RASCUNHO – NÃO EMITIDO (lista gerada fora do Emitir, sem conferência)')]] : []),
       [B(!rascunho && aprovacao ? `PROJETO CONFERIDO E APROVADO POR ${aprovacao.por.toUpperCase()} EM ${aprovacao.data}` : Engine.AVISO_ESTRUTURAL)], [Engine.NOTA_RESPONSABILIDADE],
       [B('Projeto'), $('projeto').value, B('Cliente'), $('cliente').value, B('Revisão'), $('revisao').value], [B('Cortes'), lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], []];
@@ -484,15 +488,15 @@
     const linhaPeca = (p, obs) => [p.grupo, p.codigo || Engine.SEM.SA, p.desc, { v: p.qtd, fmt: 'int' }, p.compr == null ? '' : Math.round(p.compr * 10) / 10, p.pesoUnit == null ? '' : { v: p.pesoUnit, fmt: 'kg' }, p.pesoTotal == null ? '' : { v: p.pesoTotal, fmt: 'kg' }, obs];
     const larg = [24, 13, 60, 9, 12, 14, 15, 40];
     const est = semFix(consolidar(lp)), pesoT = est.reduce((a, p) => a + (p.pesoTotal || 0), 0);
-    const folhas = [{ nome: 'Projeto', larguras: larg, linhas: [...topo, cab, ...est.map((p) => linhaPeca(p, [...new Set(p.cortes)].join(', '))), [], [B('TOTAL DO PROJETO (itens com peso)'), '', '', '', '', '', { v: pesoT, fmt: 'kg' }]] }];
+    const folhas = [{ nome: 'Projeto', larguras: larg, linhas: [...cabDoc('Lista de materiais'), ...topo, cab, ...est.map((p) => linhaPeca(p, [...new Set(p.cortes)].join(', '))), [], [B('TOTAL DO PROJETO (itens com peso)'), '', '', '', '', '', { v: pesoT, fmt: 'kg' }]] }];
     const cf = custoFixadores(consolidar(lp));
-    if (cf.lista.length) folhas.push({ nome: 'Fixadores', larguras: [12, 46, 10, 16, 16, 60], linhas: [...topo,
+    if (cf.lista.length) folhas.push({ nome: 'Fixadores', larguras: [12, 46, 10, 16, 16, 60], linhas: [...cabDoc('Fixadores'), ...topo,
       [B('FIXADORES — quantidade total do projeto × preço por peça do Cadastro')], ['Código', 'Descrição', 'Qtd', 'Preço por peça', 'Valor', 'Onde entra'].map(B),
       ...cf.lista.map((e) => [e.codigo, e.desc, { v: e.qtd, fmt: 'int' }, e.preco == null ? 'SEM PREÇO' : { v: e.preco, fmt: 'brl4' }, e.valor == null ? '' : { v: e.valor, fmt: 'brl' }, e.grupos.join(', ')]),
       [], [B('TOTAL DOS FIXADORES'), cf.semPreco.length ? `${cf.semPreco.length} sem preço (fora do total)` : '', '', '', { v: cf.total, fmt: 'bbrl' }]] });
     for (const x of lp) {
       const fxc = x.r.pecas.filter(ehFixador);
-      folhas.push({ nome: `Corte ${x.nome || ''}`.trim(), larguras: larg, linhas: [[B(`CORTE ${x.nome}`), `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], [], cab, ...semFix(x.r.pecas).map((p) => linhaPeca(p, p.obs)),
+      folhas.push({ nome: `Corte ${x.nome || ''}`.trim(), larguras: larg, linhas: [...cabDoc(`Lista de materiais do corte ${x.nome || ''}`.trim()), [B(`CORTE ${x.nome}`), `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], [], cab, ...semFix(x.r.pecas).map((p) => linhaPeca(p, p.obs)),
         ...(fxc.length ? [[], [B(`FIXADORES DO CORTE ${x.nome}`)], ['Grupo', 'Código', 'Descrição', 'Qtd', '', '', '', 'Regra / obs.'].map(B), ...fxc.map((p) => [p.grupo, p.codigo || p.id, p.desc, { v: p.qtd, fmt: 'int' }, '', '', '', p.obs])] : [])] });
     }
     const nome = !rascunho ? nomeArquivo : `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}_RASCUNHO.xlsx`;
@@ -712,6 +716,9 @@
       : `<tr${pers ? ' class="pers"' : ''}><td>${esc(k)}</td><td>${esc(v)}${pers ? ' <b>(personalizado)</b>' : ''}</td></tr>`).join('') + '</table>').join('');
   }
   // relatório de emissão em PDF (relatorio.js): baixa e, com a pasta da empresa conectada, grava em projetos/emissoes/
+  // logo do PaletCad (PNG) para os documentos gerados (relatório de emissão)
+  let logoPng = null;
+  fetch('logo-horizontal.png').then((r) => (r.ok ? r.blob() : null)).then((b) => { if (!b) return; const fr = new FileReader(); fr.onload = () => { logoPng = fr.result; }; fr.readAsDataURL(b); }).catch(() => {});
   async function relatorioPdf(info) {
     if (!(window.Relatorio && window.jspdf)) { alert('Biblioteca de PDF não carregada (pasta lib/). O relatório não foi gerado.'); return; }
     const lp = calcularProjeto(), itens = consolidar(lp), pesoDe = (pecas) => pecas.reduce((s2, p) => s2 + (p.pesoTotal || 0), 0);
@@ -722,7 +729,7 @@
       totais: { posicoes: lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0), peso: pesoDe(itens), semPeso: info.pend.semPeso.length },
       conferencia: conferenciaDados(), pend: info.pend, historico: proj.historico || [],
       itens: semFix(itens).map((p) => ({ grupo: p.grupo, codigo: p.codigo || Engine.SEM.SA, desc: p.desc, qtd: p.qtd, compr: p.compr, pesoUnit: p.pesoUnit, pesoTotal: p.pesoTotal })),
-      fixadores: custoFixadores(itens),
+      fixadores: custoFixadores(itens), logo: logoPng,
     };
     const doc = Relatorio.gerar(D), nome = `${nomeArq()}_${$('revisao').value}-relatorio-emissao.pdf`;
     doc.save(nome);

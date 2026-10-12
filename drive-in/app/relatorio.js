@@ -20,6 +20,7 @@
 
     // cabeçalho
     doc.setFillColor(...TINTA); doc.rect(0, 0, W, 24, 'F');
+    if (D0.logo) { try { doc.addImage(D0.logo, 'PNG', W - M - 44, 6, 44, 10); } catch (e) { /* sem logo */ } } // logo PaletCad (fundo igual à faixa)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(255, 255, 255); doc.text('Relatório de Emissão — Drive-In', M, 11);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.text(`${D.cab.projeto || ''}  ·  ${D.cab.revisao || ''}  ·  emitido em ${D.data}`, M, 18);
     y = 32;
