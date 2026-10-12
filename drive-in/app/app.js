@@ -15,9 +15,9 @@
   try { proj = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) { proj = null; }
   if (!proj || !Array.isArray(proj.cortes) || !proj.cortes.length) proj = { atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] };
   // preenchimento (Gean): dados do projeto começam vazios e são obrigatórios; só os padrões da empresa vêm preenchidos (marcados "padrão")
-  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura'];
+  const OBRIG_CALC = ['coluna', 'espessura', 'ruas', 'niveis', 'frentePalete', 'profPalete', 'alturaPalete', 'cargaPalete', 'espacamentos', 'largura', 'uE']; // uE: chapa da longarina de túnel, sem padrão (Gean)
   const OBRIG_CAB = ['projeto', 'cliente', 'cidade', 'uf', 'responsavel', 'nomeCorte', 'qtdCorte'];
-  const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', uE: '1.8', espU: '2.65' };
+  const PADRAO = { balancoBaixo: '180', balancoAlto: '230', cA: '94', cB: '15', cC: '40', cD: '1.8', uA: '100', uB: '38', espU: '2.65' };
   // chapa padrão do perfil C do braço depende da coluna (des. 0004.0003.03.004 REV.05): #2,0 na COL 101, #1,8 nas demais
   const padraoCD = (colv) => (String(colv) === '101' ? '2.0' : '1.8');
   const padrao = (id) => (id === 'cD' ? padraoCD($('coluna').value) : PADRAO[id]);
