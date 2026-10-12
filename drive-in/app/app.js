@@ -785,7 +785,7 @@
   $('catVersao').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
   const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', 'navConfig'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
-  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); window.scrollTo(0, 0); };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
   $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });

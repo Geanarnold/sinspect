@@ -312,3 +312,7 @@ td.cad-ro{padding:7px 10px;font-size:13px;color:var(--texto)}
 td.cad-ro.num{text-align:right}
 td.cad-ro .vazio{color:var(--cinza-claro)}
 #tab-fix td.num,#tab-fix th.num{white-space:nowrap}
+
+/* cabeçalho: só o nome do app e a frase geral (sem citar estrutura); versão do catálogo só no configurador */
+body:not(.pg-config) .marca .sub-desc{display:none}
+.marca-link:focus{outline:none}.marca-link:focus-visible{outline:2px solid var(--laranja);outline-offset:4px;border-radius:8px}
