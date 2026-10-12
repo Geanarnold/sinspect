@@ -50,7 +50,7 @@
   // ---- furação da coluna (COL 80.DXF, Gean — padrão de todas as colunas, frontal e lateral): a barra (H mm, múltiplo de 50) apoia na chapa
   // de 4,75 da sapata; 1º oblongo a 25 mm da base da barra e passo 50 → oblongos a 29,75 + 50k do piso e a 25 mm das duas pontas; topo = H + 4,75
   const BASE_BARRA = 4.75, FURO_BASE = BASE_BARRA + 25;
-  const mmTxt = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
+  const mmTxt = (v) => String(Math.round(v)); // cotas do projeto sempre inteiras, sem casas decimais (Gean)
   // ---- peças paramétricas
   function coluna(H, holesRight) {
     // DI_COLUNA: 1000 mm (linhas 4,75..1004,75), furos a cada 50 a partir de 54,75, largura -19,85..49,9 (eixo em x = 15)
@@ -446,7 +446,7 @@
         put(mapPts(clone(LGC), (v) => [v[0] > 100 ? v[0] + dR : v[0] < -100 ? v[0] - dR : v[0], v[1]]), xm, yLg + 26.89, 'LONGARINA', nomeBloco('DI_LGTOPO_CONTRAV', 'RUA' + nb(rua)));
       } else
       put(stretchX(clone(src), LG_VAO0 / 2, (x2 - x1) - LG_VAO0), x1, yLg, 'LONGARINA', nomeBloco('DI_LGTOPO', 'RUA' + nb(rua), 'COL' + col));
-      cota(xs[i] + col / 2, H, xs[i + 1] - col / 2, H, 300, `${rua}`, false, 'p');
+      cota(xs[i] + col / 2, H, xs[i + 1] - col / 2, H, 300, `${Math.round(rua)}`, false, 'p');
     }
     const W = xs[R] + col / 2;
     const x0p = -1500, nP = Math.ceil((W + 3000) / 1000);
@@ -472,7 +472,7 @@
       topoBraco.forEach((yA, k) => {
         const bal = k === 0 ? F.balBaixo : F.balAlto, yC = yA - offApoio - 150; // abaixo do suporte U
         const a1 = xs[i] + uo, t1 = a1 + bal, a2 = xs[i + 1] - uo, t2 = a2 - bal;
-        cota(a1, yC, t1, yC, -1, `${bal}`, false, 'c'); cota(t1, yC, t2, yC, -1, `${Math.round(t2 - t1)}`, false, 'c'); cota(t2, yC, a2, yC, -1, `${bal}`, false, 'c');
+        cota(a1, yC, t1, yC, -1, `${Math.round(bal)}`, false, 'c'); cota(t1, yC, t2, yC, -1, `${Math.round(t2 - t1)}`, false, 'c'); cota(t2, yC, a2, yC, -1, `${Math.round(bal)}`, false, 'c');
       });
     }
     if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
@@ -591,7 +591,7 @@
     }
     text(W / 2, -1450, 110, 'FRENTE (ENTRADA DA EMPILHADEIRA)', 'COTAS', 0, 1, 'ROMANS');
     // cotas: ruas e largura total em cima; espaços (A1…An, do fundo para a frente) e profundidade total à esquerda
-    for (const i of RUAS) cota(X(i) + col / 2, D, X(i + 1) - col / 2, D, 300, `${rua}`, false, 'p');
+    for (const i of RUAS) cota(X(i) + col / 2, D, X(i + 1) - col / 2, D, 300, `${Math.round(rua)}`, false, 'p');
     cota(0, D, W, D, 700, RT > R ? `${Math.round(r.dimensoes.largura)} (${RT} RUAS)` : `${Math.round(W)}`, false, 'g');
     if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
       const xb = (X(R) + X(RT - 1)) / 2, z = [[xb, -400], [xb, D * 0.45], [xb - 120, D * 0.48], [xb + 120, D * 0.52], [xb, D * 0.55], [xb, D + 300]]; // interrupção entre a 5ª e a última rua
