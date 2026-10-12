@@ -14,7 +14,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 3,
- "pesoTotalKg": 928.013,
+ "pesoTotalKg": 927.261,
  "erros": [],
  "alertas": [
   "1º nível 1700 mm ajustado para 1701.75 mm (furação de 50 mm da coluna).",
@@ -144,35 +144,35 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 180 – COL 80 – C 94x40x15x1.8 (comp. C 265.3)",
+   "codigo": "CO040537",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (des. 0004.0003.02.002 REV.03)",
    "qtd": 8,
    "compr": 265.3,
-   "pesoUnit": 1.439
+   "pesoUnit": 1.385
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 180 – COL 80 – C 94x40x15x1.8 (comp. C 445.3)",
+   "codigo": "CO040538",
+   "desc": "SUP BRAÇO DUP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041641 (des. 0004.0003.02.002 REV.03)",
    "qtd": 8,
    "compr": 445.3,
-   "pesoUnit": 1.94
+   "pesoUnit": 1.942
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 230 – COL 80 – C 94x40x15x1.8 (comp. C 315.3)",
+   "codigo": "CO040536",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041638 (des. 0004.0003.02.002 REV.03)",
    "qtd": 16,
    "compr": 315.3,
-   "pesoUnit": 1.578
+   "pesoUnit": 1.534
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 230 – COL 80 – C 94x40x15x1.8 (comp. C 545.3)",
+   "codigo": "CO040530",
+   "desc": "SUP BRAÇO DUP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041630 (des. 0004.0003.02.002 REV.03)",
    "qtd": 16,
    "compr": 545.3,
-   "pesoUnit": 2.218
+   "pesoUnit": 2.241
   },
   {
    "grupo": "Fixadores dos braços",

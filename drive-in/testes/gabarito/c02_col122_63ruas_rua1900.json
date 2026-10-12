@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 114641.063,
+ "pesoTotalKg": 115105.733,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -212,35 +212,35 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 180 – COL 122 – C 94x40x15x1.8 (comp. C 307.3)",
+   "codigo": "CO040539",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041643 (des. 0004.0003.02.002 REV.03)",
    "qtd": 30,
    "compr": 307.3,
-   "pesoUnit": 1.734
+   "pesoUnit": 1.76
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 180 – COL 122 – C 94x40x15x1.8 (comp. C 487.3)",
+   "codigo": "CO040540",
+   "desc": "SUP BRAÇO DUP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041644 (des. 0004.0003.02.002 REV.03)",
    "qtd": 930,
    "compr": 487.3,
-   "pesoUnit": 2.235
+   "pesoUnit": 2.298
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 230 – COL 122 – C 94x40x15x1.8 (comp. C 357.3)",
+   "codigo": "CO040542",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041646 (des. 0004.0003.02.002 REV.03)",
    "qtd": 150,
    "compr": 357.3,
-   "pesoUnit": 1.873
+   "pesoUnit": 1.909
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 230 – COL 122 – C 94x40x15x1.8 (comp. C 587.3)",
+   "codigo": "CO040541",
+   "desc": "SUP BRAÇO DUP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041645 (des. 0004.0003.02.002 REV.03)",
    "qtd": 4650,
    "compr": 587.3,
-   "pesoUnit": 2.513
+   "pesoUnit": 2.599
   },
   {
    "grupo": "Fixadores dos braços",

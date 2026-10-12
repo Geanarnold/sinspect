@@ -201,11 +201,16 @@
       if (lateraisPonta) contBraco['S|' + bal] = (contBraco['S|' + bal] || 0) + lateraisPonta * colPorLateral;
       if (lateraisInternas) contBraco['D|' + bal] = (contBraco['D|' + bal] || 0) + lateraisInternas * colPorLateral;
     }
+    // braço padrão = perfil C 94x40x15 #1,8 e U #2,65 (valores padrão da tela) [CONFIRMAR que é o C dos braços cadastrados]
+    const bracoPadrao = perfilC.A === 94 && perfilC.C === 40 && perfilC.B === 15 && perfilC.D === 1.8 && ESP_U === 2.65;
     let totBracos = 0;
     const cTxt = `C ${perfilC.A}x${perfilC.C}x${perfilC.B}x${perfilC.D}`;
     for (const [m, q] of Object.entries(contBraco)) {
       totBracos += q;
       const [tipo, bal] = m.split('|'), b = Number(bal);
+      // braço padrão cadastrado (des. 0004.0003.02.002 REV.03): COL 80/101/122, simples/duplo, balanço 180/230, com perfil C e chapa do U padrão
+      const cadB = !dup && bracoPadrao && cat.produtos[`BRACO-${tipo}${bal}-${col}`];
+      if (cadB) { add('Braços', `BRACO-${tipo}${bal}-${col}`, cadB.desc, cadB.codigo, q, compC(tipo, b), cadB.peso, 'braço padrão cadastrado'); continue; }
       add('Braços', `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, `Braço ${dup ? 'específico ' : ''}${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – ${nomeCol} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3),
         dup ? 'braço específico da coluna duplada (sem desenho/SA): peso ESTIMADO com U de 160 abraçando as 2 montantes + perfil C' : 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }

@@ -14,7 +14,7 @@
  ],
  "posicoes": 200,
  "paletesPorRua": 5,
- "pesoTotalKg": 4044.436,
+ "pesoTotalKg": 4056.13,
  "erros": [],
  "alertas": [
   "1º nível 2800 mm ajustado para 2801.75 mm (furação de 50 mm da coluna).",
@@ -145,35 +145,35 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 180 – COL 101 – C 94x40x15x1.8 (comp. C 286.3)",
+   "codigo": "CO040444",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 101 – SA041464 PERFIL U COL 101 + SA041455 (des. 0004.0003.02.002 REV.03)",
    "qtd": 12,
    "compr": 286.3,
-   "pesoUnit": 1.587
+   "pesoUnit": 1.617
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 180 – COL 101 – C 94x40x15x1.8 (comp. C 466.3)",
+   "codigo": "CO040446",
+   "desc": "SUP BRAÇO DUP 180MM - COL 101 – SA041464 PERFIL U COL 101 + SA041456 (des. 0004.0003.02.002 REV.03)",
    "qtd": 42,
    "compr": 466.3,
-   "pesoUnit": 2.087
+   "pesoUnit": 2.158
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço simples balanço 230 – COL 101 – C 94x40x15x1.8 (comp. C 336.3)",
+   "codigo": "CO040443",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 101 – SA041464 PERFIL U COL 101 + SA041457 (des. 0004.0003.02.002 REV.03)",
    "qtd": 24,
    "compr": 336.3,
-   "pesoUnit": 1.726
+   "pesoUnit": 1.766
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço duplo balanço 230 – COL 101 – C 94x40x15x1.8 (comp. C 566.3)",
+   "codigo": "CO040445",
+   "desc": "SUP BRAÇO DUP 230MM - COL 101 – SA041464 PERFIL U COL 101 + SA041458 (des. 0004.0003.02.002 REV.03)",
    "qtd": 84,
    "compr": 566.3,
-   "pesoUnit": 2.365
+   "pesoUnit": 2.453
   },
   {
    "grupo": "Fixadores dos braços",
