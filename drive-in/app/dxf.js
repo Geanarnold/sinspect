@@ -686,7 +686,9 @@
     const porBloco = {}; for (const c of Fo.campos) (porBloco[c.bloco] = porBloco[c.bloco] || []).push(c);
     const put = (c, valor, hMax) => { if (valor == null || valor === '') return; const [x, y] = T(c.x, c.y); mc.textos.push({ x, y, h: Math.min(c.h, hMax || c.h) * S, s: String(valor), l: 'FOLHA_CAMPO', rot: c.rot, just: c.j, v: c.v, st: 'ROMANS' }); };
     const cab = { CIDADE: dd.cidade, FOLHA: dd.folha, CADASTRO: dd.processo, 'REVISÃO': dd.revisao, DATA: dd.data, UNIDADE: 'mm', ESCALA: `1/${S}`, DESENHISTA: dd.desenhista, RT: dd.rt, REPRESENTANTE: dd.representante, CLIENTE: dd.cliente, UF: dd.uf };
-    for (const c of porBloco['CABEÇALHO'] || []) put(c, cab[c.tag]);
+    // rascunho: o campo revisão sai uma vez só, "REV-xx RASCUNHO", com letra um pouco menor para caber na célula
+    if (dd.rascunho) cab['REVISÃO'] = `${dd.revisao} RASCUNHO`;
+    for (const c of porBloco['CABEÇALHO'] || []) put(c, cab[c.tag], dd.rascunho && c.tag === 'REVISÃO' ? c.h * 0.8 : undefined);
     const rv = (porBloco['Bloco Revisões de Projeto'] || []).slice().sort((a, b) => a.x - b.x);
     if (rv.length === 4 && dd.rev) { put(rv[0], dd.rev.num); put(rv[1], dd.rev.por); put(rv[2], dd.rev.data); put(rv[3], dd.rev.alteracao); }
     for (const c of porBloco['CAPCIDADE TOTAL'] || []) put(c, dd.capTotal);
@@ -694,9 +696,8 @@
     linhasP.forEach((y, k) => { const p = (dd.paletes || [])[k]; if (!p) return; const cs = pl.filter((c) => c.y === y).sort((a, b) => a.x - b.x); [p.modelo, p.larg, p.prof, p.alt, p.peso].forEach((v, i) => cs[i] && put(cs[i], v)); });
     const ds = (porBloco['Bloco Descrição Drive In'] || []).slice().sort((a, b) => a.x - b.x), D = dd.descricao || {};
     [D.bloco, D.dims, D.empilhamento, D.carga, D.porRua, D.ruas, D.total].forEach((v, i) => ds[i] && put(ds[i], v));
-    // rascunho: carimbo marcado e faixa "RASCUNHO – NÃO EMITIDO" sobre a folha (layer FOLHA_NOTA, vermelho)
+    // rascunho: faixa "RASCUNHO – NÃO EMITIDO" sobre a folha (layer FOLHA_NOTA, vermelho)
     if (dd.rascunho) {
-      for (const c of (porBloco['CABEÇALHO'] || []).filter((c) => c.tag === 'REVISÃO')) put(c, `${dd.revisao} RASCUNHO`);
       const [rx, ry] = T((ax0 + ax1) / 2, ay1 - 40);
       mc.textos.push({ x: rx, y: ry, h: 15 * S, s: 'RASCUNHO - NÃO EMITIDO - SEM CONFERÊNCIA', l: 'FOLHA_NOTA', rot: 0, just: 1, v: 2, st: 'ROMANS' });
     }
