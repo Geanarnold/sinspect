@@ -471,28 +471,34 @@
       </ul>`;
   }
 
+  let aprovacao = null; // preenchida no "Aprovar e emitir": troca o aviso de "sem validação" pelo registro da aprovação nas saídas oficiais
+  // lista de peças em Excel (.xlsx, planilha.js): aba do projeto consolidado, aba de fixadores com custo e uma aba por corte
   function csv(nomeArquivo) {
     if (!last) return;
     const rascunho = typeof nomeArquivo !== 'string'; // botão da lista = rascunho; o Emitir passa o nome oficial
-    const cab = ['Grupo', 'Código', 'Descrição', 'Qtd', 'Comprimento (mm)', 'Peso unit (kg)', 'Peso total (kg)', 'Obs / cortes'];
-    const lp = calcularProjeto();
-    const rows = [...(rascunho ? [['RASCUNHO – NÃO EMITIDO (lista gerada fora do Emitir, sem conferência)'], []] : []), [Engine.AVISO_ESTRUTURAL], [Engine.NOTA_RESPONSABILIDADE], [], ['PROJETO CONSOLIDADO', lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], cab];
-    for (const p of semFix(consolidar(lp))) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), [...new Set(p.cortes)].join(', ')]);
+    const lp = calcularProjeto(), B = (v) => ({ v, b: true });
+    const topo = [...(rascunho ? [[B('RASCUNHO – NÃO EMITIDO (lista gerada fora do Emitir, sem conferência)')]] : []),
+      [B(!rascunho && aprovacao ? `PROJETO CONFERIDO E APROVADO POR ${aprovacao.por.toUpperCase()} EM ${aprovacao.data}` : Engine.AVISO_ESTRUTURAL)], [Engine.NOTA_RESPONSABILIDADE],
+      [B('Projeto'), $('projeto').value, B('Cliente'), $('cliente').value, B('Revisão'), $('revisao').value], [B('Cortes'), lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], []];
+    const cab = ['Grupo', 'Código', 'Descrição', 'Qtd', 'Compr. (mm)', 'Peso unit. (kg)', 'Peso total (kg)', 'Cortes / obs.'].map(B);
+    const linhaPeca = (p, obs) => [p.grupo, p.codigo || Engine.SEM.SA, p.desc, { v: p.qtd, fmt: 'int' }, p.compr == null ? '' : Math.round(p.compr * 10) / 10, p.pesoUnit == null ? '' : { v: p.pesoUnit, fmt: 'kg' }, p.pesoTotal == null ? '' : { v: p.pesoTotal, fmt: 'kg' }, obs];
+    const larg = [24, 13, 60, 9, 12, 14, 15, 40];
+    const est = semFix(consolidar(lp)), pesoT = est.reduce((a, p) => a + (p.pesoTotal || 0), 0);
+    const folhas = [{ nome: 'Projeto', larguras: larg, linhas: [...topo, cab, ...est.map((p) => linhaPeca(p, [...new Set(p.cortes)].join(', '))), [], [B('TOTAL DO PROJETO (itens com peso)'), '', '', '', '', '', { v: pesoT, fmt: 'kg' }]] }];
     const cf = custoFixadores(consolidar(lp));
-    if (cf.lista.length) {
-      rows.push([], ['FIXADORES — CUSTO (quantidade total do projeto × preço unitário do cadastro)'], ['Código', 'Descrição', 'Qtd', 'Preço por peça (R$)', 'Valor (R$)', 'Onde entra']);
-      for (const e of cf.lista) rows.push([e.codigo, e.desc, e.qtd, e.preco == null ? 'SEM PREÇO' : e.preco.toLocaleString('pt-BR', { maximumFractionDigits: 4 }), e.valor == null ? '' : e.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), e.grupos.join(', ')]);
-      rows.push(['TOTAL DOS FIXADORES', cf.semPreco.length ? `${cf.semPreco.length} sem preço (fora do total)` : '', '', '', cf.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })]);
-    }
+    if (cf.lista.length) folhas.push({ nome: 'Fixadores', larguras: [12, 46, 10, 16, 16, 60], linhas: [...topo,
+      [B('FIXADORES — quantidade total do projeto × preço por peça do Cadastro')], ['Código', 'Descrição', 'Qtd', 'Preço por peça', 'Valor', 'Onde entra'].map(B),
+      ...cf.lista.map((e) => [e.codigo, e.desc, { v: e.qtd, fmt: 'int' }, e.preco == null ? 'SEM PREÇO' : { v: e.preco, fmt: 'brl4' }, e.valor == null ? '' : { v: e.valor, fmt: 'brl' }, e.grupos.join(', ')]),
+      [], [B('TOTAL DOS FIXADORES'), cf.semPreco.length ? `${cf.semPreco.length} sem preço (fora do total)` : '', '', '', { v: cf.total, fmt: 'bbrl' }]] });
     for (const x of lp) {
-      rows.push([], [`CORTE ${x.nome}`, `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], cab);
-      for (const p of semFix(x.r.pecas)) rows.push([p.grupo, p.codigo || Engine.SEM.SA, p.desc, p.qtd, p.compr ?? '', p.pesoUnit ?? '', p.pesoTotal == null ? '' : p.pesoTotal.toFixed(3), p.obs]);
       const fxc = x.r.pecas.filter(ehFixador);
-      if (fxc.length) { rows.push([], [`FIXADORES DO CORTE ${x.nome}`, 'quantidades por bloco'], ['Grupo', 'Código', 'Descrição', 'Qtd', 'Regra / obs.']); for (const p of fxc) rows.push([p.grupo, p.codigo || p.id, p.desc, p.qtd, p.obs]); }
+      folhas.push({ nome: `Corte ${x.nome || ''}`.trim(), larguras: larg, linhas: [[B(`CORTE ${x.nome}`), `${x.qtd} bloco(s) igual(is) — quantidades por bloco`], [], cab, ...semFix(x.r.pecas).map((p) => linhaPeca(p, p.obs)),
+        ...(fxc.length ? [[], [B(`FIXADORES DO CORTE ${x.nome}`)], ['Grupo', 'Código', 'Descrição', 'Qtd', '', '', '', 'Regra / obs.'].map(B), ...fxc.map((p) => [p.grupo, p.codigo || p.id, p.desc, { v: p.qtd, fmt: 'int' }, '', '', '', p.obs])] : [])] });
     }
-    const txt = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv' })); a.download = !rascunho ? nomeArquivo : `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}_RASCUNHO.csv`; a.click();
+    const nome = !rascunho ? nomeArquivo : `lista-pecas-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}_RASCUNHO.xlsx`;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(Planilha.gerar(folhas)); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
   }
+
 
   document.querySelectorAll('.painel .tab').forEach((t) => t.addEventListener('click', () => {
     const grupo = t.closest('.painel');
@@ -537,7 +543,7 @@
         cliente: maius($('cliente').value), cidade: maius($('cidade').value), uf: maius($('uf').value), representante: maius($('representante').value), rt: maius($('rt').value),
         desenhista: maius(u ? u.por : $('responsavel').value), processo: maius($('projeto').value), revisao: revTxt, data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, folha: `${i + 1}/${n}`,
         rev: { num: revNum, por: maius(u ? u.por : $('responsavel').value), data: u ? new Date(u.em).toLocaleDateString('pt-BR') : hoje, alteracao: alteracao.length > 70 ? alteracao.slice(0, 67) + '...' : alteracao },
-        capTotal: `${capTotal} PALLETS`, paletes: pals.slice(0, 2), rascunho: !!opc.rascunho,
+        capTotal: `${capTotal} PALLETS`, paletes: pals.slice(0, 2), rascunho: !!opc.rascunho, aprovado: opc.aprovado || null,
         descricao: { bloco: `BLOCO ${corte}${x.qtd > 1 ? ` (x${x.qtd})` : ''}`, dims: `${Math.round(r.dimensoes.largura)}/${Math.round(r.dimensoes.profundidade)}/${r.dimensoes.altura}`, empilhamento: `PISO${F.escravo ? '(2)' : ''}+${String(F.niveis.length).padStart(2, '0')} NÍVEIS`, carga: `${F.cargaPalete} KG`, porRua: `${r.paletesPorRua * camadas} PALLETS`, ruas: `${r.entradas.ruas} RUAS`, total: `${r.posicoes * x.qtd} PALLETS` },
       };
     };
@@ -711,7 +717,7 @@
     const lp = calcularProjeto(), itens = consolidar(lp), pesoDe = (pecas) => pecas.reduce((s2, p) => s2 + (p.pesoTotal || 0), 0);
     const D = {
       cab: Object.fromEntries(CAB.map((k) => [k, $(k).value])), data: new Date().toLocaleString('pt-BR'), aprovador: info.nome, catalogo: catVersaoTxt(),
-      responsabilidades: [Engine.AVISO_ESTRUTURAL, Engine.NOTA_RESPONSABILIDADE],
+      responsabilidades: [aprovacao ? `Projeto conferido e aprovado por ${aprovacao.por} em ${aprovacao.data}.` : Engine.AVISO_ESTRUTURAL, Engine.NOTA_RESPONSABILIDADE],
       cortes: lp.map((x) => ({ nome: x.nome, qtd: x.qtd, posicoes: x.r.posicoes * x.qtd, dims: `${Math.round(x.r.dimensoes.largura)} × ${Math.round(x.r.dimensoes.profundidade)} × ${x.r.dimensoes.altura}`, peso: pesoDe(x.r.pecas) * x.qtd })),
       totais: { posicoes: lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0), peso: pesoDe(itens), semPeso: info.pend.semPeso.length },
       conferencia: conferenciaDados(), pend: info.pend, historico: proj.historico || [],
@@ -753,9 +759,10 @@
         if (!$('emCiente').checked || !nome) { alert('Marque a ciência e informe seu nome.'); return false; }
         try { localStorage.setItem('drivein_usuario', nome); } catch (e) { /* sem storage */ }
         if (!(await salvarProjeto({ emissao: true, por: nome }))) return false;
-        baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha()), 'application/dxf');
-        csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.csv`);
-        const pdfP = pdfProjeto(`${nomeArq()}_${$('revisao').value}-projeto.pdf`);
+        aprovacao = { por: nome, data: new Date().toLocaleDateString('pt-BR') };
+        baixar(`${nomeArq()}_${$('revisao').value}-projeto.dxf`, DXF.dxfProjeto(calcularProjeto().map((x) => ({ r: x.r, corte: x.nome, qtd: x.qtd })), dadosFolha({ aprovado: aprovacao })), 'application/dxf');
+        csv(`${nomeArq()}_${$('revisao').value}-lista-pecas.xlsx`);
+        const pdfP = pdfProjeto(`${nomeArq()}_${$('revisao').value}-projeto.pdf`, { aprovado: aprovacao });
         if (pdfP && window.Pasta && Pasta.pronta) { try { await Pasta.escrever(`projetos/emissoes/${nomeArq()}_${$('revisao').value}-projeto.pdf`, pdfP.output('arraybuffer')); } catch (e) { /* fica só o download */ } }
         await relatorioPdf({ nome, pend: { alertas, semCod, semPeso, est, confirmar: pend } });
         return true;

@@ -738,7 +738,11 @@
       const blocos = comFolha && parcial(r) ? [melhor(MAX_RUAS_FRONTAL), melhor()] : [melhor()];
       if (qtd > 1) for (const mc of blocos) { mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 }); }
       for (const mc of blocos) if (comFolha) {
-        montarFolha(mc, { ...folhaDados(corte, i, lista.length), folha: `${++nf}/${nFolhas}` });
+        const dd = { ...folhaDados(corte, i, lista.length), folha: `${++nf}/${nFolhas}` };
+        // emissão aprovada (Gean): o aviso "sem validação" sai das folhas e entra o registro de quem conferiu e aprovou; no rascunho o aviso fica
+        if (dd.aprovado && !dd.rascunho) { const av = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
+          for (const t of mc.textos) if (t.s === av) t.s = `PROJETO CONFERIDO E APROVADO POR ${String(dd.aprovado.por || '').toUpperCase()} EM ${dd.aprovado.data || ''}`; }
+        montarFolha(mc, dd);
         shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]);
         dir = mc.bbox[2] + 0.1 * (mc.bbox[2] - mc.bbox[0]);
       }
