@@ -273,13 +273,13 @@
       if (lgTB) add('Longarinas', idItem, `${nome} – ${lgTB.desc}`, lgTB.codigo, qtd, lgTB.dim, lgTB.peso, obs);
       else {
         // rua sem modelo cadastrado (Gean): a longarina sai pelos componentes — 2 garras (esq./dir.), 2 fixações trav. superior e o perfil cortado
-        // perfil = rua − 203 mm: é o que fecha o peso dos 4 desenhos (0004.0003.02.005: 1350/1400/1480/1570 → perfil a 1,92 kg/m = peso − 0,88)
+        // perfil com o comprimento da rua (Gean). Atenção: com 1,92 kg/m isso dá ~12% acima do peso dos desenhos 1350/1400/1480/1570 [CONFIRMAR kg/m]
         const gE = prodOf(cat, 'SA040009'), gD = prodOf(cat, 'SA040008'), fx = prodOf(cat, 'SA041460'), pf = prodOf(cat, 'LGTB80-PERFIL');
-        const cP = larguraRua - 203, rot = `${nome} TB 80 – rua ${larguraRua} mm (montada por componentes)`;
+        const cP = larguraRua, rot = `${nome} TB 80 – rua ${larguraRua} mm (montada por componentes)`;
         add('Longarinas', `${idItem}-GE`, `${rot}: ${gE.desc}`, gE.codigo, qtd, null, gE.peso, obs);
         add('Longarinas', `${idItem}-GD`, `${rot}: ${gD.desc}`, gD.codigo, qtd, null, gD.peso, obs);
         add('Longarinas', `${idItem}-FX`, `${rot}: ${fx.desc}`, fx.codigo, 2 * qtd, null, fx.peso, `2 por longarina; ${obs}`);
-        add('Longarinas', `${idItem}-PF`, `${rot}: PP PERFIL LONGARINA ${(larguraRua / 1000).toFixed(2).replace('.', ',')} - ESP MT (corte ${cP} mm)`, pf.codigo, qtd, cP, +(pf.peso * cP / 1000).toFixed(3), `${pf.peso} kg/m; perfil = rua − 203 [CONFIRMAR]; sem SA cadastrado para este comprimento`);
+        add('Longarinas', `${idItem}-PF`, `${rot}: PP PERFIL LONGARINA ${(larguraRua / 1000).toFixed(2).replace('.', ',')} - ESP MT (corte ${cP} mm)`, pf.codigo, qtd, cP, +(pf.peso * cP / 1000).toFixed(3), `${pf.peso} kg/m [CONFIRMAR]; perfil no comprimento da rua; sem SA cadastrado para este comprimento`);
       }
     };
     // ---- travamento em zig-zag (treinamento slides 9 e 11): mesmo perfil das travessas da lateral (sliter 80 × 1,40), em todas as ruas
@@ -342,7 +342,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados saem por componentes (perfil = rua − 203 [CONFIRMAR]). Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados saem por componentes (perfil no comprimento da rua; kg/m do perfil a confirmar). Fixadores sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);

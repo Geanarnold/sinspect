@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 113423.525,
+ "pesoTotalKg": 113939.495,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -405,10 +405,10 @@
   {
    "grupo": "Longarinas",
    "codigo": "SA04XXXX",
-   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1697 mm)",
+   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1900 mm)",
    "qtd": 378,
-   "compr": 1697,
-   "pesoUnit": 3.258
+   "compr": 1900,
+   "pesoUnit": 3.648
   },
   {
    "grupo": "Travamento de topo (zig-zag)",
@@ -501,10 +501,10 @@
   {
    "grupo": "Longarinas",
    "codigo": "SA04XXXX",
-   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1697 mm)",
+   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1900 mm)",
    "qtd": 945,
-   "compr": 1697,
-   "pesoUnit": 3.258
+   "compr": 1900,
+   "pesoUnit": 3.648
   },
   {
    "grupo": "Longarinas",
