@@ -797,10 +797,13 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
-  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
+  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'] };
   const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
   $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
+  // treinamento (como preencher e usar o app): menu de cima e atalho na página inicial; o índice rola até a seção
+  for (const id of ['navTrein', 'iniTrein']) $(id).addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('trein'); });
+  document.querySelectorAll('.trein-indice a').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const alvo = document.querySelector(a.getAttribute('href')); if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   $('iniContinuarDI').addEventListener('click', () => mostrarPagina('config'));
   $('iniNovoDI').addEventListener('click', () => {
