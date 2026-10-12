@@ -1330,6 +1330,42 @@ window.CATALOGO = {
    "aco": "",
    "dim": null
   },
+  "SA040009": {
+   "tipo": "Longarina TB 80 (componente)",
+   "desc": "PP GARRA LONGARINA 3 ENCAIXES ESQ",
+   "codigo": "SA040009",
+   "peso": 0.24,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "SA040008": {
+   "tipo": "Longarina TB 80 (componente)",
+   "desc": "PP GARRA LONGARINA 3 ENCAIXES DIR",
+   "codigo": "SA040008",
+   "peso": 0.24,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "SA041460": {
+   "tipo": "Longarina TB 80 (componente)",
+   "desc": "FIXAÇÃO TRAV SUPERIOR",
+   "codigo": "SA041460",
+   "peso": 0.2,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "LGTB80-PERFIL": {
+   "tipo": "Longarina TB 80 (componente)",
+   "desc": "PP PERFIL LONGARINA TB 80 - ESP MT (por metro)",
+   "codigo": "SA04XXXX",
+   "peso": 1.92,
+   "unid": "kg/m",
+   "aco": "",
+   "dim": null
+  },
   "LGTB80-1350": {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,35 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",

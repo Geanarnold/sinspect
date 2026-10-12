@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 113467.184,
+ "pesoTotalKg": 113423.525,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -380,11 +380,35 @@
   },
   {
    "grupo": "Longarinas",
-   "codigo": "PKXXXXXX",
-   "desc": "Longarina de fundo TB 80 – 1900 mm (fora dos modelos cadastrados)",
+   "codigo": "SA040009",
+   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): PP GARRA LONGARINA 3 ENCAIXES ESQ",
    "qtd": 378,
-   "compr": 1900,
-   "pesoUnit": 4.171
+   "compr": null,
+   "pesoUnit": 0.24
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA040008",
+   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): PP GARRA LONGARINA 3 ENCAIXES DIR",
+   "qtd": 378,
+   "compr": null,
+   "pesoUnit": 0.24
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA041460",
+   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): FIXAÇÃO TRAV SUPERIOR",
+   "qtd": 756,
+   "compr": null,
+   "pesoUnit": 0.2
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de fundo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1697 mm)",
+   "qtd": 378,
+   "compr": 1697,
+   "pesoUnit": 3.258
   },
   {
    "grupo": "Travamento de topo (zig-zag)",
@@ -452,11 +476,35 @@
   },
   {
    "grupo": "Longarinas",
-   "codigo": "PKXXXXXX",
-   "desc": "Longarina de topo TB 80 – 1900 mm (fora dos modelos cadastrados)",
+   "codigo": "SA040009",
+   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): PP GARRA LONGARINA 3 ENCAIXES ESQ",
    "qtd": 945,
-   "compr": 1900,
-   "pesoUnit": 4.171
+   "compr": null,
+   "pesoUnit": 0.24
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA040008",
+   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): PP GARRA LONGARINA 3 ENCAIXES DIR",
+   "qtd": 945,
+   "compr": null,
+   "pesoUnit": 0.24
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA041460",
+   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): FIXAÇÃO TRAV SUPERIOR",
+   "qtd": 1890,
+   "compr": null,
+   "pesoUnit": 0.2
+  },
+  {
+   "grupo": "Longarinas",
+   "codigo": "SA04XXXX",
+   "desc": "Longarina de topo TB 80 – rua 1900 mm (montada por componentes): PP PERFIL LONGARINA 1,90 - ESP MT (corte 1697 mm)",
+   "qtd": 945,
+   "compr": 1697,
+   "pesoUnit": 3.258
   },
   {
    "grupo": "Longarinas",
