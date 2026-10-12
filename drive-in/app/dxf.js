@@ -648,7 +648,8 @@
   const tituloVista = (vista, corte) => `VISTA ${vista} CORTE ${String(corte || 'A').trim().toUpperCase()}`;
   // um corte = vista lateral + vista frontal lado a lado (modelo de primitivas + blocos)
   // maxRuasPlanta: vista superior parcial (só as primeiras ruas), para a folha sair numa escala maior
-  function modeloCorte(r, corte, maxRuasPlanta) {
+  // layout das 3 vistas na folha: 'A' superior embaixo da frontal; 'B' superior embaixo da lateral; 'C' as 3 lado a lado (o projetoModelo escolhe o que deixa a escala maior)
+  function modeloCorte(r, corte, maxRuasPlanta, layout = 'A') {
     const mL = montarLateral(r, tituloVista('LATERAL', corte)), mF = montarFrontal(r, tituloVista('FRONTAL', corte), corte);
     shiftModel(mF, mL.bbox[2] + 2000 - mF.bbox[0]);
     const aviso = (typeof root.Engine !== 'undefined' ? root.Engine : (typeof require === 'function' ? require('./engine.js') : {})).AVISO_ESTRUTURAL;
@@ -665,7 +666,8 @@
     }
     // vista superior embaixo da frontal (mesma escala e mesmo alinhamento em X das ruas)
     const mP = montarPlanta(r, tituloVista('SUPERIOR', corte) + (maxRuasPlanta && Number(r.entradas.ruas) > maxRuasPlanta + 1 ? ' (PARCIAL)' : ''), corte, maxRuasPlanta);
-    shiftModel(mP, mF.bbox[0] - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
+    if (layout === 'C') shiftModel(mP, mF.bbox[2] + 2000 - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - mP.bbox[1]);
+    else shiftModel(mP, (layout === 'B' ? mL.bbox[0] : mF.bbox[0]) - mP.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1500 - mP.bbox[3]);
     const junta = (ms) => ({ prims: [].concat(...ms.map((m) => m.prims)), items: [].concat(...ms.map((m) => m.items)), linhas: [].concat(...ms.map((m) => m.linhas)), textos: [].concat(...ms.map((m) => m.textos)),
       bbox: [Math.min(...ms.map((m) => m.bbox[0])), Math.min(...ms.map((m) => m.bbox[1])), Math.max(...ms.map((m) => m.bbox[2])), Math.max(...ms.map((m) => m.bbox[3]))] });
     const ms = [mL, mF, mP];
@@ -677,11 +679,17 @@
   // a geometria da folha vai como bloco FOLHA_A0 (inserido com a escala), textos e campos preenchidos como TEXT soltos
   const ESCALAS = [10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 750, 1000];
   const FOLHA = () => root.FOLHA || (typeof global !== 'undefined' && global.window && global.window.FOLHA) || null;
+  // menor escala padrão em que o desenho (bbox) cabe na área útil da folha (à esquerda do carimbo)
+  function escalaFolha(bbox) {
+    const Fo = FOLHA(); if (!Fo) return null;
+    const [bx0, by0, bx1, by1] = Fo.borda, ax0 = bx0 + 28, ax1 = Fo.carimbo_x - 12, ay0 = by0 + 18, ay1 = by1 - 18;
+    const W = bbox[2] - bbox[0], H = bbox[3] - bbox[1];
+    return ESCALAS.find((e) => W / e <= ax1 - ax0 && H / e <= ay1 - ay0) || Math.ceil(Math.max(W / (ax1 - ax0), H / (ay1 - ay0)) / 50) * 50;
+  }
   function montarFolha(mc, dd) {
     const Fo = FOLHA(); if (!Fo) return null;
     const [bx0, by0, bx1, by1] = Fo.borda, ax0 = bx0 + 28, ax1 = Fo.carimbo_x - 12, ay0 = by0 + 18, ay1 = by1 - 18;
-    const W = mc.bbox[2] - mc.bbox[0], H = mc.bbox[3] - mc.bbox[1];
-    const S = ESCALAS.find((e) => W / e <= ax1 - ax0 && H / e <= ay1 - ay0) || Math.ceil(Math.max(W / (ax1 - ax0), H / (ay1 - ay0)) / 50) * 50;
+    const S = escalaFolha(mc.bbox);
     const cxP = (ax0 + ax1) / 2, cyP = (ay0 + ay1) / 2, cxM = (mc.bbox[0] + mc.bbox[2]) / 2, cyM = (mc.bbox[1] + mc.bbox[3]) / 2;
     const T = (x, y) => [cxM + (x - cxP) * S, cyM + (y - cyP) * S];
     // títulos das vistas com a escala
@@ -724,7 +732,10 @@
     const parcial = (r) => Number(r.entradas.ruas) > MAX_RUAS_SUPERIOR;
     const nFolhas = lista.reduce((s2, x) => s2 + (parcial(x.r) ? 2 : 1), 0); let nf = 0;
     lista.forEach(({ r, corte, qtd }, i) => {
-      const blocos = comFolha && parcial(r) ? [modeloCorte(r, corte, MAX_RUAS_FRONTAL), modeloCorte(r, corte)] : [modeloCorte(r, corte)];
+      // com a folha: para cada folha, testa os 3 arranjos das vistas e fica com o que permite a maior escala (vistas maiores); empate → arranjo A (o de sempre)
+      const melhor = (maxR) => { if (!comFolha) return modeloCorte(r, corte, maxR); let best = null, bS = Infinity;
+        for (const lay of ['A', 'B', 'C']) { const mc0 = modeloCorte(r, corte, maxR, lay), s0 = escalaFolha(mc0.bbox); if (s0 < bS) { bS = s0; best = mc0; } } return best; };
+      const blocos = comFolha && parcial(r) ? [melhor(MAX_RUAS_FRONTAL), melhor()] : [melhor()];
       if (qtd > 1) for (const mc of blocos) { mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${String(corte).toUpperCase()} - ${qtd} BLOCOS IGUAIS`, l: '4 - TEXTO DE ESCALA E VISTA', rot: 0, just: 1 }); }
       for (const mc of blocos) if (comFolha) {
         montarFolha(mc, { ...folhaDados(corte, i, lista.length), folha: `${++nf}/${nFolhas}` });

@@ -524,7 +524,7 @@
   }
  ],
  "dxf": {
-  "tamanhoKB": 3050,
+  "tamanhoKB": 3060,
   "inserts": {
    "DI_BR": 72,
    "DI_CANELEIRA": 12,
@@ -546,14 +546,14 @@
    "FOLHA_A0_SUPRA": 2
   },
   "textos": [
-   "VISTA FRONTAL CORTE A - ESC. 1/200",
+   "VISTA FRONTAL CORTE A - ESC. 1/150",
    "VISTA FRONTAL CORTE A - ESC. 1/50",
-   "VISTA LATERAL CORTE A - ESC. 1/200",
+   "VISTA LATERAL CORTE A - ESC. 1/150",
    "VISTA LATERAL CORTE A - ESC. 1/50",
    "VISTA PARCIAL: 5 DE 63 RUAS - LARGURA TOTAL 127508 mm",
    "VISTA PARCIAL: RUAS 1 A 5 E 63 (DE 63) - LARGURA TOTAL 127508 mm",
    "VISTA SUPERIOR CORTE A (PARCIAL) - ESC. 1/50",
-   "VISTA SUPERIOR CORTE A - ESC. 1/200"
+   "VISTA SUPERIOR CORTE A - ESC. 1/150"
   ],
   "problemas": []
  }
