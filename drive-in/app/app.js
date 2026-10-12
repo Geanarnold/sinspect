@@ -808,6 +808,7 @@
     document.querySelectorAll('.trein-aba').forEach((x) => x.classList.toggle('ativa', x === b));
     document.querySelectorAll('.trein-painel').forEach((pn) => pn.classList.toggle('hidden', pn.dataset.aba !== b.dataset.aba)); window.scrollTo(0, 0);
   }));
+  document.querySelectorAll('.ir-drivein').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.querySelector('.trein-aba[data-aba="drivein"]').click(); }));
   document.querySelectorAll('.trein-mini a').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const alvo = document.querySelector(a.getAttribute('href')); if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   $('iniContinuarDI').addEventListener('click', () => mostrarPagina('config'));

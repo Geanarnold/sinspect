@@ -200,32 +200,25 @@
       <button type="button" class="trein-aba" disabled title="Em breve">Porta-Palete <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Cantilever <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Flow Rack <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Piso Elevado <small>em breve</small></button>
     </div>
     <div class="trein-painel" data-aba="geral">
-      <div class="trein-conteudo">
-      <h2 id="t-oque">O que é o PaletCad</h2>
-      <p>O PaletCad é a ferramenta da engenharia para <b>orçar</b> e <b>projetar</b> sistemas de armazenagem. A partir das medidas do cliente (palete, quantidade de posições, galpão), ele monta a estrutura com as peças padrão da empresa e entrega, de uma vez, o que o comercial precisa para orçar e o que a engenharia precisa para desenhar.</p>
-      <div class="trein-cards">
-        <div class="trein-card"><h3>Orçamentos</h3>
-          <ul>
-            <li><b>Lista de peças</b> completa, com código, quantidade e comprimento de cada item.</li>
-            <li><b>Peso</b> de cada peça e o <b>peso total</b> da estrutura e por posição de palete: a base do preço do aço.</li>
-            <li><b>Valor dos fixadores</b> (parafusos, porcas, arruelas, chumbadores), pela quantidade × preço de cada um.</li>
-            <li>Planilha <b>Excel</b> pronta para montar a proposta.</li>
-          </ul></div>
-        <div class="trein-card"><h3>Projetos</h3>
-          <ul>
-            <li><b>Desenho</b> nas três vistas (lateral, frontal e superior) na <b>folha A0 SUPRA</b>, com carimbo preenchido.</li>
-            <li>Arquivos em <b>DXF</b> (AutoCAD, cada peça em bloco) e em <b>PDF</b>.</li>
-            <li><b>Conferência e aprovação</b> com o nome de quem aprovou, <b>revisões</b> registradas e relatório de emissão.</li>
-            <li>Todos os projetos guardados na <b>pasta da empresa</b>, consultados na página Projetos.</li>
-          </ul></div>
-      </div>
-      <h2 id="t-estruturas">Para quais estruturas</h2>
-      <p>Cada tipo de estrutura tem regras, peças e desenho próprios. Hoje está disponível o <b>Drive-In</b>; Porta-Palete, Cantilever, Flow Rack e Piso Elevado entram aos poucos. Para aprender a usar, abra a aba da estrutura (por exemplo, <b>"Como fazer um Drive-In"</b>).</p>
-      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/01-inicio.jpg" alt="Página inicial"><figcaption>Página inicial: cada card é um tipo de estrutura</figcaption></figure>
-      <h2 id="t-oquenao">O que o PaletCad não faz</h2>
-      <p class="trein-alerta"><b>Não faz dimensionamento estrutural.</b> Ele monta a estrutura com as peças padrão e calcula quantidades e pesos; a verificação de cargas, folgas, empilhadeira e interferências do galpão é de quem projeta e aprova.</p>
-      <h2 id="t-resp">Responsabilidades</h2>
-      <p>As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável. Ao aprovar, seu nome vai nas folhas.</p>
+      <div class="trein-conteudo apres">
+        <div class="apres-topo"><img src="logo-horizontal.svg" alt="PaletCad" width="280" height="64"><p><b>Orçamentos e projetos de sistemas de armazenagem</b>, a partir das medidas do cliente e com as peças padrão da empresa.</p></div>
+        <div class="apres-fluxo">
+          <div><b>Dados do cliente</b><small>palete, posições, galpão</small></div><span>›</span>
+          <div class="destaque"><b>PaletCad</b><small>monta a estrutura com as peças padrão</small></div><span>›</span>
+          <div><b>Orçamento + projeto</b><small>lista, pesos, valores e desenho</small></div>
+        </div>
+        <div class="trein-cards">
+          <div class="trein-card"><h3>Orçamentos</h3><ul>
+            <li>Lista de peças com código e quantidade</li>
+            <li>Peso total e por posição</li>
+            <li>Valor dos fixadores e planilha Excel</li></ul></div>
+          <div class="trein-card"><h3>Projetos</h3><ul>
+            <li>3 vistas na folha A0 SUPRA, em DXF e PDF</li>
+            <li>Conferência e aprovação com o nome de quem aprova</li>
+            <li>Revisões guardadas na pasta da empresa</li></ul></div>
+        </div>
+        <div class="apres-estr"><b>Estruturas:</b> <span class="ok">Drive-In</span><span>Porta-Palete · em breve</span><span>Cantilever · em breve</span><span>Flow Rack · em breve</span><span>Piso Elevado · em breve</span></div>
+        <p class="apres-nota">Para aprender a usar, abra a aba da estrutura, por exemplo <a href="#" class="ir-drivein">"Como fazer um Drive-In"</a>. O PaletCad não faz dimensionamento estrutural: a verificação estrutural e operacional é do engenheiro responsável e de quem aprova o projeto.</p>
       </div>
     </div>
     <div class="trein-painel hidden" data-aba="drivein">
