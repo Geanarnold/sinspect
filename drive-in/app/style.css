@@ -15,6 +15,7 @@ body{margin:0;background:var(--fundo);color:var(--texto);font:14px/1.45 "Segoe U
 .wrap{max-width:1680px;margin:0 auto;padding:0 20px}
 .hdr{display:flex;align-items:center;gap:14px;height:60px}
 .logo{width:38px;height:38px;border-radius:8px;object-fit:contain;background:var(--laranja);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:.02em}
+.marca-link{display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none}
 .marca h1{font-size:16px;font-weight:700;margin:0;line-height:1.2}
 .marca .modulo{font-weight:600;color:var(--laranja)}
 .marca .sub{font-size:12px;color:var(--cinza-claro)}
@@ -251,7 +252,7 @@ input[readonly]{background:#f3f4f6;color:#374151}
 .mob-abas{display:none}
 @media (max-width: 700px) {
   .topo{position:static}
-  .nav{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
   .nav a{white-space:normal;text-align:center;line-height:1.2;font-size:11.5px;padding:7px 4px;gap:5px}
   .mob-abas{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--topo);box-shadow:0 -4px 14px rgba(15,23,42,.25)}
   .mob-abas button{min-height:46px;border:0;border-radius:10px;background:rgba(255,255,255,.08);color:#cbd5e1;font-size:14px}
@@ -264,4 +265,40 @@ input[readonly]{background:#f3f4f6;color:#374151}
   .lateral-esq{padding:12px}
   .kpi{padding:10px 12px}.kpi .s{font-size:11px}
   .rodape-app{padding-bottom:96px}
+}
+
+/* ---- página inicial: escolha do tipo de estrutura */
+.inicio{max-width:1180px;margin:0 auto;padding:28px 20px 40px}
+.ini-topo{background:var(--topo);border-radius:14px;padding:22px 24px;margin-bottom:24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.ini-logo{height:56px;width:auto}
+.ini-topo p{margin:0;color:#cbd5e1;font-size:14px;max-width:420px}
+.inicio h2{font-size:20px;margin:0 0 4px;color:var(--tinta)}
+.ini-lead{color:var(--cinza);margin:0 0 18px}
+.ini-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.ini-card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--sombra);position:relative;transition:.15s}
+.ini-card:not(.off):hover{border-color:var(--laranja);box-shadow:0 4px 14px rgba(232,82,10,.15)}
+.ini-card svg{width:100%;height:96px;background:var(--fundo);border-radius:8px}
+.ini-card h3{margin:0;font-size:15px;color:var(--tinta)}
+.ini-card p{margin:0;font-size:12.5px;color:var(--cinza);line-height:1.4}
+.ini-acao{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+.ini-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;position:absolute;top:12px;right:12px}
+.ini-tag.ok{background:#dcfce7;color:#166534}.ini-tag.breve{background:#e2e8f0;color:#475569}
+.ini-card.off{opacity:.62}
+.ini-sec{margin-top:28px}
+.ini-sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ini-sec-h h3{margin:0;font-size:15px}
+.ini-sec-h a{font-size:13px;color:var(--laranja);font-weight:600;text-decoration:none}
+.ini-rec{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden}
+.ini-rec .ini-vazio{padding:14px 16px;color:var(--cinza);font-size:13px;margin:0}
+.ini-lin{display:grid;grid-template-columns:30px 1.4fr 1fr .8fr .9fr;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--borda);font-size:13px;cursor:pointer}
+.ini-lin:hover{background:var(--laranja-claro)}
+.ini-lin.cab{border-top:0;background:var(--fundo);font-weight:600;color:var(--cinza);font-size:12px;cursor:default}
+.ini-mini{width:26px;height:26px;border-radius:6px;background:var(--laranja-claro);color:var(--laranja);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px}
+@media (max-width:700px){
+  .inicio{padding:16px 12px 32px}
+  .ini-topo{padding:16px;gap:10px}.ini-logo{height:44px}.ini-topo p{font-size:12.5px}
+  .ini-cards{grid-template-columns:1fr 1fr;gap:10px}
+  .ini-card{padding:12px}.ini-card svg{height:70px}.ini-card p{display:none}
+  .ini-acao button{flex:1 1 100%}
+  .ini-lin{grid-template-columns:30px 1fr auto}.ini-lin>:nth-child(3),.ini-lin>:nth-child(4){display:none}
 }

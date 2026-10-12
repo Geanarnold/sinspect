@@ -744,8 +744,32 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
-  const PAGINAS = { config: ['paginaConfig', 'navConfig'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
-  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); };
+  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', 'navConfig'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); window.scrollTo(0, 0); };
+  // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
+  $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
+  $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
+  $('iniContinuarDI').addEventListener('click', () => mostrarPagina('config'));
+  $('iniNovoDI').addEventListener('click', () => {
+    const temDados = CAB.some((k) => k !== 'revisao' && $(k).value.trim()) || proj.cortes.some((c) => !vazioDados(c.dados));
+    if (temDados) $('btnNovoProj').click(); // pede confirmação e limpa
+    else { for (const k of CAB) $(k).value = k === 'revisao' ? 'REV.00' : ''; carregarProjeto({ atual: 0, cortes: [{ nome: '', qtd: '', dados: null }] }); renderRev(); }
+    mostrarPagina('config');
+  });
+  $('iniVerTodos').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('proj'); });
+  function renderRecentes() {
+    const box = $('iniRecentes');
+    if (!(window.Pasta && Pasta.pronta)) { box.innerHTML = '<p class="ini-vazio">Conecte a pasta da empresa (botão "Escolher pasta" no Configurador) para ver os projetos recentes.</p>'; return; }
+    const lista = [...painel].sort((a, b) => String(b.revEm || '').localeCompare(String(a.revEm || ''))).slice(0, 8);
+    if (!lista.length) { box.innerHTML = '<p class="ini-vazio">Nenhum projeto salvo na pasta ainda.</p>'; return; }
+    const cls = { 'Em andamento': 'and', Emitido: 'emit', 'Alterado após emissão': 'alt' };
+    box.innerHTML = '<div class="ini-lin cab"><span></span><span>Projeto</span><span>Cliente</span><span>Projetista</span><span>Situação</span></div>'
+      + lista.map((x) => `<div class="ini-lin" data-arq="${esc(x.arq)}"><span class="ini-mini">DI</span><span><b>${esc(x.projeto)}</b> · ${esc(x.rev)}</span><span>${esc(x.cliente)}</span><span>${esc(x.revPor || x.criadoPor || '–')}</span><span><span class="sit ${cls[x.sit]}">${esc(x.sit)}</span></span></div>`).join('');
+    box.querySelectorAll('.ini-lin[data-arq]').forEach((el) => el.addEventListener('click', () => {
+      const x = painel.find((y) => y.arq === el.dataset.arq); if (!x) return;
+      try { abrirTexto(x.txt); mostrarPagina('config'); } catch (e) { alert('Não foi possível abrir: ' + e.message); }
+    }));
+  }
   $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('config'); });
   $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('cad'); });
   $('navProj').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('proj'); });
@@ -797,5 +821,6 @@
   $('pjAtualizar').addEventListener('click', carregarPainel);
   if (window.Cadastro) Cadastro.init();
   render(); renderRev();
-  if (window.Pasta) Pasta.restaurar().then(async (ok) => { await renderPasta(); if (ok && window.Cadastro) await Cadastro.carregarDaPasta(); }); else renderPasta();
+  if (window.Pasta) Pasta.restaurar().then(async (ok) => { await renderPasta(); if (ok && window.Cadastro) await Cadastro.carregarDaPasta(); if (!$('paginaInicio').classList.contains('hidden')) mostrarPagina('inicio'); }); else renderPasta();
+  mostrarPagina('inicio');
 })();
