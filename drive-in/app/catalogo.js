@@ -1366,6 +1366,46 @@ window.CATALOGO = {
    "aco": "",
    "dim": null
   },
+  "LGFUNDO-1350": {
+   "tipo": "Longarina travamento fundo",
+   "desc": "LONGARINA TRAVAMENTO FUNDO 1,35 MT – kit CO041037 + 4 INT0812 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.015 REV.04)",
+   "codigo": "PK041378",
+   "peso": 4.027,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1350,
+   "total": 1420.3
+  },
+  "LGFUNDO-1400": {
+   "tipo": "Longarina travamento fundo",
+   "desc": "LONGARINA TRAVAMENTO FUNDO 1,40 MT – kit CO040546 + 4 INT0812 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.015 REV.04)",
+   "codigo": "PK041335",
+   "peso": 4.158,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1400,
+   "total": 1470.3
+  },
+  "LGFUNDO-1480": {
+   "tipo": "Longarina travamento fundo",
+   "desc": "LONGARINA TRAVAMENTO FUNDO 1,48 MT – kit CO041261 + 4 INT0812 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.015 REV.04)",
+   "codigo": "PK041635",
+   "peso": 4.368,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1480,
+   "total": 1550.3
+  },
+  "LGFUNDO-1570": {
+   "tipo": "Longarina travamento fundo",
+   "desc": "LONGARINA TRAVAMENTO FUNDO 1,57 MT – kit CO041094 + 4 INT0812 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.015 REV.04)",
+   "codigo": "PK041447",
+   "peso": 4.605,
+   "unid": "kg",
+   "aco": "",
+   "dim": 1570,
+   "total": 1640.3
+  },
   "LGTB80-1350": {
    "tipo": "Longarina TB 80 (topo/fundo)",
    "desc": "PP LONG 1,35 TB 80 - ESP DRIVE IN – kit com 2 INT0648 + 2 INT0650",

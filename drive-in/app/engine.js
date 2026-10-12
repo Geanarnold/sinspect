@@ -303,7 +303,15 @@
     for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua; 50 mm acima da sapata/suporte até 50 mm abaixo do suporte seguinte`);
     // longarina de fundo: mesmo perfil da longarina de topo (DI_LGTOPO, acompanha a largura da rua), 1 por rua em cada nível de braço, cor laranja no desenho
     const compLgFundo = larguraRua;
-    if (niveisArm.length) addLgTB80('LG-FUNDO', 'Longarina de fundo', R * niveisArm.length, `1 por rua × ${niveisArm.length} nível(is)`);
+    // longarina de fundo = LONGARINA TRAVAMENTO FUNDO (des. 0004.0003.01.015 REV.04), produto próprio (não é a TB 80 de topo): kit por largura de rua
+    // com 4 INT0812 + 4 INT0648 + 4 INT0650; rua sem modelo: peso pela reta dos 4 modelos (0,481 + 2,627 kg/m × rua), marcado como estimado
+    if (niveisArm.length) {
+      const nF = R * niveisArm.length, obsF = `1 por rua × ${niveisArm.length} nível(is)`;
+      const lf = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGFUNDO-') && p.dim != null).map(([id, p]) => ({ id, ...p })).find((p) => Math.abs(p.dim - larguraRua) <= 5);
+      if (lf) add('Longarinas', 'LG-FUNDO', `Longarina de fundo – ${lf.desc}`, lf.codigo, nF, lf.dim, lf.peso, obsF);
+      else add('Longarinas', 'LG-FUNDO', `Longarina travamento fundo – rua ${larguraRua} mm (fora dos modelos cadastrados)`, SEM.PK, nF, larguraRua, +(0.481 + 0.002627 * larguraRua).toFixed(3), `${obsF}; peso ESTIMADO pela reta dos modelos 1350/1400/1480/1570`);
+      for (const id of ['INT0812', 'INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 4 * nF, null, null, `4 por longarina de fundo (já incluídos no PK)`);
+    }
     // TOPO (plano do topo, VISTA_SUPERIOR.dxf): só diagonais, alternadas, uma por vão entre linhas de coluna, presas nas chapas de ponta das
     // longarinas superiores (DI_LONG_VIST_SUP): furos a 60 mm para dentro da face da coluna (c/c em x = rua − 120) e, ao longo da profundidade,
     // a 65 mm da alma para o lado da longarina (dentro do quadro) ou 25 mm para o lado de fora (vão entre quadros / solteira)
@@ -338,11 +346,11 @@
     }
     // VISTA_SUPERIOR.dxf: longarina superior (DI_LONG_VIST_SUP) em todas as linhas de coluna — é nela que as diagonais de topo são fixadas — confirmado pelo Gean
     addLgTB80('LGTOPO', 'Longarina de topo', R * colPorLateral, `1 por rua em cada linha de coluna (${colPorLateral} por rua), no topo`);
-    if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo/fundo (já incluídos no PK)`);
+    if (nLgTB80) for (const id of ['INT0648', 'INT0650']) add('Longarinas', id, prodOf(cat, id).desc, id, 2 * nLgTB80, null, null, `2 por longarina de topo (já incluídos no PK)`);
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados saem por componentes (perfil no comprimento da rua; kg/m do perfil a confirmar). Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
