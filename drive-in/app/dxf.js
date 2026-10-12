@@ -411,6 +411,13 @@
       const ya = snapApoio(yN) + offApoio, x1 = xs[i] + hx + 2.23, x2 = xs[i + 1] - hx - 2.23;
       put(stretchX(clone(B().DI_LGTOPO).map((q) => ({ ...q, l: 'LONGARINA_FUNDO' })), 1931.73 / 2, (x2 - x1) - 1931.73), x1, ya - 111.89, 'LONGARINA_FUNDO', nomeBloco('DI_LG_FUNDO', 'RUA' + nb(rua), 'COL' + col));
     }
+    // longarina de fundo no nível do chão (Gean): 1 por rua, a 300 mm do piso (centro do corpo de 76 mm), sem braço → vai de coluna a coluna
+    // (mesmo bloco DI_LGFUNDO, pontas esticadas até a face do apoio na coluna: ponta = rua/2 − chapa do U); sem stop
+    if (F.lgFundo && LGF) for (let i = 0; i < R; i++) {
+      const ponta = rua / 2 - F.espU, d = ponta - 519, xm = (xs[i] + xs[i + 1]) / 2;
+      const semStop = clone(LGF).filter((q) => { const p = q.p || (q.c ? [q.c] : []); return !p.length || Math.max(...p.map((v) => v[1])) <= 84 + 1e-6; }); // tira os stops (acima do corpo)
+      put(mapPts(semStop, (v) => [v[0] > 100 ? v[0] + d : v[0] < -100 ? v[0] - d : v[0], v[1]]), xm, 300 - 38, 'LONGARINA_FUNDO', nomeBloco('DI_LGFUNDO', 'RUA' + nb(rua), 'CHAO'));
+    }
     // paletes: centralizados na rua (100 mm de cada coluna), no chão e apoiados no topo do C de cada nível
     if (F.frentePalete > 0 && F.alturaPalete > 0) {
       const ret = (x0, y0, w, h) => put(geoPalete(w, h, true), x0, y0, 'PALETE', nomeBloco('DI_PALETE', nb(w) + 'X' + nb(h)));
