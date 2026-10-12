@@ -65,18 +65,20 @@
   async function desbloquear() {
     const m = meta();
     if (!m.senhaHash) {
-      const a = prompt('Este catálogo ainda não tem senha. Defina a senha de edição (mín. 6 caracteres):'); if (!a) return;
-      if (a.length < 6) { alert('Senha muito curta.'); return; }
-      if (prompt('Repita a senha:') !== a) { alert('As senhas não conferem.'); return; }
+      const a = prompt('Este catálogo ainda não tem senha. Defina a senha de edição (mín. 6 caracteres):'); if (!a) return false;
+      if (a.length < 6) { alert('Senha muito curta.'); return false; }
+      if (prompt('Repita a senha:') !== a) { alert('As senhas não conferem.'); return false; }
       m.senhaHash = await sha256(a); alterado = true; liberado = true;
       msg('Senha definida. Ela passa a valer quando a próxima versão for publicada.');
     } else {
-      const a = prompt('Senha de edição do catálogo:'); if (a == null) return;
-      if ((await sha256(a)) !== m.senhaHash) { alert('Senha incorreta.'); return; }
+      const a = prompt('Senha de edição do catálogo:'); if (a == null) return false;
+      if ((await sha256(a)) !== m.senhaHash) { alert('Senha incorreta.'); return false; }
       liberado = true; msg('Edição liberada nesta sessão. Publique uma nova versão para valer para todos.');
     }
     renderTabela(); estado();
+    return liberado;
   }
+  function sair() { liberado = false; renderTabela(); estado(); msg('Modo administrador encerrado.'); }
   async function publicar() {
     if (!liberado) return;
     TABELAS[atual].gravar(window.CATALOGO, rows);
@@ -142,5 +144,5 @@
     $('cadRestaurar').addEventListener('click', () => { if (!confirm('Descartar todas as edições e voltar ao catálogo padrão?')) return; const m0 = meta(); substituir(PADRAO); window.CATALOGO.meta = m0; alterado = true; renderTabela(); estado(); $('cadMsg').textContent = 'Valores do catálogo base restaurados (não publicado).'; if (window.recalcular) window.recalcular(); });
     renderTabela(); estado();
   }
-  window.Cadastro = { init, carregarDaPasta };
+  window.Cadastro = { init, carregarDaPasta, desbloquear, sair, admin: () => liberado };
 })();

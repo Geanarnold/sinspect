@@ -784,8 +784,8 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
-  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', 'navConfig'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
-  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
+  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'] };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
   $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
@@ -810,8 +810,15 @@
       try { abrirTexto(x.txt); mostrarPagina('config'); } catch (e) { alert('Não foi possível abrir: ' + e.message); }
     }));
   }
-  $('navConfig').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('config'); });
-  $('navCad').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('cad'); });
+  $('navCad').addEventListener('click', (e) => { e.preventDefault(); if (window.Cadastro && Cadastro.admin()) mostrarPagina('cad'); });
+  // Cadastro de produtos: só aparece no menu depois do login do administrador (senha do catálogo), pelo link no rodapé.
+  // Configurador: sem botão no menu — entra-se escolhendo o tipo de estrutura na página inicial (ou abrindo um projeto).
+  const modoAdmin = (on) => { $('navCad').classList.toggle('hidden', !on); $('adminLink').textContent = on ? 'sair do modo administrador' : 'acesso do administrador'; };
+  $('adminLink').addEventListener('click', async (e) => {
+    e.preventDefault(); if (!window.Cadastro) return;
+    if (Cadastro.admin()) { Cadastro.sair(); modoAdmin(false); if (!$('paginaCad').classList.contains('hidden')) mostrarPagina('inicio'); return; }
+    if (await Cadastro.desbloquear()) { modoAdmin(true); mostrarPagina('cad'); }
+  });
   $('navProj').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('proj'); });
   // ---------- painel de projetos (lê a pasta da empresa): quem criou, última revisão, situação, posições e peso ----------
   let painel = [];

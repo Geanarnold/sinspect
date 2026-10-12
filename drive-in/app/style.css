@@ -252,7 +252,7 @@ input[readonly]{background:#f3f4f6;color:#374151}
 .mob-abas{display:none}
 @media (max-width: 700px) {
   .topo{position:static}
-  .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  .nav{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}
   .nav a{white-space:normal;text-align:center;line-height:1.2;font-size:11.5px;padding:7px 4px;gap:5px}
   .mob-abas{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--topo);box-shadow:0 -4px 14px rgba(15,23,42,.25)}
   .mob-abas button{min-height:46px;border:0;border-radius:10px;background:rgba(255,255,255,.08);color:#cbd5e1;font-size:14px}
@@ -316,3 +316,5 @@ td.cad-ro .vazio{color:var(--cinza-claro)}
 /* cabeçalho: só o nome do app e a frase geral (sem citar estrutura); versão do catálogo só no configurador */
 body:not(.pg-config) .marca .sub-desc{display:none}
 .marca-link:focus{outline:none}.marca-link:focus-visible{outline:2px solid var(--laranja);outline-offset:4px;border-radius:8px}
+
+.rodape-app a{color:var(--cinza);text-decoration:underline}
