@@ -125,3 +125,16 @@ Responder 1 a 3 (são ~16 t das diferenças do caso 2), corrigir os erros 1–4 
 
 ## 7. Alteração posterior (10/10/2026)
 Suporte U passou a ter altura = A do C + 110 (Gean) e chapa padrão 2,65 editável. Com A = 94 o U fica com 204 mm (antes 180): braços do caso 1 sobem de 283,7 para 297,2 kg (app caso 1: 3.722,8 kg). As tabelas acima foram feitas com U 180.
+
+## 8. Decisões do Gean (12/10/2026), já aplicadas no app
+| Item | Decisão | Fonte |
+|---|---|---|
+| Stop palete | kit PA042118, 0,424 kg + 1 INT1132; 2 por longarina de fundo, só nos níveis de braço | des. 0004.0003.01.007 REV.01 |
+| DI_TOPO | é só a representação (vista lateral) do zig-zag de topo: fora da lista | Gean |
+| Caneleira | kit por coluna: 80 PK040222 1,502 / 101 PK040220 1,638 / 122 PK041373 1,788 / 80 DUP PK04XXXX (SA04XXXX) 2,088; 4 INT0648 + 4 INT0650; 1 na 1ª coluna de cada lateral (ruas + 1) | des. 0004.0003.01.017 REV.02 |
+| Longarina de topo TB 80 | kits PK por rua (1000T 2,824 / 1350 3,444 / 1400 3,540 / 1480 3,693 / 1570 3,866); fora deles, por componentes (2 garras 0,24 + 2 fixações 0,20 + perfil 1,92 kg/m no comprimento da rua) | des. 0004.0003.01.011 REV.05 |
+| Longarina de fundo | produto próprio "Longarina Travamento Fundo" (1350 PK041378 4,027 / 1400 PK041335 4,158 / 1480 PK041635 4,368 / 1570 PK041447 4,605), 4 INT0812 + 4 INT0648 + 4 INT0650; também no chão (centro a 300 mm, sem stop) → bate com a planilha (36 / 441) | des. 0004.0003.01.015 REV.04 |
+| Braços | cadastrados (CO por coluna/tipo/balanço) quando C 94x40x15 na chapa padrão (#1,8 COL 80/122; #2,0 COL 101) e U #2,65; senão, braço especial calculado (SA04XXXX) | des. 0004.0003.02.002 REV.03 e 0004.0003.03.004 REV.05 |
+| PP Distanciador Centro | **não existe** nas laterais: a planilha conta 1,9 t a mais no caso 2 (erro da planilha) | Gean |
+
+Ainda em aberto: travessa união (regra de comprimento e peso por passo), kit guia inferior (PA042114/277/276/273: escolha do kit por profundidade), longarina de túnel (barras ≤ 3000 com tala × barra inteira; chapa), peso por peça dos fixadores, braço da COL 80 duplada (sem desenho: peso estimado).
