@@ -226,7 +226,7 @@
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     // desenho 0004.0003.01.017 REV.02: um kit por modelo de coluna (80, 101, 122, 80 duplada), cada um com 4 INT0648 + 4 INT0650
     { const idC = dup ? 'CAN-80D' : `CAN-${col}`, cn = prodOf(cat, idC);
-      add('Protetores', idC, cn.desc, cn.codigo, laterais, 700, cn.peso, '1 por lateral, na frente [CONFIRMAR]');
+      add('Protetores', idC, cn.desc, cn.codigo, laterais, 700, cn.peso, '1 na primeira coluna (frente) de cada lateral: ruas + 1');
       for (const id of ['INT0648', 'INT0650']) add('Protetores', id, prodOf(cat, id).desc, id, 4 * laterais, null, null, `4 por caneleira (já incluídos no ${cn.codigo})`); }
     // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
     // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
