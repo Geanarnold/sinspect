@@ -795,8 +795,8 @@
   CAB.forEach((k) => $(k).addEventListener('input', () => { salvar(); if (OBRIG_CAB.includes(k)) render(); }));
   $('btnCsv').addEventListener('click', csv);
   $('btnPrint').addEventListener('click', () => window.print());
-  $('catVersao').textContent = catVersaoTxt();
-  window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); render(); };
+  $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt();
+  window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt(); render(); };
   const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'] };
   const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------

@@ -197,28 +197,25 @@
     <div class="trein-abas" role="tablist">
       <button type="button" class="trein-aba ativa" data-aba="geral">O que é o PaletCad</button>
       <button type="button" class="trein-aba" data-aba="drivein">Como fazer um Drive-In</button>
-      <button type="button" class="trein-aba" disabled title="Em breve">Porta-Palete <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Cantilever <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Flow Rack <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Piso Elevado <small>em breve</small></button>
+      <button type="button" class="trein-aba" disabled title="Prevista">Porta-Palete <small>prevista</small></button><button type="button" class="trein-aba" disabled title="Prevista">Cantilever <small>prevista</small></button><button type="button" class="trein-aba" disabled title="Prevista">Flow Rack <small>prevista</small></button><button type="button" class="trein-aba" disabled title="Prevista">Piso Elevado <small>prevista</small></button>
     </div>
     <div class="trein-painel" data-aba="geral">
       <div class="trein-conteudo apres">
-        <div class="apres-topo"><img src="logo-horizontal.svg" alt="PaletCad" width="280" height="64"><p><b>Orçamentos e projetos de sistemas de armazenagem</b>, a partir das medidas do cliente e com as peças padrão da empresa.</p></div>
-        <div class="apres-fluxo">
-          <div><b>Dados do cliente</b><small>palete, posições, galpão</small></div><span>›</span>
-          <div class="destaque"><b>PaletCad</b><small>monta a estrutura com as peças padrão</small></div><span>›</span>
-          <div><b>Orçamento + projeto</b><small>lista, pesos, valores e desenho</small></div>
-        </div>
+        <div class="apres-topo"><img src="logo-horizontal.svg" alt="PaletCad" width="280" height="64"><div><h2 class="apres-tit">PaletCad – Configurador de Sistemas de Armazenagem</h2><p>Ferramenta interna da Engenharia SUPRA para elaboração de <b>projetos</b> e <b>base de orçamento</b> de sistemas de armazenagem, padronizada com o catálogo de peças da empresa.</p></div></div>
         <div class="trein-cards">
-          <div class="trein-card"><h3>Orçamentos</h3><ul>
-            <li>Lista de peças com código e quantidade</li>
-            <li>Peso total e por posição</li>
-            <li>Valor dos fixadores e planilha Excel</li></ul></div>
-          <div class="trein-card"><h3>Projetos</h3><ul>
-            <li>3 vistas na folha A0 SUPRA, em DXF e PDF</li>
-            <li>Conferência e aprovação com o nome de quem aprova</li>
-            <li>Revisões guardadas na pasta da empresa</li></ul></div>
+          <div class="trein-card"><h3>Base para orçamento</h3><ul>
+            <li>Lista de materiais com código e quantidade</li>
+            <li>Peso total e por posição de palete</li>
+            <li>Custo de fixadores</li>
+            <li>Planilha para a proposta comercial</li></ul></div>
+          <div class="trein-card"><h3>Projeto</h3><ul>
+            <li>Desenho técnico em 3 vistas na folha A0 padrão (DXF e PDF)</li>
+            <li>Conferência e aprovação registradas</li>
+            <li>Controle de revisões</li></ul></div>
         </div>
-        <div class="apres-estr"><b>Estruturas:</b> <span class="ok">Drive-In</span><span>Porta-Palete · em breve</span><span>Cantilever · em breve</span><span>Flow Rack · em breve</span><span>Piso Elevado · em breve</span></div>
-        <p class="apres-nota">Para aprender a usar, abra a aba da estrutura, por exemplo <a href="#" class="ir-drivein">"Como fazer um Drive-In"</a>. O PaletCad não faz dimensionamento estrutural: a verificação estrutural e operacional é do engenheiro responsável e de quem aprova o projeto.</p>
+        <div class="apres-estr"><b>Estruturas disponíveis:</b> <span class="ok">Drive-In</span> <b class="apres-prev">Previstas:</b> <span>Porta-Palete</span><span>Cantilever</span><span>Flow Rack</span><span>Piso Elevado</span></div>
+        <p class="apres-aviso">O PaletCad padroniza e agiliza o projeto; não substitui o dimensionamento estrutural, que é de responsabilidade do engenheiro responsável técnico.</p>
+        <p class="apres-rodape">Uso interno · catálogo <span id="treinCat"></span> · responsável: Engenharia de Produto · <a href="#" class="ir-drivein">Como fazer um Drive-In</a></p>
       </div>
     </div>
     <div class="trein-painel hidden" data-aba="drivein">

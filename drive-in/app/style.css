@@ -395,3 +395,10 @@ body:not(.pg-config) .marca .sub-desc{display:none}
 .apres-nota{font-size:13px;color:var(--cinza);margin-top:14px}
 .apres-nota a{color:var(--laranja);font-weight:600}
 @media (max-width:700px){.apres{padding:14px}.apres-fluxo{flex-direction:column}.apres-fluxo span{transform:rotate(90deg)}}
+.apres-tit{margin:0 0 6px;font-size:18px;color:#fff;border:0;padding:0}
+.apres-topo>div{flex:1;min-width:260px}
+.apres-prev{margin-left:10px}
+.apres-aviso{margin:16px 0 6px;font-size:13.5px;font-style:italic;color:var(--texto);border-left:4px solid var(--laranja);padding:8px 12px;background:#fff7ed;border-radius:6px}
+.apres-rodape{font-size:12.5px;color:var(--cinza);margin:10px 0 0}
+.apres-rodape a{color:var(--laranja);font-weight:600}
+.trein-conteudo .apres-tit{color:#fff;border-top:0;margin:0 0 6px;padding:0}
