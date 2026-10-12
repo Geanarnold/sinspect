@@ -374,3 +374,8 @@ body:not(.pg-config) .marca .sub-desc{display:none}
   .trein-abas::-webkit-scrollbar,.trein-mini::-webkit-scrollbar{display:none}
   .trein-aba,.trein-mini a{white-space:nowrap;flex:none}
 }
+.trein-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.trein-card{border:1px solid var(--borda);border-top:4px solid var(--laranja);border-radius:10px;padding:12px 16px;background:#fff}
+.trein-card h3{margin:2px 0 6px;font-size:16px;color:var(--tinta)}
+.trein-card ul{margin:0;padding-left:18px}
+@media (max-width:700px){.trein-cards{grid-template-columns:1fr}}
