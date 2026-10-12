@@ -1276,6 +1276,42 @@ window.CATALOGO = {
    "aco": "(não especificado no desenho)",
    "dim": null
   },
+  "CAN-80": {
+   "tipo": "Caneleira",
+   "desc": "PP PROTETOR CANELEIRA 80 700 mm – kit SA040171 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
+   "codigo": "PK040222",
+   "peso": 1.502,
+   "unid": "kg",
+   "aco": "",
+   "dim": 700
+  },
+  "CAN-101": {
+   "tipo": "Caneleira",
+   "desc": "PP PROTETOR CANELEIRA 101 700 mm – kit SA040172 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
+   "codigo": "PK040220",
+   "peso": 1.638,
+   "unid": "kg",
+   "aco": "",
+   "dim": 700
+  },
+  "CAN-122": {
+   "tipo": "Caneleira",
+   "desc": "PP PROTETOR CANELEIRA 122 700 mm – kit SA040173 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
+   "codigo": "PK041373",
+   "peso": 1.788,
+   "unid": "kg",
+   "aco": "",
+   "dim": 700
+  },
+  "CAN-80D": {
+   "tipo": "Caneleira",
+   "desc": "PP PROTETOR CANELEIRA 80 DUP 700 mm – kit SA040173 [CONFIRMAR: o desenho repete o SA da 122] + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
+   "codigo": "PK04XXXX",
+   "peso": 2.088,
+   "unid": "kg",
+   "aco": "",
+   "dim": 700
+  },
   "STOP-PALETE": {
    "tipo": "Stop palete",
    "desc": "STOP PALETE DRIVE IN – kit CO040442 + 1 INT1132 (des. 0004.0003.01.007 REV.01)",

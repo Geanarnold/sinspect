@@ -224,7 +224,10 @@
       add('Fixadores dos braços', 'INT0812', prodOf(cat, 'INT0812').desc, 'INT0812', 16 * totBracos, null, null, '16 por braço');
     }
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
-    add('Protetores', 'CANELEIRA', 'Caneleira (protetor de coluna) 700 mm', SEM.SA, laterais, 700, 2.5, 'peso da planilha antiga (a confirmar); 1 por lateral, na frente [CONFIRMAR]');
+    // desenho 0004.0003.01.017 REV.02: um kit por modelo de coluna (80, 101, 122, 80 duplada), cada um com 4 INT0648 + 4 INT0650
+    { const idC = dup ? 'CAN-80D' : `CAN-${col}`, cn = prodOf(cat, idC);
+      add('Protetores', idC, cn.desc, cn.codigo, laterais, 700, cn.peso, '1 por lateral, na frente [CONFIRMAR]');
+      for (const id of ['INT0648', 'INT0650']) add('Protetores', id, prodOf(cat, id).desc, id, 4 * laterais, null, null, `4 por caneleira (já incluídos no ${cn.codigo})`); }
     // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
     // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
     const TRILHO_ALT = 75, TRILHO_FRENTE = 50;
@@ -330,14 +333,14 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados e caneleira com peso provisório. Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados com peso estimado. Fixadores sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
     else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
     alertas.unshift(AVISO_ESTRUTURAL, NOTA_RESPONSABILIDADE); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
-    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço específico da duplada (sem desenho, SA nem peso cadastrados: peso estimado com U de ${colW} mm), zig-zag no oblongo externo. Faltam: desenho do braço específico, caneleira, fixação montante–montante e se a duplada vale para todas as laterais.`);
+    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço específico da duplada (sem desenho, SA nem peso cadastrados: peso estimado com U de ${colW} mm), zig-zag no oblongo externo. Faltam: desenho do braço específico, código PK da caneleira 80 DUP, fixação montante–montante e se a duplada vale para todas as laterais.`);
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);
     return {

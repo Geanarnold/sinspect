@@ -14,7 +14,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 3,
- "pesoTotalKg": 907.144,
+ "pesoTotalKg": 903.152,
  "erros": [],
  "alertas": [
   "1º nível 1700 mm ajustado para 1701.75 mm (furação de 50 mm da coluna).",
@@ -200,11 +200,27 @@
   },
   {
    "grupo": "Protetores",
-   "codigo": "SA04XXXX",
-   "desc": "Caneleira (protetor de coluna) 700 mm",
+   "codigo": "PK040222",
+   "desc": "PP PROTETOR CANELEIRA 80 700 mm – kit SA040171 + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",
    "qtd": 4,
    "compr": 700,
-   "pesoUnit": 2.5
+   "pesoUnit": 1.502
+  },
+  {
+   "grupo": "Protetores",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 16,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Protetores",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 16,
+   "compr": null,
+   "pesoUnit": null
   },
   {
    "grupo": "Longarinas",
