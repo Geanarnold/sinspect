@@ -173,13 +173,7 @@
       add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
       add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
     }
-    // elemento de topo: dois modelos, um para o passo dentro do quadro e outro para o passo entre quadros (inclui o passo da solteira [CONFIRMAR])
-    const porPassoTopo = (lista, rotulo, id) => {
-      const c = {}; for (const a of lista) c[a] = (c[a] || 0) + 1;
-      for (const [a, q] of Object.entries(c)) add('Topo', `${id}-${a}`, `Topo (DI_TOPO) ${rotulo} – passo ${a} mm`, SEM.SA, q * laterais * nM, Number(a), null, 'SA e peso a confirmar');
-    };
-    porPassoTopo(passosQuadro, 'da montante (dentro do quadro)', 'TOPO-Q');
-    porPassoTopo(espacos.filter((_, i) => solteira ? i % 2 === 0 : i % 2 === 1), 'entre montantes', 'TOPO-E');
+    // DI_TOPO (vista lateral) é só a representação do zig-zag de topo (travessas diagonais da vista superior, contadas no grupo do zig-zag): não entra na lista (Gean)
     const nPar = 2 * nH * vaosQuadro;
     const par = prodOf(cat, PARAFUSO_TRAV[col]), porca = prodOf(cat, 'INT0650');
     add('Fixadores das travessas', par.id, par.desc, par.codigo, nPar, null, null);
@@ -336,7 +330,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união, topo (DI_TOPO) e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados e caneleira com peso provisório. Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo/fundo fora dos modelos cadastrados e caneleira com peso provisório. Fixadores sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);

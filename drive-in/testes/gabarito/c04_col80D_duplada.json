@@ -94,22 +94,6 @@
    "pesoUnit": null
   },
   {
-   "grupo": "Topo",
-   "codigo": "SA04XXXX",
-   "desc": "Topo (DI_TOPO) da montante (dentro do quadro) – passo 1025 mm",
-   "qtd": 14,
-   "compr": 1025,
-   "pesoUnit": null
-  },
-  {
-   "grupo": "Topo",
-   "codigo": "SA04XXXX",
-   "desc": "Topo (DI_TOPO) entre montantes – passo 1025 mm",
-   "qtd": 14,
-   "compr": 1025,
-   "pesoUnit": null
-  },
-  {
    "grupo": "Fixadores das travessas",
    "codigo": "INT0993",
    "desc": "Parafuso sextavado 5/16\" x 2.1/2\" ZNC",

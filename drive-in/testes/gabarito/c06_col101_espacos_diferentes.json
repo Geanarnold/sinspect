@@ -150,22 +150,6 @@
    "pesoUnit": null
   },
   {
-   "grupo": "Topo",
-   "codigo": "SA04XXXX",
-   "desc": "Topo (DI_TOPO) da montante (dentro do quadro) – passo 788 mm",
-   "qtd": 12,
-   "compr": 788,
-   "pesoUnit": null
-  },
-  {
-   "grupo": "Topo",
-   "codigo": "SA04XXXX",
-   "desc": "Topo (DI_TOPO) entre montantes – passo 1025 mm",
-   "qtd": 12,
-   "compr": 1025,
-   "pesoUnit": null
-  },
-  {
    "grupo": "Fixadores das travessas",
    "codigo": "INT0958",
    "desc": "Parafuso SX GR2 UNC R.P 5/16\" x 3.1/4\" zincado",
