@@ -31,7 +31,7 @@
 
     titulo('Resumo');
     tabela({ head: [['Corte', 'Blocos', 'Posições', 'Largura × prof. × altura (mm)', 'Peso (kg)']], body: D.cortes.map((c) => [c.nome, c.qtd, c.posicoes, c.dims, fmt(c.peso)]).concat([[{ content: 'Total do projeto', colSpan: 2, styles: { fontStyle: 'bold' } }, { content: String(D.totais.posicoes), styles: { fontStyle: 'bold' } }, '', { content: fmt(D.totais.peso), styles: { fontStyle: 'bold' } }]]) });
-    paragrafo(`Peso dos itens com peso cadastrado (fixadores e itens sem peso não entram). ${D.totais.semPeso} item(ns) sem peso — ver pendências.`, 8, CINZA);
+    paragrafo(`Peso dos itens com peso cadastrado (fixadores entram só pelo valor; itens sem peso não entram). ${D.totais.semPeso} item(ns) sem peso — ver pendências.`, 8, CINZA);
 
     titulo('Conferência dos dados');
     for (const bloco of D.conferencia) {

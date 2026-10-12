@@ -357,7 +357,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores sem peso.');
+    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);

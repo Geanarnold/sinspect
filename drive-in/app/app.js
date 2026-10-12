@@ -467,7 +467,7 @@
       <li>Travessas: 1ª a 100 mm, 3 vãos de 600, depois 900; horizontal total = A − 78,6 (c/c A − 109,1); diagonal = √(c/c² + vão²) + 30,5; vão de topo sem diagonal. Código SA buscado no cadastro a ±3 mm.</li>
       <li>Braço: suporte U (chapa padrão 2,65, altura = A + 110) + perfil C; simples nas laterais das pontas, duplo nas internas; apoio mínimo do palete 80 mm por lado (aviso abaixo de 100).</li>
       <li>Longarina de túnel em barras de até 3000 mm com tala (PK041366) sobre o braço; longarina de topo por rua em cada linha de coluna; longarina de fundo e zig-zag de fundo por rua e nível; zig-zag de topo nas chapas das longarinas superiores.</li>
-      <li>Pesos: coluna e travessas pela geometria (aço 7,85 g/cm³, sem descontar furos); itens sem peso cadastrado não entram no total; fixadores sem peso.</li>
+      <li>Pesos: coluna e travessas pela geometria (aço 7,85 g/cm³, sem descontar furos); itens sem peso cadastrado não entram no total; fixadores (INT/IND) entram só pelo valor (aba Fixadores), sem peso.</li>
       </ul>`;
   }
 
@@ -735,7 +735,7 @@
     const pend = [...new Set(lp.flatMap((x) => x.r.pendencias))];
     const itens = lp.length ? consolidar(lp) : [];
     const semCod = [...new Set(itens.filter((p) => !p.codigo || /XXXX/.test(p.codigo)).map((p) => `${p.codigo || Engine.SEM.SA} – ${p.desc}`))];
-    const semPeso = [...new Set(itens.filter((p) => p.pesoUnit == null).map((p) => p.desc))];
+    const semPeso = [...new Set(itens.filter((p) => p.pesoUnit == null && !ehFixador(p)).map((p) => p.desc))]; // fixadores (INT/IND) entram só pelo valor, sem peso (Gean)
     const est = [...new Set(itens.filter((p) => /ESTIMADO|estimad/i.test(p.obs || '') && !/não estimad/i.test(p.obs || '')).map((p) => p.desc))];
     const sec = (t, l) => l.length ? `<h4>${t} (${l.length})</h4><ul>${l.slice(0, 60).map(li).join('')}${l.length > 60 ? `<li>… mais ${l.length - 60}</li>` : ''}</ul>` : '';
     const html = (bloq.length ? `<h4 class="bloq">Impede a emissão</h4><ul class="bloq">${bloq.map(li).join('')}</ul>` : '')
