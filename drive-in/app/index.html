@@ -193,25 +193,17 @@
 
   <div id="modal" class="modal hidden"><div class="modal-caixa"><h3 id="modalTit"></h3><div id="modalCorpo" class="modal-corpo"></div><div id="modalAcoes" class="modal-acoes"></div></div></div>
   <section id="paginaTrein" class="trein hidden">
-    <aside class="trein-indice">
-      <b>Treinamento</b>
-      <a href="#t-visao">1. O que o PaletCad faz</a>
-      <a href="#t-fluxo">2. Passo a passo rápido</a>
-      <a href="#t-pasta">3. Pasta da empresa e projetos</a>
-      <a href="#t-cortes">4. Cortes e blocos iguais</a>
-      <a href="#t-projeto">5. Etapa 1 – Projeto</a>
-      <a href="#t-estrutura">6. Etapa 2 – Estrutura</a>
-      <a href="#t-lateral">7. Etapa 3 – Lateral</a>
-      <a href="#t-braco">8. Etapa 4 – Braço</a>
-      <a href="#t-resultado">9. Resultado e lista de peças</a>
-      <a href="#t-saidas">10. Rascunho × emissão oficial</a>
-      <a href="#t-folhas">11. Folhas A0 (DXF e PDF)</a>
-      <a href="#t-pecas">12. Peças cadastradas e especiais</a>
-      <a href="#t-resp">13. Responsabilidades</a>
-      <a href="#t-duvidas">14. Dúvidas e problemas comuns</a>
-    </aside>
-    <div class="trein-conteudo">
-      <h2 id="t-visao">1. O que o PaletCad faz</h2>
+    <h1 class="trein-titulo">Treinamento</h1>
+    <div class="trein-abas" role="tablist">
+      <button type="button" class="trein-aba ativa" data-aba="geral">O que é o PaletCad</button>
+      <button type="button" class="trein-aba" data-aba="drivein">Como fazer um Drive-In</button>
+      <button type="button" class="trein-aba" disabled title="Em breve">Porta-Palete <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Cantilever <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Flow Rack <small>em breve</small></button><button type="button" class="trein-aba" disabled title="Em breve">Piso Elevado <small>em breve</small></button>
+    </div>
+    <div class="trein-painel" data-aba="geral">
+      <nav class="trein-mini"><a href="#t-visao">1. O que é o PaletCad</a><a href="#t-fluxo">2. Como funciona (todas as estruturas)</a><a href="#t-pasta">3. Pasta da empresa e projetos</a><a href="#t-saidas">4. Rascunho × emissão oficial</a><a href="#t-folhas">5. Folhas A0 (DXF e PDF)</a><a href="#t-pecas">6. Peças cadastradas e especiais</a><a href="#t-resp">7. Responsabilidades</a><a href="#t-duvidas">8. Dúvidas e problemas comuns</a></nav>
+      <div class="trein-conteudo">
+      <h2 id="t-visao">1. O que é o PaletCad</h2>
+      
       <p>O PaletCad monta o projeto de uma estrutura de armazenagem a partir dos dados do cliente. Hoje o módulo disponível é o <b>Drive-In</b>. Ele entrega:</p>
       <ul>
         <li><b>Lista de peças</b> com código, quantidade, comprimento e peso (aba de estrutura) e <b>fixadores com valor</b> (aba própria).</li>
@@ -220,11 +212,12 @@
       </ul>
       <p class="trein-alerta"><b>O app não faz dimensionamento estrutural.</b> Ele monta a estrutura com as peças padrão; a verificação de cargas, folgas, empilhadeira e interferências do galpão é de quem projeta e aprova.</p>
 
-      <h2 id="t-fluxo">2. Passo a passo rápido</h2>
+      <h2 id="t-fluxo">2. Como funciona (todas as estruturas)</h2>
+      
       <div class="trein-fluxo">
         <div><span>1</span><b>Início</b><small>escolher a estrutura</small></div>
         <div><span>2</span><b>Pasta</b><small>escolher a pasta da empresa</small></div>
-        <div><span>3</span><b>4 etapas</b><small>Projeto · Estrutura · Lateral · Braço</small></div>
+        <div><span>3</span><b>Etapas</b><small>preencher os dados da estrutura</small></div>
         <div><span>4</span><b>Resultado</b><small>indicadores, alertas e desenho</small></div>
         <div><span>5</span><b>Lista</b><small>peças, fixadores, pendências</small></div>
         <div><span>6</span><b>Aprovar</b><small>conferir e emitir</small></div>
@@ -233,7 +226,7 @@
       <ol class="trein-passos">
         <li>Na <b>página inicial</b>, no card do tipo de estrutura (Drive-In), clique em <b>Novo projeto</b> (ou <b>Continuar o atual</b>).</li>
         <li>Clique em <b>Escolher pasta</b> e selecione a pasta de projetos da empresa (uma vez por computador).</li>
-        <li>Preencha as <b>4 etapas</b>: Projeto → Estrutura → Lateral → Braço. Os números vermelhos nas etapas mostram quantos campos obrigatórios faltam.</li>
+        <li>Preencha as <b>etapas</b> da estrutura (no Drive-In: Projeto → Estrutura → Lateral → Braço). Os números vermelhos nas etapas mostram quantos campos obrigatórios faltam.</li>
         <li>Confira o <b>resultado</b> à direita: posições, altura, largura, profundidade, peso, alertas e o desenho.</li>
         <li>Clique em <b>Gerar lista de peças</b> e revise as abas (estrutura, projeto consolidado, fixadores, pendências).</li>
         <li>Se precisar enviar algo para análise interna, use os botões de <b>rascunho</b> (DXF, PDF, Excel, PNG).</li>
@@ -241,6 +234,7 @@
       </ol>
 
       <h2 id="t-pasta">3. Pasta da empresa e projetos</h2>
+      
       <div class="trein-dupla"><div>
       <ul>
         <li><b>Escolher pasta</b> (no quadro "Projeto e cortes"): liga o app à pasta da empresa. Funciona no <b>Chrome</b> ou no <b>Edge</b>. Sem a pasta, o app baixa os arquivos no seu computador.</li>
@@ -252,14 +246,68 @@
 
       </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/12-celular.jpg" alt="No celular: barra de baixo com Preencher e Resultado."><figcaption>No celular: barra de baixo com Preencher e Resultado.</figcaption></figure></div>
 
-      <h2 id="t-cortes">4. Cortes e blocos iguais</h2>
+      <h2 id="t-saidas">4. Rascunho × emissão oficial</h2>
+      
+      <table class="trein-tab"><tbody>
+        <tr><th>Rascunho</th><td>Botões <b>DXF do projeto</b>, <b>PDF do projeto</b>, <b>Excel</b> e <b>PNG</b>. Saem marcados como <b>RASCUNHO – NÃO EMITIDO</b> (faixa vermelha, carimbo "REV-xx RASCUNHO" e "_RASCUNHO" no nome do arquivo). Use só para análise interna.</td></tr>
+        <tr><th>Emissão oficial</th><td>Botão <b>Conferir e aprovar</b>: mostra a tabela de conferência de todos os dados (personalizados em destaque) e as pendências. Marque <b>"Conferi os dados"</b> e <b>"Estou ciente das pendências"</b>, informe seu nome e clique em <b>Aprovar e emitir</b>.</td></tr>
+        <tr><th>O que a emissão gera</th><td>Nova revisão salva como emissão + DXF + PDF das folhas + Excel + relatório de emissão em PDF (com cópia em <code>projetos/emissoes/</code> se a pasta estiver ligada). As folhas saem com <b>"PROJETO CONFERIDO E APROVADO POR [nome] EM [data]"</b>.</td></tr>
+      </tbody></table>
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/10-conferir-aprovar.jpg" alt="Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita"><figcaption>Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita</figcaption></figure>
+      <p class="trein-alerta">Alterou o projeto depois de emitir? Ele aparece como <b>"Alterado após emissão"</b>. Emita de novo para gerar a revisão oficial.</p>
+
+      <h2 id="t-folhas">5. Folhas A0 (DXF e PDF)</h2>
+      
+      <ul>
+        <li>Cada corte sai numa folha A0 SUPRA com as <b>3 vistas</b> e o carimbo preenchido.</li>
+        <li>O app escolhe sozinho a <b>disposição das vistas</b> e a <b>maior escala padrão</b> que cabe (a escala aparece no título de cada vista e no carimbo).</li>
+        <li>Com <b>mais de 10 ruas</b> saem <b>2 folhas</b> por corte: uma com a vista superior <b>parcial</b> (ruas 1 a 5 e a última, com a barra de corte) e outra com a estrutura completa. Use a que for melhor para o cliente.</li>
+        <li>A vista frontal mostra 5 ruas; a cota total mostra a largura de todas as ruas ("18386 (12 RUAS)").</li>
+        <li>Cotas sempre em milímetros inteiros. No DXF, cada peça é um bloco.</li>
+      </ul>
+
+      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/11-folha-a0.jpg" alt="Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app"><figcaption>Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app</figcaption></figure>
+
+      <h2 id="t-pecas">6. Peças cadastradas e especiais</h2>
+      
+      <ul>
+        <li><b>Código SA/CO/PK/PA</b>: peça cadastrada, peso do desenho.</li>
+        <li><b>SA04XXXX / CO04XXXX / PKXXXXXX</b> (em destaque): peça <b>sem cadastro</b> (especial ou medida fora do padrão). Precisa ser cadastrada antes de produzir. Aparece nas pendências da emissão.</li>
+        <li><b>Peso estimado</b>: medida fora dos modelos (ex.: longarina de fundo de rua sem desenho). Aparece marcado.</li>
+        <li>Longarina de topo fora das larguras padrão sai <b>pelos componentes</b> (garras, fixações e perfil).</li>
+      </ul>
+
+      <h2 id="t-resp">7. Responsabilidades</h2>
+      
+      <p>As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável. Ao aprovar, seu nome vai nas folhas.</p>
+
+      <h2 id="t-duvidas">8. Dúvidas e problemas comuns</h2>
+      
+      <dl class="trein-faq">
+        <dt>Os botões de DXF/PDF/Excel estão cinza.</dt><dd>Falta campo obrigatório. Veja os números vermelhos nas etapas; o grupo com campo em branco abre sozinho.</dd>
+        <dt>"Escolher pasta" não aparece ou não funciona.</dt><dd>Use Chrome ou Edge no computador. No celular a pasta não funciona; use para consulta.</dd>
+        <dt>No celular, onde está o resultado?</dt><dd>Na barra de baixo: <b>Preencher</b> (formulário) e <b>Resultado</b> (indicadores, desenho e lista).</dd>
+        <dt>O site pediu o código de novo.</dt><dd>O login vale 7 dias. Digite seu e-mail da empresa e o código que chega.</dd>
+        <dt>Peça com código XXXX na lista.</dt><dd>É peça sem cadastro (especial). Confirme com a engenharia antes de emitir.</dd>
+        <dt>Preciso mudar peso, código ou preço.</dt><dd>Só o administrador altera o Cadastro de produtos (link "acesso do administrador" no rodapé). Peça a ele.</dd>
+      </dl>
+</div>
+    </div>
+    <div class="trein-painel hidden" data-aba="drivein">
+      <nav class="trein-mini"><a href="#t-cortes">1. Cortes e blocos iguais</a><a href="#t-projeto">2. Etapa 1 – Projeto</a><a href="#t-estrutura">3. Etapa 2 – Estrutura</a><a href="#t-lateral">4. Etapa 3 – Lateral</a><a href="#t-braco">5. Etapa 4 – Braço</a><a href="#t-resultado">6. Resultado e lista de peças</a></nav>
+      <div class="trein-conteudo">
+      <p class="trein-intro">Para começar um drive-in: na <b>página inicial</b>, no card <b>Drive-In</b>, clique em <b>Novo projeto</b>. O configurador abre com 4 etapas (Projeto, Estrutura, Lateral e Braço) à esquerda e o resultado à direita. Antes de começar, veja na aba <b>"O que é o PaletCad"</b> como ligar a pasta da empresa e como funciona a aprovação.</p>
+
+      <h2 id="t-cortes">1. Cortes e blocos iguais</h2>
+      
       <ul>
         <li>Um projeto pode ter vários <b>cortes</b> (blocos de drive-in diferentes no mesmo galpão). Cada corte tem os próprios dados e sai na própria folha.</li>
         <li><b>Novo corte</b> cria um corte em branco; <b>Duplicar</b> copia o corte atual (dê um nome novo e ajuste o que muda); <b>Remover</b> apaga o corte.</li>
         <li><b>Blocos iguais</b> (etapa Projeto): se o mesmo corte se repete, informe quantas vezes. As quantidades da lista consolidada já saem multiplicadas.</li>
       </ul>
 
-      <h2 id="t-projeto">5. Etapa 1 – Projeto</h2>
+      <h2 id="t-projeto">2. Etapa 1 – Projeto</h2>
+      
       <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Projeto (nº do processo)</th><td>Número do processo. Vai no carimbo e no nome dos arquivos.</td></tr>
@@ -274,7 +322,8 @@
 
       </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/02-etapa-projeto.jpg" alt="Etapa 1 – Projeto: dados do cliente, corte e desenhista. Os números nas etapas mostram o que falta preencher."><figcaption>Etapa 1 – Projeto: dados do cliente, corte e desenhista. Os números nas etapas mostram o que falta preencher.</figcaption></figure></div>
 
-      <h2 id="t-estrutura">6. Etapa 2 – Estrutura</h2>
+      <h2 id="t-estrutura">3. Etapa 2 – Estrutura</h2>
+      
       <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Ruas</th><td>Quantidade de ruas (entradas da empilhadeira). Laterais = ruas + 1.</td></tr>
@@ -287,7 +336,8 @@
 
       </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/03-etapa-estrutura.jpg" alt="Etapa 2 – Estrutura: ruas, níveis e palete."><figcaption>Etapa 2 – Estrutura: ruas, níveis e palete.</figcaption></figure></div>
 
-      <h2 id="t-lateral">7. Etapa 3 – Lateral</h2>
+      <h2 id="t-lateral">4. Etapa 3 – Lateral</h2>
+      
       <div class="trein-dupla"><div>
       <table class="trein-tab"><tbody>
         <tr><th>Coluna – modelo e espessura</th><td>COL 80, 101, 122 ou 80 duplada, e a chapa da coluna. O modelo define sapata, braço padrão, caneleira e travessas.</td></tr>
@@ -299,7 +349,8 @@
 
       </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/04-etapa-lateral.jpg" alt="Etapa 3 – Lateral: modelo da coluna e espaços na profundidade."><figcaption>Etapa 3 – Lateral: modelo da coluna e espaços na profundidade.</figcaption></figure></div>
 
-      <h2 id="t-braco">8. Etapa 4 – Braço</h2>
+      <h2 id="t-braco">5. Etapa 4 – Braço</h2>
+      
       <div class="trein-dupla"><div>
       <p>Os grupos vêm fechados mostrando o resumo; clique na setinha para abrir. O desenho ao lado mostra o que você está ajustando. Campo diferente do padrão fica marcado como <b>personalizado</b>.</p>
       <table class="trein-tab"><tbody>
@@ -312,7 +363,8 @@
 
       </div><figure class="trein-fig estreita"><img loading="lazy" src="img/trein/05-etapa-braco.jpg" alt="Etapa 4 – Braço: o desenho mostra o braço que você está ajustando."><figcaption>Etapa 4 – Braço: o desenho mostra o braço que você está ajustando.</figcaption></figure></div>
 
-      <h2 id="t-resultado">9. Resultado e lista de peças</h2>
+      <h2 id="t-resultado">6. Resultado e lista de peças</h2>
+      
       <figure class="trein-fig larga"><img loading="lazy" src="img/trein/06-resultado.jpg" alt="Resultado: indicadores, total do projeto, alertas e botões de rascunho/aprovação"><figcaption>Resultado: indicadores, total do projeto, alertas e botões de rascunho/aprovação</figcaption></figure><figure class="trein-fig larga"><img loading="lazy" src="img/trein/07-vista.jpg" alt="Vista na tela (lateral, frontal, esquema, planta), atualizada a cada campo"><figcaption>Vista na tela (lateral, frontal, esquema, planta), atualizada a cada campo</figcaption></figure>
       <ul>
         <li><b>Indicadores</b>: posições, altura, largura, profundidade, peso do corte e kg por posição. Embaixo, o total do projeto (todos os cortes) e o valor dos fixadores.</li>
@@ -327,47 +379,7 @@
       </ul>
 
       <figure class="trein-fig larga"><img loading="lazy" src="img/trein/08-lista-pecas.jpg" alt="Lista de peças: só a estrutura, com código, quantidade e peso. Botão Excel para baixar a planilha."><figcaption>Lista de peças: só a estrutura, com código, quantidade e peso. Botão Excel para baixar a planilha.</figcaption></figure><figure class="trein-fig larga"><img loading="lazy" src="img/trein/09-fixadores.jpg" alt="Aba Fixadores: quantidade, preço por peça e valor total (preços de exemplo)"><figcaption>Aba Fixadores: quantidade, preço por peça e valor total (preços de exemplo)</figcaption></figure>
-
-      <h2 id="t-saidas">10. Rascunho × emissão oficial</h2>
-      <table class="trein-tab"><tbody>
-        <tr><th>Rascunho</th><td>Botões <b>DXF do projeto</b>, <b>PDF do projeto</b>, <b>Excel</b> e <b>PNG</b>. Saem marcados como <b>RASCUNHO – NÃO EMITIDO</b> (faixa vermelha, carimbo "REV-xx RASCUNHO" e "_RASCUNHO" no nome do arquivo). Use só para análise interna.</td></tr>
-        <tr><th>Emissão oficial</th><td>Botão <b>Conferir e aprovar</b>: mostra a tabela de conferência de todos os dados (personalizados em destaque) e as pendências. Marque <b>"Conferi os dados"</b> e <b>"Estou ciente das pendências"</b>, informe seu nome e clique em <b>Aprovar e emitir</b>.</td></tr>
-        <tr><th>O que a emissão gera</th><td>Nova revisão salva como emissão + DXF + PDF das folhas + Excel + relatório de emissão em PDF (com cópia em <code>projetos/emissoes/</code> se a pasta estiver ligada). As folhas saem com <b>"PROJETO CONFERIDO E APROVADO POR [nome] EM [data]"</b>.</td></tr>
-      </tbody></table>
-      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/10-conferir-aprovar.jpg" alt="Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita"><figcaption>Conferir e aprovar: confira todos os dados, marque as caixas, informe seu nome e emita</figcaption></figure>
-      <p class="trein-alerta">Alterou o projeto depois de emitir? Ele aparece como <b>"Alterado após emissão"</b>. Emita de novo para gerar a revisão oficial.</p>
-
-      <h2 id="t-folhas">11. Folhas A0 (DXF e PDF)</h2>
-      <ul>
-        <li>Cada corte sai numa folha A0 SUPRA com as <b>3 vistas</b> e o carimbo preenchido.</li>
-        <li>O app escolhe sozinho a <b>disposição das vistas</b> e a <b>maior escala padrão</b> que cabe (a escala aparece no título de cada vista e no carimbo).</li>
-        <li>Com <b>mais de 10 ruas</b> saem <b>2 folhas</b> por corte: uma com a vista superior <b>parcial</b> (ruas 1 a 5 e a última, com a barra de corte) e outra com a estrutura completa. Use a que for melhor para o cliente.</li>
-        <li>A vista frontal mostra 5 ruas; a cota total mostra a largura de todas as ruas ("18386 (12 RUAS)").</li>
-        <li>Cotas sempre em milímetros inteiros. No DXF, cada peça é um bloco.</li>
-      </ul>
-
-      <figure class="trein-fig larga"><img loading="lazy" src="img/trein/11-folha-a0.jpg" alt="Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app"><figcaption>Folha A0 com as 3 vistas, carimbo preenchido e escala escolhida pelo app</figcaption></figure>
-
-      <h2 id="t-pecas">12. Peças cadastradas e especiais</h2>
-      <ul>
-        <li><b>Código SA/CO/PK/PA</b>: peça cadastrada, peso do desenho.</li>
-        <li><b>SA04XXXX / CO04XXXX / PKXXXXXX</b> (em destaque): peça <b>sem cadastro</b> (especial ou medida fora do padrão). Precisa ser cadastrada antes de produzir. Aparece nas pendências da emissão.</li>
-        <li><b>Peso estimado</b>: medida fora dos modelos (ex.: longarina de fundo de rua sem desenho). Aparece marcado.</li>
-        <li>Longarina de topo fora das larguras padrão sai <b>pelos componentes</b> (garras, fixações e perfil).</li>
-      </ul>
-
-      <h2 id="t-resp">13. Responsabilidades</h2>
-      <p>As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável. Ao aprovar, seu nome vai nas folhas.</p>
-
-      <h2 id="t-duvidas">14. Dúvidas e problemas comuns</h2>
-      <dl class="trein-faq">
-        <dt>Os botões de DXF/PDF/Excel estão cinza.</dt><dd>Falta campo obrigatório. Veja os números vermelhos nas etapas; o grupo com campo em branco abre sozinho.</dd>
-        <dt>"Escolher pasta" não aparece ou não funciona.</dt><dd>Use Chrome ou Edge no computador. No celular a pasta não funciona; use para consulta.</dd>
-        <dt>No celular, onde está o resultado?</dt><dd>Na barra de baixo: <b>Preencher</b> (formulário) e <b>Resultado</b> (indicadores, desenho e lista).</dd>
-        <dt>O site pediu o código de novo.</dt><dd>O login vale 7 dias. Digite seu e-mail da empresa e o código que chega.</dd>
-        <dt>Peça com código XXXX na lista.</dt><dd>É peça sem cadastro (especial). Confirme com a engenharia antes de emitir.</dd>
-        <dt>Preciso mudar peso, código ou preço.</dt><dd>Só o administrador altera o Cadastro de produtos (link "acesso do administrador" no rodapé). Peça a ele.</dd>
-      </dl>
+</div>
     </div>
   </section>
   <section id="paginaProj" class="wrap hidden">
