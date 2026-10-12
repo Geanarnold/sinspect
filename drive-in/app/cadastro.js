@@ -16,6 +16,23 @@
       ler: (c) => Object.entries(c.produtos).map(([id, p]) => ({ id, ...p })),
       gravar: (c, rows) => { c.produtos = {}; for (const r of rows) if (r.id) { const { id, ...p } = r; c.produtos[id] = p; } },
     },
+    fixadores: {
+      titulo: 'Fixadores (preço unitário)',
+      cols: [['codigo', 'Código INT', 'text'], ['desc', 'Descrição', 'text'], ['custo', 'Preço por peça (R$)', 'number']],
+      ler: (c) => Object.entries(c.produtos).filter(([, p]) => p.tipo === 'Fixador').map(([id, p]) => ({ _id: id, codigo: p.codigo || id, desc: p.desc, custo: p.custo ?? '' })).sort((a, b) => a.codigo.localeCompare(b.codigo)),
+      // só mexe nos fixadores: preço em branco (ou linha removida) = sem preço; o produto continua no catálogo (o cálculo usa)
+      gravar: (c, rows) => {
+        const ids = new Set();
+        for (const r of rows) {
+          const cod = String(r.codigo || '').trim().toUpperCase(); if (!r._id && !cod) continue;
+          const id = r._id || Object.keys(c.produtos).find((k) => c.produtos[k].codigo === cod) || cod; ids.add(id);
+          const p = c.produtos[id] || (c.produtos[id] = { tipo: 'Fixador', codigo: cod, unid: 'kg' });
+          if (cod) p.codigo = cod; if (r.desc) p.desc = r.desc;
+          if (r.custo === '' || r.custo == null || !(Number(r.custo) >= 0)) delete p.custo; else p.custo = Number(r.custo);
+        }
+        for (const [id, p] of Object.entries(c.produtos)) if (p.tipo === 'Fixador' && !ids.has(id)) delete p.custo;
+      },
+    },
     colunas_sa: {
       titulo: 'Colunas: SA por altura',
       cols: [['col', 'Coluna (80/101/122)', 'number'], ['altura', 'Altura (mm)', 'number'], ['sa', 'Código SA', 'text']],
@@ -58,7 +75,7 @@
       if ((await sha256(a)) !== m.senhaHash) { alert('Senha incorreta.'); return; }
       liberado = true; msg('Edição liberada nesta sessão. Publique uma nova versão para valer para todos.');
     }
-    estado();
+    renderTabela(); estado();
   }
   async function publicar() {
     if (!liberado) return;
@@ -85,7 +102,8 @@
     const m = meta();
     $('cadVersao').innerHTML = `Catálogo <b>v${m.versao}</b> · ${m.data || ''} · ${m.autor || ''}${(m.historico || []).length ? ` · <a href="#" id="cadHist">histórico</a>` : ''}${liberado ? ' · <b style="color:#b45309">edição liberada</b>' : ''}${alterado ? ' · <b style="color:#b91c1c">alterações não publicadas</b>' : ''}`;
     const h = $('cadHist'); if (h) h.addEventListener('click', (e) => { e.preventDefault(); alert((m.historico || []).slice().reverse().map((x) => `v${x.versao} – ${x.data} – ${x.autor}: ${x.descricao}`).join('\n')); });
-    for (const id of ['cadNovo', 'cadSalvar', 'cadRestaurar', 'cadImportarLbl']) { const el = $(id); if (el) el.classList.toggle('hidden', !liberado); }
+    for (const id of ['cadNovo', 'cadSalvar', 'cadRestaurar', 'cadImportarLbl', 'cadPublicar']) { const el = $(id); if (el) el.classList.toggle('hidden', !liberado); }
+    const tv = $('cadTrava'); if (tv) { tv.className = liberado ? 'cad-trava aberta' : 'cad-trava'; tv.textContent = liberado ? 'Edição liberada (administrador) nesta sessão' : 'Somente leitura: alterações só pelo administrador (senha do catálogo)'; }
     $('cadDesbloquear').classList.toggle('hidden', liberado);
     $('cadTabela').querySelectorAll('input,button.mini').forEach((el) => { el.disabled = !liberado; });
   }
@@ -94,7 +112,10 @@
     const filtro = ($('cadBusca').value || '').toLowerCase();
     const vis = rows.map((r, i) => [r, i]).filter(([r]) => !filtro || Object.values(r).join(' ').toLowerCase().includes(filtro)).slice(0, 600);
     let h = `<table><thead><tr>${T.cols.map((c) => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>`;
-    for (const [r, i] of vis) h += `<tr data-i="${i}">${T.cols.map((c) => `<td><input data-k="${c[0]}" type="${c[2]}" step="any" value="${esc(r[c[0]])}"/></td>`).join('')}<td><button class="mini" data-del="${i}">×</button></td></tr>`;
+    // travado: só texto (nada parece editável); liberado pelo administrador: campos de edição
+    for (const [r, i] of vis) h += liberado
+      ? `<tr data-i="${i}">${T.cols.map((c) => `<td><input data-k="${c[0]}" type="${c[2]}" step="any" value="${esc(r[c[0]])}"/></td>`).join('')}<td><button class="mini" data-del="${i}">×</button></td></tr>`
+      : `<tr data-i="${i}">${T.cols.map((c) => `<td class="cad-ro">${r[c[0]] === '' || r[c[0]] == null ? '<span class="vazio">—</span>' : esc(r[c[0]])}</td>`).join('')}<td></td></tr>`;
     h += `</tbody></table>`;
     $('cadTabela').innerHTML = h;
     $('cadInfo').textContent = `${rows.length} linhas${vis.length < rows.length ? ` (mostrando ${vis.length})` : ''}`;

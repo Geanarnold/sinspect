@@ -49,6 +49,16 @@
     tabela({ head: [['Grupo', 'Código', 'Descrição', 'Qtd', 'Compr. (mm)', 'kg/un', 'kg total']], body: D.itens.map((p) => [p.grupo, p.codigo, p.desc, p.qtd, p.compr ?? '', p.pesoUnit == null ? '—' : fmt(p.pesoUnit, 3), p.pesoTotal == null ? '—' : fmt(p.pesoTotal)]),
       styles: { fontSize: 7, cellPadding: 1 }, columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 20 }, 3: { halign: 'right', cellWidth: 12 }, 4: { halign: 'right', cellWidth: 16 }, 5: { halign: 'right', cellWidth: 14 }, 6: { halign: 'right', cellWidth: 16 } } });
 
+    const F = D.fixadores;
+    if (F && F.lista.length) {
+      titulo('Fixadores — custo');
+      const brl = (v) => (v == null ? 'sem preço' : 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }));
+      tabela({ head: [['Código', 'Descrição', 'Qtd', 'Preço unit.', 'Valor']], body: F.lista.map((e) => [e.codigo, e.desc, e.qtd, brl(e.preco), e.valor == null ? '—' : brl(e.valor)])
+        .concat([[{ content: 'Total dos fixadores', colSpan: 4, styles: { fontStyle: 'bold' } }, { content: brl(F.total), styles: { fontStyle: 'bold' } }]]),
+        styles: { fontSize: 7.5, cellPadding: 1.2 }, columnStyles: { 0: { cellWidth: 20 }, 2: { halign: 'right', cellWidth: 14 }, 3: { halign: 'right', cellWidth: 26 }, 4: { halign: 'right', cellWidth: 28 } } });
+      if (F.semPreco.length) paragrafo(`${F.semPreco.length} fixador(es) sem preço no cadastro, fora do total: ${F.semPreco.join(', ')}.`, 8, CINZA);
+    }
+
     titulo('Aprovação do operador');
     tabela({ body: [['Dados do projeto conferidos', 'SIM'], ['Pendências lidas e emissão assumida', 'SIM'], ['Aprovado por', D.aprovador], ['Data / hora', D.data]], columnStyles: { 0: { cellWidth: 90, textColor: CINZA }, 1: { fontStyle: 'bold' } } });
 

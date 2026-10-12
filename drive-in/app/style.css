@@ -302,3 +302,12 @@ input[readonly]{background:#f3f4f6;color:#374151}
   .ini-acao button{flex:1 1 100%}
   .ini-lin{grid-template-columns:30px 1fr auto}.ini-lin>:nth-child(3),.ini-lin>:nth-child(4){display:none}
 }
+
+/* ---- cadastro travado: só o administrador (senha do catálogo) edita */
+.cad-trava{margin:0 16px 8px;padding:8px 12px;border-radius:8px;background:#f1f5f9;border:1px solid var(--borda-forte);color:var(--texto);font-size:12.5px;font-weight:600}
+.cad-trava::before{content:"";display:inline-block;width:10px;height:8px;margin-right:8px;border:2px solid currentColor;border-radius:2px;vertical-align:-1px;box-shadow:0 -5px 0 -2px #f1f5f9,0 -5px 0 0 currentColor}
+.cad-trava.aberta{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+.cad-trava.aberta::before{box-shadow:none}
+td.cad-ro{padding:7px 10px;font-size:13px;color:var(--texto)}
+td.cad-ro.num{text-align:right}
+td.cad-ro .vazio{color:var(--cinza-claro)}
