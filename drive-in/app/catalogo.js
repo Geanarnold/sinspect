@@ -1478,6 +1478,42 @@ window.CATALOGO = {
    "aco": "",
    "dim": 230
   },
+  "BRACO-S180-80D": {
+   "tipo": "Braço (padrão)",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550",
+   "codigo": "PK04XXXX",
+   "peso": 2.25,
+   "unid": "kg",
+   "aco": "",
+   "dim": 180
+  },
+  "BRACO-D180-80D": {
+   "tipo": "Braço (padrão)",
+   "desc": "SUP BRAÇO DUP 180MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550",
+   "codigo": "PK04XXXX",
+   "peso": 2.824,
+   "unid": "kg",
+   "aco": "",
+   "dim": 180
+  },
+  "BRACO-S230-80D": {
+   "tipo": "Braço (padrão)",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550",
+   "codigo": "PK04XXXX",
+   "peso": 2.399,
+   "unid": "kg",
+   "aco": "",
+   "dim": 230
+  },
+  "BRACO-D230-80D": {
+   "tipo": "Braço (padrão)",
+   "desc": "SUP BRAÇO DUP 230MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550",
+   "codigo": "PK04XXXX",
+   "peso": 3.127,
+   "unid": "kg",
+   "aco": "",
+   "dim": 230
+  },
   "BRACO-S180-80": {
    "tipo": "Braço (padrão)",
    "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (C 94x40x15 #1,8; CO040537; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550)",

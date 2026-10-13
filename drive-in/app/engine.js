@@ -225,8 +225,9 @@
       totBracos += q;
       const [tipo, bal] = m.split('|'), b = Number(bal);
       // braço padrão cadastrado (des. 0004.0003.02.002 REV.03): COL 80/101/122, simples/duplo, balanço 180/230, com perfil C e chapa do U padrão
-      const cadB = !dup && bracoPadrao && cat.produtos[`BRACO-${tipo}${bal}-${col}`];
-      if (cadB) { add('Braços', `BRACO-${tipo}${bal}-${col}`, cadB.desc, cadB.codigo, q, compC(tipo, b), cadB.peso, 'braço padrão cadastrado'); continue; }
+      // COL 80 duplada (Gean 13/10/2026): kit sem cadastro, peso extrapolado dos kits COL 80 e 122 (mesmo C #1,8) para o U de 160 mm
+      const idB = `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, cadB = bracoPadrao && cat.produtos[idB];
+      if (cadB) { add('Braços', idB, cadB.desc, cadB.codigo, q, compC(tipo, b), cadB.peso, dup ? 'braço da duplada: peso ESTIMADO (extrapolado dos kits COL 80 e 122)' : 'braço padrão cadastrado'); continue; }
       add('Braços', `BRACO-${tipo}${bal}-${col}${dup ? 'D' : ''}`, `Braço ${dup ? 'específico ' : ''}${tipo === 'S' ? 'simples' : 'duplo'} balanço ${bal} – ${nomeCol} – ${cTxt} (comp. C ${compC(tipo, b).toFixed(1)})`, SEM.SA, q, compC(tipo, b), +pesoBracoCalc(tipo, b).toFixed(3),
         dup ? 'braço específico da coluna duplada (sem desenho/SA): peso ESTIMADO com U de 160 abraçando as 2 montantes + perfil C' : 'peso calculado pela geometria (U 2,65 + perfil C), sem descontar furos; SA a definir');
     }
@@ -404,7 +405,7 @@
     else if (peDireito && peDireito - H < 300) alertas.push(`Folga entre o topo da estrutura e o pé-direito: ${peDireito - H} mm. Conferir sprinklers, luminárias e vigas do galpão.`);
     alertas.unshift(AVISO_ESTRUTURAL, NOTA_RESPONSABILIDADE); // decisão do Gean: aviso fixo em todo projeto (sem tabela de dimensionamento)
     if (col === 80) pend.push('COL 80: sapata (CO) e perfil U (SA) sem código cadastrado.');
-    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço específico da duplada (sem desenho, SA nem peso cadastrados: peso estimado com U de ${colW} mm), zig-zag no oblongo externo. Faltam: desenho do braço específico, código PK da caneleira 80 DUP, fixação montante–montante e se a duplada vale para todas as laterais.`);
+    if (dup) pend.push(`${nomeCol}: regras provisórias — 2 montantes por posição (perfil, emenda e contraventamento lateral em dobro), 1 sapata ${idSap} por posição, braço da duplada (kit PK04XXXX sem cadastro: peso extrapolado dos kits COL 80 e 122 para o U de ${colW} mm; C fora do padrão: calculado pela geometria), zig-zag no oblongo externo. Faltam: cadastro do kit do braço da duplada, código PK da caneleira 80 DUP, fixação montante–montante e se a duplada vale para todas as laterais.`);
 
     const pesoTotal = pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0);
     return {

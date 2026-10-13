@@ -13,7 +13,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 2,
- "pesoTotalKg": 1797.865,
+ "pesoTotalKg": 1810.948,
  "erros": [],
  "alertas": [
   "1º nível 1800 mm ajustado para 1801.75 mm (furação de 50 mm da coluna).",
@@ -159,35 +159,35 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço específico simples balanço 180 – COL 80 DUPLADA – C 94x40x15x1.8 (comp. C 345.3)",
+   "codigo": "PK04XXXX",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550",
    "qtd": 6,
    "compr": 345.3,
-   "pesoUnit": 2.001
+   "pesoUnit": 2.25
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço específico duplo balanço 180 – COL 80 DUPLADA – C 94x40x15x1.8 (comp. C 525.3)",
+   "codigo": "PK04XXXX",
+   "desc": "SUP BRAÇO DUP 180MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550",
    "qtd": 15,
    "compr": 525.3,
-   "pesoUnit": 2.502
+   "pesoUnit": 2.824
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço específico simples balanço 230 – COL 80 DUPLADA – C 94x40x15x1.8 (comp. C 395.3)",
+   "codigo": "PK04XXXX",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550",
    "qtd": 6,
    "compr": 395.3,
-   "pesoUnit": 2.14
+   "pesoUnit": 2.399
   },
   {
    "grupo": "Braços",
-   "codigo": "SA04XXXX",
-   "desc": "Braço específico duplo balanço 230 – COL 80 DUPLADA – C 94x40x15x1.8 (comp. C 625.3)",
+   "codigo": "PK04XXXX",
+   "desc": "SUP BRAÇO DUP 230MM - COL 80 DUP – kit sem cadastro, peso ESTIMADO pelos kits COL 80 e 122 (U 160, C 94x40x15 #1,8) com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550",
    "qtd": 15,
    "compr": 625.3,
-   "pesoUnit": 2.78
+   "pesoUnit": 3.127
   },
   {
    "grupo": "Fixadores dos braços",
