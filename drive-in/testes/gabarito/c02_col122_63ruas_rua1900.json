@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 116527.621,
+ "pesoTotalKg": 116724.741,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -295,6 +295,22 @@
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
    "qtd": 256,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Protetores",
+   "codigo": "SA04XXXX",
+   "desc": "PROTETOR FRONTAL GUIA COL 122 (sem cadastro) + 3 INT0654",
+   "qtd": 64,
+   "compr": null,
+   "pesoUnit": 3.08
+  },
+  {
+   "grupo": "Protetores",
+   "codigo": "INT0654",
+   "desc": "Chumbador PBA 3/8\" x 3.1/2\"",
+   "qtd": 192,
    "compr": null,
    "pesoUnit": null
   },

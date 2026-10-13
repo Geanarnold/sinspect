@@ -1289,6 +1289,42 @@ window.CATALOGO = {
    "aco": "",
    "dim": 700
   },
+  "PROT-FRONT-80": {
+   "tipo": "Protetor frontal",
+   "desc": "PROTETOR COL DRIVE IN C REFORÇO (COL 80) + 3 INT0654",
+   "codigo": "CO040441",
+   "peso": 2.69,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "PROT-FRONT-101": {
+   "tipo": "Protetor frontal",
+   "desc": "PROTETOR FRONTAL GUIA COL 101 (sem cadastro) + 3 INT0654",
+   "codigo": "SA04XXXX",
+   "peso": 2.85,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "PROT-FRONT-122": {
+   "tipo": "Protetor frontal",
+   "desc": "PROTETOR FRONTAL GUIA COL 122 (sem cadastro) + 3 INT0654",
+   "codigo": "SA04XXXX",
+   "peso": 3.08,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "PROT-FRONT-80D": {
+   "tipo": "Protetor frontal",
+   "desc": "PROTETOR FRONTAL GUIA COL 80 DUP (sem cadastro) + 3 INT0654",
+   "codigo": "SA04XXXX",
+   "peso": 3.57,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
   "CAN-80D": {
    "tipo": "Caneleira",
    "desc": "PP PROTETOR CANELEIRA 80 DUP 700 mm – kit SA04XXXX (sem cadastro) + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",

@@ -249,6 +249,10 @@
     { const idC = dup ? 'CAN-80D' : `CAN-${col}`, cn = prodOf(cat, idC);
       add('Protetores', idC, cn.desc, cn.codigo, laterais, 700, cn.peso, '1 na primeira coluna (frente) de cada lateral: ruas + 1');
       for (const id of ['INT0648', 'INT0650']) add('Protetores', id, prodOf(cat, id).desc, id, 4 * laterais, null, null, `4 por caneleira (já incluídos no ${cn.codigo})`); }
+    // protetor frontal da guia (Gean 13/10/2026): fixo por coluna, 1 por lateral (ruas + 1) na coluna da frente, junto com a caneleira; 3 INT0654 cada
+    { const idP = dup ? 'PROT-FRONT-80D' : `PROT-FRONT-${col}`, pf = prodOf(cat, idP);
+      add('Protetores', idP, pf.desc, pf.codigo, laterais, null, pf.peso, '1 por lateral (ruas + 1), na coluna da frente, além da caneleira');
+      add('Protetores', 'INT0654', prodOf(cat, 'INT0654').desc, 'INT0654', 3 * laterais, null, null, '3 chumbadores por protetor frontal'); }
     // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
     // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
     const TRILHO_ALT = 75, TRILHO_FRENTE = 50;
