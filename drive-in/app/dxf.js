@@ -577,7 +577,7 @@
       if (TRV) put(rotate(mapPts(clone(TRV), (v) => [v[0] > CC0 / 2 ? v[0] + cc - CC0 : v[0], v[1]]), ang), p1[0], p1[1], 'Contraventamento', nomeBloco('DI_PL_DIAG_TOPO', nb(cc), dirJ > 0 ? 'A' : 'B'));
       else line(p1[0], p1[1], p2[0], p2[1], 'Contraventamento');
     }
-    // trilho guia (DI_TRILHO_GUIA): centrado na linha de colunas de cada lateral, começa à frente da estrutura e entra até o fim do penúltimo palete
+    // trilho guia (DI_TRILHO_GUIA): centrado na linha de colunas de cada lateral, começa à frente da estrutura e vai até passar da penúltima coluna (Gean 13/10/2026)
     // trilho por modelo de coluna (DI_TRILHO_GUIA_80 / _101 / _122 / _80D, Gean); sem bloco do modelo: DI_TRILHO_GUIA genérico
     const Tr = r.lateral.trilho, TRL = B()['DI_TRILHO_GUIA_' + cp + (dup ? 'D' : '')] || B().DI_TRILHO_GUIA;
     const TL0 = TRL ? Math.max(...TRL.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : 0;

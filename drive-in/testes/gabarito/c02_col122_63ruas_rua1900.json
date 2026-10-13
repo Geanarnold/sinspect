@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 123627.141,
+ "pesoTotalKg": 123239.237,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -478,15 +478,23 @@
    "grupo": "Guia inferior",
    "codigo": "SA042687",
    "desc": "GUIA BASE LATERAL EMPILHADEIRA - 2,750 MT",
-   "qtd": 512,
+   "qtd": 384,
    "compr": 2750,
    "pesoUnit": 9.667
   },
   {
    "grupo": "Guia inferior",
+   "codigo": "SA041660",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 1,050 MT",
+   "qtd": 256,
+   "compr": 1050,
+   "pesoUnit": 3.665
+  },
+  {
+   "grupo": "Guia inferior",
    "codigo": "PK041124",
    "desc": "REFORÇO GUIA PERFIL S (SA042123 185x75) + 2 INT0654 + 4 INT0648 + 4 INT0650",
-   "qtd": 1408,
+   "qtd": 1344,
    "compr": null,
    "pesoUnit": 1.387
   },
@@ -494,7 +502,7 @@
    "grupo": "Guia inferior",
    "codigo": "INT0654",
    "desc": "Chumbador PBA 3/8\" x 3.1/2\"",
-   "qtd": 2816,
+   "qtd": 2688,
    "compr": null,
    "pesoUnit": null
   },
@@ -502,7 +510,7 @@
    "grupo": "Guia inferior",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 5632,
+   "qtd": 5376,
    "compr": null,
    "pesoUnit": null
   },
@@ -510,7 +518,7 @@
    "grupo": "Guia inferior",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 5632,
+   "qtd": 5376,
    "compr": null,
    "pesoUnit": null
   },

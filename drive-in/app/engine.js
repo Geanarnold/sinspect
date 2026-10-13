@@ -253,10 +253,8 @@
     { const idP = dup ? 'PROT-FRONT-80D' : `PROT-FRONT-${col}`, pf = prodOf(cat, idP);
       add('Protetores', idP, pf.desc, pf.codigo, laterais, null, pf.peso, '1 por lateral (ruas + 1), na coluna da frente, além da caneleira');
       add('Protetores', 'INT0654', prodOf(cat, 'INT0654').desc, 'INT0654', 3 * laterais, null, null, '3 chumbadores por protetor frontal'); }
-    // trilho guia: 1 de cada lado da rua, da frente até o final do penúltimo palete na profundidade
-    // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura e vai até o fim do penúltimo palete
+    // trilho guia (Drawing1.dxf, vistas laterais A–D): perfil de 75 mm no piso, passa 50 mm à frente da estrutura; comprimento definido após as faces das colunas
     const TRILHO_ALT = 75, TRILHO_FRENTE = 50;
-    const compTrilho = P > 1 ? (P - 1) * ocupPalete + TRILHO_FRENTE : 0;
     // longarina de túnel (Drawing1.dxf): perfil U na mesma faixa do C do braço (topo = apoio do palete), contínua em toda a profundidade,
     // uma em cada linha de braço → 2 por rua por nível de braço
     const lgU = { A: Number(inp.uA) || 100, B: Number(inp.uB) || 38, e: Number(inp.uE) || 1.8 };
@@ -265,6 +263,8 @@
     const LG_TUNEL_MAX = 3000, CW_LAT = 69.8;
     const faces = [0]; espacos.forEach((a, i) => { const quadroI = solteira ? i % 2 === 1 : i % 2 === 0; faces.push(faces[i] + (solteira && i === 0 ? a : quadroI ? a - CW_LAT : a + CW_LAT)); });
     const eixosLat = faces.map((v) => v + CW_LAT / 2);
+    // trilho/guia (Gean 13/10/2026): da frente (50 mm à frente da estrutura) até passar da penúltima coluna, contando da frente (face de trás dela)
+    const compTrilho = profundidade - faces[n >= 2 ? 1 : 0] + TRILHO_FRENTE;
     const barrasTunel = []; let ini = 0;
     while (profundidade - ini > LG_TUNEL_MAX + 1e-6) {
       const cand = eixosLat.filter((x) => x > ini + 1e-6 && x - ini <= LG_TUNEL_MAX + 1e-6);
@@ -363,10 +363,10 @@
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     // guia inferior (Gean 13/10/2026): 2 perfis laterais (des. 0004.0003.03.009 REV.04, chapa #4,75, ~3,513 kg/m) montados com peças padrão,
-    // maior primeiro e sem corte, do protetor frontal (~133 mm) até passar da última coluna (profundidade total), com a menor sobra possível sem picar em peças pequenas
-    // perfil S de reforço PK041124 (des. 0004.0003.01.009): 1 a cada 500 mm saindo da coluna da frente (1º a 500 mm) → floor(guia / 500)
+    // maior primeiro e sem corte, do protetor frontal (~133 mm) até passar da penúltima coluna (= trilho do desenho), com a menor sobra possível sem picar em peças pequenas
+    // perfil S de reforço PK041124 (des. 0004.0003.01.009): 1 a cada 500 mm, o 1º colado na coluna da frente → floor(guia / 500) + 1
     if (compTrilho > 0) {
-      const PECAS_GUIA = [2750, 2495, 1625, 1250, 1100, 1050], alvo = profundidade - 133, lado = [];
+      const PECAS_GUIA = [2750, 2495, 1625, 1250, 1100, 1050], alvo = compTrilho - 133, lado = [];
       let rest = alvo;
       while (rest > 2750 + 1050) { lado.push(2750); rest -= 2750; } // peças de 2750 enquanto couber; o final (≤ 3800) pela combinação de até 3 peças
       if (rest > 0) {                                                  // que passa da coluna com a menor sobra, cada emenda a mais pesando como 150 mm de sobra
@@ -376,9 +376,9 @@
       }
       const soma = lado.reduce((a, b) => a + b, 0), cont = {};
       for (const pc of lado) cont[pc] = (cont[pc] || 0) + 1;
-      for (const pc of PECAS_GUIA) if (cont[pc]) { const g = prodOf(cat, `GUIA-${pc}`); add('Guia inferior', `GUIA-${pc}`, g.desc, g.codigo, 2 * cont[pc] * laterais, pc, g.peso, `${cont[pc]} por lado × 2 lados × ${laterais} lateral(is); guia ${soma} mm + protetor, passa ${r1(-rest)} mm da última coluna (profundidade ${r1(profundidade)} mm)`); }
-      const nS = Math.max(1, Math.floor(soma / 500)), ps = prodOf(cat, 'PERFIL-S');
-      add('Guia inferior', 'PERFIL-S', ps.desc, ps.codigo, nS * laterais, null, ps.peso, `${nS} por guia: 1 a cada 500 mm saindo da coluna da frente`);
+      for (const pc of PECAS_GUIA) if (cont[pc]) { const g = prodOf(cat, `GUIA-${pc}`); add('Guia inferior', `GUIA-${pc}`, g.desc, g.codigo, 2 * cont[pc] * laterais, pc, g.peso, `${cont[pc]} por lado × 2 lados × ${laterais} lateral(is); guia ${soma} mm + protetor, passa ${r1(-rest)} mm da penúltima coluna (trilho ${r1(compTrilho)} mm com o protetor)`); }
+      const nS = Math.floor(soma / 500) + 1, ps = prodOf(cat, 'PERFIL-S');
+      add('Guia inferior', 'PERFIL-S', ps.desc, ps.codigo, nS * laterais, null, ps.peso, `${nS} por guia: 1 colado na coluna da frente + 1 a cada 500 mm`);
       add('Guia inferior', 'INT0654', prodOf(cat, 'INT0654').desc, 'INT0654', 2 * nS * laterais, null, null, '2 por perfil S');
       add('Guia inferior', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 4 * nS * laterais, null, null, '4 por perfil S');
       add('Guia inferior', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 4 * nS * laterais, null, null, '4 por perfil S');
