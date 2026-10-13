@@ -363,18 +363,22 @@
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
     // guia inferior (Gean 13/10/2026): 2 perfis laterais (des. 0004.0003.03.009 REV.04, chapa #4,75, ~3,513 kg/m) montados com peças padrão,
-    // maior primeiro e sem corte, do protetor frontal (~133 mm) até o fim do trilho; sobra ≥ 525 mm recebe mais uma peça de 1050
-    // perfil S de reforço PK041124 (des. 0004.0003.01.009): 1 em cada emenda + 1 no meio de cada peça = 2n − 1 por guia [CONFIRMAR]
+    // maior primeiro e sem corte, do protetor frontal (~133 mm) até passar da última coluna (profundidade total), com a menor sobra possível sem picar em peças pequenas
+    // perfil S de reforço PK041124 (des. 0004.0003.01.009): 1 a cada 500 mm saindo da coluna da frente (1º a 500 mm) → floor(guia / 500)
     if (compTrilho > 0) {
-      const PECAS_GUIA = [2750, 2495, 1625, 1250, 1100, 1050], alvo = compTrilho - 133, lado = [];
+      const PECAS_GUIA = [2750, 2495, 1625, 1250, 1100, 1050], alvo = profundidade - 133, lado = [];
       let rest = alvo;
-      while (rest >= 1050) { const pc = PECAS_GUIA.find((v) => v <= rest); lado.push(pc); rest -= pc; }
-      if (rest >= 525) { lado.push(1050); rest -= 1050; }
+      while (rest > 2750 + 1050) { lado.push(2750); rest -= 2750; } // peças de 2750 enquanto couber; o final (≤ 3800) pela combinação de até 3 peças
+      if (rest > 0) {                                                  // que passa da coluna com a menor sobra, cada emenda a mais pesando como 150 mm de sobra
+        let best = null; const tenta = (c) => { const t = c.reduce((a, b) => a + b, 0), n = t - rest + 150 * c.length; if (t >= rest && (!best || n < best.n)) best = { t, c, n }; };
+        PECAS_GUIA.forEach((a, i) => { tenta([a]); PECAS_GUIA.slice(i).forEach((b, j) => { tenta([a, b]); PECAS_GUIA.slice(i + j).forEach((c) => tenta([a, b, c])); }); });
+        lado.push(...best.c); rest -= best.t;
+      }
       const soma = lado.reduce((a, b) => a + b, 0), cont = {};
       for (const pc of lado) cont[pc] = (cont[pc] || 0) + 1;
-      for (const pc of PECAS_GUIA) if (cont[pc]) { const g = prodOf(cat, `GUIA-${pc}`); add('Guia inferior', `GUIA-${pc}`, g.desc, g.codigo, 2 * cont[pc] * laterais, pc, g.peso, `${cont[pc]} por lado × 2 lados × ${laterais} lateral(is); guia ${soma} mm + protetor (alvo ${r1(alvo)} mm até o fim do ${P - 1}º palete)`); }
-      const nS = 2 * lado.length - 1, ps = prodOf(cat, 'PERFIL-S');
-      add('Guia inferior', 'PERFIL-S', ps.desc, ps.codigo, nS * laterais, null, ps.peso, `${nS} por guia (1 por emenda + 1 por peça) [CONFIRMAR]`);
+      for (const pc of PECAS_GUIA) if (cont[pc]) { const g = prodOf(cat, `GUIA-${pc}`); add('Guia inferior', `GUIA-${pc}`, g.desc, g.codigo, 2 * cont[pc] * laterais, pc, g.peso, `${cont[pc]} por lado × 2 lados × ${laterais} lateral(is); guia ${soma} mm + protetor, passa ${r1(-rest)} mm da última coluna (profundidade ${r1(profundidade)} mm)`); }
+      const nS = Math.max(1, Math.floor(soma / 500)), ps = prodOf(cat, 'PERFIL-S');
+      add('Guia inferior', 'PERFIL-S', ps.desc, ps.codigo, nS * laterais, null, ps.peso, `${nS} por guia: 1 a cada 500 mm saindo da coluna da frente`);
       add('Guia inferior', 'INT0654', prodOf(cat, 'INT0654').desc, 'INT0654', 2 * nS * laterais, null, null, '2 por perfil S');
       add('Guia inferior', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 4 * nS * laterais, null, null, '4 por perfil S');
       add('Guia inferior', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 4 * nS * laterais, null, null, '4 por perfil S');
@@ -392,7 +396,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: quantidade de perfis S da guia a confirmar; travessa união fora dos modelos sai com peso estimado; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
+    pend.push('Pesos em validação: travessa união fora dos modelos sai com peso estimado; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
