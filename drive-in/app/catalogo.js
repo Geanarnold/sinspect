@@ -922,7 +922,7 @@ window.CATALOGO = {
   },
   "PLN-122": {
    "tipo": "Placa niveladora",
-   "desc": "Placa niveladora COL 122",
+   "desc": "Placa niveladora COL 122 e 80 DUP (mesma peça)",
    "codigo": "SA041649",
    "peso": 0.231,
    "unid": "kg",
@@ -1687,6 +1687,12 @@ window.CATALOGO = {
    "item": "INT0812",
    "qtd": 8,
    "contagem": "por sapata"
+  },
+  {
+   "pai": "SAP-80DUP",
+   "item": "PLN-122",
+   "qtd": 2,
+   "contagem": "por sapata (placa da 122 = placa da 80 DUP, des. 0004.0003.03.015 REV.00)"
   },
   {
    "pai": "SAP-80DUP",
