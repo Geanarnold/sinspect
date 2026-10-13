@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 123185.477,
+ "pesoTotalKg": 124350.977,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -220,41 +220,41 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040539",
-   "desc": "SUP BRAÇO SIMP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041643 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK041374",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041643 (C 94x40x15 #1,8; CO040539; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550)",
    "qtd": 30,
    "compr": 307.3,
-   "pesoUnit": 1.76
+   "pesoUnit": 1.911
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040540",
-   "desc": "SUP BRAÇO DUP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041644 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK041377",
+   "desc": "SUP BRAÇO DUP 180MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041644 (C 94x40x15 #1,8; CO040540; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550)",
    "qtd": 930,
    "compr": 487.3,
-   "pesoUnit": 2.298
+   "pesoUnit": 2.502
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040542",
-   "desc": "SUP BRAÇO SIMP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041646 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK041375",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041646 (C 94x40x15 #1,8; CO040542; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550)",
    "qtd": 150,
    "compr": 357.3,
-   "pesoUnit": 1.909
+   "pesoUnit": 2.06
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040541",
-   "desc": "SUP BRAÇO DUP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041645 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK041376",
+   "desc": "SUP BRAÇO DUP 230MM - COL 122 – SA041642 PERFIL U 205X200MM COL 122 + SA041645 (C 94x40x15 #1,8; CO040541; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550)",
    "qtd": 4650,
    "compr": 587.3,
-   "pesoUnit": 2.599
+   "pesoUnit": 2.803
   },
   {
    "grupo": "Fixadores dos braços",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 46080,
+   "qtd": 23040,
    "compr": null,
    "pesoUnit": null
   },
@@ -262,7 +262,7 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 46080,
+   "qtd": 34380,
    "compr": null,
    "pesoUnit": null
   },
@@ -270,7 +270,15 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0812",
    "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
-   "qtd": 92160,
+   "qtd": 57420,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT1550",
+   "desc": "Parafuso francês zincado 5/16\" x 4.1/2\"",
+   "qtd": 11340,
    "compr": null,
    "pesoUnit": null
   },

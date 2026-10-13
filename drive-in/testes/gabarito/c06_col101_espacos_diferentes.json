@@ -209,7 +209,7 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 480,
+   "qtd": 240,
    "compr": null,
    "pesoUnit": null
   },
@@ -217,7 +217,7 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 480,
+   "qtd": 340,
    "compr": null,
    "pesoUnit": null
   },
@@ -225,7 +225,15 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0812",
    "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
-   "qtd": 960,
+   "qtd": 580,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT1550",
+   "desc": "Parafuso francês zincado 5/16\" x 4.1/2\"",
+   "qtd": 100,
    "compr": null,
    "pesoUnit": null
   },

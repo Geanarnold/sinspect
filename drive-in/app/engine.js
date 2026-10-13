@@ -240,9 +240,10 @@
       else if (ap < APOIO_AVISO) alertas.push(`ATENÇÃO – braço ${nome}: apoio do palete de ${ap.toFixed(1)} mm por lado, menor que ${APOIO_AVISO} mm. Conferir; para ${APOIO_AVISO} mm o balanço deve ser de pelo menos ${Math.ceil(APOIO_AVISO + FOLGA_PALETE_COLUNA - ESP_U)} mm.`);
     }
     if (totBracos) {
-      add('Fixadores dos braços', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 8 * totBracos, null, null, '8 por braço');
-      add('Fixadores dos braços', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 8 * totBracos, null, null, '8 por braço');
-      add('Fixadores dos braços', 'INT0812', prodOf(cat, 'INT0812').desc, 'INT0812', 16 * totBracos, null, null, '16 por braço');
+      // fixadores do kit do suporte de braço (des. 0004.0003.01.014 REV.03): simples 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550; duplo 4 + 6 + 10 + 2
+      const nS = Object.entries(contBraco).filter(([m]) => m[0] === 'S').reduce((a, [, q]) => a + q, 0), nDb = totBracos - nS;
+      const fx = [['INT0648', 4, 4], ['INT0650', 5, 6], ['INT0812', 9, 10], ['INT1550', 1, 2]];
+      for (const [id, qs, qd] of fx) add('Fixadores dos braços', id, prodOf(cat, id).desc, id, qs * nS + qd * nDb, null, null, `${qs} por braço simples + ${qd} por braço duplo (kit des. 0004.0003.01.014)`);
     }
     // caneleira (protetor 700 mm) na coluna de frente de cada lateral; longarina superior (DI_LGTOPO) no topo de cada rua
     // desenho 0004.0003.01.017 REV.02: um kit por modelo de coluna (80, 101, 122, 80 duplada), cada um com 4 INT0648 + 4 INT0650

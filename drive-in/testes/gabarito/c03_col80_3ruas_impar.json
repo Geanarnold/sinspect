@@ -14,7 +14,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 3,
- "pesoTotalKg": 1023.745,
+ "pesoTotalKg": 1032.265,
  "erros": [],
  "alertas": [
   "1º nível 1700 mm ajustado para 1701.75 mm (furação de 50 mm da coluna).",
@@ -144,41 +144,41 @@
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040537",
-   "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK040863",
+   "desc": "SUP BRAÇO SIMP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041640 (C 94x40x15 #1,8; CO040537; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550)",
    "qtd": 8,
    "compr": 265.3,
-   "pesoUnit": 1.385
+   "pesoUnit": 1.536
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040538",
-   "desc": "SUP BRAÇO DUP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041641 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK040864",
+   "desc": "SUP BRAÇO DUP 180MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041641 (C 94x40x15 #1,8; CO040538; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550)",
    "qtd": 8,
    "compr": 445.3,
-   "pesoUnit": 1.942
+   "pesoUnit": 2.146
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040536",
-   "desc": "SUP BRAÇO SIMP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041638 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK040862",
+   "desc": "SUP BRAÇO SIMP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041638 (C 94x40x15 #1,8; CO040536; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 5 INT0650 + 9 INT0812 + 1 INT1550)",
    "qtd": 16,
    "compr": 315.3,
-   "pesoUnit": 1.534
+   "pesoUnit": 1.685
   },
   {
    "grupo": "Braços",
-   "codigo": "CO040530",
-   "desc": "SUP BRAÇO DUP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041630 (C 94x40x15 #1,8; des. 0004.0003.02.002 REV.03)",
+   "codigo": "PK040861",
+   "desc": "SUP BRAÇO DUP 230MM - COL 80 – SA041629 PERFIL U 180X165MM COL 80 + SA041630 (C 94x40x15 #1,8; CO040530; kit des. 0004.0003.01.014 REV.03 com 4 INT0648 + 6 INT0650 + 10 INT0812 + 2 INT1550)",
    "qtd": 16,
    "compr": 545.3,
-   "pesoUnit": 2.241
+   "pesoUnit": 2.445
   },
   {
    "grupo": "Fixadores dos braços",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 384,
+   "qtd": 192,
    "compr": null,
    "pesoUnit": null
   },
@@ -186,7 +186,7 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 384,
+   "qtd": 264,
    "compr": null,
    "pesoUnit": null
   },
@@ -194,7 +194,15 @@
    "grupo": "Fixadores dos braços",
    "codigo": "INT0812",
    "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
-   "qtd": 768,
+   "qtd": 456,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Fixadores dos braços",
+   "codigo": "INT1550",
+   "desc": "Parafuso francês zincado 5/16\" x 4.1/2\"",
+   "qtd": 72,
    "compr": null,
    "pesoUnit": null
   },
