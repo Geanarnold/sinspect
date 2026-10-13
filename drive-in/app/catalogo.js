@@ -1325,6 +1325,69 @@ window.CATALOGO = {
    "aco": "",
    "dim": null
   },
+  "GUIA-2750": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 2,750 MT",
+   "codigo": "SA042687",
+   "peso": 9.667,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 2750
+  },
+  "GUIA-2495": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 2,495 MT",
+   "codigo": "SA042844",
+   "peso": 8.766,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 2495
+  },
+  "GUIA-1625": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 1,625 MT",
+   "codigo": "SA041451",
+   "peso": 5.709,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 1625
+  },
+  "GUIA-1250": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 1,250 MT",
+   "codigo": "SA042978",
+   "peso": 4.386,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 1250
+  },
+  "GUIA-1100": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 1,100 MT",
+   "codigo": "SA041656",
+   "peso": 3.863,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 1100
+  },
+  "GUIA-1050": {
+   "tipo": "Guia base lateral",
+   "desc": "GUIA BASE LATERAL EMPILHADEIRA - 1,050 MT",
+   "codigo": "SA041660",
+   "peso": 3.665,
+   "unid": "kg",
+   "aco": "ACO0557 CHAPA LQ 4,75",
+   "dim": 1050
+  },
+  "PERFIL-S": {
+   "tipo": "Reforço guia",
+   "desc": "REFORÇO GUIA PERFIL S (SA042123 185x75) + 2 INT0654 + 4 INT0648 + 4 INT0650",
+   "codigo": "PK041124",
+   "peso": 1.387,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
   "CAN-80D": {
    "tipo": "Caneleira",
    "desc": "PP PROTETOR CANELEIRA 80 DUP 700 mm – kit SA04XXXX (sem cadastro) + 4 INT0648 + 4 INT0650 (des. 0004.0003.01.017 REV.02)",

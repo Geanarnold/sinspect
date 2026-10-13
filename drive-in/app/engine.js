@@ -362,7 +362,23 @@
     if (folgaUC < -1) erros.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm não comporta o C do braço (A = ${perfilC.A} mm; tolerância ± 1 mm).`);
     else if (folgaUC > 1) alertas.push(`Longarina de túnel U ${lgU.A}x${lgU.B}x${lgU.e}: altura interna ${uInterno.toFixed(1)} mm deixa folga de ${folgaUC.toFixed(1)} mm sobre o C do braço (A = ${perfilC.A} mm), acima da tolerância de ± 1 mm.`);
     // VISTA_SUPERIOR.dxf: trilho (DI_TRILHO_GUIA, 167 mm) centrado na linha de colunas de cada lateral → 1 por lateral (o das internas serve às duas ruas) — confirmado pelo Gean
-    if (compTrilho > 0) add('Trilho guia', 'TRILHO-GUIA', `Trilho guia – até o fim do ${P - 1}º palete`, SEM.SA, laterais, compTrilho, null, '1 por lateral, centrado na linha de colunas (VISTA_SUPERIOR.dxf); perfil e peso a definir');
+    // guia inferior (Gean 13/10/2026): 2 perfis laterais (des. 0004.0003.03.009 REV.04, chapa #4,75, ~3,513 kg/m) montados com peças padrão,
+    // maior primeiro e sem corte, do protetor frontal (~133 mm) até o fim do trilho; sobra ≥ 525 mm recebe mais uma peça de 1050
+    // perfil S de reforço PK041124 (des. 0004.0003.01.009): 1 em cada emenda + 1 no meio de cada peça = 2n − 1 por guia [CONFIRMAR]
+    if (compTrilho > 0) {
+      const PECAS_GUIA = [2750, 2495, 1625, 1250, 1100, 1050], alvo = compTrilho - 133, lado = [];
+      let rest = alvo;
+      while (rest >= 1050) { const pc = PECAS_GUIA.find((v) => v <= rest); lado.push(pc); rest -= pc; }
+      if (rest >= 525) { lado.push(1050); rest -= 1050; }
+      const soma = lado.reduce((a, b) => a + b, 0), cont = {};
+      for (const pc of lado) cont[pc] = (cont[pc] || 0) + 1;
+      for (const pc of PECAS_GUIA) if (cont[pc]) { const g = prodOf(cat, `GUIA-${pc}`); add('Guia inferior', `GUIA-${pc}`, g.desc, g.codigo, 2 * cont[pc] * laterais, pc, g.peso, `${cont[pc]} por lado × 2 lados × ${laterais} lateral(is); guia ${soma} mm + protetor (alvo ${r1(alvo)} mm até o fim do ${P - 1}º palete)`); }
+      const nS = 2 * lado.length - 1, ps = prodOf(cat, 'PERFIL-S');
+      add('Guia inferior', 'PERFIL-S', ps.desc, ps.codigo, nS * laterais, null, ps.peso, `${nS} por guia (1 por emenda + 1 por peça) [CONFIRMAR]`);
+      add('Guia inferior', 'INT0654', prodOf(cat, 'INT0654').desc, 'INT0654', 2 * nS * laterais, null, null, '2 por perfil S');
+      add('Guia inferior', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 4 * nS * laterais, null, null, '4 por perfil S');
+      add('Guia inferior', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 4 * nS * laterais, null, null, '4 por perfil S');
+    }
     // stop palete (Gean, bloco DI_LGFUNDO): 2 por longarina de fundo → 2 por rua em cada nível de braço
     // desenho 0004.0003.01.007 REV.01: kit PA042118 = stop CO040442 + 1 parafuso autobrocante INT1132, 0,424 kg (existe também o invertido PA042271, mesmo peso)
     if (niveisArm.length) {
@@ -376,7 +392,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: trilho guia sai sem peso; travessa união fora dos modelos sai com peso estimado; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
+    pend.push('Pesos em validação: quantidade de perfis S da guia a confirmar; travessa união fora dos modelos sai com peso estimado; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);
