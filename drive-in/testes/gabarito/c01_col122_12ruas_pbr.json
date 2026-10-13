@@ -13,7 +13,7 @@
  ],
  "posicoes": 144,
  "paletesPorRua": 4,
- "pesoTotalKg": 4548.512,
+ "pesoTotalKg": 4544.872,
  "erros": [],
  "alertas": [
   "1º nível 2300 mm ajustado para 2301.75 mm (furação de 50 mm da coluna).",
@@ -89,10 +89,10 @@
   {
    "grupo": "Sapatas",
    "codigo": "CO040544",
-   "desc": "Sapata Drive-In COL 122 (conjunto)",
+   "desc": "Sapata Drive-In COL 122 (base SA041442 + U SA041652) (conjunto)",
    "qtd": 65,
    "compr": null,
-   "pesoUnit": 1.35
+   "pesoUnit": 1.294
   },
   {
    "grupo": "Travessas",

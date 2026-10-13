@@ -841,27 +841,27 @@ window.CATALOGO = {
  "produtos": {
   "SAP-80": {
    "tipo": "Sapata (conjunto)",
-   "desc": "Sapata Drive-In COL 80",
-   "codigo": "",
-   "peso": 1.25,
+   "desc": "Sapata Drive-In COL 80 (base SA041442 + U SA042676)",
+   "codigo": "CO041028",
+   "peso": 1.209,
    "unid": "kg",
    "aco": "Civil 300",
    "dim": null
   },
   "SAP-101": {
    "tipo": "Sapata (conjunto)",
-   "desc": "Sapata Drive-In COL 101",
+   "desc": "Sapata Drive-In COL 101 (base SA041442 + U SA041441)",
    "codigo": "CO040437",
-   "peso": 1.3,
+   "peso": 1.251,
    "unid": "kg",
    "aco": "Civil 300",
    "dim": null
   },
   "SAP-122": {
    "tipo": "Sapata (conjunto)",
-   "desc": "Sapata Drive-In COL 122",
+   "desc": "Sapata Drive-In COL 122 (base SA041442 + U SA041652)",
    "codigo": "CO040544",
-   "peso": 1.35,
+   "peso": 1.294,
    "unid": "kg",
    "aco": "Civil 300",
    "dim": null
@@ -887,7 +887,7 @@ window.CATALOGO = {
   "SAP-U80": {
    "tipo": "Sapata (componente)",
    "desc": "Perfil U sapata 80",
-   "codigo": "",
+   "codigo": "SA042676",
    "peso": null,
    "unid": "kg",
    "aco": "Civil 300",

@@ -14,7 +14,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 3,
- "pesoTotalKg": 1024.401,
+ "pesoTotalKg": 1023.745,
  "erros": [],
  "alertas": [
   "1º nível 1700 mm ajustado para 1701.75 mm (furação de 50 mm da coluna).",
@@ -40,7 +40,7 @@
   },
   {
    "grupo": "Sapatas",
-   "codigo": "SA04XXXX",
+   "codigo": "SA042676",
    "desc": "Perfil U sapata 80",
    "qtd": 16,
    "compr": null,
@@ -88,11 +88,11 @@
   },
   {
    "grupo": "Sapatas",
-   "codigo": "COXXXXXX",
-   "desc": "Sapata Drive-In COL 80 (conjunto)",
+   "codigo": "CO041028",
+   "desc": "Sapata Drive-In COL 80 (base SA041442 + U SA042676) (conjunto)",
    "qtd": 16,
    "compr": null,
-   "pesoUnit": 1.25
+   "pesoUnit": 1.209
   },
   {
    "grupo": "Travessas",

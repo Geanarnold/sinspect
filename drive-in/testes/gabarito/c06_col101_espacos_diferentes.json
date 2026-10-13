@@ -13,7 +13,7 @@
  ],
  "posicoes": 30,
  "paletesPorRua": 2,
- "pesoTotalKg": 1549.578,
+ "pesoTotalKg": 1548.108,
  "erros": [],
  "alertas": [
   "1º nível 1600 mm ajustado para 1601.75 mm (furação de 50 mm da coluna).",
@@ -88,10 +88,10 @@
   {
    "grupo": "Sapatas",
    "codigo": "CO040437",
-   "desc": "Sapata Drive-In COL 101 (conjunto)",
+   "desc": "Sapata Drive-In COL 101 (base SA041442 + U SA041441) (conjunto)",
    "qtd": 30,
    "compr": null,
-   "pesoUnit": 1.3
+   "pesoUnit": 1.251
   },
   {
    "grupo": "Travessas",
