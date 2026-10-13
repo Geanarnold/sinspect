@@ -1689,6 +1689,30 @@ window.CATALOGO = {
    "contagem": "por sapata"
   },
   {
+   "pai": "SAP-80DUP",
+   "item": "INT0654",
+   "qtd": 4,
+   "contagem": "por sapata (fixadores iguais às 4 sapatas, Gean 13/10/2026)"
+  },
+  {
+   "pai": "SAP-80DUP",
+   "item": "INT0648",
+   "qtd": 4,
+   "contagem": "por sapata (fixadores iguais às 4 sapatas, Gean 13/10/2026)"
+  },
+  {
+   "pai": "SAP-80DUP",
+   "item": "INT0650",
+   "qtd": 4,
+   "contagem": "por sapata (fixadores iguais às 4 sapatas, Gean 13/10/2026)"
+  },
+  {
+   "pai": "SAP-80DUP",
+   "item": "INT0812",
+   "qtd": 8,
+   "contagem": "por sapata (fixadores iguais às 4 sapatas, Gean 13/10/2026)"
+  },
+  {
    "pai": "SAP-101",
    "item": "SAP-BASE",
    "qtd": 1,

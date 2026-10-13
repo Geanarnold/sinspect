@@ -31,6 +31,38 @@
   },
   {
    "grupo": "Sapatas",
+   "codigo": "INT0654",
+   "desc": "Chumbador PBA 3/8\" x 3.1/2\"",
+   "qtd": 84,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0648",
+   "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
+   "qtd": 84,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0650",
+   "desc": "Porca sextavada 5/16\" zincada",
+   "qtd": 84,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
+   "codigo": "INT0812",
+   "desc": "Arruela lisa 5/16\" 8,5x20x1,2 zinc. BRC",
+   "qtd": 168,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Sapatas",
    "codigo": "CO04XXXX",
    "desc": "Sapata Drive-In COL 80 DUP (base SA04XXXX 190 mm + U SA04XXXX, sem cadastro) (conjunto)",
    "qtd": 21,
