@@ -13,7 +13,7 @@
  ],
  "posicoes": 144,
  "paletesPorRua": 4,
- "pesoTotalKg": 3834.773,
+ "pesoTotalKg": 4085.387,
  "erros": [],
  "alertas": [
   "1º nível 2300 mm ajustado para 2301.75 mm (furação de 50 mm da coluna).",
@@ -128,17 +128,17 @@
   },
   {
    "grupo": "Coluna solteira",
-   "codigo": "COXXXXXX",
-   "desc": "Travessa união COL 122 – passo 1025 mm (total 955.2 mm)",
+   "codigo": "PK041466",
+   "desc": "Travessa união COL 122 – A1 1025 mm (total 1017.8 mm) – CO040543",
    "qtd": 117,
-   "compr": 955.2,
-   "pesoUnit": null
+   "compr": 1017.8,
+   "pesoUnit": 2.142
   },
   {
    "grupo": "Coluna solteira",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 702,
+   "qtd": 468,
    "compr": null,
    "pesoUnit": null
   },
@@ -146,7 +146,15 @@
    "grupo": "Coluna solteira",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 702,
+   "qtd": 585,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Coluna solteira",
+   "codigo": "INT0994",
+   "desc": "Parafuso sextavado 5/16\" x 4\" ZNC",
+   "qtd": 117,
    "compr": null,
    "pesoUnit": null
   },

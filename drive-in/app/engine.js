@@ -17,6 +17,9 @@
 
   const SEM = { SA: 'SA04XXXX', CO: 'COXXXXXX', PA: 'PAXXXXXX', PK: 'PKXXXXXX' };
 
+  const PARAFUSO_UNIAO = { 80: 'INT0993', 101: 'INT0958', 122: 'INT0994' }; // parafuso longo da travessa união (desenho 0004.0003.01.012 REV.04)
+  // reta do peso do kit da união [kg, kg/m]: COL 80 e 122 pelos 2 modelos do desenho; COL 101 com 1 modelo e inclinação interpolada (estimada)
+  const RETA_UNIAO = { 80: [0.238, 1.247], 101: [0.264, 1.614, 'COL 101: inclinação interpolada, reta fraca'], 122: [0.281, 1.829] };
   const PARAFUSO_TRAV = { 80: 'INT0993', 101: 'INT0958', 122: 'INT0973' };
   const TUBO = { 80: 'TUBO-80', 101: 'TUBO-101', 122: 'TUBO-122' };
   const PLACA = { 80: 'PLN-80-101', 101: 'PLN-80-101', 122: 'PLN-122' };
@@ -24,6 +27,7 @@
 
   const r50 = (v) => Math.ceil(v / PASSO_COLUNA) * PASSO_COLUNA;
   const r1 = (v) => Math.round(v * 10) / 10;
+  const r3 = (v) => Math.round(v * 1000) / 1000;
 
   function prodOf(cat, id) {
     let p = cat.produtos[id];
@@ -166,12 +170,23 @@
     const tb = prodOf(cat, TUBO[col]);
     add('Travessas', TUBO[col], tb.desc, tb.codigo, tubos, null, tb.peso, 'nós de travessa sem diagonal (1ª e última horizontais)');
     if (solteira) {
-      const a = passoSolteira, totU = r1(a - 69.8);
+      // travessa união = kit PK (desenho 0004.0003.01.012 REV.04); comprimento total = A1 − 7,2 mm (A1 da face externa da coluna solteira
+      // à face da coluna do quadro; modelo "1,025" = A1 1025 → total 1017,8). Fora dos modelos (±3 mm): PK04XXXX, peso pela reta da coluna
+      const a = passoSolteira, totU = r1(a - 7.2), q = nH * laterais * nM;
       const itU = (cat.uniao || []).filter((u) => u.col === col).find((u) => Math.abs(u.total - totU) <= TOL_SA);
-      add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – passo ${a} mm (total ${totU} mm)`, itU ? itU.co : SEM.CO, nH * laterais * nM, totU, itU ? itU.peso : null, itU ? itU.nome : 'sem CO cadastrado para este comprimento (±3 mm); peso não estimado');
-      const q = nH * laterais * nM;
-      add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 6 * q, null, null, '6 por união (a confirmar para todas as variantes)');
-      add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 6 * q, null, null, '6 por união (a confirmar)');
+      const reta = RETA_UNIAO[col];
+      if (itU) add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – A1 ${a} mm (total ${totU} mm) – ${itU.co}`, itU.pk || SEM.PK, q, totU, itU.peso, itU.nome);
+      else {
+        const faixa = (cat.uniao || []).filter((u) => u.col === col).map((u) => u.total), fora = faixa.length && (totU < Math.min(...faixa) - 300 || totU > Math.max(...faixa) + 300);
+        add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – A1 ${a} mm (total ${totU} mm) – especial, ${SEM.SA}`, SEM.PK, q, totU, reta ? r3(reta[0] + reta[1] * totU / 1000) : null,
+          reta ? `fora dos modelos cadastrados: peso ESTIMADO pela reta ${reta[0]} + ${reta[1]} kg/m × total${reta[2] ? ' (' + reta[2] + ')' : ''}${fora ? '; fora da faixa dos modelos: conferir peso' : ''}` : 'sem modelo nem reta para esta coluna; peso não estimado');
+        pend.push(`Travessa união COL ${col} com A1 ${a} mm (total ${totU} mm) fora dos modelos: criar cadastro PK/SA; peso estimado.`);
+      }
+      const longo = PARAFUSO_UNIAO[col];
+      add('Coluna solteira', 'INT0648', prodOf(cat, 'INT0648').desc, 'INT0648', 4 * q, null, null, '4 por união (desenho 0004.0003.01.012)');
+      add('Coluna solteira', 'INT0650', prodOf(cat, 'INT0650').desc, 'INT0650', 5 * q, null, null, '5 por união');
+      if (longo) add('Coluna solteira', longo, prodOf(cat, longo).desc, longo, q, null, null, '1 por união (parafuso longo da coluna)');
+      else add('Coluna solteira', 'INTXXXX', `Parafuso longo da união COL ${col}`, 'INTXXXX', q, null, null, 'parafuso longo não definido para esta coluna');
     }
     // DI_TOPO (vista lateral) é só a representação do zig-zag de topo (travessas diagonais da vista superior, contadas no grupo do zig-zag): não entra na lista (Gean)
     const nPar = 2 * nH * vaosQuadro;
@@ -357,7 +372,7 @@
 
 
     // ---- pesos/regras ainda em validação (Gean, validacao/VALIDACAO_PESOS.md): itens listados, mas sem peso ou com peso provisório
-    pend.push('Pesos em validação: travessa união e trilho guia saem sem peso; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
+    pend.push('Pesos em validação: trilho guia sai sem peso; travessa união fora dos modelos sai com peso estimado; longarinas de topo fora dos modelos cadastrados saem por componentes; longarina de fundo fora dos modelos com peso estimado. Fixadores (INT/IND) entram só pelo valor, sem peso.');
     pend.push('Longarina de túnel: regra de barras de até 3000 mm com tala sobre o braço a confirmar (a planilha F379 usa barra inteira + complemento, sem tala).');
     const peDireito = Number(inp.peDireito) || 0;
     if (peDireito && H > peDireito) erros.push(`Altura da estrutura (${H} mm) maior que o pé-direito informado (${peDireito} mm).`);

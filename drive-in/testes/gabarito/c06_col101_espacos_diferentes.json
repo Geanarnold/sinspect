@@ -13,7 +13,7 @@
  ],
  "posicoes": 30,
  "paletesPorRua": 2,
- "pesoTotalKg": 1286.448,
+ "pesoTotalKg": 1366.542,
  "erros": [],
  "alertas": [
   "1º nível 1600 mm ajustado para 1601.75 mm (furação de 50 mm da coluna).",
@@ -127,17 +127,17 @@
   },
   {
    "grupo": "Coluna solteira",
-   "codigo": "COXXXXXX",
-   "desc": "Travessa união COL 101 – passo 1025 mm (total 955.2 mm)",
+   "codigo": "PK041553",
+   "desc": "Travessa união COL 101 – A1 1025 mm (total 1017.8 mm) – CO040432",
    "qtd": 42,
-   "compr": 955.2,
-   "pesoUnit": null
+   "compr": 1017.8,
+   "pesoUnit": 1.907
   },
   {
    "grupo": "Coluna solteira",
    "codigo": "INT0648",
    "desc": "Parafuso 5/16\" x 3/4\" UNC ZNB",
-   "qtd": 252,
+   "qtd": 168,
    "compr": null,
    "pesoUnit": null
   },
@@ -145,7 +145,15 @@
    "grupo": "Coluna solteira",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 252,
+   "qtd": 210,
+   "compr": null,
+   "pesoUnit": null
+  },
+  {
+   "grupo": "Coluna solteira",
+   "codigo": "INT0958",
+   "desc": "Parafuso SX GR2 UNC R.P 5/16\" x 3.1/4\" zincado",
+   "qtd": 42,
    "compr": null,
    "pesoUnit": null
   },

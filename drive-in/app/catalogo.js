@@ -832,34 +832,11 @@ window.CATALOGO = {
   }
  ],
  "uniao": [
-  {
-   "nome": "PP TRAVESSA UNIAO 0,70 LATERAL TRIPLA COL 80",
-   "col": 80,
-   "co": "CO040458",
-   "peso": 1.134,
-   "total": 696.5
-  },
-  {
-   "nome": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 101",
-   "col": 101,
-   "co": "CO040432",
-   "peso": 1.793,
-   "total": 1017.8
-  },
-  {
-   "nome": "PP TRAVESSA UNIAO 0,76 LATERAL TRIPLA COL 101",
-   "col": 101,
-   "co": "CO040755",
-   "peso": 1.434,
-   "total": 791.8
-  },
-  {
-   "nome": "PP TRAVESSA UNIAO 1,02 LATERAL TRIPLA COL 122",
-   "col": 122,
-   "co": "CO040543",
-   "peso": 2.059,
-   "total": 1017.8
-  }
+  { "nome": "PP TRAVESSA UNIAO 1,025 LATERAL TRIPLA COL 80", "col": 80, "pk": "PK041340", "co": "CO040998", "peso": 1.507, "total": 1017.8 },
+  { "nome": "PP TRAVESSA UNIAO 1,245 LATERAL TRIPLA COL 80", "col": 80, "pk": "PK041444", "co": "CO041089", "peso": 1.78, "total": 1236.8 },
+  { "nome": "PP TRAVESSA UNIAO 1,025 LATERAL TRIPLA COL 101", "col": 101, "pk": "PK041553", "co": "CO040432", "peso": 1.907, "total": 1017.8 },
+  { "nome": "PP TRAVESSA UNIAO 1,025 LATERAL TRIPLA COL 122", "col": 122, "pk": "PK041466", "co": "CO040543", "peso": 2.142, "total": 1017.8 },
+  { "nome": "PP TRAVESSA UNIAO 1,375 LATERAL TRIPLA COL 122", "col": 122, "pk": "PK041367", "co": "CO041036", "peso": 2.782, "total": 1367.8 }
  ],
  "produtos": {
   "SAP-80": {
@@ -1154,6 +1131,15 @@ window.CATALOGO = {
    "tipo": "Fixador",
    "desc": "Parafuso sextavado 5/16\" x 2.1/2\" ZNC",
    "codigo": "INT0993",
+   "peso": null,
+   "unid": "kg",
+   "aco": "",
+   "dim": null
+  },
+  "INT0994": {
+   "tipo": "Fixador",
+   "desc": "Parafuso sextavado 5/16\" x 4\" ZNC",
+   "codigo": "INT0994",
    "peso": null,
    "unid": "kg",
    "aco": "",
@@ -1768,14 +1754,20 @@ window.CATALOGO = {
   {
    "pai": "UNIAO (por peça)",
    "item": "INT0648",
-   "qtd": 6,
+   "qtd": 4,
    "contagem": "por travessa união"
   },
   {
    "pai": "UNIAO (por peça)",
    "item": "INT0650",
-   "qtd": 6,
+   "qtd": 5,
    "contagem": "por travessa união"
+  },
+  {
+   "pai": "UNIAO (por peça)",
+   "item": "INT0993 / INT0958 / INT0994",
+   "qtd": 1,
+   "contagem": "por travessa união (parafuso longo: COL 80 / 101 / 122)"
   }
  ]
 };
