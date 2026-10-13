@@ -1301,7 +1301,7 @@ window.CATALOGO = {
   "PROT-FRONT-101": {
    "tipo": "Protetor frontal",
    "desc": "PROTETOR FRONTAL GUIA COL 101 (sem cadastro) + 3 INT0654",
-   "codigo": "SA04XXXX",
+   "codigo": "CO04XXXX",
    "peso": 2.85,
    "unid": "kg",
    "aco": "",
@@ -1310,7 +1310,7 @@ window.CATALOGO = {
   "PROT-FRONT-122": {
    "tipo": "Protetor frontal",
    "desc": "PROTETOR FRONTAL GUIA COL 122 (sem cadastro) + 3 INT0654",
-   "codigo": "SA04XXXX",
+   "codigo": "CO04XXXX",
    "peso": 3.08,
    "unid": "kg",
    "aco": "",
@@ -1319,7 +1319,7 @@ window.CATALOGO = {
   "PROT-FRONT-80D": {
    "tipo": "Protetor frontal",
    "desc": "PROTETOR FRONTAL GUIA COL 80 DUP (sem cadastro) + 3 INT0654",
-   "codigo": "SA04XXXX",
+   "codigo": "CO04XXXX",
    "peso": 3.57,
    "unid": "kg",
    "aco": "",
