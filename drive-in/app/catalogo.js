@@ -868,9 +868,9 @@ window.CATALOGO = {
   },
   "SAP-80DUP": {
    "tipo": "Sapata (conjunto)",
-   "desc": "Sapata COL 80DUP",
-   "codigo": "",
-   "peso": 1.65,
+   "desc": "Sapata Drive-In COL 80 DUP (base SA04XXXX 190 mm + U SA04XXXX, sem cadastro)",
+   "codigo": "CO04XXXX",
+   "peso": 1.578,
    "unid": "kg",
    "aco": "",
    "dim": null

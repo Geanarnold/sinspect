@@ -13,7 +13,7 @@
  ],
  "posicoes": 36,
  "paletesPorRua": 2,
- "pesoTotalKg": 1789.675,
+ "pesoTotalKg": 1788.163,
  "erros": [],
  "alertas": [
   "1º nível 1800 mm ajustado para 1801.75 mm (furação de 50 mm da coluna).",
@@ -31,11 +31,11 @@
   },
   {
    "grupo": "Sapatas",
-   "codigo": "COXXXXXX",
-   "desc": "Sapata COL 80DUP (conjunto)",
+   "codigo": "CO04XXXX",
+   "desc": "Sapata Drive-In COL 80 DUP (base SA04XXXX 190 mm + U SA04XXXX, sem cadastro) (conjunto)",
    "qtd": 21,
    "compr": null,
-   "pesoUnit": 1.65
+   "pesoUnit": 1.578
   },
   {
    "grupo": "Travessas",
