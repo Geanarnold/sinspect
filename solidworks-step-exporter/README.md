@@ -28,9 +28,31 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 
 - SOLIDWORKS 2019 ou superior, 64 bits (usa `SaveAs3`, disponível a partir do 2019)
 - Visual Studio 2019/2022 com a carga de trabalho ".NET desktop" **ou** o .NET SDK 6+ com o Developer Pack do .NET Framework 4.8
-- Permissão de administrador para registrar (RegAsm grava em `HKLM`)
+- Permissão de administrador **somente** para a versão add-in (RegAsm grava em `HKLM`); a versão executável não precisa
 
-## Compilação e instalação
+## Instalação SEM administrador (recomendada para estações sem direito de admin)
+
+Esta versão é um executável avulso (`StepExporterApp.exe`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
+
+1. Compile:
+   ```bat
+   dotnet build app\StepExporterApp.csproj -c Release
+   ```
+2. Copie o conteúdo de `app\bin\Release\net48\` para uma pasta do usuário, por exemplo `C:\Users\<voce>\Ferramentas\StepExporter\`.
+3. Com o SOLIDWORKS aberto e a montagem ativa, execute `StepExporterApp.exe`.
+
+**Botão dentro do SOLIDWORKS (também sem admin):** a macro `app\BotaoExportarSTEP.bas` chama o executável. O passo a passo está no próprio arquivo:
+- crie a macro `.swp` na mesma pasta do `.exe`;
+- cole o código;
+- em *Ferramentas › Personalizar › Comandos › Macro*, arraste um botão de macro para a barra.
+
+Diferenças em relação ao add-in:
+- **Sem aba própria no CommandManager.** O acesso é pelo botão de macro ou pelo atalho do `.exe`.
+- **Um pouco mais lento em montagens muito grandes.** As chamadas à API cruzam processos. O tempo de exportação STEP continua sendo o fator dominante.
+- **Mesmo nível de privilégio.** Se o SOLIDWORKS for aberto "como administrador", o `.exe` também precisa ser.
+- **Política de TI.** Em empresas com AppLocker ou bloqueio de executáveis não assinados, a TI pode bloquear o `.exe`. Nesse caso não há saída técnica: é liberação da TI.
+
+## Compilação e instalação do add-in (requer administrador)
 
 1. Confira o caminho das DLLs de interop. Por padrão:
    `C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\api\redist\`
@@ -58,8 +80,12 @@ Para remover, execute `desregistrar.bat` como administrador, com o SOLIDWORKS fe
 
 ```
 src/
-  SwAddin.cs             registro COM, CommandManager, callback do botão, ícone gerado em runtime
+  SwAddin.cs             add-in: registro COM, CommandManager, ícone gerado em runtime
+  ExportCommand.cs       fluxo do comando (pop-up, exportação, resumo); compartilhado
   ComponentCollector.cs  varredura recursiva da árvore (dedup por arquivo + configuração)
   ExportDialog.cs        pop-up de seleção (WinForms)
   StepExportService.cs   exportação, troca e restauração de configuração, progresso, log
+app/
+  Program.cs             executável sem admin (conecta ao SOLIDWORKS aberto)
+  BotaoExportarSTEP.bas  macro VBA para criar o botão na barra do SOLIDWORKS
 ```
