@@ -8,6 +8,9 @@
   const PADRAO = JSON.parse(JSON.stringify(window.CATALOGO));
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  // grupos de peças de aço do Drive-In (os de fixadores entram pelo preço por peça) e parâmetros do orçamento
+  const GRUPOS_ORC = ['Colunas', 'Emenda de coluna', 'Sapatas', 'Travessas', 'Coluna solteira', 'Braços', 'Protetores', 'Longarinas', 'Emendas da longarina de túnel', 'Travamento de fundo (zig-zag)', 'Travamento de topo (zig-zag)', 'Guia inferior', 'Stop palete'];
+  const PARAM_ORC = [['impostos', 'Impostos', '% do preço'], ['comissao', 'Comissão', '% do preço'], ['margem', 'Margem', '% do preço'], ['freteKg', 'Frete (padrão)', 'R$/kg'], ['montagemPos', 'Montagem (padrão)', 'R$/posição'], ['art', 'Projeto/ART (padrão)', 'R$ por projeto']];
   // Tabelas editáveis: cada uma com colunas (chave, rótulo, tipo) e conversão de/para a estrutura do catálogo
   const TABELAS = {
     produtos: {
@@ -31,6 +34,19 @@
           if (r.custo === '' || r.custo == null || !(Number(r.custo) >= 0)) delete p.custo; else p.custo = Number(r.custo);
         }
         for (const [id, p] of Object.entries(c.produtos)) if (p.tipo === 'Fixador' && !ids.has(id)) delete p.custo;
+      },
+    },
+    orcamento: {
+      titulo: 'Orçamento: valores padrão',
+      cols: [['item', 'Item', 'text'], ['valor', 'Valor', 'number'], ['unid', 'Unidade', 'text']],
+      // linhas fixas: R$/kg de cada grupo de peças + parâmetros do markup divisor e padrões de frete, montagem e projeto/ART
+      ler: (c) => { const o = c.orcamento || {}, g = o.grupos || {}; return GRUPOS_ORC.map((n) => ({ _k: 'g:' + n, item: n, valor: g[n] ?? '', unid: 'R$/kg' })).concat(PARAM_ORC.map(([k, item, unid]) => ({ _k: k, item, valor: o[k] ?? '', unid }))); },
+      gravar: (c, rows) => {
+        const o = c.orcamento = c.orcamento || {}; o.grupos = o.grupos || {};
+        for (const r of rows) {
+          if (!r._k) continue; const v = r.valor === '' || r.valor == null || !(Number(r.valor) >= 0) ? null : Number(r.valor);
+          if (r._k.startsWith('g:')) { if (v == null) delete o.grupos[r._k.slice(2)]; else o.grupos[r._k.slice(2)] = v; } else o[r._k] = v;
+        }
       },
     },
     colunas_sa: {
@@ -144,5 +160,5 @@
     $('cadRestaurar').addEventListener('click', () => { if (!confirm('Descartar todas as edições e voltar ao catálogo padrão?')) return; const m0 = meta(); substituir(PADRAO); window.CATALOGO.meta = m0; alterado = true; renderTabela(); estado(); $('cadMsg').textContent = 'Valores do catálogo base restaurados (não publicado).'; if (window.recalcular) window.recalcular(); });
     renderTabela(); estado();
   }
-  window.Cadastro = { init, carregarDaPasta, desbloquear, sair, admin: () => liberado };
+  window.Cadastro = { init, carregarDaPasta, desbloquear, sair, admin: () => liberado, GRUPOS_ORC };
 })();

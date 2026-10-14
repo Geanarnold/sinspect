@@ -415,3 +415,16 @@ body:not(.pg-config) .marca .sub-desc{display:none}
 .alerta.aberto b::after{content:""}
 .alerta ul{min-width:0;list-style-position:inside;padding-left:0}
 .alerta li{min-width:0;max-width:100%}
+
+/* orçamento (administrador) */
+.orc-tab{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.orc-tab th,.orc-tab td{padding:4px 6px;border-bottom:1px solid var(--borda)}
+.orc-tab th{text-align:left;color:var(--cinza);font-weight:600;background:var(--fundo)}
+.orc-tab .num{text-align:right;white-space:nowrap}
+.orc-tab .orc-sub td{font-weight:700;background:var(--fundo)}
+.orc-tab .orc-tot td{font-weight:800;font-size:14px;border-top:2px solid var(--tinta)}
+.orc-tab .orc-falta td{color:#b91c1c}
+.orc-in{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.orc-in span{color:var(--cinza);font-size:11px}
+.orc-tab td{vertical-align:middle}
+.orc-in input{width:96px;text-align:right;padding:2px 6px;height:26px;min-height:0;font-size:12px}

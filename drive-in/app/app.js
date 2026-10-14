@@ -503,6 +503,68 @@
     const a = document.createElement('a'); a.href = URL.createObjectURL(Planilha.gerar(folhas)); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
   }
 
+  // ---------- orçamento (operador): aço por grupo (peso × R$/kg) + fixadores (preço por peça) + frete, montagem e projeto/ART;
+  // preço de venda pelo markup divisor: preço = custo ÷ (1 − impostos − comissão − margem). O operador preenche os campos na janela
+  // (ficam salvos no projeto, proj.orc); campo vazio usa o padrão do Cadastro (aba Orçamento, administrador), quando houver.
+  function dadosOrcamento(aj) {
+    const lp = calcularProjeto(), itens = consolidar(lp), O = cat.orcamento || {}, G = O.grupos || {};
+    const num = (v, d) => (v === '' || v == null || !isFinite(Number(v)) ? d : Number(v));
+    const pos = lp.reduce((s2, x) => s2 + x.r.posicoes * x.qtd, 0), grupos = new Map();
+    for (const p of semFix(itens)) if (p.pesoTotal) grupos.set(p.grupo, (grupos.get(p.grupo) || 0) + p.pesoTotal);
+    const aco = [...grupos].map(([g, kg]) => ({ grupo: g, kg, rkg: num(aj['g:' + g], G[g] > 0 ? Number(G[g]) : null) })).map((x) => ({ ...x, valor: x.rkg == null ? null : x.kg * x.rkg }));
+    const peso = aco.reduce((s2, x) => s2 + x.kg, 0), cf = custoFixadores(itens);
+    const frete = num(aj.frete, (Number(O.freteKg) || 0) * peso), montagem = num(aj.montagem, (Number(O.montagemPos) || 0) * pos), art = num(aj.art, Number(O.art) || 0);
+    const imp = num(aj.impostos, Number(O.impostos) || 0), com = num(aj.comissao, Number(O.comissao) || 0), mg = num(aj.margem, Number(O.margem) || 0);
+    const custoAco = aco.reduce((s2, x) => s2 + (x.valor || 0), 0), custo = custoAco + cf.total + frete + montagem + art, div = 1 - (imp + com + mg) / 100;
+    const preco = div > 0 ? custo / div : null;
+    const falta = aco.filter((x) => x.rkg == null).map((x) => x.grupo);
+    return { lp, pos, peso, aco, cf, frete, montagem, art, imp, com, mg, custoAco, custo, div, preco, falta,
+      vImp: preco == null ? null : preco * imp / 100, vCom: preco == null ? null : preco * com / 100, vMg: preco == null ? null : preco * mg / 100 };
+  }
+  const ajOrc = () => (proj.orc = proj.orc || {});
+  function abrirOrcamento() {
+    if (!last) return;
+    const brl = (v) => (v == null ? '–' : 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    const inp = (k, v, unid) => `<label class="orc-in"><span>${unid}</span><input type="number" step="any" data-orc="${k}" value="${v == null ? '' : Math.round(v * 100) / 100}"/></label>`;
+    const desenha = () => {
+      const D = dadosOrcamento(ajOrc());
+      const linhas = D.aco.map((x) => `<tr${x.rkg == null ? ' class="orc-falta"' : ''}><td>${esc(x.grupo)}</td><td class="num">${fmt(x.kg, 1)}</td><td>${inp('g:' + x.grupo, x.rkg, 'R$/kg')}</td><td class="num">${brl(x.valor)}</td></tr>`).join('');
+      return `<p class="nota">Projeto <b>${esc($('projeto').value || '—')}</b> · ${D.lp.length} corte(s) · <b>${fmt0(D.pos)}</b> posições · <b>${fmt(D.peso, 1)} kg</b> · catálogo ${esc(catVersaoTxt())}</p>
+        ${D.falta.length ? `<p class="bloq">Preencha o R$/kg de: ${esc(D.falta.join(', '))}. Sem ele o grupo fica fora do custo.</p>` : ''}
+        ${D.cf.semPreco.length ? `<p class="bloq">${D.cf.semPreco.length} fixador(es) sem preço: ${esc(D.cf.semPreco.join(', '))}.</p>` : ''}
+        <table class="orc-tab"><thead><tr><th>Aço por grupo</th><th class="num">Peso (kg)</th><th class="num">R$/kg</th><th class="num">Custo</th></tr></thead><tbody>${linhas}
+        <tr class="orc-sub"><td>Aço</td><td class="num">${fmt(D.peso, 1)}</td><td></td><td class="num">${brl(D.custoAco)}</td></tr>
+        <tr><td>Fixadores (INT/IND)</td><td></td><td></td><td class="num">${brl(D.cf.total)}</td></tr>
+        <tr><td>Frete</td><td></td><td>${inp('frete', D.frete, 'R$')}</td><td class="num">${brl(D.frete)}</td></tr>
+        <tr><td>Montagem</td><td></td><td>${inp('montagem', D.montagem, 'R$')}</td><td class="num">${brl(D.montagem)}</td></tr>
+        <tr><td>Projeto / ART</td><td></td><td>${inp('art', D.art, 'R$')}</td><td class="num">${brl(D.art)}</td></tr>
+        <tr class="orc-sub"><td>CUSTO TOTAL</td><td></td><td></td><td class="num">${brl(D.custo)}</td></tr>
+        <tr><td>Impostos</td><td></td><td>${inp('impostos', D.imp, '%')}</td><td class="num">${brl(D.vImp)}</td></tr>
+        <tr><td>Comissão</td><td></td><td>${inp('comissao', D.com, '%')}</td><td class="num">${brl(D.vCom)}</td></tr>
+        <tr><td>Margem</td><td></td><td>${inp('margem', D.mg, '%')}</td><td class="num">${brl(D.vMg)}</td></tr>
+        <tr class="orc-tot"><td>PREÇO DE VENDA</td><td></td><td class="num">÷ ${fmt(D.div, 4)}</td><td class="num">${D.preco == null ? '<span class="bloq">percentuais ≥ 100%</span>' : brl(D.preco)}</td></tr>
+        <tr><td>Preço por posição</td><td></td><td></td><td class="num">${D.preco == null || !D.pos ? '–' : brl(D.preco / D.pos)}</td></tr>
+        <tr><td>Preço por kg</td><td></td><td></td><td class="num">${D.preco == null || !D.peso ? '–' : brl(D.preco / D.peso)}</td></tr></tbody></table>
+        <p class="nota">Preço = custo ÷ (1 − impostos − comissão − margem). Os valores preenchidos ficam salvos no projeto; campo vazio usa o padrão do Cadastro, quando houver. Peso pelos itens levantados (pesos em validação: ver Pendências).</p>`;
+    };
+    const liga = () => $('modalCorpo').querySelectorAll('input[data-orc]').forEach((el) => el.addEventListener('change', () => { if (el.value === '') delete ajOrc()[el.dataset.orc]; else ajOrc()[el.dataset.orc] = Number(el.value); salvar(); $('modalCorpo').innerHTML = desenha(); liga(); }));
+    modal(`Orçamento ${$('projeto').value || ''}`.trim(), desenha(), [{ txt: 'Limpar valores', fn: () => { if (!confirm('Apagar os valores preenchidos neste orçamento (volta aos padrões do Cadastro)?')) return false; proj.orc = {}; salvar(); $('modalCorpo').innerHTML = desenha(); liga(); return false; } }, { txt: 'Fechar' }, { txt: 'Excel do orçamento', cls: 'primario', fn: () => { excelOrcamento(); return false; } }]);
+    liga();
+  }
+  function excelOrcamento() {
+    const D = dadosOrcamento(ajOrc()), B = (v) => ({ v, b: true }), R = (v, f = 'brl') => (v == null ? '' : { v, fmt: f });
+    const linhas = [[{ v: 'PaletCad – Orçamento', fmt: 'tit' }], [{ v: `Projeto ${$('projeto').value || '—'} · ${$('cliente').value || '—'} · ${$('revisao').value} · gerado em ${new Date().toLocaleDateString('pt-BR')} · catálogo ${catVersaoTxt()}`, fmt: 'sub' }], [],
+      [B('Cortes'), D.lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], [B('Posições'), R(D.pos, 'int')], [B('Peso (kg)'), R(D.peso, 'kg')], [],
+      ['Aço por grupo', 'Peso (kg)', 'R$/kg', 'Custo'].map(B), ...D.aco.map((x) => [x.grupo, R(x.kg, 'kg'), x.rkg == null ? 'SEM R$/kg' : R(x.rkg, 'brl4'), R(x.valor)]),
+      [B('Aço'), R(D.peso, 'kg'), '', R(D.custoAco, 'bbrl')], ['Fixadores (INT/IND)', '', D.cf.semPreco.length ? `${D.cf.semPreco.length} sem preço` : '', R(D.cf.total)],
+      ['Frete', '', '', R(D.frete)], ['Montagem', '', '', R(D.montagem)], ['Projeto / ART', '', '', R(D.art)], [B('CUSTO TOTAL'), '', '', R(D.custo, 'bbrl')], [],
+      ['Impostos', '', R(D.imp / 100, 'pct'), R(D.vImp)], ['Comissão', '', R(D.com / 100, 'pct'), R(D.vCom)], ['Margem', '', R(D.mg / 100, 'pct'), R(D.vMg)],
+      [B('PREÇO DE VENDA'), '', `÷ ${D.div.toFixed(4).replace('.', ',')}`, R(D.preco, 'bbrl')], ['Preço por posição', '', '', R(D.preco && D.pos ? D.preco / D.pos : null)], ['Preço por kg', '', '', R(D.preco && D.peso ? D.preco / D.peso : null, 'brl4')],
+      [], ['Preço = custo ÷ (1 − impostos − comissão − margem). Documento interno: não enviar ao cliente.']];
+    const a = document.createElement('a'); a.href = URL.createObjectURL(Planilha.gerar([{ nome: 'Orçamento', larguras: [34, 14, 16, 18], linhas }]));
+    a.download = `orcamento-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.xlsx`; document.body.appendChild(a); a.click(); a.remove();
+  }
+  $('btnOrc').addEventListener('click', abrirOrcamento);
 
   document.querySelectorAll('.painel .tab').forEach((t) => t.addEventListener('click', () => {
     const grupo = t.closest('.painel');

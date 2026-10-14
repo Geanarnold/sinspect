@@ -1,6 +1,6 @@
 // Gera planilha Excel (.xlsx) sem biblioteca externa: ZIP sem compressão (método "store") com o mínimo do formato OOXML.
 // Uso: Planilha.gerar([{ nome: 'Projeto', larguras: [18, 12, ...], linhas: [[...], ...] }, ...]) → Blob
-// Célula: número → número no Excel; texto → texto; { v, b: true } → negrito; { v, fmt: 'kg' | 'brl' | 'int' } → formato numérico.
+// Célula: número → número no Excel; texto → texto; { v, b: true } → negrito; { v, fmt: 'kg' | 'brl' | 'int' | 'pct' } → formato numérico.
 (function () {
   'use strict';
   const xml = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
@@ -24,16 +24,16 @@
   }
   const colL = (i) => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
   // estilos: 0 normal, 1 negrito, 2 kg (0,000), 3 R$ (#.##0,00), 4 inteiro (#.##0), 5 R$ unitário (0,0000), 6 negrito R$
-  const ESTILO = { b: 1, kg: 2, brl: 3, int: 4, brl4: 5, bbrl: 6, tit: 7, sub: 8 };
+  const ESTILO = { b: 1, kg: 2, brl: 3, int: 4, brl4: 5, bbrl: 6, tit: 7, sub: 8, pct: 9 };
   const STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
     + '<numFmts count="4"><numFmt numFmtId="164" formatCode="0.000"/><numFmt numFmtId="165" formatCode="&quot;R$&quot; #,##0.00"/><numFmt numFmtId="166" formatCode="#,##0"/><numFmt numFmtId="167" formatCode="&quot;R$&quot; #,##0.0000"/></numFmts>'
     + '<fonts count="4"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font><font><b/><sz val="14"/><color rgb="FF0F172A"/><name val="Arial"/></font><font><sz val="9"/><color rgb="FF64748B"/><name val="Arial"/></font></fonts>'
     + '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders>'
-    + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9">'
+    + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="10">'
     + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/>'
     + '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/>'
     + '<xf numFmtId="166" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/><xf numFmtId="167" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/>'
-    + '<xf numFmtId="165" fontId="1" fillId="0" borderId="0" applyNumberFormat="1" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    + '<xf numFmtId="165" fontId="1" fillId="0" borderId="0" applyNumberFormat="1" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" applyFont="1"/><xf numFmtId="10" fontId="0" fillId="0" borderId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
   function folha(f) {
     const cols = (f.larguras || []).map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('');
     const linhas = f.linhas.map((ln, r) => `<row r="${r + 1}">` + ln.map((c, i) => {
