@@ -2,38 +2,39 @@
 
   <!--
     Add-in COM para SOLIDWORKS (.NET Framework 4.8, x64).
-    Ajuste SwInstallDir se o SOLIDWORKS estiver instalado em outro caminho.
+    As DLLs da API vêm do NuGet e são EMBUTIDAS na DLL (EmbedInteropTypes):
+    o plugin é um único arquivo StepExporter.dll e funciona com SOLIDWORKS 2019+.
   -->
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
-    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>StepExporter</AssemblyName>
     <RootNamespace>StepExporter</RootNamespace>
     <LangVersion>7.3</LangVersion>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Version>1.0.0</Version>
     <Company>Gean Arnold</Company>
     <Product>Exportador STEP em Lote</Product>
-    <SwInstallDir Condition="'$(SwInstallDir)' == ''">C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS</SwInstallDir>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="SolidWorks.Interop.sldworks">
-      <HintPath>$(SwInstallDir)\api\redist\SolidWorks.Interop.sldworks.dll</HintPath>
-      <EmbedInteropTypes>false</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="SolidWorks.Interop.swconst">
-      <HintPath>$(SwInstallDir)\api\redist\SolidWorks.Interop.swconst.dll</HintPath>
-      <EmbedInteropTypes>false</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="SolidWorks.Interop.swpublished">
-      <HintPath>$(SwInstallDir)\api\redist\SolidWorks.Interop.swpublished.dll</HintPath>
-      <EmbedInteropTypes>false</EmbedInteropTypes>
-    </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SolidWorks.Interop.sldworks" Version="32.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="SolidWorks.Interop.swpublished" Version="32.1.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- Embute os tipos da API (não é preciso distribuir as DLLs de interop). -->
+  <Target Name="EmbedSolidWorksInterop" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferencePath Condition="$([System.String]::Copy('%(Filename)').StartsWith('SolidWorks.Interop.'))">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 
 </Project>

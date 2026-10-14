@@ -1,3 +1,6 @@
 macro/*.bas -text
 macro/*.txt -text
 *.zip binary
+plugin/*.bat -text
+plugin/*.txt -text
+*.dll binary

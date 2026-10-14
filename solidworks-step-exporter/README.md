@@ -30,6 +30,16 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 - Visual Studio 2019/2022 com a carga de trabalho ".NET desktop" **ou** o .NET SDK 6+ com o Developer Pack do .NET Framework 4.8
 - Permissão de administrador **somente** para a versão add-in (RegAsm grava em `HKLM`); a versão executável não precisa
 
+## Plugin pronto (add-in compilado) — `dist/ExportadorSTEP_Plugin.zip`
+
+O pacote traz `StepExporter.dll`, compilada com a API do SOLIDWORKS (NuGet, 2024 SP1) **embutida**, sem DLLs extras, mais os instaladores:
+
+- **`INSTALAR_sem_admin.bat`**: registra o plugin só para o usuário atual (`HKCU`). **Este modo não é documentado pela Dassault**, que documenta apenas o registro em `HKLM`. Funciona se a sua versão do SOLIDWORKS ler add-ins do `HKCU`. Teste: o plugin precisa aparecer em *Ferramentas › Suplementos*.
+- **`INSTALAR_admin.bat`**: registro oficial via RegAsm. Requer administrador uma única vez (ou a TI).
+- **`DESINSTALAR.bat`**: remove os dois tipos de registro.
+
+O passo a passo está no `plugin/LEIA-ME.txt`. Para recompilar: `dotnet build src/StepExporter.csproj -c Release`. Agora não é mais preciso ter o SOLIDWORKS instalado para compilar.
+
 ## Versão MACRO (sem administrador e sem .exe) — mais simples de distribuir
 
 Esta versão é recomendada quando a TI bloqueia executáveis. A macro roda dentro do SOLIDWORKS, com o mesmo pop-up de seleção e o mesmo comportamento de exportação.
