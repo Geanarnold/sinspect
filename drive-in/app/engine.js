@@ -291,7 +291,7 @@
       for (const id of ['INT0648', 'INT0650', 'INT0812']) add('Emendas da longarina de túnel', id, prodOf(cat, id).desc, id, 14 * nJuntas, null, null, `14 por tala (já incluídos no ${padrao ? 'PK041366' : 'kit'})`);
     }
     // longarina TB 80 (topo e fundo, mesmo perfil — desenho 0004.0003.01.011 REV.05): comprimento = largura nominal da rua
-    // modelo cadastrado (±5 mm) → PK e peso do desenho; senão PKXXXXXX e peso pela reta dos modelos: kg = 0,527 + 0,001918 × L (bate os 4 modelos de rua)
+    // modelo cadastrado (±5 mm) → PK e peso do desenho; senão montada por componentes (abaixo); referência: os 4 modelos de rua seguem kg = 0,855 + 0,001918 × L (pesos do desenho de 12/10/2026)
     const lgTB80 = Object.entries(cat.produtos).filter(([id, p]) => id.startsWith('LGTB80-') && p.dim != null).map(([id, p]) => ({ id, ...p }));
     const lgTB = lgTB80.find((p) => Math.abs(p.dim - larguraRua) <= 5); // ±5: a de rua 1000 (palete 800) mede 996,3
     let nLgTB80 = 0;
@@ -300,7 +300,7 @@
       if (lgTB) add('Longarinas', idItem, `${nome} – ${lgTB.desc}`, lgTB.codigo, qtd, lgTB.dim, lgTB.peso, obs);
       else {
         // rua sem modelo cadastrado (Gean): a longarina sai pelos componentes — 2 garras (esq./dir.), 2 fixações trav. superior e o perfil cortado
-        // perfil com o comprimento da rua (Gean). Atenção: com 1,92 kg/m isso dá ~12% acima do peso dos desenhos 1350/1400/1480/1570 [CONFIRMAR kg/m]
+        // perfil com o comprimento da rua (Gean). Com 1,92 kg/m a soma fica <1% acima dos desenhos 1350/1400/1480/1570 (kg/m confirmado pelo desenho: 1,918)
         const gE = prodOf(cat, 'SA040009'), gD = prodOf(cat, 'SA040008'), fx = prodOf(cat, 'SA041460'), pf = prodOf(cat, 'LGTB80-PERFIL');
         const cP = larguraRua, rot = `${nome} TB 80 – rua ${larguraRua} mm (montada por componentes)`;
         add('Longarinas', `${idItem}-GE`, `${rot}: ${gE.desc}`, gE.codigo, qtd, null, gE.peso, obs);
