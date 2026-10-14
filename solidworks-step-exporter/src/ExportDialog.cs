@@ -47,7 +47,7 @@ namespace StepExporter
 
         private void BuildLayout()
         {
-            Text = "Exportar STEP – " + _collection.RootName;
+            Text = "Gerador de STEP – " + _collection.RootName;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true;
             Size = new Size(820, 640);
@@ -159,7 +159,7 @@ namespace StepExporter
                 FlowDirection = FlowDirection.RightToLeft
             };
             var btnCancel = MakeButton("Cancelar", (s, e) => { DialogResult = DialogResult.Cancel; Close(); });
-            var btnOk = MakeButton("Exportar", OnOk);
+            var btnOk = MakeButton("Gerar STEP", OnOk);
             btnOk.Font = new Font(Font, FontStyle.Bold);
             footer.Controls.Add(btnCancel);
             footer.Controls.Add(btnOk);

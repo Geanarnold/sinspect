@@ -30,7 +30,7 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 - Visual Studio 2019/2022 com a carga de trabalho ".NET desktop" **ou** o .NET SDK 6+ com o Developer Pack do .NET Framework 4.8
 - Permissão de administrador **somente** para a versão add-in (RegAsm grava em `HKLM`); a versão executável não precisa
 
-## Plugin pronto (add-in compilado) — `dist/ExportadorSTEP_Plugin.zip`
+## Plugin pronto (add-in compilado) — `dist/GeradorDeSTEP_Plugin.zip`
 
 O pacote traz `StepExporter.dll`, compilada com a API do SOLIDWORKS (NuGet, 2024 SP1) **embutida**, sem DLLs extras, mais os instaladores:
 

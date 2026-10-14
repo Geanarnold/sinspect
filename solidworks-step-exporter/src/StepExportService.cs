@@ -60,7 +60,7 @@ namespace StepExporter
             object progressObj;
             _swApp.GetUserProgressBar(out progressObj);
             dynamic progress = progressObj;
-            progress.Start(0, items.Count, "Exportando STEP");
+            progress.Start(0, items.Count, "Gerando STEP");
             _swApp.CommandInProgress = true;
 
             try
@@ -70,7 +70,7 @@ namespace StepExporter
                     ExportItem item = items[n];
                     string target = targets[item];
 
-                    progress.UpdateTitle(string.Format("Exportando STEP {0}/{1}: {2}", n + 1, items.Count, Path.GetFileName(target)));
+                    progress.UpdateTitle(string.Format("Gerando STEP {0}/{1}: {2}", n + 1, items.Count, Path.GetFileName(target)));
                     if ((int)progress.UpdateProgress(n) == _userCancel)
                     {
                         report.Cancelled = true;

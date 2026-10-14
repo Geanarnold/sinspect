@@ -1,7 +1,7 @@
 @echo off
 setlocal
 REM =====================================================================
-REM  Exportador STEP - registro SOMENTE para o usuario atual (sem admin).
+REM  Gerador de STEP - registro SOMENTE para o usuario atual (sem admin).
 REM  Feche o SOLIDWORKS antes de executar.
 REM  ATENCAO: o SOLIDWORKS documenta apenas o registro em HKLM (admin).
 REM  Este modo e uma tentativa; se o plugin nao aparecer em
@@ -34,12 +34,12 @@ reg add "%K%\Implemented Categories\{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}" /f >
 reg add "HKCU\Software\Classes\%CLS%\CLSID" /ve /d "%GUID%" /f >nul
 
 reg add "HKCU\Software\SolidWorks\AddIns\%GUID%" /ve /t REG_DWORD /d 1 /f >nul
-reg add "HKCU\Software\SolidWorks\AddIns\%GUID%" /v Title /d "Exportador STEP" /f >nul
+reg add "HKCU\Software\SolidWorks\AddIns\%GUID%" /v Title /d "Gerador de STEP" /f >nul
 reg add "HKCU\Software\SolidWorks\AddIns\%GUID%" /v Description /d "Exporta pecas, submontagens e montagens para STEP em lote." /f >nul
 reg add "HKCU\Software\SolidWorks\AddInsStartup\%GUID%" /ve /t REG_DWORD /d 1 /f >nul
 
 echo.
 echo Registro do usuario concluido.
-echo Abra o SOLIDWORKS e confira em Ferramentas ^> Suplementos se aparece "Exportador STEP".
+echo Abra o SOLIDWORKS e confira em Ferramentas ^> Suplementos se aparece "Gerador de STEP".
 echo Se NAO aparecer, execute INSTALAR_admin.bat como administrador.
 pause

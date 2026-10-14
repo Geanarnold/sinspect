@@ -10,9 +10,9 @@ EXPORTADOR STEP - PLUGIN (ADD-IN) PARA SOLIDWORKS 2019+
    a) Sem administrador: duplo clique em INSTALAR_sem_admin.bat
    b) Se o plugin nao aparecer no SOLIDWORKS, ou se voce tiver admin/TI:
       botao direito em INSTALAR_admin.bat > Executar como administrador
-5. Abra o SOLIDWORKS > Ferramentas > Suplementos: marque "Exportador STEP"
+5. Abra o SOLIDWORKS > Ferramentas > Suplementos: marque "Gerador de STEP"
    nas DUAS colunas (ativo agora e na inicializacao).
-6. Com uma montagem aberta, aparece a aba "Exportador STEP" no
-   CommandManager com o botao "Exportar STEP" (tambem no menu).
+6. Com uma montagem aberta, aparece a aba "Gerador de STEP" no
+   CommandManager com o botao "Gerar STEP" (tambem no menu).
 
 Para remover: feche o SOLIDWORKS e execute DESINSTALAR.bat.

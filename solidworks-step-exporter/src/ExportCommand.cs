@@ -10,7 +10,7 @@ namespace StepExporter
     /// </summary>
     public static class ExportCommand
     {
-        public const string Title = "Exportador STEP";
+        public const string Title = "Gerador de STEP";
 
         /// <param name="swAppObject">Instância do SOLIDWORKS (ISldWorks), via add-in ou GetActiveObject.</param>
         public static void Run(object swAppObject)

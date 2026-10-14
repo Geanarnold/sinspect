@@ -10,14 +10,14 @@ using SolidWorks.Interop.swpublished;
 namespace StepExporter
 {
     /// <summary>
-    /// Add-in do SOLIDWORKS: adiciona o comando "Exportar STEP" (menu, barra de ferramentas
+    /// Add-in do SOLIDWORKS: adiciona o comando "Gerar STEP" (menu, barra de ferramentas
     /// e aba no CommandManager) para montagens e peças.
     /// </summary>
     [ComVisible(true)]
     [Guid("f004cba8-388c-4126-8113-efc4fd40b057")]
     public class SwAddin : ISwAddin
     {
-        private const string AddinTitle = "Exportador STEP";
+        private const string AddinTitle = "Gerador de STEP";
         private const string AddinDescription = "Exporta peças, submontagens e montagens para STEP em lote.";
         private const int MainCmdGroupId = 7001;
         private const int CmdExportId = 0;
@@ -98,9 +98,9 @@ namespace StepExporter
 
             int menuToolbar = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
             int cmdIndex = group.AddCommandItem2(
-                "Exportar STEP", -1,
+                "Gerar STEP", -1,
                 "Exporta para STEP os componentes selecionados da montagem",
-                "Exportar STEP em lote", 0,
+                "Gerar STEP em lote", 0,
                 nameof(OnExportStep), nameof(OnExportStepEnable), CmdExportId, menuToolbar);
 
             group.HasToolbar = true;

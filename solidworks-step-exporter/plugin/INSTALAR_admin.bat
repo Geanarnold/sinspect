@@ -1,7 +1,7 @@
 @echo off
 setlocal
 REM =====================================================================
-REM  Exportador STEP - registro OFICIAL (todos os usuarios). Requer ADMIN.
+REM  Gerador de STEP - registro OFICIAL (todos os usuarios). Requer ADMIN.
 REM  Clique com o botao direito > Executar como administrador.
 REM  Feche o SOLIDWORKS antes.
 REM =====================================================================
