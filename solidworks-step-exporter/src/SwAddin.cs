@@ -1,8 +1,6 @@
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using SolidWorks.Interop.sldworks;
@@ -159,7 +157,8 @@ namespace StepExporter
     }
 
     /// <summary>
-    /// Gera os ícones do comando em tempo de execução (evita arquivos binários no repositório).
+    /// Extrai os ícones embutidos na DLL (icons/step_*.png, desenhados a partir de
+    /// icons/icon_*.svg) para uma pasta temporária, no formato que o CommandManager espera.
     /// </summary>
     internal static class IconFactory
     {
@@ -170,26 +169,15 @@ namespace StepExporter
             string folder = Path.Combine(Path.GetTempPath(), "StepExporterIcons");
             Directory.CreateDirectory(folder);
 
+            Assembly asm = typeof(IconFactory).Assembly;
             var paths = new string[Sizes.Length];
             for (int i = 0; i < Sizes.Length; i++)
             {
-                int s = Sizes[i];
-                string path = Path.Combine(folder, "step_" + s + ".png");
-                using (var bmp = new Bitmap(s, s, PixelFormat.Format32bppArgb))
-                using (var g = Graphics.FromImage(bmp))
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.Clear(Color.Transparent);
-                    using (var bg = new SolidBrush(Color.FromArgb(232, 82, 10)))
-                        g.FillRectangle(bg, 0, 0, s, s);
-                    using (var font = new Font("Arial", s * 0.30f, FontStyle.Bold, GraphicsUnit.Pixel))
-                    using (var fg = new SolidBrush(Color.White))
-                    {
-                        var fmt = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                        g.DrawString("STP", font, fg, new RectangleF(0, 0, s, s), fmt);
-                    }
-                    bmp.Save(path, ImageFormat.Png);
-                }
+                string name = "step_" + Sizes[i] + ".png";
+                string path = Path.Combine(folder, name);
+                using (Stream res = asm.GetManifestResourceStream("StepExporter.icons." + name))
+                using (FileStream file = File.Create(path))
+                    res.CopyTo(file);
                 paths[i] = path;
             }
             return paths;

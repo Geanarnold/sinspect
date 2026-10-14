@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="icons\step_*.png" LogicalName="StepExporter.icons.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SolidWorks.Interop.sldworks" Version="32.1.0" ExcludeAssets="runtime" />
     <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" ExcludeAssets="runtime" />
     <PackageReference Include="SolidWorks.Interop.swpublished" Version="32.1.0" ExcludeAssets="runtime" />
