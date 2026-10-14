@@ -1,4 +1,4 @@
-' =====================================================================
+Ôªø' =====================================================================
 '  CODIGO DO FORMULARIO frmExportarSTEP
 '  Cole TUDO isto no codigo de um UserForm VAZIO cujo (Name) seja
 '  frmExportarSTEP. Os controles sao criados automaticamente.
@@ -33,9 +33,9 @@ Private Sub UserForm_Initialize()
     Me.Height = 495
 
     Set lbl = Novo("Label", "lblTitulo", 8, 6, 620, 14)
-    lbl.Caption = "Marque o que deve ser convertido para STEP (das peÁas simples atÈ a montagem principal):"
+    lbl.Caption = "Marque o que deve ser convertido para STEP (das pe√ßas simples at√© a montagem principal):"
 
-    Set btnPecas = Botao("btnPecas", "Todas as peÁas", 8, 24, 100)
+    Set btnPecas = Botao("btnPecas", "Todas as pe√ßas", 8, 24, 100)
     Set btnSub = Botao("btnSub", "Todas as submontagens", 112, 24, 120)
     Set btnTop = Botao("btnTop", "Montagem principal", 236, 24, 105)
     Set btnToolbox = Botao("btnToolbox", "Toolbox", 345, 24, 70)
@@ -43,7 +43,7 @@ Private Sub UserForm_Initialize()
     Set btnNada = Botao("btnNada", "Nada", 483, 24, 60)
 
     ' Cabecalho das colunas
-    titulos = Array("Tipo", "Arquivo", "ConfiguraÁ„o", "Qtd", "NÌvel")
+    titulos = Array("Tipo", "Arquivo", "Configura√ß√£o", "Qtd", "N√≠vel")
     larguras = Array(95, 230, 140, 35, 35)
     x = 8 + 18
     For i = 0 To 4
@@ -61,12 +61,12 @@ Private Sub UserForm_Initialize()
 
     If gNaoCarregados > 0 Then
         Set lbl = Novo("Label", "lblAviso", 8, 338, 620, 12)
-        lbl.Caption = "AtenÁ„o: " & gNaoCarregados & " componente(s) n„o carregado(s) ser„o ignorados."
+        lbl.Caption = "Aten√ß√£o: " & gNaoCarregados & " componente(s) n√£o carregado(s) ser√£o ignorados."
         lbl.ForeColor = RGB(170, 0, 0)
     End If
 
     Set lbl = Novo("Label", "lblPasta", 8, 357, 70, 14)
-    lbl.Caption = "Pasta de saÌda:"
+    lbl.Caption = "Pasta de sa√≠da:"
     Set txtPasta = Novo("TextBox", "txtPasta", 80, 354, 462, 18)
     txtPasta.Text = PastaDe(gRootPath) & "\STEP"
     Set btnProcurar = Botao("btnProcurar", "Procurar...", 548, 353, 80)
@@ -84,7 +84,7 @@ Private Sub UserForm_Initialize()
     chkSobrescrever.Caption = "Sobrescrever arquivos existentes"
     chkSobrescrever.Value = True
     Set chkCfgNome = Novo("CheckBox", "chkCfgNome", 205, 404, 210, 16)
-    chkCfgNome.Caption = "Sempre incluir configuraÁ„o no nome"
+    chkCfgNome.Caption = "Sempre incluir configura√ß√£o no nome"
     chkCfgNome.Value = False
     Set chkAbrir = Novo("CheckBox", "chkAbrir", 425, 404, 190, 16)
     chkAbrir.Caption = "Abrir pasta ao terminar"
@@ -149,8 +149,8 @@ Private Function TipoTexto(k As Long) As String
     Select Case GrupoDe(k)
         Case 0: TipoTexto = "Montagem"
         Case 1: TipoTexto = "Submontagem"
-        Case 2: TipoTexto = "PeÁa"
-        Case Else: TipoTexto = "PeÁa (toolbox)"
+        Case 2: TipoTexto = "Pe√ßa"
+        Case Else: TipoTexto = "Pe√ßa (toolbox)"
     End Select
     If gItems(k).IsVirtual Then TipoTexto = TipoTexto & " virtual"
 End Function
@@ -222,6 +222,8 @@ End Sub
 
 Private Sub AtualizarContagem()
     Dim r As Long, n As Long
+    ' A lista dispara Change enquanto o formulario ainda esta sendo montado.
+    If lblContagem Is Nothing Then Exit Sub
     For r = 0 To lst.ListCount - 1
         If lst.Selected(r) Then n = n + 1
     Next r
@@ -234,7 +236,7 @@ End Sub
 Private Sub btnProcurar_Click()
     Dim sh As Object, f As Object
     Set sh = CreateObject("Shell.Application")
-    Set f = sh.BrowseForFolder(0, "Selecione a pasta de saÌda dos arquivos STEP", &H40)
+    Set f = sh.BrowseForFolder(0, "Selecione a pasta de sa√≠da dos arquivos STEP", &H40)
     If Not f Is Nothing Then txtPasta.Text = f.Self.Path
 End Sub
 
@@ -244,11 +246,11 @@ Private Sub btnExportar_Click()
     pasta = Trim$(txtPasta.Text)
     If Right$(pasta, 1) = "\" Then pasta = Left$(pasta, Len(pasta) - 1)
     If pasta = "" Then
-        MsgBox "Informe a pasta de saÌda.", vbExclamation, "Exportador STEP"
+        MsgBox "Informe a pasta de sa√≠da.", vbExclamation, "Exportador STEP"
         Exit Sub
     End If
     If Not CriarPasta(pasta) Then
-        MsgBox "N„o foi possÌvel criar a pasta:" & vbCrLf & pasta, vbCritical, "Exportador STEP"
+        MsgBox "N√£o foi poss√≠vel criar a pasta:" & vbCrLf & pasta, vbCritical, "Exportador STEP"
         Exit Sub
     End If
 

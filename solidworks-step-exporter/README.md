@@ -36,7 +36,7 @@ Esta versão é recomendada quando a TI bloqueia executáveis. A macro roda dent
 
 - **Pacote:** `dist/ExportadorSTEP_Macro.zip`, com os fontes em `macro/`.
 - **O que você monta, uma vez:** o `.swp`, importando `modExportarSTEP.bas` e colando `frmExportarSTEP_codigo.txt` num UserForm vazio chamado `frmExportarSTEP`. O passo a passo está em `macro/LEIA-ME.txt`.
-- **Codificação dos arquivos:** Windows-1252 com CRLF, que é o formato que o editor VBA importa sem corromper os acentos. Não salve esses arquivos em UTF-8.
+- **Codificação dos arquivos:** o `.bas` está em Windows-1252, que é o formato que o editor VBA importa sem corromper os acentos. O `.txt` do formulário está em UTF-8 com BOM, para o Bloco de Notas abrir certo antes de você colar.
 
 ## Instalação SEM administrador (recomendada para estações sem direito de admin)
 
