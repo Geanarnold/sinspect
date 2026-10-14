@@ -170,6 +170,13 @@
   }
   // cota no padrão do projeto 260324 (estilos IGOR): marca oblíqua nas pontas, texto sobre a linha, fonte ROMANS
   // tamanhos: 'c' corrente (texto 80, marca 25) · 'p' principal (150, 40) · 'g' total (220, 50)
+  // meia largura da guia inferior na planta (bloco DI_TRILHO_GUIA_<col>, centrado na linha de colunas) → distância livre entre guias de uma rua
+  function meiaGuia(r) {
+    const cp = Number(r.entradas.coluna), dup = !!r.entradas.dup, b = B() && (B()['DI_TRILHO_GUIA_' + cp + (dup ? 'D' : '')] || B().DI_TRILHO_GUIA);
+    if (!b) return null;
+    const xs = []; for (const q of b) for (const v of (q.p || (q.c ? [q.c] : []))) xs.push(v[0]);
+    return (Math.max(...xs) - Math.min(...xs)) / 2;
+  }
   function fazCota(line, text) {
     const T = { c: [80, 25], p: [150, 40], g: [220, 50] };
     return (x1, y1, x2, y2, off, label, vertical, tam = 'p') => {
@@ -287,6 +294,10 @@
       const ps = [[0, 0, Tl, 0], [Tl, 0, Tl, th], [Tl, th, 0, th], [0, th, 0, 0]].map(([a, b, c, d]) => ({ t: 'p', l: 'TRILHO', p: [[a, b], [c, d]] }));
       put(ps, cum[n] + L.trilho.frente - Tl, 0, 'TRILHO', nomeBloco('DI_TRILHO_GUIA', nb(Tl)));
       text(cum[n] + 200, -250, 70, 'FRENTE', '4 - TEXTO DE ESCALA E VISTA');
+      // posição do trilho guia na profundidade (nota 10): comprimento dentro da estrutura e avanço à frente
+      const xi = cum[n] + L.trilho.frente - Tl;
+      cota(xi, 0, cum[n], 0, -420, `TRILHO GUIA ${Math.round(cum[n] - xi)}`, false, 'c');
+      cota(cum[n], 0, cum[n] + L.trilho.frente, 0, -420, `${Math.round(L.trilho.frente)}`, false, 'c');
     }
     cota(cum[0], H, cum[n], H, 650, `${Math.round(cum[n] - cum[0])}`, false, 'g');
     // corrente das travessas (piso → 1ª, vãos, última → topo) e altura total, à esquerda
@@ -299,7 +310,15 @@
     text((xs[0] + xs[n]) / 2, -600, 120, titulo || 'CORTE A - VISTA LATERAL', '4 - TEXTO DE ESCALA E VISTA');
     const tab = [['B', H], ['C', ys[1] - ys[0]], ['A', cum[n]]].concat(espacos.map((a, i) => [`A${i + 1}`, a]));
     tab.forEach(([k, v], i) => text(xs[n] + 1500, H - i * 200, 100, `${k} = ${v} mm`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
-    return { prims, items, linhas, textos, bbox: [xs[0] - 1900, -800, xs[n] + 3200, H + 1150] };
+    // quadro "informações do Drive-In" (o que o cliente e o fornecedor da empilhadeira conferem primeiro)
+    const Fi = r.frontal || {}, nivA = L.niveis || [], yUlt = nivA.length ? nivA[nivA.length - 1] + deltaNivel(nivA[nivA.length - 1]) : null, hg = meiaGuia(r);
+    const info = [['RUAS (FRENTES)', r.entradas.ruas], ['PALETES POR RUA', r.paletesPorRua], ['NÍVEIS', `CHÃO${Fi.escravo ? ' (2)' : ''} + ${nivA.length}`], ['POSIÇÕES', r.posicoes],
+      ['CARGA POR PALETE', Fi.cargaPalete ? `${Fi.cargaPalete} kg` : '–'], ['PALETE', Fi.frentePalete ? `${Fi.frentePalete} x ${r.planta ? r.planta.profPalete : '–'} x ${Fi.alturaPalete || '–'} mm` : '–'],
+      ['ÚLTIMO NÍVEL (APOIO)', yUlt != null ? `${Math.round(yUlt)} mm` : '–'], ['ENTRE GUIAS', hg != null && Fi.larguraRua ? `${Math.round(Fi.larguraRua + r.dimensoes.colW - 2 * hg)} mm` : '–']];
+    const yI = H - (tab.length + 1) * 200;
+    text(xs[n] + 1500, yI, 110, 'INFORMAÇÕES DO DRIVE-IN', '4 - TEXTO DE ESCALA E VISTA', 0, 0);
+    info.forEach(([k, v], i) => text(xs[n] + 1500, yI - (i + 1) * 180, 90, `${k}: ${v}`, '4 - TEXTO DE ESCALA E VISTA', 0, 0));
+    return { prims, items, linhas, textos, bbox: [xs[0] - 1900, -800, xs[n] + 3800, H + 1150] };
   }
 
   // ---- vista frontal (olhando para dentro das ruas)
@@ -457,6 +476,11 @@
     const niv = [0, ...topoBraco, Htop];
     for (let k = 0; k < niv.length - 1; k++) cota(0, niv[k], 0, niv[k + 1], 600, `${Math.round(niv[k + 1] - niv[k])}`, true, 'p');
     cota(0, 0, 0, Htop, 1050, mmTxt(Htop), true, 'g'); // piso → topo da coluna (barra H + chapa da sapata)
+    // nota 1: piso → apoio do palete no último nível (alcance do garfo da empilhadeira)
+    // marcado na própria cadeia de níveis (texto horizontal sobre a linha de chamada do último apoio), para não disputar espaço com a cota total
+    if (topoBraco.length) { const yU = topoBraco[topoBraco.length - 1]; line(-1500, yU, -600, yU, 'COTAS'); text(-1500, yU + 50, 110, `ÚLT. NÍVEL ${Math.round(yU)}`, 'COTAS', 0, 0, 'ROMANS'); }
+    // nota 2: distância livre entre as guias inferiores (rodas-guia da empilhadeira), no piso de uma rua sem palete desenhado
+    { const hg = meiaGuia(r), i = R > 1 ? 1 : 0; if (hg != null && R) cota(xs[i] + hg, 0, xs[i + 1] - hg, 0, -320, `ENTRE GUIAS ${Math.round(xs[i + 1] - xs[i] - 2 * hg)}`, false, 'c'); }
     if (F.alturaPalete > 0) {
       const hp = F.alturaPalete, baseC = (y) => y - F.perfilC.A, lgBase = Htop - 154.65;
       const apoios = [0, ...topoBraco];
@@ -472,7 +496,7 @@
       topoBraco.forEach((yA, k) => {
         const bal = k === 0 ? F.balBaixo : F.balAlto, yC = yA - offApoio - 150; // abaixo do suporte U
         const a1 = xs[i] + uo, t1 = a1 + bal, a2 = xs[i + 1] - uo, t2 = a2 - bal;
-        cota(a1, yC, t1, yC, -1, `${Math.round(bal)}`, false, 'c'); cota(t1, yC, t2, yC, -1, `${Math.round(t2 - t1)}`, false, 'c'); cota(t2, yC, a2, yC, -1, `${Math.round(bal)}`, false, 'c');
+        cota(a1, yC, t1, yC, -1, `${Math.round(bal)}`, false, 'c'); cota(t1, yC, t2, yC, -1, `VÃO LIVRE ${Math.round(t2 - t1)}`, false, 'c'); cota(t2, yC, a2, yC, -1, `${Math.round(bal)}`, false, 'c');
       });
     }
     if (RT > R) { // vista parcial: linha de interrupção à direita e nota com o total
@@ -583,6 +607,11 @@
     const TL0 = TRL ? Math.max(...TRL.filter((q) => q.p).map((q) => Math.max(...q.p.map((v) => v[1])))) : 0;
     if (Tr && Tr.comp > 100 && TRL) for (const i of COLS)
       put(mapPts(clone(TRL), (v) => [v[0], v[1] > 100 ? v[1] + Tr.comp - TL0 : v[1]]), X(i), -Tr.frente, 'TRILHO', nomeBloco('DI_PL_TRILHO', cp + (dup ? 'D' : ''), nb(Tr.comp)));
+    if (Tr && Tr.comp > 100 && TRL) { // notas 2 e 10: distância livre entre guias (1ª rua) e comprimento do trilho guia (da frente da estrutura)
+      const hg = meiaGuia(r), yG = Tr.comp * 0.55 - Tr.frente;
+      if (hg != null) cota(X(0) + hg, yG, X(1) - hg, yG, -1, `ENTRE GUIAS ${Math.round(X(1) - X(0) - 2 * hg)}`, false, 'c');
+      cota(W, -Tr.frente, W, Tr.comp - Tr.frente, -650, `TRILHO GUIA ${Math.round(Tr.comp)}`, true, 'c');
+    }
     // entrada de cada rua: seta e número da rua
     for (const i of RUAS) {
       const xm = (X(i) + X(i + 1)) / 2;
