@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using SolidWorks.Interop.sldworks;
 
 namespace StepExporter
 {
@@ -17,10 +16,10 @@ namespace StepExporter
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            ISldWorks swApp;
+            object swApp;
             try
             {
-                swApp = (ISldWorks)Marshal.GetActiveObject("SldWorks.Application");
+                swApp = Marshal.GetActiveObject("SldWorks.Application");
             }
             catch (COMException)
             {

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
-using SolidWorks.Interop.sldworks;
 
 namespace StepExporter
 {
@@ -13,24 +12,29 @@ namespace StepExporter
     {
         public const string Title = "Exportador STEP";
 
-        public static void Run(ISldWorks swApp)
+        /// <param name="swAppObject">Instância do SOLIDWORKS (ISldWorks), via add-in ou GetActiveObject.</param>
+        public static void Run(object swAppObject)
         {
             try
             {
-                ModelDoc2 doc = (ModelDoc2)swApp.ActiveDoc;
+                dynamic swApp = swAppObject;
+                SwConst.Init(swApp);
+
+                dynamic doc = swApp.ActiveDoc;
                 if (doc == null)
                 {
                     Warn("Abra uma peça ou montagem antes de exportar.");
                     return;
                 }
 
-                if (string.IsNullOrEmpty(doc.GetPathName()))
+                string docPath = doc.GetPathName();
+                if (string.IsNullOrEmpty(docPath))
                 {
                     Warn("Salve o documento antes de exportar (o arquivo ainda não tem caminho).");
                     return;
                 }
 
-                ComponentCollection collection = ComponentCollector.Collect(swApp, doc);
+                ComponentCollection collection = ComponentCollector.Collect(doc);
 
                 ExportOptions options;
                 using (var dialog = new ExportDialog(collection))
@@ -46,7 +50,7 @@ namespace StepExporter
                     return;
                 }
 
-                ExportReport report = new StepExportService(swApp).Export(doc, options);
+                ExportReport report = new StepExportService(swAppObject).Export(doc, options);
 
                 string summary = string.Format(
                     "Exportação concluída.\n\nExportados: {0}\nIgnorados (já existiam): {1}\nFalhas: {2}\n\nPasta: {3}\nLog: {4}",
