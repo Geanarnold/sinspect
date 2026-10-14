@@ -1,6 +1,8 @@
 # Referência técnica 01 – Memorial de cálculo de Drive-In (consultoria externa, nov/2025)
 
-Resumo **somente técnico** de um memorial de cálculo emitido por engenharia externa para uma estrutura Drive-In fabricada pela Metalúrgica Amapá. Sem dados de cliente, obra ou responsável técnico (o documento original fica com a engenharia, fora do repositório). Uso: base para a futura verificação estrutural do PaletCad e para conferir premissas do app.
+Resumo **somente técnico** de um memorial de cálculo emitido por engenharia externa para uma estrutura Drive-In fabricada pela Metalúrgica Amapá. Sem dados de cliente, obra ou responsável técnico (o documento original fica com a engenharia, fora do repositório).
+
+**Finalidade (Gean, 14/10/2026):** somente dados para análise numa futura validação de cálculo. Não altera regras, padrões nem alertas do PaletCad.
 
 ## Normas e método
 - FEM 10.2.07, ABNT NBR 17191, ABNT NBR 14762 e AISI (LRFD).
@@ -34,11 +36,9 @@ Resumo **somente técnico** de um memorial de cálculo emitido por engenharia ex
 | Travessas, amarração superior, longarinas de topo | — | esforços baixos | ≤ 10% |
 | Reação máxima no piso (já majorada) | — | — | **4.366 kg por coluna** |
 
-## Leitura para o PaletCad
-- **Braço:** o memorial aprovou o C 94 × 40 × 15 em **#2,25** com 92% para 1.400 kg/palete. O braço padrão cadastrado no app para COL 80/122 é **#1,8** (COL 101 #2,0). Com #1,8 a capacidade é menor: o padrão do app não cobre automaticamente uma carga de 1.400 kg/palete — a espessura do braço depende da carga e precisa vir do dimensionamento do engenheiro.
-- **Viga túnel:** aprovada em **#2,0** com 94% (vão 1.375 mm). A chapa da longarina de túnel no app é obrigatória e sem padrão (correto); cargas próximas de 1.400 kg/palete pedem ≥ 2,0.
-- **Coluna 122 #1,8:** 77% com chão + 3 níveis e 7,7 m de altura — referência de folga para essa configuração.
-- **Piso:** 4,4 t por coluna (majorada) — dado útil para a fundação/laudo de piso do cliente.
+## Pontos para a futura validação de cálculo
+- Braço verificado em #2,25 (92%) para 1.400 kg/palete; viga túnel em #2,0 (94%, vão 1.375 mm); coluna 122 #1,8 com 77%.
+- Reação máxima no piso de 4,4 t por coluna (majorada).
 
 ## Inconsistências do documento original (anotar ao reutilizar)
 - Chumbadores: 4 por coluna na metodologia × 2 por coluna no item 4.1.
