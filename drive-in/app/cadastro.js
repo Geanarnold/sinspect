@@ -10,7 +10,7 @@
 
   // grupos de peças de aço do Drive-In (os de fixadores entram pelo preço por peça) e parâmetros do orçamento
   const GRUPOS_ORC = ['Colunas', 'Emenda de coluna', 'Sapatas', 'Travessas', 'Coluna solteira', 'Braços', 'Protetores', 'Longarinas', 'Emendas da longarina de túnel', 'Travamento de fundo (zig-zag)', 'Travamento de topo (zig-zag)', 'Guia inferior', 'Stop palete'];
-  const PARAM_ORC = [['impostos', 'Impostos', '% do preço'], ['comissao', 'Comissão', '% do preço'], ['margem', 'Margem', '% do preço'], ['freteKg', 'Frete (padrão)', 'R$/kg'], ['montagemPos', 'Montagem (padrão)', 'R$/posição'], ['art', 'Projeto/ART (padrão)', 'R$ por projeto']];
+  const PARAM_ORC = [['impostos', 'Impostos', '% do preço'], ['comissao', 'Comissão', '% do preço'], ['margem', 'Margem', '% do preço'], ['montagemPos', 'Montagem (padrão)', 'R$/posição'], ['art', 'Projeto/ART (padrão)', 'R$ por projeto'], ['origem', 'Origem do frete (cidade/UF ou CEP)', 'texto; vazio = Cláudio/MG']];
   // Tabelas editáveis: cada uma com colunas (chave, rótulo, tipo) e conversão de/para a estrutura do catálogo
   const TABELAS = {
     produtos: {
@@ -38,16 +38,24 @@
     },
     orcamento: {
       titulo: 'Orçamento: valores padrão',
-      cols: [['item', 'Item', 'text'], ['valor', 'Valor', 'number'], ['unid', 'Unidade', 'text']],
+      cols: [['item', 'Item', 'text'], ['valor', 'Valor', 'text'], ['unid', 'Unidade', 'text']],
       // linhas fixas: R$/kg de cada grupo de peças + parâmetros do markup divisor e padrões de frete, montagem e projeto/ART
       ler: (c) => { const o = c.orcamento || {}, g = o.grupos || {}; return GRUPOS_ORC.map((n) => ({ _k: 'g:' + n, item: n, valor: g[n] ?? '', unid: 'R$/kg' })).concat(PARAM_ORC.map(([k, item, unid]) => ({ _k: k, item, valor: o[k] ?? '', unid }))); },
       gravar: (c, rows) => {
         const o = c.orcamento = c.orcamento || {}; o.grupos = o.grupos || {};
         for (const r of rows) {
-          if (!r._k) continue; const v = r.valor === '' || r.valor == null || !(Number(r.valor) >= 0) ? null : Number(r.valor);
+          if (!r._k) continue;
+          if (r._k === 'origem') { o.origem = String(r.valor || '').trim() || null; continue; }
+          const n = Number(String(r.valor ?? '').replace(',', '.')), v = r.valor === '' || r.valor == null || !(n >= 0) ? null : n;
           if (r._k.startsWith('g:')) { if (v == null) delete o.grupos[r._k.slice(2)]; else o.grupos[r._k.slice(2)] = v; } else o[r._k] = v;
         }
       },
+    },
+    frete: {
+      titulo: 'Frete: faixas de km',
+      cols: [['ate', 'Até (km, ida e volta)', 'number'], ['valor', 'Valor do frete (R$)', 'number']],
+      ler: (c) => ((c.orcamento || {}).freteFaixas || []).map((x) => ({ ...x })),
+      gravar: (c, rows) => { const o = c.orcamento = c.orcamento || {}; o.freteFaixas = rows.filter((r) => Number(r.ate) > 0 && r.valor !== '' && Number(r.valor) >= 0).map((r) => ({ ate: Number(r.ate), valor: Number(r.valor) })).sort((a, b) => a.ate - b.ate); },
     },
     colunas_sa: {
       titulo: 'Colunas: SA por altura',

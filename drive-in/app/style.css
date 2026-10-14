@@ -428,3 +428,4 @@ body:not(.pg-config) .marca .sub-desc{display:none}
 .orc-in span{color:var(--cinza);font-size:11px}
 .orc-tab td{vertical-align:middle}
 .orc-in input{width:96px;text-align:right;padding:2px 6px;height:26px;min-height:0;font-size:12px}
+.orc-frete{display:flex;gap:6px;margin-top:4px}.orc-frete input{flex:1;min-width:0;height:26px;padding:2px 6px;font-size:12px}.orc-frete .mini-btn{white-space:nowrap}

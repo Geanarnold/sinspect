@@ -838,7 +838,7 @@ window.CATALOGO = {
   { "nome": "PP TRAVESSA UNIAO 1,025 LATERAL TRIPLA COL 122", "col": 122, "pk": "PK041466", "co": "CO040543", "peso": 2.142, "total": 1017.8 },
   { "nome": "PP TRAVESSA UNIAO 1,375 LATERAL TRIPLA COL 122", "col": 122, "pk": "PK041367", "co": "CO041036", "peso": 2.782, "total": 1367.8 }
  ],
- "orcamento": { "grupos": {}, "impostos": null, "comissao": null, "margem": null, "freteKg": null, "montagemPos": null, "art": null },
+ "orcamento": { "grupos": {}, "impostos": null, "comissao": null, "margem": null, "montagemPos": null, "art": null, "origem": null, "freteFaixas": [] },
  "produtos": {
   "SAP-80": {
    "tipo": "Sapata (conjunto)",

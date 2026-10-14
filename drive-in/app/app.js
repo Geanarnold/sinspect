@@ -506,6 +506,35 @@
   // ---------- orçamento (operador): aço por grupo (peso × R$/kg) + fixadores (preço por peça) + frete, montagem e projeto/ART;
   // preço de venda pelo markup divisor: preço = custo ÷ (1 − impostos − comissão − margem). O operador preenche os campos na janela
   // (ficam salvos no projeto, proj.orc); campo vazio usa o padrão do Cadastro (aba Orçamento, administrador), quando houver.
+  // distância rodoviária para o frete: CEP → cidade (BrasilAPI), cidade → coordenadas (OpenStreetMap/Nominatim), rota (OSRM);
+  // ida e volta = 2 × ida. Sem rota: linha reta × 1,3 (marcada como estimada). Serviços públicos e gratuitos, sem chave.
+  const geoCache = {};
+  async function localizar(txt) {
+    let t = String(txt).trim(), cidade, uf;
+    const cep = t.replace(/\D/g, '');
+    if (/^\d{8}$/.test(cep)) {
+      const r = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`); if (!r.ok) throw new Error(`CEP ${t} não encontrado.`);
+      const j = await r.json(); cidade = j.city; uf = j.state;
+    } else { const m = t.split(/[\/,-]/).map((x) => x.trim()).filter(Boolean); cidade = m[0]; uf = m[1] || ''; }
+    if (!cidade) throw new Error(`Local "${t}" inválido.`);
+    const k = `${cidade}/${uf}`.toLowerCase(); if (geoCache[k]) return geoCache[k];
+    const q = new URLSearchParams({ city: cidade, country: 'Brazil', format: 'json', limit: '1' }); if (uf) q.set('state', uf);
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?${q}`); const j = r.ok ? await r.json() : [];
+    if (!j.length) throw new Error(`Cidade "${cidade}${uf ? '/' + uf : ''}" não encontrada no mapa.`);
+    return (geoCache[k] = { nome: `${cidade}${uf ? '/' + uf.toUpperCase() : ''}`, lat: Number(j[0].lat), lon: Number(j[0].lon) });
+  }
+  async function distanciaFrete(origem, destino) {
+    const a = await localizar(origem), b = await localizar(destino);
+    try {
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`);
+      const j = await r.json(); if (j.code !== 'Ok' || !j.routes.length) throw new Error('sem rota');
+      return { de: a.nome, para: b.nome, km: 2 * j.routes[0].distance / 1000, fonte: 'rota' };
+    } catch (e) {
+      const R = 6371, rad = Math.PI / 180, dl = (b.lat - a.lat) * rad, dn = (b.lon - a.lon) * rad;
+      const h = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dn / 2) ** 2;
+      return { de: a.nome, para: b.nome, km: 2 * 1.3 * 2 * R * Math.asin(Math.sqrt(h)), fonte: 'reta' };
+    }
+  }
   function dadosOrcamento(aj) {
     const lp = calcularProjeto(), itens = consolidar(lp), O = cat.orcamento || {}, G = O.grupos || {};
     const num = (v, d) => (v === '' || v == null || !isFinite(Number(v)) ? d : Number(v));
@@ -513,12 +542,14 @@
     for (const p of semFix(itens)) if (p.pesoTotal) grupos.set(p.grupo, (grupos.get(p.grupo) || 0) + p.pesoTotal);
     const aco = [...grupos].map(([g, kg]) => ({ grupo: g, kg, rkg: num(aj['g:' + g], G[g] > 0 ? Number(G[g]) : null) })).map((x) => ({ ...x, valor: x.rkg == null ? null : x.kg * x.rkg }));
     const peso = aco.reduce((s2, x) => s2 + x.kg, 0), cf = custoFixadores(itens);
-    const frete = num(aj.frete, (Number(O.freteKg) || 0) * peso), montagem = num(aj.montagem, (Number(O.montagemPos) || 0) * pos), art = num(aj.art, Number(O.art) || 0);
+    const faixas = (O.freteFaixas || []).slice().sort((a, b) => a.ate - b.ate), fx = aj.freteKm > 0 ? faixas.find((f) => aj.freteKm <= f.ate) : null;
+    const freteFaixa = fx ? fx.valor : null, foraFaixa = aj.freteKm > 0 && faixas.length && !fx;
+    const frete = num(aj.frete, freteFaixa || 0), montagem = num(aj.montagem, (Number(O.montagemPos) || 0) * pos), art = num(aj.art, Number(O.art) || 0);
     const imp = num(aj.impostos, Number(O.impostos) || 0), com = num(aj.comissao, Number(O.comissao) || 0), mg = num(aj.margem, Number(O.margem) || 0);
     const custoAco = aco.reduce((s2, x) => s2 + (x.valor || 0), 0), custo = custoAco + cf.total + frete + montagem + art, div = 1 - (imp + com + mg) / 100;
     const preco = div > 0 ? custo / div : null;
     const falta = aco.filter((x) => x.rkg == null).map((x) => x.grupo);
-    return { lp, pos, peso, aco, cf, frete, montagem, art, imp, com, mg, custoAco, custo, div, preco, falta,
+    return { lp, pos, peso, aco, cf, frete, fx, foraFaixa, semFaixas: !faixas.length, montagem, art, imp, com, mg, custoAco, custo, div, preco, falta,
       vImp: preco == null ? null : preco * imp / 100, vCom: preco == null ? null : preco * com / 100, vMg: preco == null ? null : preco * mg / 100 };
   }
   const ajOrc = () => (proj.orc = proj.orc || {});
@@ -535,7 +566,9 @@
         <table class="orc-tab"><thead><tr><th>Aço por grupo</th><th class="num">Peso (kg)</th><th class="num">R$/kg</th><th class="num">Custo</th></tr></thead><tbody>${linhas}
         <tr class="orc-sub"><td>Aço</td><td class="num">${fmt(D.peso, 1)}</td><td></td><td class="num">${brl(D.custoAco)}</td></tr>
         <tr><td>Fixadores (INT/IND)</td><td></td><td></td><td class="num">${brl(D.cf.total)}</td></tr>
-        <tr><td>Frete</td><td></td><td>${inp('frete', D.frete, 'R$')}</td><td class="num">${brl(D.frete)}</td></tr>
+        <tr><td>Frete<div class="orc-frete"><input id="orcDest" type="text" placeholder="CEP ou cidade/UF da obra" value="${esc(ajOrc().freteDest || [$('cidade').value, $('uf').value].filter(Boolean).join('/'))}"/><button type="button" id="orcKm" class="mini-btn">Calcular distância</button></div>
+          <div class="nota" id="orcKmInfo">${ajOrc().freteKm ? `${esc(ajOrc().freteRota || '')} · <b>${fmt0(Math.round(ajOrc().freteKm))} km</b> ida e volta${ajOrc().freteFonte === 'reta' ? ' (estimada: linha reta × 1,3)' : ''} · ${D.fx ? `faixa até ${fmt0(D.fx.ate)} km` : D.semFaixas ? '<span class="bloq">sem faixas no Cadastro</span>' : '<span class="bloq">acima da última faixa</span>'}${ajOrc().frete != null ? ' · valor digitado manualmente' : ''}` : 'Informe o CEP ou a cidade/UF e calcule: o valor sai da tabela de faixas (Cadastro).'}</div></td>
+          <td></td><td>${inp('frete', D.frete, 'R$')}</td><td class="num">${brl(D.frete)}</td></tr>
         <tr><td>Montagem</td><td></td><td>${inp('montagem', D.montagem, 'R$')}</td><td class="num">${brl(D.montagem)}</td></tr>
         <tr><td>Projeto / ART</td><td></td><td>${inp('art', D.art, 'R$')}</td><td class="num">${brl(D.art)}</td></tr>
         <tr class="orc-sub"><td>CUSTO TOTAL</td><td></td><td></td><td class="num">${brl(D.custo)}</td></tr>
@@ -547,7 +580,16 @@
         <tr><td>Preço por kg</td><td></td><td></td><td class="num">${D.preco == null || !D.peso ? '–' : brl(D.preco / D.peso)}</td></tr></tbody></table>
         <p class="nota">Preço = custo ÷ (1 − impostos − comissão − margem). Os valores preenchidos ficam salvos no projeto; campo vazio usa o padrão do Cadastro, quando houver. Peso pelos itens levantados (pesos em validação: ver Pendências).</p>`;
     };
-    const liga = () => $('modalCorpo').querySelectorAll('input[data-orc]').forEach((el) => el.addEventListener('change', () => { if (el.value === '') delete ajOrc()[el.dataset.orc]; else ajOrc()[el.dataset.orc] = Number(el.value); salvar(); $('modalCorpo').innerHTML = desenha(); liga(); }));
+    const redesenha = () => { $('modalCorpo').innerHTML = desenha(); liga(); };
+    const liga = () => {
+      $('modalCorpo').querySelectorAll('input[data-orc]').forEach((el) => el.addEventListener('change', () => { if (el.value === '') delete ajOrc()[el.dataset.orc]; else ajOrc()[el.dataset.orc] = Number(el.value); salvar(); redesenha(); }));
+      $('orcKm').addEventListener('click', async () => {
+        const dest = $('orcDest').value.trim(); if (!dest) { alert('Informe o CEP ou a cidade/UF da obra.'); return; }
+        $('orcKm').disabled = true; $('orcKmInfo').textContent = 'Calculando a distância…';
+        try { const d = await distanciaFrete((cat.orcamento || {}).origem || 'Cláudio/MG', dest); Object.assign(ajOrc(), { freteDest: dest, freteKm: d.km, freteRota: `${d.de} → ${d.para}`, freteFonte: d.fonte }); delete ajOrc().frete; salvar(); redesenha(); }
+        catch (e) { $('orcKm').disabled = false; $('orcKmInfo').innerHTML = `<span class="bloq">${esc(e.message)}</span>`; }
+      });
+    };
     modal(`Orçamento ${$('projeto').value || ''}`.trim(), desenha(), [{ txt: 'Limpar valores', fn: () => { if (!confirm('Apagar os valores preenchidos neste orçamento (volta aos padrões do Cadastro)?')) return false; proj.orc = {}; salvar(); $('modalCorpo').innerHTML = desenha(); liga(); return false; } }, { txt: 'Fechar' }, { txt: 'Excel do orçamento', cls: 'primario', fn: () => { excelOrcamento(); return false; } }]);
     liga();
   }
@@ -557,7 +599,7 @@
       [B('Cortes'), D.lp.map((x) => `${x.nome} x${x.qtd}`).join(' · ')], [B('Posições'), R(D.pos, 'int')], [B('Peso (kg)'), R(D.peso, 'kg')], [],
       ['Aço por grupo', 'Peso (kg)', 'R$/kg', 'Custo'].map(B), ...D.aco.map((x) => [x.grupo, R(x.kg, 'kg'), x.rkg == null ? 'SEM R$/kg' : R(x.rkg, 'brl4'), R(x.valor)]),
       [B('Aço'), R(D.peso, 'kg'), '', R(D.custoAco, 'bbrl')], ['Fixadores (INT/IND)', '', D.cf.semPreco.length ? `${D.cf.semPreco.length} sem preço` : '', R(D.cf.total)],
-      ['Frete', '', '', R(D.frete)], ['Montagem', '', '', R(D.montagem)], ['Projeto / ART', '', '', R(D.art)], [B('CUSTO TOTAL'), '', '', R(D.custo, 'bbrl')], [],
+      [`Frete${proj.orc && proj.orc.freteKm ? ` (${proj.orc.freteRota || ''}, ${Math.round(proj.orc.freteKm)} km ida e volta${D.fx ? `, faixa até ${D.fx.ate} km` : ''})` : ''}`, '', '', R(D.frete)], ['Montagem', '', '', R(D.montagem)], ['Projeto / ART', '', '', R(D.art)], [B('CUSTO TOTAL'), '', '', R(D.custo, 'bbrl')], [],
       ['Impostos', '', R(D.imp / 100, 'pct'), R(D.vImp)], ['Comissão', '', R(D.com / 100, 'pct'), R(D.vCom)], ['Margem', '', R(D.mg / 100, 'pct'), R(D.vMg)],
       [B('PREÇO DE VENDA'), '', `÷ ${D.div.toFixed(4).replace('.', ',')}`, R(D.preco, 'bbrl')], ['Preço por posição', '', '', R(D.preco && D.pos ? D.preco / D.pos : null)], ['Preço por kg', '', '', R(D.preco && D.peso ? D.preco / D.peso : null, 'brl4')],
       [], ['Preço = custo ÷ (1 − impostos − comissão − margem). Documento interno: não enviar ao cliente.']];
@@ -565,6 +607,7 @@
     a.download = `orcamento-${($('projeto').value || 'drive-in').replace(/[^\w-]+/g, '_')}.xlsx`; document.body.appendChild(a); a.click(); a.remove();
   }
   $('btnOrc').addEventListener('click', abrirOrcamento);
+  $('btnOrc2').addEventListener('click', abrirOrcamento);
 
   document.querySelectorAll('.painel .tab').forEach((t) => t.addEventListener('click', () => {
     const grupo = t.closest('.painel');
@@ -581,6 +624,7 @@
     $('btnVoltar').disabled = passo === 0;
     $('btnAvancar').classList.toggle('hidden', passo === PASSOS.length - 1);
     $('btnBom').classList.toggle('hidden', passo !== PASSOS.length - 1);
+    $('btnOrc2').classList.toggle('hidden', passo !== PASSOS.length - 1);
     $('btnAprovar').classList.toggle('hidden', passo !== PASSOS.length - 1);
   }
   document.querySelectorAll('.passo').forEach((el, k) => el.addEventListener('click', () => mostrarPasso(k)));
