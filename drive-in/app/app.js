@@ -553,46 +553,58 @@
       vImp: preco == null ? null : preco * imp / 100, vCom: preco == null ? null : preco * com / 100, vMg: preco == null ? null : preco * mg / 100 };
   }
   const ajOrc = () => (proj.orc = proj.orc || {});
-  function abrirOrcamento() {
-    if (!last) return;
+  // página Orçamento: blocos (aço, fixadores, frete, montagem/ART) à esquerda e resumo do preço fixo à direita
+  function renderOrcamento() {
+    const box = $('orcConteudo'); if (!box) return;
     const brl = (v) => (v == null ? '–' : 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    const lp0 = last ? calcularProjeto() : [];
+    if (!lp0.length) { box.innerHTML = `<div class="card orc-vazio"><h3>Nenhum projeto calculado</h3><p class="nota">Abra ou preencha um projeto no configurador; o orçamento usa a lista de peças de todos os cortes.</p><button class="primario" id="orcIrConfig">Ir para o configurador</button></div>`; $('orcIrConfig').addEventListener('click', () => mostrarPagina('config')); return; }
+    const D = dadosOrcamento(ajOrc()), A = ajOrc();
     const inp = (k, v, unid) => `<label class="orc-in"><span>${unid}</span><input type="number" step="any" data-orc="${k}" value="${v == null ? '' : Math.round(v * 100) / 100}"/></label>`;
-    const desenha = () => {
-      const D = dadosOrcamento(ajOrc());
-      const linhas = D.aco.map((x) => `<tr${x.rkg == null ? ' class="orc-falta"' : ''}><td>${esc(x.grupo)}</td><td class="num">${fmt(x.kg, 1)}</td><td>${inp('g:' + x.grupo, x.rkg, 'R$/kg')}</td><td class="num">${brl(x.valor)}</td></tr>`).join('');
-      return `<p class="nota">Projeto <b>${esc($('projeto').value || '—')}</b> · ${D.lp.length} corte(s) · <b>${fmt0(D.pos)}</b> posições · <b>${fmt(D.peso, 1)} kg</b> · catálogo ${esc(catVersaoTxt())}</p>
-        ${D.falta.length ? `<p class="bloq">Preencha o R$/kg de: ${esc(D.falta.join(', '))}. Sem ele o grupo fica fora do custo.</p>` : ''}
-        ${D.cf.semPreco.length ? `<p class="bloq">${D.cf.semPreco.length} fixador(es) sem preço: ${esc(D.cf.semPreco.join(', '))}.</p>` : ''}
-        <table class="orc-tab"><thead><tr><th>Aço por grupo</th><th class="num">Peso (kg)</th><th class="num">R$/kg</th><th class="num">Custo</th></tr></thead><tbody>${linhas}
-        <tr class="orc-sub"><td>Aço</td><td class="num">${fmt(D.peso, 1)}</td><td></td><td class="num">${brl(D.custoAco)}</td></tr>
-        <tr><td>Fixadores (INT/IND)</td><td></td><td></td><td class="num">${brl(D.cf.total)}</td></tr>
-        <tr><td>Frete<div class="orc-frete"><input id="orcDest" type="text" placeholder="CEP ou cidade/UF da obra" value="${esc(ajOrc().freteDest || [$('cidade').value, $('uf').value].filter(Boolean).join('/'))}"/><button type="button" id="orcKm" class="mini-btn">Calcular distância</button></div>
-          <div class="nota" id="orcKmInfo">${ajOrc().freteKm ? `${esc(ajOrc().freteRota || '')} · <b>${fmt0(Math.round(ajOrc().freteKm))} km</b> ida e volta${ajOrc().freteFonte === 'reta' ? ' (estimada: linha reta × 1,3)' : ''} · ${D.fx ? `faixa até ${fmt0(D.fx.ate)} km` : D.semFaixas ? '<span class="bloq">sem faixas no Cadastro</span>' : '<span class="bloq">acima da última faixa</span>'}${ajOrc().frete != null ? ' · valor digitado manualmente' : ''}` : 'Informe o CEP ou a cidade/UF e calcule: o valor sai da tabela de faixas (Cadastro).'}</div></td>
-          <td></td><td>${inp('frete', D.frete, 'R$')}</td><td class="num">${brl(D.frete)}</td></tr>
-        <tr><td>Montagem</td><td></td><td>${inp('montagem', D.montagem, 'R$')}</td><td class="num">${brl(D.montagem)}</td></tr>
-        <tr><td>Projeto / ART</td><td></td><td>${inp('art', D.art, 'R$')}</td><td class="num">${brl(D.art)}</td></tr>
-        <tr class="orc-sub"><td>CUSTO TOTAL</td><td></td><td></td><td class="num">${brl(D.custo)}</td></tr>
-        <tr><td>Impostos</td><td></td><td>${inp('impostos', D.imp, '%')}</td><td class="num">${brl(D.vImp)}</td></tr>
-        <tr><td>Comissão</td><td></td><td>${inp('comissao', D.com, '%')}</td><td class="num">${brl(D.vCom)}</td></tr>
-        <tr><td>Margem</td><td></td><td>${inp('margem', D.mg, '%')}</td><td class="num">${brl(D.vMg)}</td></tr>
-        <tr class="orc-tot"><td>PREÇO DE VENDA</td><td></td><td class="num">÷ ${fmt(D.div, 4)}</td><td class="num">${D.preco == null ? '<span class="bloq">percentuais ≥ 100%</span>' : brl(D.preco)}</td></tr>
-        <tr><td>Preço por posição</td><td></td><td></td><td class="num">${D.preco == null || !D.pos ? '–' : brl(D.preco / D.pos)}</td></tr>
-        <tr><td>Preço por kg</td><td></td><td></td><td class="num">${D.preco == null || !D.peso ? '–' : brl(D.preco / D.peso)}</td></tr></tbody></table>
-        <p class="nota">Preço = custo ÷ (1 − impostos − comissão − margem). Os valores preenchidos ficam salvos no projeto; campo vazio usa o padrão do Cadastro, quando houver. Peso pelos itens levantados (pesos em validação: ver Pendências).</p>`;
-    };
-    const redesenha = () => { $('modalCorpo').innerHTML = desenha(); liga(); };
-    const liga = () => {
-      $('modalCorpo').querySelectorAll('input[data-orc]').forEach((el) => el.addEventListener('change', () => { if (el.value === '') delete ajOrc()[el.dataset.orc]; else ajOrc()[el.dataset.orc] = Number(el.value); salvar(); redesenha(); }));
-      $('orcKm').addEventListener('click', async () => {
-        const dest = $('orcDest').value.trim(); if (!dest) { alert('Informe o CEP ou a cidade/UF da obra.'); return; }
-        $('orcKm').disabled = true; $('orcKmInfo').textContent = 'Calculando a distância…';
-        try { const d = await distanciaFrete((cat.orcamento || {}).origem || 'Cláudio/MG', dest); Object.assign(ajOrc(), { freteDest: dest, freteKm: d.km, freteRota: `${d.de} → ${d.para}`, freteFonte: d.fonte }); delete ajOrc().frete; salvar(); redesenha(); }
-        catch (e) { $('orcKm').disabled = false; $('orcKmInfo').innerHTML = `<span class="bloq">${esc(e.message)}</span>`; }
-      });
-    };
-    modal(`Orçamento ${$('projeto').value || ''}`.trim(), desenha(), [{ txt: 'Limpar valores', fn: () => { if (!confirm('Apagar os valores preenchidos neste orçamento (volta aos padrões do Cadastro)?')) return false; proj.orc = {}; salvar(); $('modalCorpo').innerHTML = desenha(); liga(); return false; } }, { txt: 'Fechar' }, { txt: 'Excel do orçamento', cls: 'primario', fn: () => { excelOrcamento(); return false; } }]);
-    liga();
+    const linhas = D.aco.map((x) => `<tr${x.rkg == null ? ' class="orc-falta"' : ''}><td>${esc(x.grupo)}</td><td class="num">${fmt(x.kg, 1)}</td><td>${inp('g:' + x.grupo, x.rkg, 'R$/kg')}</td><td class="num">${brl(x.valor)}</td></tr>`).join('');
+    const kmInfo = A.freteKm ? `${esc(A.freteRota || '')} · <b>${fmt0(Math.round(A.freteKm))} km</b> ida e volta${A.freteFonte === 'reta' ? ' (estimada: linha reta × 1,3)' : ''} · ${D.fx ? `faixa até ${fmt0(D.fx.ate)} km` : D.semFaixas ? '<span class="bloq">sem faixas no Cadastro</span>' : '<span class="bloq">acima da última faixa</span>'}${A.frete != null ? ' · valor digitado manualmente' : ''}` : 'Informe o CEP ou a cidade/UF da obra e calcule: o valor sai da tabela de faixas de km (Cadastro).';
+    box.innerHTML = `
+      <div class="orc-cab card"><div><h2>Orçamento ${esc($('projeto').value || '')}</h2><p class="nota">${esc($('cliente').value || '—')} · ${esc([$('cidade').value, $('uf').value].filter(Boolean).join('/') || '—')} · ${esc($('revisao').value || '')} · ${D.lp.length} corte(s): ${esc(D.lp.map((x) => `${x.nome} x${x.qtd}`).join(' · '))} · catálogo ${esc(catVersaoTxt())}</p></div>
+        <div class="orc-kpis"><div><span>Posições</span><b>${fmt0(D.pos)}</b></div><div><span>Peso</span><b>${fmt(D.peso, 1)} kg</b></div><div><span>Kg/posição</span><b>${D.pos ? fmt(D.peso / D.pos, 1) : '–'}</b></div></div></div>
+      <div class="orc-grid">
+        <div class="orc-col">
+          <div class="card orc-bloco"><h3>1. Aço por grupo</h3>${D.falta.length ? `<p class="bloq">Preencha o R$/kg de: ${esc(D.falta.join(', '))}. Sem ele o grupo fica fora do custo.</p>` : ''}
+            <table class="orc-tab"><thead><tr><th>Grupo</th><th class="num">Peso (kg)</th><th class="num">R$/kg</th><th class="num">Custo</th></tr></thead><tbody>${linhas}
+            <tr class="orc-sub"><td>Total do aço</td><td class="num">${fmt(D.peso, 1)}</td><td></td><td class="num">${brl(D.custoAco)}</td></tr></tbody></table></div>
+          <div class="card orc-bloco"><h3>2. Fixadores (INT/IND)</h3><p class="nota">Quantidade do projeto × preço por peça do Cadastro (aba Fixadores).</p>${D.cf.semPreco.length ? `<p class="bloq">${D.cf.semPreco.length} sem preço: ${esc(D.cf.semPreco.join(', '))}.</p>` : ''}
+            <table class="orc-tab"><tbody><tr class="orc-sub"><td>Total dos fixadores</td><td class="num">${brl(D.cf.total)}</td></tr></tbody></table></div>
+          <div class="card orc-bloco"><h3>3. Frete</h3>
+            <div class="orc-frete"><input id="orcDest" type="text" placeholder="CEP ou cidade/UF da obra" value="${esc(A.freteDest || [$('cidade').value, $('uf').value].filter(Boolean).join('/'))}"/><button type="button" id="orcKm">Calcular distância</button></div>
+            <p class="nota" id="orcKmInfo">${kmInfo}</p>
+            <table class="orc-tab"><tbody><tr class="orc-sub"><td>Frete</td><td>${inp('frete', D.frete, 'R$')}</td><td class="num">${brl(D.frete)}</td></tr></tbody></table></div>
+          <div class="card orc-bloco"><h3>4. Montagem e projeto</h3>
+            <table class="orc-tab"><tbody><tr><td>Montagem</td><td>${inp('montagem', D.montagem, 'R$')}</td><td class="num">${brl(D.montagem)}</td></tr>
+            <tr><td>Projeto / ART</td><td>${inp('art', D.art, 'R$')}</td><td class="num">${brl(D.art)}</td></tr></tbody></table></div>
+        </div>
+        <aside class="card orc-resumo"><h3>Resumo do preço</h3>
+          <table class="orc-tab"><tbody>
+            <tr><td>Aço</td><td></td><td class="num">${brl(D.custoAco)}</td></tr><tr><td>Fixadores</td><td></td><td class="num">${brl(D.cf.total)}</td></tr>
+            <tr><td>Frete</td><td></td><td class="num">${brl(D.frete)}</td></tr><tr><td>Montagem</td><td></td><td class="num">${brl(D.montagem)}</td></tr><tr><td>Projeto / ART</td><td></td><td class="num">${brl(D.art)}</td></tr>
+            <tr class="orc-sub"><td>Custo total</td><td></td><td class="num">${brl(D.custo)}</td></tr>
+            <tr><td>Impostos</td><td>${inp('impostos', D.imp, '%')}</td><td class="num">${brl(D.vImp)}</td></tr>
+            <tr><td>Comissão</td><td>${inp('comissao', D.com, '%')}</td><td class="num">${brl(D.vCom)}</td></tr>
+            <tr><td>Margem</td><td>${inp('margem', D.mg, '%')}</td><td class="num">${brl(D.vMg)}</td></tr></tbody></table>
+          <div class="orc-preco"><span>Preço de venda</span><b>${D.preco == null ? '<span class="bloq">percentuais ≥ 100%</span>' : brl(D.preco)}</b><small>custo ÷ ${fmt(D.div, 4)}</small></div>
+          <div class="orc-kpis orc-kpis-s"><div><span>Por posição</span><b>${D.preco == null || !D.pos ? '–' : brl(D.preco / D.pos)}</b></div><div><span>Por kg</span><b>${D.preco == null || !D.peso ? '–' : brl(D.preco / D.peso)}</b></div></div>
+          <div class="orc-acoes"><button class="primario" id="orcExcel">Excel do orçamento</button><button id="orcLimpar" class="discreto">Limpar valores</button></div>
+          <p class="nota">Preço = custo ÷ (1 − impostos − comissão − margem). Valores salvos no projeto; campo vazio usa o padrão do Cadastro. Peso pelos itens levantados (pesos em validação).</p></aside>
+      </div>`;
+    box.querySelectorAll('input[data-orc]').forEach((el) => el.addEventListener('change', () => { if (el.value === '') delete ajOrc()[el.dataset.orc]; else ajOrc()[el.dataset.orc] = Number(el.value); salvar(); renderOrcamento(); }));
+    $('orcExcel').addEventListener('click', excelOrcamento);
+    $('orcLimpar').addEventListener('click', () => { if (!confirm('Apagar os valores preenchidos neste orçamento (volta aos padrões do Cadastro)?')) return; proj.orc = {}; salvar(); renderOrcamento(); });
+    $('orcKm').addEventListener('click', async () => {
+      const dest = $('orcDest').value.trim(); if (!dest) { alert('Informe o CEP ou a cidade/UF da obra.'); return; }
+      $('orcKm').disabled = true; $('orcKmInfo').textContent = 'Calculando a distância…';
+      try { const d = await distanciaFrete((cat.orcamento || {}).origem || 'Cláudio/MG', dest); Object.assign(ajOrc(), { freteDest: dest, freteKm: d.km, freteRota: `${d.de} → ${d.para}`, freteFonte: d.fonte }); delete ajOrc().frete; salvar(); renderOrcamento(); }
+      catch (e) { $('orcKm').disabled = false; $('orcKmInfo').innerHTML = `<span class="bloq">${esc(e.message)}</span>`; }
+    });
   }
+  const abrirOrcamento = () => mostrarPagina('orc');
   function excelOrcamento() {
     const D = dadosOrcamento(ajOrc()), B = (v) => ({ v, b: true }), R = (v, f = 'brl') => (v == null ? '' : { v, fmt: f });
     const linhas = [[{ v: 'PaletCad – Orçamento', fmt: 'tit' }], [{ v: `Projeto ${$('projeto').value || '—'} · ${$('cliente').value || '—'} · ${$('revisao').value} · gerado em ${new Date().toLocaleDateString('pt-BR')} · catálogo ${catVersaoTxt()}`, fmt: 'sub' }], [],
@@ -910,8 +922,8 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt(); render(); };
-  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'] };
-  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
+  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], orc: ['paginaOrc', 'navOrc'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'] };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'orc') renderOrcamento(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
   $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   // treinamento (como preencher e usar o app): menu de cima e atalho na página inicial; o índice rola até a seção
@@ -955,6 +967,7 @@
     if (await Cadastro.desbloquear()) { modoAdmin(true); mostrarPagina('cad'); }
   });
   $('navProj').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('proj'); });
+  $('navOrc').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('orc'); });
   // ---------- painel de projetos (lê a pasta da empresa): quem criou, última revisão, situação, posições e peso ----------
   let painel = [];
   async function carregarPainel() {

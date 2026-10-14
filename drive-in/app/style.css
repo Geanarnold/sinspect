@@ -429,3 +429,21 @@ body:not(.pg-config) .marca .sub-desc{display:none}
 .orc-tab td{vertical-align:middle}
 .orc-in input{width:96px;text-align:right;padding:2px 6px;height:26px;min-height:0;font-size:12px}
 .orc-frete{display:flex;gap:6px;margin-top:4px}.orc-frete input{flex:1;min-width:0;height:26px;padding:2px 6px;font-size:12px}.orc-frete .mini-btn{white-space:nowrap}
+/* página Orçamento */
+#paginaOrc{padding:20px}
+.orc-cab{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 20px;margin-bottom:14px}
+.orc-cab h2{margin:0 0 2px;font-size:18px;color:var(--tinta)}.orc-cab .nota{margin:0}
+.orc-kpis{display:flex;gap:10px;flex-wrap:wrap}.orc-kpis div{background:var(--fundo);border:1px solid var(--borda);border-radius:var(--raio-p);padding:6px 12px;min-width:96px}
+.orc-kpis span{display:block;font-size:11px;color:var(--cinza)}.orc-kpis b{font-size:15px;color:var(--tinta)}
+.orc-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+.orc-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.orc-bloco,.orc-resumo{padding:14px 18px}.orc-bloco h3,.orc-resumo h3{margin:0 0 8px;font-size:14px;color:var(--tinta)}
+.orc-resumo{position:sticky;top:76px}
+.orc-preco{background:var(--tinta);color:#fff;border-radius:var(--raio-p);padding:12px 14px;margin:10px 0;display:flex;flex-direction:column}
+.orc-preco span{font-size:12px;opacity:.8}.orc-preco b{font-size:24px}.orc-preco small{font-size:11px;opacity:.7}
+.orc-kpis-s{margin-bottom:10px}.orc-kpis-s div{flex:1}
+.orc-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}.orc-acoes button{flex:1}
+.orc-vazio{padding:28px;text-align:center}
+#paginaOrc .orc-frete{margin:0 0 6px}#paginaOrc .orc-frete input{height:32px;font-size:13px}
+@media (max-width:900px){.orc-grid{grid-template-columns:1fr}.orc-resumo{position:static}#paginaOrc{padding:12px}}
+#paginaOrc .bloq{color:#b91c1c;font-weight:600;font-size:12px;margin:0 0 8px}
