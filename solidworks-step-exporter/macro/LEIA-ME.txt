@@ -1,0 +1,42 @@
+EXPORTADOR STEP EM LOTE - VERSAO MACRO (sem administrador, sem .exe)
+=====================================================================
+
+MONTAGEM DA MACRO (uma unica vez, cerca de 5 minutos)
+
+1. No SOLIDWORKS: Ferramentas > Macro > Nova...
+   Salve como ExportarSTEP.swp numa pasta sua (ex.: C:\Users\<voce>\Macros\).
+   O editor VBA abre em seguida.
+
+2. Na arvore do projeto (lado esquerdo), em "Modulos", clique com o botao
+   direito no modulo criado automaticamente > Remover... > responda "Nao"
+   quando perguntar se deseja exportar.
+
+3. Arquivo > Importar arquivo... > selecione modExportarSTEP.bas
+
+4. Inserir > UserForm.
+   Com o formulario selecionado, abra a janela Propriedades (F4) e mude
+   o campo (Name) para:  frmExportarSTEP
+   NAO coloque nenhum controle no formulario: ele e montado pelo codigo.
+
+5. Clique com o botao direito no frmExportarSTEP > Exibir codigo.
+   Apague o que estiver la e cole TODO o conteudo de frmExportarSTEP_codigo.txt
+
+6. Ferramentas > Referencias: confirme que estao marcadas
+   - SOLIDWORKS 20xx Type Library
+   - SOLIDWORKS 20xx Constant type library
+   - Microsoft Forms 2.0 Object Library
+   (numa macro nova elas ja vem marcadas)
+
+7. Depurar > Compilar VBAProject.
+   Se aparecer erro, anote a linha destacada e a mensagem exata.
+   Sem erro: Ctrl+S para salvar e feche o editor.
+
+USO
+
+- Abra a montagem (ou peca) e rode: Ferramentas > Macro > Executar >
+  ExportarSTEP.swp
+- Botao na barra: Ferramentas > Personalizar > Comandos > Macro >
+  arraste "Novo botao de macro" para uma barra e aponte para
+  ExportarSTEP.swp, rotina "main".
+
+Requisito: SOLIDWORKS 2019 ou superior.

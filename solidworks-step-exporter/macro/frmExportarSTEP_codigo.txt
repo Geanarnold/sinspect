@@ -1,0 +1,292 @@
+' =====================================================================
+'  CODIGO DO FORMULARIO frmExportarSTEP
+'  Cole TUDO isto no codigo de um UserForm VAZIO cujo (Name) seja
+'  frmExportarSTEP. Os controles sao criados automaticamente.
+' =====================================================================
+Option Explicit
+
+Private WithEvents lst As MSForms.ListBox
+Private WithEvents btnPecas As MSForms.CommandButton
+Private WithEvents btnSub As MSForms.CommandButton
+Private WithEvents btnTop As MSForms.CommandButton
+Private WithEvents btnToolbox As MSForms.CommandButton
+Private WithEvents btnTudo As MSForms.CommandButton
+Private WithEvents btnNada As MSForms.CommandButton
+Private WithEvents btnProcurar As MSForms.CommandButton
+Private WithEvents btnExportar As MSForms.CommandButton
+Private WithEvents btnCancelar As MSForms.CommandButton
+Private txtPasta As MSForms.TextBox
+Private cboAp As MSForms.ComboBox
+Private chkSobrescrever As MSForms.CheckBox
+Private chkCfgNome As MSForms.CheckBox
+Private chkAbrir As MSForms.CheckBox
+Private lblContagem As MSForms.Label
+
+Private mapa() As Long      ' linha da lista -> indice em gItems
+
+Private Sub UserForm_Initialize()
+    Dim lbl As MSForms.Label, i As Long, x As Single
+    Dim titulos As Variant, larguras As Variant
+
+    Me.Caption = "Exportar STEP - " & Mid$(gRootPath, InStrRev(gRootPath, "\") + 1)
+    Me.Width = 650
+    Me.Height = 495
+
+    Set lbl = Novo("Label", "lblTitulo", 8, 6, 620, 14)
+    lbl.Caption = "Marque o que deve ser convertido para STEP (das peças simples até a montagem principal):"
+
+    Set btnPecas = Botao("btnPecas", "Todas as peças", 8, 24, 100)
+    Set btnSub = Botao("btnSub", "Todas as submontagens", 112, 24, 120)
+    Set btnTop = Botao("btnTop", "Montagem principal", 236, 24, 105)
+    Set btnToolbox = Botao("btnToolbox", "Toolbox", 345, 24, 70)
+    Set btnTudo = Botao("btnTudo", "Tudo", 419, 24, 60)
+    Set btnNada = Botao("btnNada", "Nada", 483, 24, 60)
+
+    ' Cabecalho das colunas
+    titulos = Array("Tipo", "Arquivo", "Configuração", "Qtd", "Nível")
+    larguras = Array(95, 230, 140, 35, 35)
+    x = 8 + 18
+    For i = 0 To 4
+        Set lbl = Novo("Label", "lblCol" & i, x, 50, CSng(larguras(i)), 12)
+        lbl.Caption = titulos(i)
+        lbl.Font.Bold = True
+        x = x + larguras(i)
+    Next i
+
+    Set lst = Novo("ListBox", "lstItens", 8, 63, 620, 272)
+    lst.ColumnCount = 5
+    lst.ColumnWidths = "95;230;140;35;35"
+    lst.MultiSelect = fmMultiSelectMulti
+    lst.ListStyle = fmListStyleOption
+
+    If gNaoCarregados > 0 Then
+        Set lbl = Novo("Label", "lblAviso", 8, 338, 620, 12)
+        lbl.Caption = "Atenção: " & gNaoCarregados & " componente(s) não carregado(s) serão ignorados."
+        lbl.ForeColor = RGB(170, 0, 0)
+    End If
+
+    Set lbl = Novo("Label", "lblPasta", 8, 357, 70, 14)
+    lbl.Caption = "Pasta de saída:"
+    Set txtPasta = Novo("TextBox", "txtPasta", 80, 354, 462, 18)
+    txtPasta.Text = PastaDe(gRootPath) & "\STEP"
+    Set btnProcurar = Botao("btnProcurar", "Procurar...", 548, 353, 80)
+
+    Set lbl = Novo("Label", "lblAp", 8, 381, 70, 14)
+    lbl.Caption = "Formato:"
+    Set cboAp = Novo("ComboBox", "cboAp", 80, 378, 150, 18)
+    cboAp.Style = fmStyleDropDownList
+    cboAp.AddItem "AP203"
+    cboAp.AddItem "AP214 (recomendado)"
+    cboAp.AddItem "AP242"
+    cboAp.ListIndex = 1
+
+    Set chkSobrescrever = Novo("CheckBox", "chkSobrescrever", 8, 404, 190, 16)
+    chkSobrescrever.Caption = "Sobrescrever arquivos existentes"
+    chkSobrescrever.Value = True
+    Set chkCfgNome = Novo("CheckBox", "chkCfgNome", 205, 404, 210, 16)
+    chkCfgNome.Caption = "Sempre incluir configuração no nome"
+    chkCfgNome.Value = False
+    Set chkAbrir = Novo("CheckBox", "chkAbrir", 425, 404, 190, 16)
+    chkAbrir.Caption = "Abrir pasta ao terminar"
+    chkAbrir.Value = True
+
+    Set lblContagem = Novo("Label", "lblContagem", 8, 436, 300, 14)
+    Set btnExportar = Botao("btnExportar", "Exportar", 452, 430, 85)
+    btnExportar.Font.Bold = True
+    btnExportar.Default = True
+    Set btnCancelar = Botao("btnCancelar", "Cancelar", 543, 430, 85)
+    btnCancelar.Cancel = True
+
+    PreencherLista
+    AtualizarContagem
+End Sub
+
+' ---------------------------------------------------------------------
+'  Lista: montagem principal, submontagens, pecas, toolbox (ordem alfabetica)
+' ---------------------------------------------------------------------
+Private Sub PreencherLista()
+    Dim grupo As Integer, k As Long, r As Long, n As Long
+    Dim idx() As Long
+
+    ReDim mapa(0 To gCount)
+    For grupo = 0 To 3
+        n = 0
+        ReDim idx(0 To gCount)
+        For k = 0 To gCount - 1
+            If GrupoDe(k) = grupo Then
+                idx(n) = k
+                n = n + 1
+            End If
+        Next k
+        OrdenarPorNome idx, n
+
+        For k = 0 To n - 1
+            r = lst.ListCount
+            lst.AddItem TipoTexto(idx(k))
+            lst.List(r, 1) = NomeSemExtensao(gItems(idx(k)).FilePath)
+            lst.List(r, 2) = gItems(idx(k)).Config
+            lst.List(r, 3) = CStr(gItems(idx(k)).Qty)
+            lst.List(r, 4) = CStr(gItems(idx(k)).Level)
+            lst.Selected(r) = gItems(idx(k)).Selected
+            mapa(r) = idx(k)
+        Next k
+    Next grupo
+End Sub
+
+Private Function GrupoDe(k As Long) As Integer
+    If gItems(k).Kind = KIND_TOP Then
+        GrupoDe = 0
+    ElseIf gItems(k).Kind = KIND_SUB Then
+        GrupoDe = 1
+    ElseIf Not gItems(k).IsToolbox Then
+        GrupoDe = 2
+    Else
+        GrupoDe = 3
+    End If
+End Function
+
+Private Function TipoTexto(k As Long) As String
+    Select Case GrupoDe(k)
+        Case 0: TipoTexto = "Montagem"
+        Case 1: TipoTexto = "Submontagem"
+        Case 2: TipoTexto = "Peça"
+        Case Else: TipoTexto = "Peça (toolbox)"
+    End Select
+    If gItems(k).IsVirtual Then TipoTexto = TipoTexto & " virtual"
+End Function
+
+Private Sub OrdenarPorNome(idx() As Long, n As Long)
+    Dim i As Long, j As Long, t As Long
+    For i = 1 To n - 1
+        t = idx(i)
+        j = i - 1
+        Do While j >= 0
+            If StrComp(Chave(idx(j)), Chave(t), vbTextCompare) <= 0 Then Exit Do
+            idx(j + 1) = idx(j)
+            j = j - 1
+        Loop
+        idx(j + 1) = t
+    Next i
+End Sub
+
+Private Function Chave(k As Long) As String
+    Chave = NomeSemExtensao(gItems(k).FilePath) & "|" & gItems(k).Config
+End Function
+
+' ---------------------------------------------------------------------
+'  Atalhos de selecao
+' ---------------------------------------------------------------------
+Private Sub Marcar(criterio As String, valor As Boolean)
+    Dim r As Long, k As Long, aplica As Boolean
+    For r = 0 To lst.ListCount - 1
+        k = mapa(r)
+        Select Case criterio
+            Case "pecas": aplica = (GrupoDe(k) = 2)
+            Case "sub": aplica = (GrupoDe(k) = 1)
+            Case "top": aplica = (GrupoDe(k) = 0)
+            Case "toolbox": aplica = (GrupoDe(k) = 3)
+            Case Else: aplica = True
+        End Select
+        If aplica Then lst.Selected(r) = valor
+    Next r
+    AtualizarContagem
+End Sub
+
+Private Sub btnPecas_Click()
+    Marcar "pecas", True
+End Sub
+
+Private Sub btnSub_Click()
+    Marcar "sub", True
+End Sub
+
+Private Sub btnTop_Click()
+    Marcar "top", True
+End Sub
+
+Private Sub btnToolbox_Click()
+    Marcar "toolbox", True
+End Sub
+
+Private Sub btnTudo_Click()
+    Marcar "tudo", True
+End Sub
+
+Private Sub btnNada_Click()
+    Marcar "tudo", False
+End Sub
+
+Private Sub lst_Change()
+    AtualizarContagem
+End Sub
+
+Private Sub AtualizarContagem()
+    Dim r As Long, n As Long
+    For r = 0 To lst.ListCount - 1
+        If lst.Selected(r) Then n = n + 1
+    Next r
+    lblContagem.Caption = n & " de " & lst.ListCount & " selecionado(s)"
+End Sub
+
+' ---------------------------------------------------------------------
+'  Pasta, confirmar, cancelar
+' ---------------------------------------------------------------------
+Private Sub btnProcurar_Click()
+    Dim sh As Object, f As Object
+    Set sh = CreateObject("Shell.Application")
+    Set f = sh.BrowseForFolder(0, "Selecione a pasta de saída dos arquivos STEP", &H40)
+    If Not f Is Nothing Then txtPasta.Text = f.Self.Path
+End Sub
+
+Private Sub btnExportar_Click()
+    Dim pasta As String, r As Long
+
+    pasta = Trim$(txtPasta.Text)
+    If Right$(pasta, 1) = "\" Then pasta = Left$(pasta, Len(pasta) - 1)
+    If pasta = "" Then
+        MsgBox "Informe a pasta de saída.", vbExclamation, "Exportador STEP"
+        Exit Sub
+    End If
+    If Not CriarPasta(pasta) Then
+        MsgBox "Não foi possível criar a pasta:" & vbCrLf & pasta, vbCritical, "Exportador STEP"
+        Exit Sub
+    End If
+
+    For r = 0 To lst.ListCount - 1
+        gItems(mapa(r)).Selected = lst.Selected(r)
+    Next r
+
+    gPasta = pasta
+    gAp = Choose(cboAp.ListIndex + 1, 203, 214, 242)
+    gSobrescrever = chkSobrescrever.Value
+    gSempreCfg = chkCfgNome.Value
+    gAbrirPasta = chkAbrir.Value
+    gConfirmado = True
+    Unload Me
+End Sub
+
+Private Sub btnCancelar_Click()
+    Unload Me
+End Sub
+
+' ---------------------------------------------------------------------
+'  Criacao de controles
+' ---------------------------------------------------------------------
+Private Function Novo(tipo As String, nome As String, l As Single, t As Single, _
+                      w As Single, h As Single) As Object
+    Dim c As Object
+    Set c = Me.Controls.Add("Forms." & tipo & ".1", nome, True)
+    c.Left = l
+    c.Top = t
+    c.Width = w
+    c.Height = h
+    Set Novo = c
+End Function
+
+Private Function Botao(nome As String, texto As String, l As Single, t As Single, _
+                       w As Single) As MSForms.CommandButton
+    Dim b As MSForms.CommandButton
+    Set b = Novo("CommandButton", nome, l, t, w, 20)
+    b.Caption = texto
+    Set Botao = b
+End Function

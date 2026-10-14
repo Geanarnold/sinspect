@@ -1,0 +1,3 @@
+macro/*.bas -text
+macro/*.txt -text
+*.zip binary
