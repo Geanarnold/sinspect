@@ -26,7 +26,7 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 
 ## DXF da chapa planificada (rev.04)
 
-- Peças com corpo de chapa metálica (marcadas "chapa → DXF" na lista) geram o DXF do planificado em `<pasta da montagem>\DXF`, via `ExportToDWG2` com `swExportToDWG_ExportSheetMetal`. Bits usados: geometria (1) e, se marcada, linhas de dobra (4).
+- Peças com corpo de chapa metálica (marcadas "chapa → DXF" na lista) geram o DXF do planificado em `<pasta da montagem>\DXF`, via `ExportToDWG2` com `swExportToDWG_ExportSheetMetal`. Bits usados: geometria (1, sempre), linhas de dobra (4), esboços (8) e ferramentas de conformação/repuxo (64), conforme as opções do pop-up.
 - Nome do arquivo: `<Código> - <peça>.dxf`. O `Código` vem da propriedade personalizada informada no pop-up (padrão "Código"). A leitura procura primeiro na configuração e depois no arquivo, e aceita "Código", "Código:" ou "Codigo". Se a propriedade estiver vazia, o DXF sai sem prefixo e o log registra um aviso.
 - Se o DXF falhar com a peça oculta, o programa abre a peça numa janela, tenta de novo e fecha a janela.
 
@@ -56,7 +56,7 @@ Esta versão é recomendada quando a TI bloqueia executáveis. A macro roda dent
 
 ## Instalação SEM administrador (recomendada para estações sem direito de admin)
 
-**Versão recomendada quando não há administrador.** Executável avulso (`GeradorDeSTEP.exe`, pacote `dist/GeradorDeSTEP_rev04_SemAdmin.zip`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
+**Versão recomendada quando não há administrador.** Executável avulso (`GeradorDeSTEP.exe`, pacote `dist/GeradorDeSTEP_rev05_SemAdmin.zip`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
 
 1. **Pronto para usar:** baixe `dist/ExportadorSTEP.zip`. Se o Windows marcar o arquivo como vindo da internet, use *Propriedades › Desbloquear* antes de extrair. Extraia o zip para uma pasta sua, por exemplo `C:\Users\<voce>\Ferramentas\ExportadorSTEP\`.
 2. *(Opcional)* Para recompilar: `dotnet build app\StepExporterApp.csproj -c Release`. As DLLs da API vêm do NuGet.

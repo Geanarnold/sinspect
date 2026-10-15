@@ -21,6 +21,8 @@ namespace StepExporter
         public string DxfFolder;
         public string CodeProperty = "Código";
         public bool DxfBendLines = true;
+        public bool DxfFormingTools = true;
+        public bool DxfSketches;
     }
 
     /// <summary>
@@ -42,6 +44,8 @@ namespace StepExporter
         private readonly TextBox _txtDxfFolder = new TextBox();
         private readonly TextBox _txtCodeProperty = new TextBox();
         private readonly CheckBox _chkBendLines = new CheckBox();
+        private readonly CheckBox _chkFormingTools = new CheckBox();
+        private readonly CheckBox _chkSketches = new CheckBox();
         private readonly Label _lblCount = new Label();
 
         private ListViewGroup _grpTop, _grpSub, _grpPart, _grpToolbox;
@@ -61,7 +65,7 @@ namespace StepExporter
             Text = ExportCommand.Title + " " + ExportCommand.Revision + " – " + _collection.RootName;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true;
-            Size = new Size(860, 720);
+            Size = new Size(880, 750);
             MinimumSize = new Size(640, 480);
             Font = new Font("Segoe UI", 9f);
             ShowInTaskbar = false;
@@ -161,9 +165,21 @@ namespace StepExporter
             _chkBendLines.Text = "Linhas de dobra";
             _chkBendLines.AutoSize = true;
             _chkBendLines.Checked = true;
-            dxfRow.Controls.Add(_chkBendLines);
             opts.Controls.Add(dxfRow, 1, 3);
             opts.SetColumnSpan(dxfRow, 2);
+
+            opts.Controls.Add(new Label { Text = "No DXF incluir:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
+            var dxfContent = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, WrapContents = false };
+            dxfContent.Controls.Add(_chkBendLines);
+            _chkFormingTools.Text = "Repuxos / ferramentas de conformação";
+            _chkFormingTools.AutoSize = true;
+            _chkFormingTools.Checked = true;
+            dxfContent.Controls.Add(_chkFormingTools);
+            _chkSketches.Text = "Esboços do planificado";
+            _chkSketches.AutoSize = true;
+            dxfContent.Controls.Add(_chkSketches);
+            opts.Controls.Add(dxfContent, 1, 4);
+            opts.SetColumnSpan(dxfContent, 2);
 
             var checks = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill };
             _chkOverwrite.Text = "Sobrescrever arquivos existentes";
@@ -177,7 +193,7 @@ namespace StepExporter
             checks.Controls.Add(_chkOverwrite);
             checks.Controls.Add(_chkConfigName);
             checks.Controls.Add(_chkOpenFolder);
-            opts.Controls.Add(checks, 0, 4);
+            opts.Controls.Add(checks, 0, 5);
             opts.SetColumnSpan(checks, 3);
 
             if (_collection.Warnings.Count > 0)
@@ -188,7 +204,7 @@ namespace StepExporter
                     ForeColor = Color.DarkRed,
                     Text = "Atenção: " + _collection.Warnings.Count + " componente(s) não carregado(s) serão ignorados."
                 };
-                opts.Controls.Add(warn, 0, 5);
+                opts.Controls.Add(warn, 0, 6);
                 opts.SetColumnSpan(warn, 3);
             }
             root.Controls.Add(opts, 0, 3);
@@ -341,7 +357,9 @@ namespace StepExporter
                 GenerateDxf = _chkDxf.Checked,
                 DxfFolder = dxfFolder,
                 CodeProperty = _txtCodeProperty.Text.Trim(),
-                DxfBendLines = _chkBendLines.Checked
+                DxfBendLines = _chkBendLines.Checked,
+                DxfFormingTools = _chkFormingTools.Checked,
+                DxfSketches = _chkSketches.Checked
             };
 
             DialogResult = DialogResult.OK;

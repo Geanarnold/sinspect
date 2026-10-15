@@ -38,7 +38,7 @@ namespace StepExporter
             log.AppendLine("Exportação STEP – " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             log.AppendLine("Origem: " + rootDoc.GetPathName());
             log.AppendLine("STEP: " + (options.GenerateStep ? "AP" + options.StepAp + " em " + options.OutputFolder : "não"));
-            log.AppendLine("DXF planificado: " + (options.GenerateDxf ? options.DxfFolder + " (prefixo = propriedade \"" + options.CodeProperty + "\")" : "não"));
+            log.AppendLine("DXF planificado: " + (options.GenerateDxf ? options.DxfFolder + " (prefixo = propriedade \"" + options.CodeProperty + "\", SheetMetalOptions = " + SheetMetalOptions(options) + ")" : "não"));
             log.AppendLine();
 
             // Peças primeiro, depois submontagens, por último a montagem principal.
@@ -117,7 +117,7 @@ namespace StepExporter
                             dxfTarget = Path.Combine(options.DxfFolder, name + ".dxf");
                             if (!options.Overwrite && File.Exists(dxfTarget))
                                 return null;
-                            return SaveFlatPattern(doc, dxfTarget, options.DxfBendLines);
+                            return SaveFlatPattern(doc, dxfTarget, SheetMetalOptions(options));
                         };
                         string error = WithConfiguration(item, dxfAction, out activated);
                         activatedOtherDocs |= activated;
@@ -242,16 +242,27 @@ namespace StepExporter
             return null;
         }
 
-        // Bits de SheetMetalOptions (ExportToDWG2): 1 = geometria, 4 = linhas de dobra.
+        // Bits de SheetMetalOptions (ExportToDWG2, doc. oficial): bit1 = 1 geometria do planificado
+        // (obrigatório), bit3 = 4 linhas de dobra, bit4 = 8 esboços, bit7 = 64 ferramentas de
+        // conformação (repuxo, venezianas, nervuras...).
         private const int SheetMetalGeometry = 1;
         private const int SheetMetalBendLines = 4;
+        private const int SheetMetalSketches = 8;
+        private const int SheetMetalFormingTools = 64;
 
-        private static string SaveFlatPattern(ModelDoc2 doc, string target, bool bendLines)
+        public static int SheetMetalOptions(ExportOptions o)
+        {
+            return SheetMetalGeometry
+                   | (o.DxfBendLines ? SheetMetalBendLines : 0)
+                   | (o.DxfFormingTools ? SheetMetalFormingTools : 0)
+                   | (o.DxfSketches ? SheetMetalSketches : 0);
+        }
+
+        private static string SaveFlatPattern(ModelDoc2 doc, string target, int options)
         {
             if (!ComponentCollector.IsSheetMetal(doc))
                 return "nesta configuração a peça não é chapa metálica";
 
-            int options = SheetMetalGeometry | (bendLines ? SheetMetalBendLines : 0);
             bool ok = ((PartDoc)doc).ExportToDWG2(
                 target, doc.GetPathName(), (int)swExportToDWG_e.swExportToDWG_ExportSheetMetal,
                 true, null, false, false, options, null);

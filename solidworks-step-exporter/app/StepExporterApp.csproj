@@ -12,8 +12,8 @@
     <AssemblyName>GeradorDeSTEP</AssemblyName>
     <RootNamespace>StepExporter</RootNamespace>
     <LangVersion>7.3</LangVersion>
-    <Version>1.0.4</Version>
-    <InformationalVersion>rev.04</InformationalVersion>
+    <Version>1.0.5</Version>
+    <InformationalVersion>rev.05</InformationalVersion>
     <ApplicationIcon>..\src\icons\step.ico</ApplicationIcon>
     <Product>Gerador de STEP</Product>
   </PropertyGroup>

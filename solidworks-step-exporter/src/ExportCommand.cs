@@ -12,7 +12,7 @@ namespace StepExporter
     public static class ExportCommand
     {
         public const string Title = "Gerador de STEP";
-        public const string Revision = "rev.04";
+        public const string Revision = "rev.05";
 
         public static void Run(ISldWorks swApp)
         {
