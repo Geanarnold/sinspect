@@ -15,6 +15,12 @@ namespace StepExporter
         public bool Overwrite;
         public bool AlwaysAppendConfiguration;
         public bool OpenFolderWhenDone = true;
+
+        public bool GenerateStep = true;
+        public bool GenerateDxf = true;
+        public string DxfFolder;
+        public string CodeProperty = "Código";
+        public bool DxfBendLines = true;
     }
 
     /// <summary>
@@ -31,6 +37,11 @@ namespace StepExporter
         private readonly CheckBox _chkOverwrite = new CheckBox();
         private readonly CheckBox _chkConfigName = new CheckBox();
         private readonly CheckBox _chkOpenFolder = new CheckBox();
+        private readonly CheckBox _chkStep = new CheckBox();
+        private readonly CheckBox _chkDxf = new CheckBox();
+        private readonly TextBox _txtDxfFolder = new TextBox();
+        private readonly TextBox _txtCodeProperty = new TextBox();
+        private readonly CheckBox _chkBendLines = new CheckBox();
         private readonly Label _lblCount = new Label();
 
         private ListViewGroup _grpTop, _grpSub, _grpPart, _grpToolbox;
@@ -50,7 +61,7 @@ namespace StepExporter
             Text = ExportCommand.Title + " " + ExportCommand.Revision + " – " + _collection.RootName;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true;
-            Size = new Size(820, 640);
+            Size = new Size(860, 720);
             MinimumSize = new Size(640, 480);
             Font = new Font("Segoe UI", 9f);
             ShowInTaskbar = false;
@@ -83,6 +94,7 @@ namespace StepExporter
             quick.Controls.Add(MakeButton("Todas as peças", (s, e) => SetChecked(i => i.Kind == ItemKind.Part && !i.IsToolbox, true)));
             quick.Controls.Add(MakeButton("Todas as submontagens", (s, e) => SetChecked(i => i.Kind == ItemKind.SubAssembly, true)));
             quick.Controls.Add(MakeButton("Montagem principal", (s, e) => SetChecked(i => i.Kind == ItemKind.TopAssembly, true)));
+            quick.Controls.Add(MakeButton("Chapas", (s, e) => SetChecked(i => i.IsSheetMetal, true)));
             quick.Controls.Add(MakeButton("Toolbox", (s, e) => SetChecked(i => i.IsToolbox, true)));
             quick.Controls.Add(MakeButton("Tudo", (s, e) => SetChecked(i => true, true)));
             quick.Controls.Add(MakeButton("Nada", (s, e) => SetChecked(i => true, false)));
@@ -110,18 +122,48 @@ namespace StepExporter
             opts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             opts.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-            opts.Controls.Add(new Label { Text = "Pasta de saída:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 0);
+            // Linha 0-1: STEP
+            _chkStep.Text = "Gerar STEP em:";
+            _chkStep.AutoSize = true;
+            _chkStep.Checked = true;
+            _chkStep.Anchor = AnchorStyles.Left;
+            opts.Controls.Add(_chkStep, 0, 0);
             _txtFolder.Dock = DockStyle.Fill;
             _txtFolder.Text = Path.Combine(_collection.RootFolder ?? "", "STEP");
             opts.Controls.Add(_txtFolder, 1, 0);
-            opts.Controls.Add(MakeButton("Procurar...", OnBrowse), 2, 0);
+            opts.Controls.Add(MakeButton("Procurar...", (s, e) => Browse(_txtFolder, "Pasta dos arquivos STEP")), 2, 0);
 
-            opts.Controls.Add(new Label { Text = "Formato:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 1);
+            opts.Controls.Add(new Label { Text = "Formato STEP:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 1);
             _cmbAp.DropDownStyle = ComboBoxStyle.DropDownList;
             _cmbAp.Items.AddRange(new object[] { "AP203", "AP214 (recomendado)", "AP242" });
             _cmbAp.SelectedIndex = 1;
             _cmbAp.Width = 200;
             opts.Controls.Add(_cmbAp, 1, 1);
+
+            // Linha 2-3: DXF planificado
+            _chkDxf.Text = "Gerar DXF planificado em:";
+            _chkDxf.AutoSize = true;
+            _chkDxf.Checked = _collection.Items.Any(i => i.IsSheetMetal);
+            _chkDxf.Anchor = AnchorStyles.Left;
+            opts.Controls.Add(_chkDxf, 0, 2);
+            _txtDxfFolder.Dock = DockStyle.Fill;
+            _txtDxfFolder.Text = Path.Combine(_collection.RootFolder ?? "", "DXF");
+            opts.Controls.Add(_txtDxfFolder, 1, 2);
+            opts.Controls.Add(MakeButton("Procurar...", (s, e) => Browse(_txtDxfFolder, "Pasta dos DXF planificados")), 2, 2);
+
+            opts.Controls.Add(new Label { Text = "Prefixo do DXF:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
+            var dxfRow = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, WrapContents = false };
+            dxfRow.Controls.Add(new Label { Text = "propriedade", AutoSize = true, Margin = new Padding(0, 6, 3, 0) });
+            _txtCodeProperty.Text = "Código";
+            _txtCodeProperty.Width = 110;
+            dxfRow.Controls.Add(_txtCodeProperty);
+            dxfRow.Controls.Add(new Label { Text = "→  \"<Código> - <peça>.dxf\"", AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(6, 6, 12, 0) });
+            _chkBendLines.Text = "Linhas de dobra";
+            _chkBendLines.AutoSize = true;
+            _chkBendLines.Checked = true;
+            dxfRow.Controls.Add(_chkBendLines);
+            opts.Controls.Add(dxfRow, 1, 3);
+            opts.SetColumnSpan(dxfRow, 2);
 
             var checks = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill };
             _chkOverwrite.Text = "Sobrescrever arquivos existentes";
@@ -135,7 +177,7 @@ namespace StepExporter
             checks.Controls.Add(_chkOverwrite);
             checks.Controls.Add(_chkConfigName);
             checks.Controls.Add(_chkOpenFolder);
-            opts.Controls.Add(checks, 0, 2);
+            opts.Controls.Add(checks, 0, 4);
             opts.SetColumnSpan(checks, 3);
 
             if (_collection.Warnings.Count > 0)
@@ -146,7 +188,7 @@ namespace StepExporter
                     ForeColor = Color.DarkRed,
                     Text = "Atenção: " + _collection.Warnings.Count + " componente(s) não carregado(s) serão ignorados."
                 };
-                opts.Controls.Add(warn, 0, 3);
+                opts.Controls.Add(warn, 0, 5);
                 opts.SetColumnSpan(warn, 3);
             }
             root.Controls.Add(opts, 0, 3);
@@ -198,6 +240,7 @@ namespace StepExporter
                 var notes = new List<string>();
                 if (item.IsVirtual) notes.Add("virtual");
                 if (item.IsToolbox) notes.Add("toolbox");
+                if (item.IsSheetMetal) notes.Add("chapa → DXF");
 
                 var lvi = new ListViewItem(item.FileName)
                 {
@@ -239,37 +282,51 @@ namespace StepExporter
             _lblCount.Text = _list.CheckedItems.Count + " de " + _list.Items.Count + " selecionado(s)";
         }
 
-        private void OnBrowse(object sender, EventArgs e)
+        private void Browse(TextBox target, string description)
         {
             using (var fbd = new FolderBrowserDialog())
             {
-                fbd.Description = "Selecione a pasta de saída dos arquivos STEP";
-                if (Directory.Exists(_txtFolder.Text))
-                    fbd.SelectedPath = _txtFolder.Text;
+                fbd.Description = description;
+                if (Directory.Exists(target.Text))
+                    fbd.SelectedPath = target.Text;
                 if (fbd.ShowDialog(this) == DialogResult.OK)
-                    _txtFolder.Text = fbd.SelectedPath;
+                    target.Text = fbd.SelectedPath;
+            }
+        }
+
+        private bool EnsureFolder(string folder, string what)
+        {
+            if (string.IsNullOrEmpty(folder))
+            {
+                MessageBox.Show(this, "Informe a pasta " + what + ".", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            try
+            {
+                Directory.CreateDirectory(folder);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Não foi possível criar a pasta " + what + ":\n" + ex.Message, Text,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
         private void OnOk(object sender, EventArgs e)
         {
             string folder = _txtFolder.Text.Trim();
-            if (string.IsNullOrEmpty(folder))
+            string dxfFolder = _txtDxfFolder.Text.Trim();
+            if (!_chkStep.Checked && !_chkDxf.Checked)
             {
-                MessageBox.Show(this, "Informe a pasta de saída.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, "Marque pelo menos uma saída: STEP e/ou DXF.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            try
-            {
-                Directory.CreateDirectory(folder);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, "Não foi possível criar a pasta:\n" + ex.Message, Text,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (_chkStep.Checked && !EnsureFolder(folder, "dos STEP"))
                 return;
-            }
+            if (_chkDxf.Checked && !EnsureFolder(dxfFolder, "dos DXF"))
+                return;
 
             int[] apValues = { 203, 214, 242 };
             Result = new ExportOptions
@@ -279,7 +336,12 @@ namespace StepExporter
                 StepAp = apValues[_cmbAp.SelectedIndex],
                 Overwrite = _chkOverwrite.Checked,
                 AlwaysAppendConfiguration = _chkConfigName.Checked,
-                OpenFolderWhenDone = _chkOpenFolder.Checked
+                OpenFolderWhenDone = _chkOpenFolder.Checked,
+                GenerateStep = _chkStep.Checked,
+                GenerateDxf = _chkDxf.Checked,
+                DxfFolder = dxfFolder,
+                CodeProperty = _txtCodeProperty.Text.Trim(),
+                DxfBendLines = _chkBendLines.Checked
             };
 
             DialogResult = DialogResult.OK;

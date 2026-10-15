@@ -12,7 +12,7 @@ namespace StepExporter
     public static class ExportCommand
     {
         public const string Title = "Gerador de STEP";
-        public const string Revision = "rev.03";
+        public const string Revision = "rev.04";
 
         public static void Run(ISldWorks swApp)
         {
@@ -57,16 +57,26 @@ namespace StepExporter
                 ExportReport report = new StepExportService(swApp).Export(doc, options);
                 Ui.Log("Run: concluído. OK=" + report.Succeeded + " falhas=" + report.Failed);
 
-                string summary = string.Format(
-                    "Exportação concluída.\n\nExportados: {0}\nIgnorados (já existiam): {1}\nFalhas: {2}\n\nPasta: {3}\nLog: {4}",
-                    report.Succeeded, report.Skipped, report.Failed, options.OutputFolder, report.LogPath);
+                string summary = "Concluído.\n";
+                if (options.GenerateStep)
+                    summary += string.Format("\nSTEP: {0} gerado(s), {1} ignorado(s), {2} falha(s)\n  {3}",
+                        report.Succeeded, report.Skipped, report.Failed, options.OutputFolder);
+                if (options.GenerateDxf)
+                    summary += string.Format("\nDXF planificado: {0} gerado(s), {1} falha(s), {2} sem código\n  {3}",
+                        report.DxfSucceeded, report.DxfFailed, report.DxfWithoutCode, options.DxfFolder);
+                summary += "\n\nLog: " + report.LogPath;
                 if (report.Cancelled)
-                    summary = "Exportação CANCELADA pelo usuário.\n\n" + summary;
+                    summary = "CANCELADO pelo usuário.\n\n" + summary;
 
-                Ui.Show(summary, report.Failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                Ui.Show(summary, report.Failed + report.DxfFailed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
-                if (options.OpenFolderWhenDone && Directory.Exists(options.OutputFolder))
-                    System.Diagnostics.Process.Start("explorer.exe", "\"" + options.OutputFolder + "\"");
+                if (options.OpenFolderWhenDone)
+                {
+                    if (options.GenerateStep && Directory.Exists(options.OutputFolder))
+                        System.Diagnostics.Process.Start("explorer.exe", "\"" + options.OutputFolder + "\"");
+                    if (options.GenerateDxf && report.DxfSucceeded > 0 && Directory.Exists(options.DxfFolder))
+                        System.Diagnostics.Process.Start("explorer.exe", "\"" + options.DxfFolder + "\"");
+                }
             }
             catch (Exception ex)
             {

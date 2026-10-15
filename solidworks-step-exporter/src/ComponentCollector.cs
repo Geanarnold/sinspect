@@ -21,6 +21,7 @@ namespace StepExporter
         public ItemKind Kind;
         public bool IsToolbox;
         public bool IsVirtual;
+        public bool IsSheetMetal;
         public int Quantity;
         public int Level;
         public ModelDoc2 Model;
@@ -47,6 +48,26 @@ namespace StepExporter
     /// <summary>Varre a árvore da montagem (todos os níveis).</summary>
     public static class ComponentCollector
     {
+        /// <summary>True se a peça (na configuração ativa) tem algum corpo de chapa metálica.</summary>
+        public static bool IsSheetMetal(ModelDoc2 model)
+        {
+            if (model == null || model.GetType() != (int)swDocumentTypes_e.swDocPART)
+                return false;
+            try
+            {
+                object[] bodies = ((PartDoc)model).GetBodies2((int)swBodyType_e.swSolidBody, true) as object[];
+                if (bodies == null)
+                    return false;
+                foreach (object b in bodies)
+                    if (((Body2)b).IsSheetMetal())
+                        return true;
+            }
+            catch
+            {
+            }
+            return false;
+        }
+
         public static bool IsAssemblyPath(string path)
         {
             return path != null && path.EndsWith(".sldasm", StringComparison.OrdinalIgnoreCase);
@@ -69,6 +90,7 @@ namespace StepExporter
                 FilePath = rootPath,
                 Configuration = activeCfg.Name,
                 Kind = isAssembly ? ItemKind.TopAssembly : ItemKind.Part,
+                IsSheetMetal = !isAssembly && IsSheetMetal(rootDoc),
                 Quantity = 1,
                 Level = 0,
                 Model = rootDoc
@@ -124,6 +146,7 @@ namespace StepExporter
                     Kind = isAssembly ? ItemKind.SubAssembly : ItemKind.Part,
                     IsToolbox = !isAssembly && model.Extension.ToolboxPartType != notToolbox,
                     IsVirtual = comp.IsVirtual,
+                    IsSheetMetal = !isAssembly && IsSheetMetal(model),
                     Quantity = 1,
                     Level = level,
                     Model = model
