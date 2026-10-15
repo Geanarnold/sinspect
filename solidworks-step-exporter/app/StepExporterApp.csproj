@@ -2,9 +2,7 @@
 
   <!--
     Versão SEM ADMINISTRADOR: executável que se conecta ao SOLIDWORKS aberto.
-    Não precisa de RegAsm nem das DLLs de interop para compilar: as chamadas à API
-    são feitas por ligação tardia (dynamic) e as constantes são lidas da instalação
-    do SOLIDWORKS em tempo de execução (SwConst.cs).
+    Não precisa de RegAsm. A API do SOLIDWORKS vem do NuGet (DLLs distribuídas junto, não embutidas).
   -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -23,13 +21,17 @@
     <Compile Include="..\src\ComponentCollector.cs" Link="Shared\ComponentCollector.cs" />
     <Compile Include="..\src\ExportDialog.cs" Link="Shared\ExportDialog.cs" />
     <Compile Include="..\src\StepExportService.cs" Link="Shared\StepExportService.cs" />
-    <Compile Include="..\src\SwConst.cs" Link="Shared\SwConst.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SolidWorks.Interop.sldworks" Version="32.1.0" />
+    <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" />
+  </ItemGroup>
+
 
 </Project>

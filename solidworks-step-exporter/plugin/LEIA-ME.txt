@@ -7,7 +7,8 @@ SOLIDWORKS 2025 e e ignorado).
 
 1. ANTES de extrair: botao direito no .zip > Propriedades > marque
    "Desbloquear" > OK.
-2. Extraia para uma pasta FIXA, acessivel ao seu usuario, que nao sera
+2. Extraia TODOS os arquivos (o plugin precisa das 4 DLLs juntas)
+   para uma pasta FIXA, acessivel ao seu usuario, que nao sera
    apagada nem movida. Ex.: C:\Ferramentas\GeradorDeSTEP\
 3. Feche o SOLIDWORKS.
 4. Se ja tentou a instalacao sem admin antes: de duplo clique em

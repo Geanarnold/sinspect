@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using SolidWorks.Interop.sldworks;
+using SolidWorks.Interop.swconst;
 
 namespace StepExporter
 {
@@ -18,29 +19,21 @@ namespace StepExporter
 
     public class StepExportService
     {
-        private readonly dynamic _swApp; // ISldWorks
+        private readonly ISldWorks _swApp;
 
-        private readonly int _dontRebuild;
-        private readonly int _saveAsVersion;
-        private readonly int _saveAsOptions;
-        private readonly int _userCancel;
+        private const int DontRebuild = (int)swRebuildOnActivation_e.swDontRebuildActiveDoc;
 
-        public StepExportService(object swApp)
+        public StepExportService(ISldWorks swApp)
         {
             _swApp = swApp;
-            _dontRebuild = SwConst.Get("swRebuildOnActivation_e", "swDontRebuildActiveDoc");
-            _saveAsVersion = SwConst.Get("swSaveAsVersion_e", "swSaveAsCurrentVersion");
-            _saveAsOptions = SwConst.Get("swSaveAsOptions_e", "swSaveAsOptions_Silent") |
-                             SwConst.Get("swSaveAsOptions_e", "swSaveAsOptions_Copy");
-            _userCancel = SwConst.Get("swUpdateProgressError_e", "swUpdateProgressError_UserCancel");
         }
 
-        public ExportReport Export(dynamic rootDoc, ExportOptions options)
+        public ExportReport Export(ModelDoc2 rootDoc, ExportOptions options)
         {
             var report = new ExportReport();
             var log = new StringBuilder();
             log.AppendLine("Exportação STEP – " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            log.AppendLine("Origem: " + (string)rootDoc.GetPathName());
+            log.AppendLine("Origem: " + rootDoc.GetPathName());
             log.AppendLine("Formato: AP" + options.StepAp);
             log.AppendLine();
 
@@ -48,18 +41,17 @@ namespace StepExporter
             List<ExportItem> items = options.Items.OrderByDescending(i => i.Kind).ToList();
             Dictionary<ExportItem, string> targets = BuildTargetNames(items, options);
 
-            int stepApPref = SwConst.Get("swUserPreferenceIntegerValue_e", "swStepAP");
+            const int stepApPref = (int)swUserPreferenceIntegerValue_e.swStepAP;
             int previousAp = _swApp.GetUserPreferenceIntegerValue(stepApPref);
-            if (!(bool)_swApp.SetUserPreferenceIntegerValue(stepApPref, options.StepAp))
+            if (!_swApp.SetUserPreferenceIntegerValue(stepApPref, options.StepAp))
                 log.AppendLine("AVISO: esta versão do SOLIDWORKS não aceitou AP" + options.StepAp +
                                "; usando AP" + previousAp + ".");
 
             string rootTitle = rootDoc.GetTitle();
             bool activatedOtherDocs = false;
 
-            object progressObj;
-            _swApp.GetUserProgressBar(out progressObj);
-            dynamic progress = progressObj;
+            UserProgressBar progress;
+            _swApp.GetUserProgressBar(out progress);
             progress.Start(0, items.Count, "Gerando STEP");
             _swApp.CommandInProgress = true;
 
@@ -71,7 +63,7 @@ namespace StepExporter
                     string target = targets[item];
 
                     progress.UpdateTitle(string.Format("Gerando STEP {0}/{1}: {2}", n + 1, items.Count, Path.GetFileName(target)));
-                    if ((int)progress.UpdateProgress(n) == _userCancel)
+                    if (progress.UpdateProgress(n) == (int)swUpdateProgressError_e.swUpdateProgressError_UserCancel)
                     {
                         report.Cancelled = true;
                         log.AppendLine("CANCELADO pelo usuário.");
@@ -109,7 +101,7 @@ namespace StepExporter
                 if (activatedOtherDocs)
                 {
                     int err = 0;
-                    _swApp.ActivateDoc3(rootTitle, false, _dontRebuild, ref err);
+                    _swApp.ActivateDoc3(rootTitle, false, DontRebuild, ref err);
                 }
             }
 
@@ -140,7 +132,7 @@ namespace StepExporter
             error = null;
             activated = false;
 
-            dynamic doc = item.Model;
+            ModelDoc2 doc = item.Model;
             if (doc == null)
             {
                 error = "documento não carregado";
@@ -154,14 +146,14 @@ namespace StepExporter
 
             try
             {
-                if (switchCfg && !(bool)doc.ShowConfiguration2(item.Configuration))
+                if (switchCfg && !doc.ShowConfiguration2(item.Configuration))
                 {
                     // Alguns documentos ocultos (carregados só pela montagem) não trocam de
                     // configuração sem uma janela ativa: ativa, troca e fecha depois.
                     int actErr = 0;
-                    _swApp.ActivateDoc3((string)doc.GetTitle(), false, _dontRebuild, ref actErr);
+                    _swApp.ActivateDoc3(doc.GetTitle(), false, DontRebuild, ref actErr);
                     activated = true;
-                    if (!(bool)doc.ShowConfiguration2(item.Configuration))
+                    if (!doc.ShowConfiguration2(item.Configuration))
                     {
                         error = "não foi possível ativar a configuração '" + item.Configuration + "'";
                         return false;
@@ -169,10 +161,11 @@ namespace StepExporter
                 }
 
                 int errors = 0, warnings = 0;
-                // DispatchWrapper(null) = "Nothing" do VBA (VT_DISPATCH nulo) para os parâmetros opcionais.
                 bool ok = doc.Extension.SaveAs3(
-                    target, _saveAsVersion, _saveAsOptions,
-                    new DispatchWrapper(null), new DispatchWrapper(null), ref errors, ref warnings);
+                    target,
+                    (int)swSaveAsVersion_e.swSaveAsCurrentVersion,
+                    (int)(swSaveAsOptions_e.swSaveAsOptions_Silent | swSaveAsOptions_e.swSaveAsOptions_Copy),
+                    null, null, ref errors, ref warnings);
 
                 if (!ok || !File.Exists(target))
                 {
@@ -193,7 +186,7 @@ namespace StepExporter
 
                 // Fecha apenas a janela aberta por nós; o modelo continua referenciado pela montagem.
                 if (activated && !wasVisible)
-                    _swApp.CloseDoc((string)doc.GetTitle());
+                    _swApp.CloseDoc(doc.GetTitle());
             }
         }
 

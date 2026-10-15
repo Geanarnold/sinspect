@@ -32,7 +32,7 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 
 ## Plugin pronto (add-in compilado) — `dist/GeradorDeSTEP_Plugin.zip`
 
-O pacote traz `StepExporter.dll`, compilada com a API do SOLIDWORKS (NuGet, 2024 SP1) **embutida**, sem DLLs extras, mais os instaladores:
+O pacote traz `StepExporter.dll` e as DLLs da API do SOLIDWORKS (NuGet, 2024 SP1), que **não são embutidas** (ver comentário no `.csproj`), mais os instaladores:
 
 - O registro só para o usuário (`HKCU`) **foi testado no SOLIDWORKS 2025 e é ignorado** (a chave é gravada, mas o add-in não aparece). Por isso o instalador sem admin foi removido.
 - **`INSTALAR_admin.bat`**: registro oficial via RegAsm. **Único caminho suportado.** Requer administrador uma única vez (ou a TI).

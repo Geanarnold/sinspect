@@ -2,8 +2,9 @@
 
   <!--
     Add-in COM para SOLIDWORKS (.NET Framework 4.8, x64).
-    As DLLs da API vêm do NuGet e são EMBUTIDAS na DLL (EmbedInteropTypes):
-    o plugin é um único arquivo StepExporter.dll e funciona com SOLIDWORKS 2019+.
+    As DLLs da API vêm do NuGet e são distribuídas junto (NÃO embutidas: com
+    EmbedInteropTypes o .NET trata retornos "object" como dynamic, e o SOLIDWORKS
+    não fornece a informação de tipo que o dynamic exige -> TYPE_E_ELEMENTNOTFOUND).
   -->
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
@@ -19,7 +20,6 @@
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,18 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SolidWorks.Interop.sldworks" Version="32.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="SolidWorks.Interop.swpublished" Version="32.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="SolidWorks.Interop.sldworks" Version="32.1.0" />
+    <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" />
+    <PackageReference Include="SolidWorks.Interop.swpublished" Version="32.1.0" />
   </ItemGroup>
 
-  <!-- Embute os tipos da API (não é preciso distribuir as DLLs de interop). -->
-  <Target Name="EmbedSolidWorksInterop" AfterTargets="ResolveAssemblyReferences">
-    <ItemGroup>
-      <ReferencePath Condition="$([System.String]::Copy('%(Filename)').StartsWith('SolidWorks.Interop.'))">
-        <EmbedInteropTypes>true</EmbedInteropTypes>
-      </ReferencePath>
-    </ItemGroup>
-  </Target>
 
 </Project>
