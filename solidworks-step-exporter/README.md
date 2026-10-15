@@ -34,8 +34,8 @@ A janela tem atalhos *Todas as peças*, *Todas as submontagens*, *Montagem princ
 
 O pacote traz `StepExporter.dll`, compilada com a API do SOLIDWORKS (NuGet, 2024 SP1) **embutida**, sem DLLs extras, mais os instaladores:
 
-- **`INSTALAR_sem_admin.bat`**: registra o plugin só para o usuário atual (`HKCU`). **Este modo não é documentado pela Dassault**, que documenta apenas o registro em `HKLM`. Funciona se a sua versão do SOLIDWORKS ler add-ins do `HKCU`. Teste: o plugin precisa aparecer em *Ferramentas › Suplementos*.
-- **`INSTALAR_admin.bat`**: registro oficial via RegAsm. Requer administrador uma única vez (ou a TI).
+- O registro só para o usuário (`HKCU`) **foi testado no SOLIDWORKS 2025 e é ignorado** (a chave é gravada, mas o add-in não aparece). Por isso o instalador sem admin foi removido.
+- **`INSTALAR_admin.bat`**: registro oficial via RegAsm. **Único caminho suportado.** Requer administrador uma única vez (ou a TI).
 - **`DESINSTALAR.bat`**: remove os dois tipos de registro.
 
 O passo a passo está no `plugin/LEIA-ME.txt`. Para recompilar: `dotnet build src/StepExporter.csproj -c Release`. Agora não é mais preciso ter o SOLIDWORKS instalado para compilar.
