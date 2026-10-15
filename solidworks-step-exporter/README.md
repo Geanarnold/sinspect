@@ -50,11 +50,11 @@ Esta versão é recomendada quando a TI bloqueia executáveis. A macro roda dent
 
 ## Instalação SEM administrador (recomendada para estações sem direito de admin)
 
-Esta versão é um executável avulso (`StepExporterApp.exe`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
+**Versão recomendada quando não há administrador.** Executável avulso (`GeradorDeSTEP.exe`, pacote `dist/GeradorDeSTEP_rev02_SemAdmin.zip`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
 
 1. **Pronto para usar:** baixe `dist/ExportadorSTEP.zip`. Se o Windows marcar o arquivo como vindo da internet, use *Propriedades › Desbloquear* antes de extrair. Extraia o zip para uma pasta sua, por exemplo `C:\Users\<voce>\Ferramentas\ExportadorSTEP\`.
-2. *(Opcional)* Para recompilar: `dotnet build app\StepExporterApp.csproj -c Release`. Não precisa das DLLs do SOLIDWORKS, porque a API é chamada por ligação tardia e as constantes são lidas da instalação do SOLIDWORKS ao executar.
-3. Com o SOLIDWORKS aberto e a montagem ativa, execute `StepExporterApp.exe`.
+2. *(Opcional)* Para recompilar: `dotnet build app\StepExporterApp.csproj -c Release`. As DLLs da API vêm do NuGet.
+3. Com o SOLIDWORKS aberto e a montagem ativa, execute `GeradorDeSTEP.exe`.
 
 **Botão dentro do SOLIDWORKS (também sem admin):** a macro `app\BotaoExportarSTEP.bas` chama o executável. O passo a passo está no próprio arquivo:
 - crie a macro `.swp` na mesma pasta do `.exe`;
