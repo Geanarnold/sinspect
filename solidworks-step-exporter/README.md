@@ -50,7 +50,7 @@ Esta versão é recomendada quando a TI bloqueia executáveis. A macro roda dent
 
 ## Instalação SEM administrador (recomendada para estações sem direito de admin)
 
-**Versão recomendada quando não há administrador.** Executável avulso (`GeradorDeSTEP.exe`, pacote `dist/GeradorDeSTEP_rev02_SemAdmin.zip`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
+**Versão recomendada quando não há administrador.** Executável avulso (`GeradorDeSTEP.exe`, pacote `dist/GeradorDeSTEP_rev03_SemAdmin.zip`). Ele se conecta ao SOLIDWORKS que já está aberto e roda **exatamente o mesmo pop-up e a mesma exportação** do add-in. Não usa RegAsm, não grava no registro e não precisa de administrador.
 
 1. **Pronto para usar:** baixe `dist/ExportadorSTEP.zip`. Se o Windows marcar o arquivo como vindo da internet, use *Propriedades › Desbloquear* antes de extrair. Extraia o zip para uma pasta sua, por exemplo `C:\Users\<voce>\Ferramentas\ExportadorSTEP\`.
 2. *(Opcional)* Para recompilar: `dotnet build app\StepExporterApp.csproj -c Release`. As DLLs da API vêm do NuGet.

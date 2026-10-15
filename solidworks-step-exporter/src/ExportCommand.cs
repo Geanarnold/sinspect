@@ -12,13 +12,15 @@ namespace StepExporter
     public static class ExportCommand
     {
         public const string Title = "Gerador de STEP";
-        public const string Revision = "rev.02";
+        public const string Revision = "rev.03";
 
         public static void Run(ISldWorks swApp)
         {
             try
             {
+                Ui.Log("Run: obtendo documento ativo");
                 ModelDoc2 doc = (ModelDoc2)swApp.ActiveDoc;
+                Ui.Log("Run: documento ativo = " + (doc == null ? "(nenhum)" : doc.GetPathName()));
                 if (doc == null)
                 {
                     Warn("Abra uma peça ou montagem antes de exportar.");
@@ -32,7 +34,10 @@ namespace StepExporter
                     return;
                 }
 
-                ComponentCollection collection = ComponentCollector.Collect(doc);
+                ComponentCollection collection;
+                using (WaitForm.Open("Lendo a montagem, aguarde..."))
+                    collection = ComponentCollector.Collect(doc);
+                Ui.Log("Run: " + collection.Items.Count + " itens coletados, " + collection.Warnings.Count + " avisos");
 
                 ExportOptions options;
                 using (var dialog = new ExportDialog(collection))
@@ -48,7 +53,9 @@ namespace StepExporter
                     return;
                 }
 
+                Ui.Log("Run: exportando " + options.Items.Count + " itens para " + options.OutputFolder);
                 ExportReport report = new StepExportService(swApp).Export(doc, options);
+                Ui.Log("Run: concluído. OK=" + report.Succeeded + " falhas=" + report.Failed);
 
                 string summary = string.Format(
                     "Exportação concluída.\n\nExportados: {0}\nIgnorados (já existiam): {1}\nFalhas: {2}\n\nPasta: {3}\nLog: {4}",
@@ -56,21 +63,21 @@ namespace StepExporter
                 if (report.Cancelled)
                     summary = "Exportação CANCELADA pelo usuário.\n\n" + summary;
 
-                MessageBox.Show(summary, Title, MessageBoxButtons.OK,
-                    report.Failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                Ui.Show(summary, report.Failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
 
                 if (options.OpenFolderWhenDone && Directory.Exists(options.OutputFolder))
                     System.Diagnostics.Process.Start("explorer.exe", "\"" + options.OutputFolder + "\"");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erro inesperado:\n\n" + ex, Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Ui.Error(ex);
             }
         }
 
         public static void Warn(string message)
         {
-            MessageBox.Show(message, Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Ui.Log("Aviso: " + message);
+            Ui.Show(message, MessageBoxIcon.Warning);
         }
     }
 }

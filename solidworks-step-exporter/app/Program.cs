@@ -14,24 +14,47 @@ namespace StepExporter
         [STAThread]
         private static void Main()
         {
+            Ui.Log("==== " + ExportCommand.Title + " " + ExportCommand.Revision + " iniciado (exe) ====");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += (s, e) => Ui.Error(e.Exception);
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                var ex = e.ExceptionObject as Exception;
+                if (ex != null) Ui.Error(ex);
+            };
 
             ISldWorks swApp;
+            WaitForm wait = WaitForm.Open("Conectando ao SOLIDWORKS...");
             try
             {
-                swApp = (ISldWorks)Marshal.GetActiveObject("SldWorks.Application");
+                object instance = Marshal.GetActiveObject("SldWorks.Application");
+                Ui.Log("SOLIDWORKS encontrado");
+                swApp = (ISldWorks)instance;
+                Ui.Log("Conectado: " + swApp.RevisionNumber());
             }
-            catch (COMException)
+            catch (COMException ex)
             {
-                ExportCommand.Warn("O SOLIDWORKS não está aberto.\n\n" +
+                wait.Close();
+                Ui.Log("SOLIDWORKS não encontrado: " + ex.Message);
+                ExportCommand.Warn("Não encontrei o SOLIDWORKS aberto.\n\n" +
                                    "Abra o SOLIDWORKS com a montagem desejada e execute novamente.\n" +
-                                   "(Se o SOLIDWORKS foi aberto como administrador, este programa também precisa ser.)");
+                                   "Se o SOLIDWORKS foi aberto como administrador, execute este programa " +
+                                   "também como administrador (botão direito > Executar como administrador).");
                 return;
             }
+            catch (Exception ex)
+            {
+                wait.Close();
+                Ui.Error(ex);
+                return;
+            }
+            wait.Close();
 
             ExportCommand.Run(swApp);
             Marshal.ReleaseComObject(swApp);
+            Ui.Log("Encerrado");
         }
     }
 }
