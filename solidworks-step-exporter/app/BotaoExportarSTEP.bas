@@ -1,13 +1,16 @@
-' Macro de 3 linhas para ter um BOTAO no SOLIDWORKS sem administrador.
-' 1) Ferramentas > Macro > Nova... salve como BotaoExportarSTEP.swp
-'    NA MESMA PASTA do GeradorDeSTEP.exe
-' 2) Apague o conteudo gerado e cole este codigo; salve.
-' 3) Ferramentas > Personalizar > Comandos > Macro: arraste "Novo botao de macro"
-'    para uma barra de ferramentas e aponte para BotaoExportarSTEP.swp / main.
+' Botao "Gerar STEP" - abre o GeradorDeSTEP.exe (sem administrador).
+' Salve esta macro como BotaoGerarSTEP.swp NA MESMA PASTA do GeradorDeSTEP.exe.
 Option Explicit
 
 Sub main()
-    Dim swApp As SldWorks.SldWorks
+    Dim swApp As Object
+    Dim exe As String
     Set swApp = Application.SldWorks
-    Shell Chr(34) & swApp.GetCurrentMacroPathFolder() & "\GeradorDeSTEP.exe" & Chr(34), vbNormalFocus
+    exe = swApp.GetCurrentMacroPathFolder() & "\GeradorDeSTEP.exe"
+    If Dir(exe) = "" Then
+        MsgBox "Nao encontrei:" & vbCrLf & exe & vbCrLf & vbCrLf & _
+               "Salve esta macro na mesma pasta do GeradorDeSTEP.exe.", vbExclamation, "Gerar STEP"
+        Exit Sub
+    End If
+    Shell Chr(34) & exe & Chr(34), vbNormalFocus
 End Sub

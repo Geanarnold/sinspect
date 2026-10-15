@@ -1,0 +1,29 @@
+BOTAO "GERAR STEP" NA BARRA DO SOLIDWORKS (sem administrador, uma vez so)
+=========================================================================
+
+Os arquivos devem estar na mesma pasta do GeradorDeSTEP.exe.
+
+PARTE 1 - criar a macro do botao (2 min)
+ 1. SOLIDWORKS > Ferramentas > Macro > Novo...
+ 2. Navegue ate a pasta do GeradorDeSTEP.exe e salve como:
+       BotaoGerarSTEP.swp
+ 3. No editor VBA que abrir: apague TODO o texto do modulo
+    (Ctrl+A, Delete).
+ 4. Abra BotaoGerarSTEP.bas no Bloco de Notas, copie tudo (Ctrl+A, Ctrl+C)
+    e cole no editor VBA (Ctrl+V).
+ 5. Ctrl+S para salvar e feche o editor VBA.
+
+PARTE 2 - colocar o botao na barra (2 min)
+ 1. Ferramentas > Personalizar... > aba "Comandos".
+ 2. Em "Categorias", clique em "Macro".
+ 3. Arraste o icone "Novo botao de macro" (primeiro da lista) para
+    qualquer barra de ferramentas ou para o CommandManager.
+ 4. Na janela "Personalizar botao de macro":
+      Imagem ..........: Procurar... > BotaoGerarSTEP_icone.bmp
+      Dica / Prompt ...: Gerar STEP
+      Macro ...........: Procurar... > BotaoGerarSTEP.swp
+      Metodo ..........: main
+ 5. OK > OK.
+
+Pronto: com a montagem aberta, clique no botao laranja.
+O botao fica salvo no seu perfil do SOLIDWORKS (nao precisa refazer).

@@ -5,3 +5,5 @@ plugin/*.bat -text
 plugin/*.txt -text
 *.dll binary
 plugin/*.txt -text
+app/*.bas -text
+app/*.txt -text
