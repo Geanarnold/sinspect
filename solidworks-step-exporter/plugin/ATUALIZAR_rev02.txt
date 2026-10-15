@@ -1,0 +1,27 @@
+GERADOR DE STEP - ATUALIZACAO rev.02 (NAO precisa de administrador)
+===================================================================
+
+Use isto se o "Gerador de STEP" JA aparece em Tools > Add-Ins.
+O registro feito pelo administrador continua valendo; so os arquivos mudam.
+
+1. Feche o SOLIDWORKS (a DLL fica travada enquanto ele esta aberto).
+2. Botao direito no .zip > Propriedades > marque "Desbloquear" > OK.
+3. Extraia TODOS os arquivos na MESMA pasta onde o plugin ja esta,
+   substituindo os existentes. Precisam ficar juntos:
+     StepExporter.dll
+     SolidWorks.Interop.sldworks.dll
+     SolidWorks.Interop.swconst.dll
+     SolidWorks.Interop.swpublished.dll
+   (Nao sabe qual e a pasta? No cmd:
+    reg query "HKCR\CLSID\{F004CBA8-388C-4126-8113-EFC4FD40B057}\InprocServer32" /v CodeBase)
+4. Abra o SOLIDWORKS, abra a montagem, clique em "Gerar STEP".
+   O titulo do pop-up deve mostrar:  Gerador de STEP rev.02 - <montagem>
+   Se nao mostrar "rev.02", a DLL antiga ainda esta sendo carregada
+   (pasta errada ou SOLIDWORKS nao foi fechado).
+
+Unico caso que pede administrador: se a pasta do plugin estiver dentro de
+C:\Program Files. Nesse caso o Windows nao deixa substituir sem admin.
+
+Novidades da rev.02:
+- Corrige o erro "Elemento nao encontrado (0x8002802B)" ao clicar no botao.
+- Mostra a revisao no titulo do pop-up.

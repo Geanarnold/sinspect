@@ -4,3 +4,4 @@ macro/*.txt -text
 plugin/*.bat -text
 plugin/*.txt -text
 *.dll binary
+plugin/*.txt -text

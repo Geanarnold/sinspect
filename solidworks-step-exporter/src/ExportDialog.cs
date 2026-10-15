@@ -47,7 +47,7 @@ namespace StepExporter
 
         private void BuildLayout()
         {
-            Text = "Gerador de STEP – " + _collection.RootName;
+            Text = ExportCommand.Title + " " + ExportCommand.Revision + " – " + _collection.RootName;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true;
             Size = new Size(820, 640);
