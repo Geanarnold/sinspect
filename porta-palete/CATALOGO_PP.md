@@ -140,6 +140,14 @@ Conector com 3 garras até 2700 kg; 4 garras até 4300 kg.
 ### 6.8 Manual F 250 – pino trava
 Grampo longarina (pino trava) INT1556: 1 por garra (manual p.11). Etiqueta de carga "por par, uniformemente distribuída" nos dois primeiros níveis.
 
+### 6.9 Regras do app – longarina simples (Gean, 17/10/2026) → `drive-in/app/pp_longarina.js` + `testes/pp_longarina.js`
+1. Fora de 1100–3500 mm (ou célula vazia da F 237): desenha e pesa, capacidade "SEM CAPACIDADE TABELADA – CONSULTAR ENGENHARIA", sem bloquear.
+2. Comprimento intermediário (passo 50): capacidade do comprimento tabelado imediatamente maior; peso pelo comprimento real; sem CO cadastrado → CO04XXXX.
+3. App escolhe o perfil mais leve que atende a carga do par; operador pode trocar; se não suportar → alerta + marcação ⚠ na lista de peças.
+4. Peso = kg/m F 237 × L + 2 garras; 2 pinos INT1556 (fixador – só valor).
+5. Começar pela longarina simples; cadeirinha (F 246) depois.
+6. Normas citadas: NBR 17150, NBR 15524, NBR 14762.
+
 Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
 - TB 130: soma fecha, mas o perfil (4,629) é **mais leve** que o TB 110 (5,207) e o TB 100 (4,997) – conferir espessura; perfil sem código SA.
 - TB 150 1,20 m: perfil 9,490 kg × 2 = 18,98 kg > peso do CO 8,778 kg – peso unitário da lista parece errado (ou é o peso do par/barra).
