@@ -107,6 +107,39 @@ Em andamento – dados extraídos dos desenhos; falta tabela de capacidade (carg
 - Peso por metro do perfil (peso SA ÷ 2,291 m): TB 80 1,920 · TB 90 2,108 · TB 100 2,181 · TB 110 2,273 · TB 130 2,020 kg/m.
 - Regra proposta para comprimento sem CO: peso = 2 × kg/m × (L − 9 mm) + 2 garras.
 
+### 6.5 Capacidade – F 237 rev.006 (21/10/2024) – longarina tubo, carga admissível no PAR (kg), aço COS CIVIL 300, flecha < L/200
+Colunas = comprimento da longarina (mm). Conector de 3 dentes só para TB 80 #1,5.
+| Tubo | kg/m | 1100 | 1200 | 1300 | 1400 | 1500 | 1600 | 1700 | 1800 | 1900 | 2000 | 2100 | 2200 | 2300 | 2400 | 2500 | 2600 | 2700 | 2800 | 2900 | 3000 | 3100 | 3200 | 3300 | 3400 | 3500 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 80#1,5 | 3.77 | 3400 | 3200 | 2900 | 2700 | 2550 | 2400 | 2250 | 2050 | 1800 | 1650 | 1500 | 1350 | 1250 | 1150 | 1050 | 950 | 900 | 800 | 750 | 700 | 650 | 600 | 550 | 550 | 500 |
+| 90#1,5 | 4.15 | 4400 | 4000 | 3750 | 3500 | 3300 | 3100 | 2900 | 2800 | 2600 | 2500 | 2350 | 2150 | 2000 | 1800 | 1650 | 1500 | 1400 | 1300 | 1200 | 1150 | 1050 | 1000 | 900 | 850 | 800 |
+| 100#1,5 | 4.33 | – | – | 4200 | 3900 | 3700 | 3450 | 3250 | 3100 | 2950 | 2800 | 2650 | 2550 | 2400 | 2200 | 2000 | 1850 | 1700 | 1600 | 1500 | 1400 | 1300 | 1200 | 1150 | 1050 | 1000 |
+| 110#1,5 | 4.48 | – | – | – | 4250 | 3950 | 3750 | 3550 | 3400 | 3200 | 3050 | 2900 | 2750 | 2700 | 2550 | 2400 | 2150 | 2000 | 1850 | 1700 | 1600 | 1500 | 1400 | 1300 | 1250 | 1150 |
+| 130#1,5 | 4.95 | – | – | – | – | 4950 | 4650 | 4400 | 4200 | 4000 | 3800 | 3650 | 3500 | 3400 | 3200 | 3100 | 2950 | 2850 | 2800 | 2600 | 2450 | 2300 | 2150 | 2000 | 1900 | 1750 |
+| 150#1,5 | 5.56 | – | – | – | – | – | – | – | – | – | 4800 | 4600 | 4400 | 4300 | 4100 | 4000 | 3800 | 3650 | 3500 | 3450 | 3300 | 3200 | 3100 | 3000 | 3000 | 2800 |
+| 150#1,8 | 6.67 | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | 4650 | 4500 | 4300 | 4200 | 4000 | 3900 | 3800 | 3700 | 3600 | 3350 |
+| 150#2,0 | 7.42 | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | – | 4400 | 4250 | 4150 | 4000 | 3750 |
+
+Peso da tabela = kg/m × comprimento (longarina inteira, 1 tubo = 2 perfis "C" do desenho). Confere com os CO dentro de ~2%, **exceto TB 130**: tabela 4,95 kg/m × desenho 4,04 kg/m (−18%).
+
+### 6.6 Capacidade – F 246 rev.001 – longarina tubo com cadeirinha (par, kg) × distância interna entre montantes; letra = modelo de transversina (C = Metalon 30×50 #1,2; D = perfil longarina TB 80 #1,5), número = qtd por plano (profundidade 1000 mm)
+| H | chapa | kg/m | 1200 | 1800 | 2300 | 2500 | 2800 | 3000 | 3400 |
+|---|---|---|---|---|---|---|---|---|---|
+| 80 | 1,50 | 4,65 | 3200 C-1 | 2050 C-3 | 1250 C-4 | 1050 C-4 | 800 C-4 | 700 C-4 | 550 C-4 |
+| 90 | 1,50 | 5,03 | 4000 C-3 | 2800 C-4 | 2000 C-6 | 1650 C-6 | 1300 C-6 | 1150 C-5 | 850 C-4 |
+| 100 | 1,50 | 5,21 | – | 3100 C-5 | 2400 C-7 | 2000 C-7 | 1600 C-7 | 1400 C-6 | 1050 C-5 |
+| 110 | 1,50 | 5,36 | – | 3400 D-4 | 2700 D-3 | 2400 D-3 | 1850 D-3 | 1600 D-3 | 1250 C-5 |
+| 130 | 1,50 | 5,83 | – | 4200 D-4 | 3400 D-4 | 3100 D-4 | 2800 D-4 | 2450 D-3 | 1900 D-4 |
+| 150 | 1,50 | 6,44 | – | – | 4300 D-5 | 4000 D-5 | 3500 D-4 | 3300 D-4 | 3000 D-4 |
+| 150 | 1,80 | 7,55 | – | – | – | – | 4300 D-5 | 4000 D-5 | 3600 D-4 |
+| 150 | 2,00 | 8,30 | – | – | – | – | – | – | 4000 D-5 |
+Conector com 3 garras até 2700 kg; 4 garras até 4300 kg.
+
+### 6.7 Montantes – F 382 rev.00 (20/02/2024) – capacidade da coluna (kgf) × distância entre níveis h (500–2600 mm), C80 #1,8/2,0, C101 #1,8/2,0/2,25/2,65, C122 #1,8/2,0/2,25/2,65 – para a etapa 7 (análise). Determinações: travamento superior a cada 3 montantes se H/L ≥ 8 acima de 8 m; 1 nível só → engate aparafusado; travessas a cada 900; até 12 m.
+
+### 6.8 Manual F 250 – pino trava
+Grampo longarina (pino trava) INT1556: 1 por garra (manual p.11). Etiqueta de carga "por par, uniformemente distribuída" nos dois primeiros níveis.
+
 Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
 - TB 130: soma fecha, mas o perfil (4,629) é **mais leve** que o TB 110 (5,207) e o TB 100 (4,997) – conferir espessura; perfil sem código SA.
 - TB 150 1,20 m: perfil 9,490 kg × 2 = 18,98 kg > peso do CO 8,778 kg – peso unitário da lista parece errado (ou é o peso do par/barra).
