@@ -141,7 +141,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA04XXXX",
-   "desc": "Travessa horizontal – passo 788 mm (total 709.4 mm, c/c 678.9 mm)",
+   "desc": "Travessa horizontal #1,40 – passo 788 mm (total 709.4 mm, c/c 678.9 mm)",
    "qtd": 6272,
    "compr": 709.4,
    "pesoUnit": 0.624
@@ -149,7 +149,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal – passo 788, vão 600 mm (total 936.5 mm, c/c 906 mm)",
+   "desc": "Travessa diagonal #1,40 – passo 788, vão 600 mm (total 936.5 mm, c/c 906 mm)",
    "qtd": 1344,
    "compr": 936.5,
    "pesoUnit": 0.823
@@ -157,7 +157,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal – passo 788, vão 900 mm (total 1157.8 mm, c/c 1127.3 mm)",
+   "desc": "Travessa diagonal #1,40 – passo 788, vão 900 mm (total 1157.8 mm, c/c 1127.3 mm)",
    "qtd": 4032,
    "compr": 1157.8,
    "pesoUnit": 1.018

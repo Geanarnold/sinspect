@@ -4,7 +4,8 @@
 (function (root) {
   'use strict';
 
-  const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado
+  const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado – padrão; zig-zag e referências
+  const ESP_TRAV_OPCOES = [0.85, 1.2, 1.4, 1.8]; // chapa das travessas do quadro (Gean 17/10/2026): sliter 80, SA mantido, chapa na descrição
   const AVISO_ESTRUTURAL = 'COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente.';
   // nota fixa (Gean): o app é ferramenta de orçamento/desenho; verificações operacionais e estruturais ficam com os responsáveis
   const NOTA_RESPONSABILIDADE = 'As verificações operacionais (empilhadeira, folgas, cargas por posição, pé-direito e interferências do galpão) são de responsabilidade do operador do software, do cliente e do representante. O dimensionamento estrutural é de responsabilidade do engenheiro responsável.';
@@ -155,19 +156,20 @@
 
     // ---- laterais: travessas, diagonais, tubos, parafusos (por quadro de 2 colunas)
     const { ys, topo: horizTopo } = posicoesHorizontais(H);
+    const espTrav = ESP_TRAV_OPCOES.includes(Number(inp.espTrav)) ? Number(inp.espTrav) : 1.4, kgmTrav = 80 * espTrav * 7.85e-6 * 1000, chTrav = ` #${espTrav.toFixed(2).replace('.', ',')}`;
     const nH = ys.length, nD = nH - 1 - (horizTopo ? 1 : 0); // diagonais nos vãos entre horizontais; o vão da horizontal de topo fica sem diagonal
     const porPasso = {};
     for (const a of passosQuadro) porPasso[a] = (porPasso[a] || 0) + 1;
     for (const [aStr, q] of Object.entries(porPasso)) {
       const a = Number(aStr), vaos = q * laterais * nM, ccH = a - 109.1, totH = a - 78.6;
       const itH = buscaSA(cat.travessas, totH);
-      add('Travessas', `TRAV-H-${a}`, `Travessa horizontal – passo ${a} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * vaos, r1(totH), KG_M_TRAVESSA * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
+      add('Travessas', `TRAV-H-${a}`, `Travessa horizontal${chTrav} – passo ${a} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * vaos, r1(totH), kgmTrav * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
       const diagPorV = {};
       for (let i = 0; i < nD; i++) { const V = ys[i + 1] - ys[i]; diagPorV[V] = (diagPorV[V] || 0) + 1; }
       for (const [V, qd] of Object.entries(diagPorV)) {
         const cc = Math.hypot(ccH, Number(V)), tot = cc + 30.5;
         const it = buscaSA(cat.diagonais, tot);
-        add('Travessas', `TRAV-D-${a}-${V}`, `Travessa diagonal – passo ${a}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, qd * vaos, r1(tot), KG_M_TRAVESSA * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
+        add('Travessas', `TRAV-D-${a}-${V}`, `Travessa diagonal${chTrav} – passo ${a}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, qd * vaos, r1(tot), kgmTrav * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
       }
     }
     const vaosQuadro = passosQuadro.length * laterais * nM;

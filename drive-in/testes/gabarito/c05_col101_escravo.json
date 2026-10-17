@@ -98,7 +98,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA040968",
-   "desc": "Travessa horizontal – passo 1025 mm (total 946.4 mm, c/c 915.9 mm)",
+   "desc": "Travessa horizontal #1,40 – passo 1025 mm (total 946.4 mm, c/c 915.9 mm)",
    "qtd": 270,
    "compr": 946.4,
    "pesoUnit": 0.832
@@ -106,7 +106,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA041666",
-   "desc": "Travessa diagonal – passo 1025, vão 600 mm (total 1125.4 mm, c/c 1094.9 mm)",
+   "desc": "Travessa diagonal #1,40 – passo 1025, vão 600 mm (total 1125.4 mm, c/c 1094.9 mm)",
    "qtd": 81,
    "compr": 1125.4,
    "pesoUnit": 0.989
@@ -114,7 +114,7 @@
   {
    "grupo": "Travessas",
    "codigo": "SA040967",
-   "desc": "Travessa diagonal – passo 1025, vão 900 mm (total 1314.6 mm, c/c 1284.1 mm)",
+   "desc": "Travessa diagonal #1,40 – passo 1025, vão 900 mm (total 1314.6 mm, c/c 1284.1 mm)",
    "qtd": 162,
    "compr": 1314.6,
    "pesoUnit": 1.156

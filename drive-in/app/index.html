@@ -114,11 +114,12 @@
         <div class="campo"><label class="obrig" for="largura" title="Medida do espaço">Medida do espaço</label><div class="in com-un"><input id="largura" type="number" step="1"/><span class="un">mm</span></div></div>
         <div class="campo full"><label class="chk"><input id="diferentes" type="checkbox"/> Espaços com medidas diferentes (A1, A2…)</label></div>
         <div id="espacos" class="full espacos hidden"></div>
+        <div class="campo"><label for="espTrav" title="Chapa das travessas horizontais e diagonais do quadro (sliter 80 mm); o código SA não muda">Chapa das travessas</label><div class="in com-un"><select id="espTrav"><option>0.85</option><option>1.2</option><option selected>1.4</option><option>1.8</option></select><span class="un">mm</span></div></div>
         <p class="nota full" id="notaQuadros"></p>
         </div></details>
         <details class="regras full"><summary><svg class="ic"><use href="#i-regras"/></svg>Regras de cálculo</summary><ul>
           <li>Travessas: 1ª a 100 mm, 3 vãos de 600 mm, depois 900 mm; vão de topo sem diagonal.</li>
-          <li>Códigos SA de travessa e diagonal buscados no cadastro a ±3 mm.</li>
+          <li>Códigos SA de travessa e diagonal buscados no cadastro a ±3 mm; chapa padrão #1,40 (opções 0,85 / 1,2 / 1,8 mm, sliter 80 mm): o SA se mantém e a chapa sai na descrição.</li>
           <li>Nº par de espaços: coluna solteira à esquerda com travessa união.</li>
         </ul></details>
       </div>
