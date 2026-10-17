@@ -20,7 +20,17 @@ Pendente: quantidade de placas por sapata.
 | CO040213 | PP SAPATA COLUNA 122 – PERFIL "U" | SA041044 (0,75 kg) | SA041042 | 0,99 kg |
 | CO040262 | PP SAPATA COLUNA 90 – ESP DMA (especial) | SA041043 | SA041142 | 0,75 kg |
 
-Base com 2 furos de chumbador; perfil U com furos oblongos para a coluna. O DXF da vista frontal (blocos_dxf/) mostra 2 chumbadores com porca e 2 parafusos sextavados prendendo o U na coluna. Pendente: códigos INT e quantidades confirmadas dos fixadores, placas por sapata, se a sapata DMA entra no app.
+Base com 2 furos de chumbador; perfil U com furos oblongos para a coluna.
+
+**Fixadores por sapata (COL 80, 101 e 122 – Gean, 17/10/2026):**
+| Qtd | Código | Descrição |
+|---|---|---|
+| 2 | INT0648 | PARAFUSO 5/16" x 3/4" UNC ZNB (sapata → coluna) |
+| 4 | INT0812 | ARRUELA LISA 5/16" 8,5 x 20 x 1,2 ZINC BRC |
+| 2 | INT0650 | PORCA SEXTAVADA 5/16" ZINCADA |
+| 2 | INT0654 | CHUMBADOR PBA 3/8" x 3.1/2" |
+
+Pendente: placas niveladoras por sapata; se a sapata DMA entra no app.
 
 Blocos de desenho recebidos (vista frontal, sapata montada com fixadores, layer 0, R2000): `blocos_dxf/PP_SAPATA_CO040211_COL80_FRONTAL.dxf`, `..._CO040212_COL101_...`, `..._CO040213_COL122_...` (base 119 mm nas COL 80/101, 140 mm na COL 122).
 
