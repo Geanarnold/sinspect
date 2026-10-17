@@ -20,7 +20,9 @@ Pendente: quantidade de placas por sapata.
 | CO040213 | PP SAPATA COLUNA 122 – PERFIL "U" | SA041044 (0,75 kg) | SA041042 | 0,99 kg |
 | CO040262 | PP SAPATA COLUNA 90 – ESP DMA (especial) | SA041043 | SA041142 | 0,75 kg |
 
-Base com 2 furos de chumbador; perfil U com furos oblongos para a coluna. Pendente: fixadores por sapata (chumbador e parafusos), se a sapata DMA entra no app.
+Base com 2 furos de chumbador; perfil U com furos oblongos para a coluna. O DXF da vista frontal (blocos_dxf/) mostra 2 chumbadores com porca e 2 parafusos sextavados prendendo o U na coluna. Pendente: códigos INT e quantidades confirmadas dos fixadores, placas por sapata, se a sapata DMA entra no app.
+
+Blocos de desenho recebidos (vista frontal, sapata montada com fixadores, layer 0, R2000): `blocos_dxf/PP_SAPATA_CO040211_COL80_FRONTAL.dxf`, `..._CO040212_COL101_...`, `..._CO040213_COL122_...` (base 119 mm nas COL 80/101, 140 mm na COL 122).
 
 ## Protetor de coluna em U (des. 0004.0001.03.053 REV.03, chapa ACO0017 #2,65) – para a etapa de protetores
 | Código | Descrição | Peso |
