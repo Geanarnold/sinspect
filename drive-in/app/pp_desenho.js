@@ -24,7 +24,10 @@
   // bloco: x = 0 na ponta dos dentes da garra esquerda, face externa da garra (= face da coluna) em x = 21,2; y = 0 no topo do perfil (apoio)
   const LG_DENTE = 21.2, LG_PLACA = 3.6, LG_TUBO = 40; // dentes que entram na coluna; chapa da garra; largura do tubo (F 246: L = 40)
   function longFrontal(TB, L) {
-    const BL = root.BLOCOS_PP || {}, base = TB <= 80 ? BL.PP_LONG_TB80_FR : BL.PP_LONG_TB110_FR, hBase = TB <= 80 ? 80 : 110;
+    const BL = root.BLOCOS_PP || {}, lib = BL['PP_LGTB_' + TB];
+    // 1ª opção: bloco da biblioteca SUPRA (LONGARINAS.dxf, LGTB_<TB>) – face da garra em x = 0, nominal 1200,2 mm, esticado no comprimento
+    if (lib) return lib.map((q) => ({ t: 'p', l: 'PP_LONGARINA', p: q.p.map(([x, y]) => [x > 600.1 ? x + L - 1200.2 : x, y]) }));
+    const base = TB <= 80 ? BL.PP_LONG_TB80_FR : BL.PP_LONG_TB110_FR, hBase = TB <= 80 ? 80 : 110;
     if (!base) return null;
     const W0 = 2299.3 + 2 * LG_DENTE, meio = W0 / 2, dL = L - 2299.3, dH = TB - hBase, xa = LG_DENTE + LG_PLACA - 0.5, xb = W0 - LG_DENTE - LG_PLACA + 0.5;
     // estica o comprimento (pontos à direita do meio) e a altura do tubo (só o tubo: topo sobe dH, depois tudo desce dH → garra fica 35 mm abaixo do perfil)
@@ -68,7 +71,8 @@
       const L = md.L, hP = md.TB - 3.5, gH = md.garraH, gE = 3.7, x0 = xs[i] + col / 2;
       const blk = longFrontal(md.TB, L), long = blk || [...m.caixa(gE, -hP, L - gE, 0, 'PP_LONGARINA'), ...m.caixa(0, -hP - 35, gE, -hP - 35 + gH, 'PP_LONGARINA'), ...m.caixa(L - gE, -hP - 35, L, -hP - 35 + gH, 'PP_LONGARINA')];
       const nomeL = nomeBloco('PP_LONG_FR', 'TB' + md.TB, nb(L)), pal = geoPalete(md.frente, md.hp, true), nomeP = nomeBloco('PP_PALETE_FR', nb(md.frente) + 'X' + nb(md.hp));
-      for (const y of md.niveis) m.put(clone(long), blk ? x0 - LG_DENTE : x0, y, 'PP_LONGARINA', nomeL); // garra encostada na face da coluna, dentes dentro dela
+      const temLib = !!(root.BLOCOS_PP || {})['PP_LGTB_' + md.TB];
+      for (const y of md.niveis) m.put(clone(long), blk && !temLib ? x0 - LG_DENTE : x0, y, 'PP_LONGARINA', nomeL); // garra encostada na face da coluna, dentes dentro dela
       const folga = (L - md.nPal * md.frente) / (md.nPal + 1); // paletes centrados no vão: folgas iguais entre paletes e até as colunas
       for (const y of (md.chao ? [0] : []).concat(md.niveis)) for (let k = 0; k < md.nPal; k++) {
         const xp = x0 + folga + k * (md.frente + folga);
