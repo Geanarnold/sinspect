@@ -96,8 +96,8 @@ Em andamento – dados extraídos dos desenhos; falta tabela de capacidade (carg
 | CAD PL MET 1,20 m 4.800 kg TB 150-E | CO040731 | 9,815 | SA041805 | SA040030 |
 
 Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
-- TB 130: peso do CO (10,041) **menor** que o TB 110 (11,197) com perfil 4,629 < 5,207 – perfil TB 130 sem código SA.
+- TB 130: soma fecha, mas o perfil (4,629) é **mais leve** que o TB 110 (5,207) e o TB 100 (4,997) – conferir espessura; perfil sem código SA.
 - TB 150 1,20 m: perfil 9,490 kg × 2 = 18,98 kg > peso do CO 8,778 kg – peso unitário da lista parece errado (ou é o peso do par/barra).
-- CAD MDP TB 90: CO 16,019 kg vs soma dos componentes ≈ 12,05 kg (2×4,829 + 2,011 + 2×0,391) – diferença de ~4 kg.
+- CAD MDP TB 90: CO 16,019 kg vs soma dos componentes 12,451 kg (2×4,829 + 2,011 + 2×0,391) – diferença de 3,57 kg. (Demais modelos fecham a soma em ±0,02 kg.)
 - TB 170 4,00 m: título diz 3.600 kg, perfil SA041030 descrito como "2,30 MT 2.400 KG TB 130 #18" – lista de componentes desatualizada.
 
