@@ -95,6 +95,18 @@ Em andamento – dados extraídos dos desenhos; falta tabela de capacidade (carg
 | CAD PL MET 2,30 m 4.300 kg TB 150-E | CO040732 | 18,173 | SA040238 | SA040022 |
 | CAD PL MET 1,20 m 4.800 kg TB 150-E | CO040731 | 9,815 | SA041805 | SA040030 |
 
+### 6.3 Regras definidas (Gean, 17/10/2026)
+- Comprimento livre de **800 a 5000 mm, passo 50 mm**; cada comprimento tem sua capacidade (tabela carga × vão por TB – a receber).
+- Comprimento sem CO cadastrado → código **CO04XXXX** (pendente de cadastro), peso calculado pela regra abaixo.
+- Nome = comprimento + capacidade + altura: `PP LONG 2,30 MT 1.250 KG TB 80`.
+- Sai como conjunto **CO**; acrescentar pino de segurança **INT1556 GRAMPO LONGARINA PORTA PALETE** (quantidade por longarina a confirmar).
+
+### 6.4 Geometria (blocos DXF frontais TB 80 e TB 110, em `blocos_dxf/`)
+- Comprimento nominal = externo das garras (2299,3 ≈ 2300); perfil = nominal − 9 mm (2291).
+- Altura do perfil desenhada = TB − 3,5 (TB 80 → 76,5; TB 110 → 106,5); garra de 3 encaixes = 150 mm de altura, de 5 encaixes = 250 mm (passo 50).
+- Peso por metro do perfil (peso SA ÷ 2,291 m): TB 80 1,920 · TB 90 2,108 · TB 100 2,181 · TB 110 2,273 · TB 130 2,020 kg/m.
+- Regra proposta para comprimento sem CO: peso = 2 × kg/m × (L − 9 mm) + 2 garras.
+
 Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
 - TB 130: soma fecha, mas o perfil (4,629) é **mais leve** que o TB 110 (5,207) e o TB 100 (4,997) – conferir espessura; perfil sem código SA.
 - TB 150 1,20 m: perfil 9,490 kg × 2 = 18,98 kg > peso do CO 8,778 kg – peso unitário da lista parece errado (ou é o peso do par/barra).
