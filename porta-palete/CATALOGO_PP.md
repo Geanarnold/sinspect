@@ -54,6 +54,7 @@ Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 
 - Comprimento: mesma regra do DI (horizontal = profundidade − 78,6 mm; diagonal pelo c/c).
 - 1ª horizontal a **100 mm** do piso.
 - Diagonal em **Z** (uma por vão, alternando o sentido).
+- **Chapa da travessa diagonal** (Gean, 17/10/2026): padrão **#1,40** (como no desenho); opções **0,85 / 1,20 / 1,40 / 1,80 mm** escolhidas pelo operador. Hoje o app usa sliter 80 × 1,40 (0,879 kg/m) para todas. Pendente: se vale também para a horizontal e para o DI, largura do sliter nas outras chapas e códigos SA.
 - Três modulações à escolha do operador:
   | Modulação | Horizontais (do piso) |
   |---|---|
