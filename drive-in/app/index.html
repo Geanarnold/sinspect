@@ -47,7 +47,7 @@
     </div>
   </section>
   <main class="wrap hidden" id="paginaPP">
-    <div class="pp-cab"><h2>Porta-Palete <small>seletivo · em validação</small></h2><p class="nota">Sequência: 1. Projeto · 2. Corte (nome, blocos iguais, quantos módulos) · 3. Quadro · 4. Cada módulo (palete, carga, níveis, túnel) · 5. Colunas. Os resultados se atualizam sozinhos. Travamentos e espaçador da fileira dupla (etapa 5) ainda não entram na lista.</p></div>
+    <div class="pp-cab"><h2>Porta-Palete <small>seletivo · em validação</small></h2><p class="nota">Padrão SUPRA: 1. Projeto · 2. Quadro e palete · 3. Tipos de módulo (cada tipo é um corte: A, B, TÚNEL…) · 4. Planta: fileiras simples ou duplas com a sequência de tipos e o corredor. A planta define a quantidade de módulos. Travamentos (etapa 5) ainda não entram na lista.</p></div>
     <div class="pp-grid">
       <aside class="pp-form">
         <details class="pp-box" open><summary>1. Projeto</summary><div class="pp-campos">
@@ -58,10 +58,12 @@
 <div class="campo"><label for="ppDesenhista">Desenhista</label><div class="in"><input id="ppDesenhista" type="text" value=""/></div></div>
 <div class="campo"><label for="ppRevisao">Revisão</label><div class="in"><input id="ppRevisao" type="text" value="REV.00"/></div></div>
         </div></details>
-        <div class="pp-box pp-cortes"><div class="pp-cortes-tit">Cortes do projeto</div><div id="ppListaCortes" class="pp-chips"></div>
-          <div class="pp-cortes-acoes"><button type="button" id="ppNovoCorte"><svg class="ic"><use href="#i-plus"/></svg>Novo corte</button><button type="button" id="ppDupCorte"><svg class="ic"><use href="#i-proj"/></svg>Duplicar</button><button type="button" id="ppRemCorte" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div>
-          <div class="pp-cortes-acoes"><button type="button" id="ppSalvar"><svg class="ic"><use href="#i-down"/></svg>Salvar arquivo</button><label class="btn-arquivo"><svg class="ic"><use href="#i-proj"/></svg>Abrir arquivo<input id="ppAbrir" type="file" accept=".json" hidden/></label></div></div>
-        <div id="ppFormCorte"></div>
+        <div class="pp-box pp-cortes"><div class="pp-cortes-acoes"><button type="button" id="ppSalvar"><svg class="ic"><use href="#i-down"/></svg>Salvar arquivo</button><label class="btn-arquivo"><svg class="ic"><use href="#i-proj"/></svg>Abrir arquivo<input id="ppAbrir" type="file" accept=".json" hidden/></label><button type="button" id="ppNovoProj" class="discreto"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div></div>
+        <div id="ppFormQuadro"></div>
+        <details class="pp-box" open><summary>3. Tipos de módulo (cortes)</summary><div class="pp-cortes"><div id="ppListaTipos" class="pp-chips"></div>
+          <div class="pp-cortes-acoes"><button type="button" id="ppNovoTipo"><svg class="ic"><use href="#i-plus"/></svg>Novo tipo</button><button type="button" id="ppDupTipo"><svg class="ic"><use href="#i-proj"/></svg>Duplicar</button><button type="button" id="ppRemTipo" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div></div>
+          <div id="ppFormTipo"></div></details>
+        <details class="pp-box" open><summary>4. Planta – fileiras</summary><div id="ppFormPlanta"></div></details>
       </aside>
       <section class="pp-res">
         <div class="card pp-barra">
@@ -72,7 +74,7 @@
         <div class="card pp-resumo" id="ppResumo"></div>
         <div class="card pp-painel hidden" id="ppPainelLong"></div>
         <div class="card pp-painel hidden" id="ppPainelCol"></div>
-        <div class="card pp-vistas"><div class="pp-abas"><button type="button" class="ativo" data-v="frontal">Frontal</button><button type="button" data-v="lateral">Lateral</button><button type="button" data-v="superior">Superior</button></div>
+        <div class="card pp-vistas"><div class="pp-abas"><button type="button" class="ativo" data-v="frontal">Frontal do tipo</button><button type="button" data-v="lateral">Lateral do tipo</button><button type="button" data-v="planta">Planta baixa</button></div>
           <div id="ppVista" class="pp-vista"></div></div>
         <div class="card pp-bom hidden" id="ppBomCard"><h3>Lista de peças</h3><div id="ppBom"></div></div>
       </section>

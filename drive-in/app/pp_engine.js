@@ -144,7 +144,7 @@
     const topoMod = (m) => (m && m.niveis.length ? m.niveis[m.niveis.length - 1] : 0);
     const Hcalc = [], Hs = [], editadas = Array.isArray(c.alturasColunas) ? c.alturasColunas : [];
     for (let j = 0; j <= nMod; j++) {
-      const hc = ceil50(Math.max(topoMod(mods[j - 1]), topoMod(mods[j])) + SOBRA_COLUNA), ed = N(editadas[j], 0);
+      const hc = ceil50(Math.max(topoMod(mods[j - 1]), topoMod(mods[j])) + SOBRA_COLUNA), ed = Math.max(N(editadas[j], 0), ...[lista[j - 1], lista[j]].map((m) => N(m && m.alturaColuna, 0)));
       Hcalc.push(hc);
       if (ed && ed < hc) alertas.push(`Coluna ${j + 1}: altura editada ${ed} mm menor que a calculada (${hc} mm = última longarina + ${SOBRA_COLUNA}). A coluna só pode subir; mantida em ${hc} mm.`);
       Hs.push(ed > hc ? ceil50(ed) : hc);
@@ -219,6 +219,59 @@
     };
   }
 
+  // ---- projeto no padrão SUPRA (Gean, 17/10/2026): CORTE = TIPO DE MÓDULO (A, B, TÚNEL…) e a PLANTA define a quantidade:
+  // fileiras simples ou duplas, cada uma com a sequência de tipos ("A×17, TÚNEL×1, A×19") e o corredor até a próxima.
+  // p: { quadro: {coluna, espessura, profPalete, profQuadro, modulacao, espTrav, entreFileiras, peDireito},
+  //      tipos: [{ nome, modulo: {…campos do módulo…} }], fileiras: [{ nome, dupla, seq: [{ tipo, qtd }], corredor }] }
+  // Cada fileira é calculada como um corte (colunas compartilhadas entre módulos vizinhos, altura pelo vizinho mais alto).
+  function calcularProjeto(p, cat) {
+    const Q = p.quadro || {}, erros = [], alertas = [];
+    const tipos = (p.tipos || []).filter((t) => t && String(t.nome || '').trim());
+    const porNome = new Map(tipos.map((t) => [String(t.nome).trim().toUpperCase(), t]));
+    if (!tipos.length) erros.push('Cadastre pelo menos um tipo de módulo.');
+    if (porNome.size !== tipos.length) erros.push('Há tipos de módulo com o mesmo nome.');
+    const usoDuplo = new Set();
+    for (const f of p.fileiras || []) if (f.dupla) for (const sg of f.seq || []) usoDuplo.add(String(sg.tipo || '').trim().toUpperCase());
+    // tipo isolado: 1 módulo entre 2 colunas — vistas frontal/lateral, longarina e níveis do tipo
+    const tiposR = tipos.map((t) => {
+      const nome = String(t.nome).trim().toUpperCase(), r = calcularCorte({ ...Q, nome, fileiras: usoDuplo.has(nome) ? 2 : 1, modulos: [t.modulo || {}] }, cat);
+      r.erros.forEach((e) => erros.push(`Tipo ${nome}: ${e.replace(/^Módulo 1:? ?/, '')}`));
+      r.alertas.filter((a) => /^Módulo 1/.test(a)).forEach((a) => alertas.push(`Tipo ${nome}: ${a.replace(/^Módulo 1:? ?/, '')}`));
+      return { nome, tunel: !!(t.modulo || {}).tunel, r, qtdModulos: 0, posicoes: 0 };
+    });
+    const tipoR = new Map(tiposR.map((x) => [x.nome, x]));
+    const fileirasR = (p.fileiras || []).map((f, i) => {
+      const nome = String(f.nome || `F${i + 1}`).trim(), dupla = !!f.dupla, mods = [], rot = [];
+      for (const sg of f.seq || []) {
+        const tn = String(sg.tipo || '').trim().toUpperCase(), q = Math.max(0, Math.round(N(sg.qtd, 0)));
+        if (!q) continue;
+        if (!porNome.has(tn)) { erros.push(`Fileira ${nome}: tipo "${sg.tipo}" não cadastrado.`); continue; }
+        for (let k = 0; k < q; k++) { mods.push({ ...porNome.get(tn).modulo }); rot.push({ tipo: tn, n: k + 1 }); }
+      }
+      if (!mods.length) { erros.push(`Fileira ${nome}: sem módulos.`); return null; }
+      const r = calcularCorte({ ...Q, nome, fileiras: dupla ? 2 : 1, modulos: mods }, cat);
+      r.erros.forEach((e) => erros.push(`Fileira ${nome}: ${e}`));
+      // alertas dos módulos já aparecem no tipo; aqui ficam os das colunas e da fileira
+      r.alertas.filter((a) => !/^Módulo \d/.test(a)).forEach((a) => alertas.push(`Fileira ${nome}: ${a}`));
+      rot.forEach((x) => { const t = tipoR.get(x.tipo); t.qtdModulos += dupla ? 2 : 1; });
+      r.modulos.forEach((m, k) => { tipoR.get(rot[k].tipo).posicoes += m.posicoes; });
+      return { nome, dupla, corredor: N(f.corredor, 0), r, rot };
+    }).filter(Boolean);
+    if (!fileirasR.length && !erros.length) erros.push('Monte a planta: cadastre pelo menos uma fileira com módulos.');
+    // lista de peças do projeto: soma das fileiras
+    const pecas = [];
+    for (const f of fileirasR) for (const pc of f.r.pecas) {
+      const ex = pecas.find((x) => x.grupo === pc.grupo && x.codigo === pc.codigo && x.desc === pc.desc && x.compr === pc.compr);
+      if (ex) { ex.qtd += pc.qtd; ex.pesoTotal = ex.pesoUnit == null ? null : ex.qtd * ex.pesoUnit; ex.atencao = ex.atencao || pc.atencao; }
+      else pecas.push({ ...pc, obs: pc.grupo === 'Longarinas' ? pc.obs.replace(/^Módulo \d+(; )?/, '') : pc.obs });
+    }
+    const ORDEM = ['Colunas', 'Emenda de coluna', 'Sapatas', 'Fixadores das sapatas', 'Travessas', 'Fixadores das travessas', 'Longarinas', 'Fixadores das longarinas'];
+    pecas.sort((a, b) => ORDEM.indexOf(a.grupo) - ORDEM.indexOf(b.grupo));
+    return { tipo: 'PP-PROJETO', erros, alertas: [...new Set(alertas)], tipos: tiposR, fileiras: fileirasR, pecas, quadro: Q,
+      posicoes: fileirasR.reduce((s, f) => s + f.r.posicoes, 0), modulos: tiposR.reduce((s, t) => s + t.qtdModulos, 0),
+      pesoTotal: pecas.reduce((s, x) => s + (x.pesoTotal || 0), 0) };
+  }
+
   // compatibilidade: corte com todos os módulos iguais (entrada "plana" da 1ª versão)
   function calcular(inp, cat) {
     const m = { paletesNivel: inp.paletesNivel, frentePalete: inp.frentePalete, alturaPalete: inp.alturaPalete, cargaPalete: inp.cargaPalete, niveis: inp.niveis, paleteChao: inp.paleteChao,
@@ -227,6 +280,6 @@
     return calcularCorte({ ...inp, modulos: Array.from({ length: n }, () => ({ ...m })) }, cat);
   }
 
-  const PPEngine = { calcular, calcularCorte, lerAlturas, horizontais, verificarColuna, F382, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
+  const PPEngine = { calcular, calcularCorte, calcularProjeto, lerAlturas, horizontais, verificarColuna, F382, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
   if (typeof module !== 'undefined' && module.exports) module.exports = PPEngine; else root.PPEngine = PPEngine;
 })(typeof window !== 'undefined' ? window : globalThis);

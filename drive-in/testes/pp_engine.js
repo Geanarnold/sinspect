@@ -87,4 +87,19 @@ t('DXF de vários cortes sem NaN, nomes de bloco ≤ 31, tala de junção acima 
   const mods = [{ ...MOD, niveis: 2 }, MOD, { ...MOD, niveis: 3 }], rr = E.calcularCorte(corte({}, mods), cat); // quadros 3050 / 5850 / 4450
   assert.strictEqual(D.modelo(rr, 'A').textos.filter((x) => /^VISTA LATERAL CORTE A - QUADRO/.test(x.s)).length, new Set(rr.colunasH).size);
 });
+t('projeto SUPRA: tipos de módulo + planta (fileiras) definem quantidades e peças', () => {
+  const p = { quadro: { coluna: '101', espessura: '2.0', profPalete: 1200, profQuadro: 1000, entreFileiras: 300 },
+    tipos: [{ nome: 'A', modulo: MOD }, { nome: 'B', modulo: { ...MOD, cargaPalete: 1500 } }, { nome: 'TUNEL', modulo: { ...MOD, tunel: true, niveis: 2, alturas: ['2800', ''], compLongarina: 3000 } }],
+    fileiras: [{ nome: 'F1', seq: [{ tipo: 'A', qtd: 5 }], corredor: 3000 }, { nome: 'F2', dupla: true, seq: [{ tipo: 'A', qtd: 3 }, { tipo: 'TUNEL', qtd: 1 }, { tipo: 'B', qtd: 2 }] }] };
+  const P = E.calcularProjeto(p, cat);
+  assert.deepStrictEqual(P.erros, []);
+  assert.deepStrictEqual(P.tipos.map((t) => [t.nome, t.qtdModulos]), [['A', 11], ['B', 4], ['TUNEL', 2]]);
+  assert.strictEqual(qtd(P, 'CO040212'), 6 * 2 + 7 * 2 * 2); // sapatas: quadros compartilhados entre módulos vizinhos
+  assert.strictEqual(qtd(P, 'CO040011'), (5 + 3 * 2) * 2 * 4); // longarinas do tipo A: 2 por nível
+  assert.ok(E.calcularProjeto({ ...p, fileiras: [{ nome: 'F9', seq: [{ tipo: 'Z', qtd: 2 }] }] }, cat).erros.some((e) => e.includes('"Z" não cadastrado')));
+  const dd2 = [dd, { ...dd, folha: '2/2' }], txt = D.dxfPP(P, dd2);
+  assert.ok(!/NaN|undefined|Infinity/.test(txt));
+  assert.strictEqual(D.projetoPP(P, dd2).items.filter((it) => it.nome === 'FOLHA_A0_SUPRA').length, 2);
+  assert.ok(D.planta(P).textos.some((x) => x.s === 'TUNEL 01'));
+});
 console.log(`\n${ok} testes OK`);

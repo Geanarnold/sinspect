@@ -161,10 +161,95 @@
     });
     return out;
   }
+  // ---- padrão SUPRA: folha dos tipos de módulo (cada tipo = lateral(is) + frontal de UM módulo) e folha da planta baixa
+  function vistasTipo(t) {
+    const { shiftModel } = X(), r = t.r, c = t.nome, alturas = [...new Set(r.colunasH)].sort((a, b) => b - a);
+    const laterais = alturas.map((h) => lateral(r, `VISTA LATERAL CORTE ${c}`, r.colunasH.indexOf(h)));
+    laterais.forEach((ml, k) => { if (k) shiftModel(ml, laterais[k - 1].bbox[2] + 400 - ml.bbox[0]); });
+    const mL = junta(laterais), mF = frontal(r, `VISTA FRONTAL CORTE ${c}`);
+    shiftModel(mF, mL.bbox[2] + 1200 - mF.bbox[0]);
+    const md = r.modulos[0], m = junta([mL, mF]);
+    m.textos.push({ x: (mF.bbox[0] + mF.bbox[2]) / 2, y: -800, h: 100, s: `${t.qtdModulos} MÓDULOS ${md.L + 2 * r.entradas.col}x${r.entradas.P}x${r.dimensoes.altura} - ${t.posicoes} POSIÇÕES`, l: TXT, rot: 0, just: 1 });
+    return m;
+  }
+  // quadro "DESCRIÇÕES TÉCNICAS PORTA PALLETS" (como nos projetos SUPRA), em texto + linhas, origem no canto superior esquerdo
+  function tabelaTipos(P, x0, y0) {
+    const m = novoModelo(), W = [900, 2200, 1700, 1700, 1300, 1600], hL = 220, cab = ['TIPO', 'DIMENSÃO DO MÓDULO', 'EMPILHAMENTO', 'CARGA MÁX. POR PLANO', 'QTD. MÓDULOS', 'CAPACIDADE TOTAL'];
+    const linhas = P.tipos.map((t) => { const r = t.r, md = r.modulos[0]; return [t.nome, `${md.L + 2 * r.entradas.col}/${r.entradas.P}/${r.dimensoes.altura}`, `${md.chao ? 'PISO + ' : ''}${String(md.niveis.length).padStart(2, '0')} NÍVEIS`, `${md.cargaPar} KG`, `${t.qtdModulos}`, `${t.posicoes} PALLETS`]; });
+    const todas = [cab, ...linhas, ['', '', '', '', 'TOTAL', `${P.posicoes} PALLETS`]], Wt = W.reduce((a, b) => a + b, 0);
+    m.text(x0 + Wt / 2, y0 + 120, 120, 'DESCRIÇÕES TÉCNICAS PORTA PALLETS', TXT);
+    todas.forEach((row, i) => { let x = x0; const y = y0 - i * hL; m.line(x0, y, x0 + Wt, y, 'COTAS'); row.forEach((v, k) => { m.text(x + W[k] / 2, y - hL * 0.65, 80, String(v), 'COTAS', 0, 1, 'ROMANS'); x += W[k]; }); });
+    m.line(x0, y0 - todas.length * hL, x0 + Wt, y0 - todas.length * hL, 'COTAS');
+    let x = x0; for (const w of [0, ...W]) { x += w; m.line(x, y0, x, y0 - todas.length * hL, 'COTAS'); }
+    return { ...m, bbox: [x0 - 100, y0 - todas.length * hL - 100, x0 + Wt + 100, y0 + 300] };
+  }
+  // planta baixa: fileiras de cima para baixo, corredor entre elas; módulos rotulados "A 01…" (numeração por trecho contínuo do mesmo tipo)
+  function planta(P, titulo) {
+    const m = novoModelo(), { clone, nomeBloco, nb } = X(), Q = P.fileiras.length ? P.fileiras[0].r.entradas : null;
+    if (!Q) return { ...m, bbox: [0, 0, 1000, 1000] };
+    const col = Q.col, Pq = Q.P, MONT = (root.BLOCOS || {})['DI_MONT_' + col];
+    const quadro = () => (MONT ? clone(MONT).map((q) => ({ ...q, p: q.p && q.p.map((v) => [v[0], v[1] < -512.5 ? v[1] - (Pq - 1025) : v[1]]), c: q.c && [q.c[0], q.c[1] < -512.5 ? q.c[1] - (Pq - 1025) : q.c[1]] })) : m.caixa(-col / 2, -Pq, col / 2, 0, 'MONTANTE'));
+    let y = 0, Wmax = 0; const tops = [];
+    for (const f of P.fileiras) {
+      const xs = eixos(f.r), W = xs[xs.length - 1] + col / 2, prof = f.dupla ? 2 * Pq + Q.entreFileiras : Pq, yTopo = y;
+      Wmax = Math.max(Wmax, W); tops.push([yTopo, prof]);
+      for (let lin = 0; lin < (f.dupla ? 2 : 1); lin++) {
+        const yF = yTopo - lin * (Pq + Q.entreFileiras); // face de cima do quadro desta linha
+        for (const x of xs) m.put(quadro(), x, yF, 'MONTANTE', nomeBloco('DI_PL_QUADRO', col, nb(Pq)));
+        let ant = null, n = 0;
+        f.r.modulos.forEach((md, i) => {
+          const x0 = xs[i] + col / 2, tp = f.rot[i].tipo; n = tp === ant ? n + 1 : 1; ant = tp;
+          for (const yl of [yF, yF - Pq - 50]) m.put(m.caixa(0, 0, md.L, 50, 'LONGARINA'), x0, yl, 'LONGARINA');
+          m.text(x0 + md.L / 2, yF - Pq / 2 - 50, Math.min(220, Pq / 4), `${tp} ${String(n).padStart(2, '0')}`, TXT, 0, 1, 'ROMANS');
+        });
+        if (f.dupla && lin === 0) for (const x of xs) m.line(x, yF - Pq, x, yF - Pq - Q.entreFileiras, 'FOLHA_NOTA'); // distanciador central
+      }
+      m.cota(0, yTopo + 60, W, yTopo + 60, 300, `${Math.round(W)}`, false, 'p');
+      m.cota(0, yTopo, 0, yTopo - prof, 400, `${prof}`, true, 'p');
+      m.text(-900, yTopo - prof / 2, 160, f.nome, TXT, 90, 1);
+      y = yTopo - prof - (f.corredor || 0);
+      if (f.corredor) m.cota(0, yTopo - prof, 0, y, 400, `${f.corredor}`, true, 'p');
+    }
+    const yFim = tops.length ? tops[tops.length - 1][0] - tops[tops.length - 1][1] : 0;
+    m.cota(Wmax, 0, Wmax, yFim, -900, `${Math.round(-yFim)}`, true, 'g');
+    m.text(Wmax / 2, yFim - 900, 220, titulo || 'PLANTA BAIXA', TXT);
+    return { ...m, bbox: [-1900, yFim - 1400, Wmax + 1600, 1200] };
+  }
+  // projeto completo: folha 1 = tipos de módulo (+ quadro das descrições), folha 2 = planta baixa; dds = [dados folha 1, dados folha 2]
+  function projetoPP(P, dds) {
+    const { shiftModel, montarFolha } = X(), out = { prims: [], items: [], linhas: [], textos: [] };
+    // tipos em grade (colunas × linhas): testa de 1 a n colunas e fica com a que deixa a maior escala na folha A0
+    const montaGrade = (nc) => {
+      const bs = P.tipos.map((t) => vistasTipo(t)); let yTop = 0;
+      for (let i = 0; i < bs.length; i += nc) {
+        const linha = bs.slice(i, i + nc), hMax = Math.max(...linha.map((b) => b.bbox[3] - b.bbox[1]));
+        let x = 0; for (const b of linha) { shiftModel(b, x - b.bbox[0], yTop - b.bbox[3]); x = b.bbox[2] + 1500; }
+        yTop -= hMax + 1200;
+      }
+      const f = junta(bs), t = tabelaTipos(P, f.bbox[0] + 400, f.bbox[1] - 600);
+      return { f, t, esc: X().escalaFolha(junta([f, t]).bbox) || 0 };
+    };
+    let best = null; for (let nc = 1; nc <= Math.max(1, P.tipos.length); nc++) { const g = montaGrade(nc); if (!best || g.esc <= best.esc) best = g; } // empate: mais colunas (folha é paisagem)
+    const f1 = best.f, tb = best.t;
+    const aviso = root.PPEngine ? root.PPEngine.AVISO_ESTRUTURAL : '';
+    if (aviso) tb.textos.push({ x: tb.bbox[0] + 100, y: tb.bbox[1] - 300, h: 90, s: aviso, l: TXT, rot: 0, just: 0 });
+    tb.bbox[1] -= 500;
+    const fo1 = junta([f1, tb]), fo2 = planta(P, 'PLANTA BAIXA');
+    let dir = 0;
+    [[fo1, dds && dds[0]], [fo2, dds && dds[1]]].forEach(([mc, dd]) => {
+      if (dd) montarFolha(mc, dd);
+      shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]); dir = mc.bbox[2] + 0.1 * (mc.bbox[2] - mc.bbox[0]);
+      for (const k of ['prims', 'items', 'linhas', 'textos']) out[k] = out[k].concat(mc[k]);
+    });
+    return out;
+  }
+  const dxfPP = (P, dds) => DXF.dxfLateral(null, '', projetoPP(P, dds));
+  const svgPlanta = (P) => DXF.svgModelo(planta(P, 'PLANTA BAIXA'));
+  const svgTipo = (t, vista) => DXF.svgModelo(vista === 'lateral' ? lateral(t.r, `VISTA LATERAL CORTE ${t.nome}`) : frontal(t.r, `VISTA FRONTAL CORTE ${t.nome}`));
   const dxf = (r, corte, dd) => DXF.dxfLateral(null, '', modelo(r, corte, dd));
   const dxfProjeto = (lista, dds) => DXF.dxfLateral(null, '', projeto(lista, dds));
   const svg = (r, vista) => DXF.svgModelo(vista === 'lateral' ? lateral(r, 'VISTA LATERAL') : vista === 'superior' ? superior(r, 'VISTA SUPERIOR') : frontal(r, 'VISTA FRONTAL'));
 
-  const PPDesenho = { frontal, lateral, superior, modelo, projeto, dxf, dxfProjeto, svg };
+  const PPDesenho = { frontal, lateral, superior, modelo, projeto, dxf, dxfProjeto, svg, planta, projetoPP, dxfPP, svgPlanta, svgTipo };
   if (typeof module !== 'undefined' && module.exports) module.exports = PPDesenho; else root.PPDesenho = PPDesenho;
 })(typeof window !== 'undefined' ? window : globalThis);

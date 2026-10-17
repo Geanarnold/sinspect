@@ -489,3 +489,9 @@ body:not(.pg-config) .marca .sub-desc{display:none}
 .pp-niv-c{display:flex;align-items:center;gap:4px}.pp-niv-c span{font-size:11.5px;font-weight:700;color:var(--cinza);width:24px}.pp-niv-c input{height:30px;padding:0 6px;text-align:right}
 .pp-niv-c input.calc::placeholder{color:#64748b;font-style:italic}.pp-niv .nota{margin:4px 0 0;font-size:11.5px}
 .pp-niv label{white-space:normal}
+.pp-fil-cab{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px 4px}.pp-fil-cab input{width:70px;height:28px}.pp-fil-cab select{width:96px;height:28px}
+.pp-fil-res{margin-left:auto;font-size:11.5px;color:var(--cinza)}
+.pp-seq{display:flex;flex-wrap:wrap;gap:6px;padding:4px 10px;align-items:center}.pp-seq-i{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--borda);border-radius:var(--raio-p);padding:3px 4px}
+.pp-seq-i select{width:90px;height:28px}.pp-seq-i input{width:62px;height:28px;text-align:right}
+.pp-fil-pe{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between;padding:4px 10px 8px;font-size:12px}.pp-fil-pe input{width:80px;height:28px;margin:0 4px}
+.pp-colh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}.pp-colh-l{flex:1 1 100%}.pp-colh-e{display:flex;gap:6px}.pp-colh-e input{width:110px;height:28px}

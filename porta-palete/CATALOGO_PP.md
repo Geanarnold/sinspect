@@ -189,3 +189,11 @@ Premissas ainda abertas:
 - Entrada dos níveis (Gean, 17/10/2026): o operador informa a **quantidade de níveis** e cada nível tem a sua caixa (N1, N2…). Caixa em branco = calculada pelo nível de baixo (palete + 100 + TB, múltiplo de 50) e mostrada em cinza; mudar o N1 empurra os de cima que estão em branco. Túnel: N1 obrigatório. Erro se um nível for menor ou igual ao de baixo.
 - Cotas de comprimento (cada longarina e total do corte) e da profundidade do quadro: **500 mm acima do palete mais alto** (Gean).
 - Vista lateral: foco na montante – paletes só em contorno, sem hachura, desenhados por baixo do quadro.
+
+### Tela v4 – padrão SUPRA: corte = tipo de módulo + planta (Gean, 17/10/2026, conferido em 9 projetos SUPRA)
+- **Corte = tipo de módulo** (A, B, TÚNEL…): um módulo desenhado (frontal + lateral) por tipo; a quantidade sai da planta.
+- **Quadro e palete** valem para o projeto (coluna, espessura, profundidade do quadro e do palete, amarração, chapa, entre fileiras, pé-direito).
+- **Planta**: fileiras simples ou duplas, cada uma com a sequência de tipos (ex.: A × 17, TÚNEL × 1, A × 19) e o corredor até a próxima. Cada fileira é calculada como um corte (quadros compartilhados entre módulos vizinhos; coluna pela altura do vizinho mais alto).
+- **Folhas**: 1/2 = tipos (lateral + frontal de cada um, em grade) + quadro "DESCRIÇÕES TÉCNICAS PORTA PALLETS" (tipo, dimensão do módulo, empilhamento, carga por plano, qtd. de módulos, capacidade); 2/2 = planta baixa com os módulos rotulados (A 01…), comprimento de cada fileira, profundidades e corredores.
+- Altura da coluna por tipo: calculada (última longarina + 250); botão "Editar altura da coluna", só para subir.
+- Pendentes vistos nos projetos: detalhes padrão (chumbação, protetor, guard rail, distanciador, longarina tubo/cadeirinha), distanciador central (até 4 m 2 / 6 m 3 / 9 m 4 / 11 m 5), travamento superior, carga por plano escrita no nível (plano MDP/metálico), cargas não paletizadas (bobina) – depois.
