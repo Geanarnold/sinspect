@@ -64,3 +64,9 @@ Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 
 - Conferido no desenho 0004.0001.01.022 REV.00 (PP LATERAL ALTURAS, quadros de 999 mm, modulação padrão 900, 2.000 a 8.500 mm de 50 em 50): 6.500/6.550/6.600/6.650 sem horizontal extra (sobra 100–250 mm); 6.700, 6.750 … 6.950 com horizontal extra no topo e o último vão sem diagonal (sobra 300–550 mm) → limite de 250 mm confirmado.
 - Aplicada no motor (DI e base do PP) em 17/10/2026: a horizontal de topo **não leva travessa união** na coluna solteira (orçamento Zanotti: 400 uniões = 10 por lateral). Zanotti após a regra: app 58.767 kg × orçamento 58.724 kg (+0,07%).
 
+
+## 5. Travamentos (horizontal, superior, contraventamento posterior)
+Pendente – adiado (Gean, 17/10/2026): seguir antes para as longarinas; os travamentos dependem da configuração final (altura, módulos, fileira dupla).
+
+## 6. Longarinas
+Em andamento – aguardando PDFs dos desenhos e tabela de capacidade (carga por par × vão).
