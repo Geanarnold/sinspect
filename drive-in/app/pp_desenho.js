@@ -20,6 +20,34 @@
     const caixa = (x0, y0, x1, y1, l) => [[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]].map(([a, b, c, d]) => ({ t: 'p', l, p: [[a, b], [c, d]] }));
     return { prims, items, linhas, textos, put, line, text, caixa, cota: fazCota(line, text) };
   }
+  // ---- longarina tubo com garra (blocos PP_LONG_TB80_FR / PP_LONG_TB110_FR, dos DXF CO040012 e CO040015), layer PP_LONGARINA (laranja)
+  // bloco: x = 0 na ponta dos dentes da garra esquerda, face externa da garra (= face da coluna) em x = 21,2; y = 0 no topo do perfil (apoio)
+  const LG_DENTE = 21.2, LG_PLACA = 3.6, LG_TUBO = 40; // dentes que entram na coluna; chapa da garra; largura do tubo (F 246: L = 40)
+  function longFrontal(TB, L) {
+    const BL = root.BLOCOS_PP || {}, base = TB <= 80 ? BL.PP_LONG_TB80_FR : BL.PP_LONG_TB110_FR, hBase = TB <= 80 ? 80 : 110;
+    if (!base) return null;
+    const W0 = 2299.3 + 2 * LG_DENTE, meio = W0 / 2, dL = L - 2299.3, dH = TB - hBase, xa = LG_DENTE + LG_PLACA - 0.5, xb = W0 - LG_DENTE - LG_PLACA + 0.5;
+    // estica o comprimento (pontos à direita do meio) e a altura do tubo (só o tubo: topo sobe dH, depois tudo desce dH → garra fica 35 mm abaixo do perfil)
+    return base.map((q) => ({ t: 'p', l: 'PP_LONGARINA', p: q.p.map(([x, y]) => {
+      const noTubo = x > xa && x < xb && y > -(hBase - 3.5) / 2;
+      return [x > meio ? x + dL : x, (noTubo ? y + dH : y) - dH];
+    }) }));
+  }
+  // corte da longarina na lateral: tubo (40 × TB − 3,5) encostado na garra (chapa vista de frente, 250 ou 150 de altura, 35 mm abaixo do perfil)
+  function longCorte(TB, gH, lado) {
+    const out = [], seg = (a, b, c, d) => out.push({ t: 'p', l: 'PP_LONGARINA', p: [[a, b], [c, d]] }), box = (x0, y0, x1, y1) => { seg(x0, y0, x1, y0); seg(x1, y0, x1, y1); seg(x1, y1, x0, y1); seg(x0, y1, x0, y0); };
+    const h = TB - 3.5, s = lado; // lado: −1 = longarina de frente (à esquerda do quadro), +1 = de fundo
+    box(0, -h - 35, s * LG_PLACA, -h - 35 + gH);                 // garra (chapa) colada na face da coluna
+    box(s * LG_PLACA, -h, s * (LG_PLACA + LG_TUBO), 0);          // tubo em corte
+    box(s * (LG_PLACA + 1.5), -h + 1.5, s * (LG_PLACA + LG_TUBO - 1.5), -1.5); // parede #1,5
+    return out;
+  }
+  // vista superior: tubo de 40 entre as garras (chapa 3,6 × 60) – y = 0 na face da coluna, tubo para fora (sinal)
+  function longTopo(L, sinal) {
+    const out = [], box = (x0, y0, x1, y1) => [[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]].forEach(([a, b, c, d]) => out.push({ t: 'p', l: 'PP_LONGARINA', p: [[a, b], [c, d]] }));
+    box(0, 0, LG_PLACA, sinal * 60); box(L - LG_PLACA, 0, L, sinal * 60); box(LG_PLACA, 0, L - LG_PLACA, sinal * LG_TUBO);
+    return out;
+  }
   const piso = (m, x0, x1) => { const { piso: pz, nomeBloco } = X(), n = Math.ceil((x1 - x0) / 1000); for (let k = 0; k < n; k++) m.put(pz(k === 0, k === n - 1), x0 + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === n - 1 ? 'FIM' : '')); };
 
   // eixos das colunas: cada módulo tem a sua longarina (vão livre = comprimento da longarina)
@@ -38,10 +66,9 @@
     r.modulos.forEach((md, i) => {
       // longarina (des. 0004.0001.02.001): perfil com altura TB − 3,5, garras de 3,7 mm nas pontas, 35 mm abaixo do perfil (150 ou 250 de altura)
       const L = md.L, hP = md.TB - 3.5, gH = md.garraH, gE = 3.7, x0 = xs[i] + col / 2;
-      const long = [...m.caixa(gE, -hP, L - gE, 0, 'LONGARINA'), { t: 'p', l: 'LONGARINA', p: [[gE, -hP + 3.5], [L - gE, -hP + 3.5]] }, { t: 'p', l: 'LONGARINA', p: [[gE, -3.5], [L - gE, -3.5]] },
-        ...m.caixa(0, -hP - 35, gE, -hP - 35 + gH, 'LONGARINA'), ...m.caixa(L - gE, -hP - 35, L, -hP - 35 + gH, 'LONGARINA')];
-      const nomeL = nomeBloco('PP_LONG_FRONTAL', 'TB' + md.TB, nb(L)), pal = geoPalete(md.frente, md.hp, true), nomeP = nomeBloco('PP_PALETE_FR', nb(md.frente) + 'X' + nb(md.hp));
-      for (const y of md.niveis) m.put(clone(long), x0, y, 'LONGARINA', nomeL);
+      const blk = longFrontal(md.TB, L), long = blk || [...m.caixa(gE, -hP, L - gE, 0, 'PP_LONGARINA'), ...m.caixa(0, -hP - 35, gE, -hP - 35 + gH, 'PP_LONGARINA'), ...m.caixa(L - gE, -hP - 35, L, -hP - 35 + gH, 'PP_LONGARINA')];
+      const nomeL = nomeBloco('PP_LONG_FR', 'TB' + md.TB, nb(L)), pal = geoPalete(md.frente, md.hp, true), nomeP = nomeBloco('PP_PALETE_FR', nb(md.frente) + 'X' + nb(md.hp));
+      for (const y of md.niveis) m.put(clone(long), blk ? x0 - LG_DENTE : x0, y, 'PP_LONGARINA', nomeL); // garra encostada na face da coluna, dentes dentro dela
       const folga = (L - md.nPal * md.frente) / (md.nPal + 1); // paletes centrados no vão: folgas iguais entre paletes e até as colunas
       for (const y of (md.chao ? [0] : []).concat(md.niveis)) for (let k = 0; k < md.nPal; k++) {
         const xp = x0 + folga + k * (md.frente + folga);
@@ -87,8 +114,8 @@
         const a = [hxL, holeY(ys[k + 1])], b = [hxR, holeY(ys[k])];
         m.put(translate(recortaDiag(travessaD(a, b), xA + CW / 2, xB - CW / 2), -a[0], -a[1]), a[0], a[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(b[0] - a[0]) + 'X' + nb(b[1] - a[1])));
       }
-      const sec = [...m.caixa(0, -TB, 50, 0, 'LONGARINA')], nomeS = nomeBloco('PP_LONG_CORTE', 'TB' + TB);
-      for (const y of niv) { m.put(clone(sec), x0 - 50, y, 'LONGARINA', nomeS); m.put(clone(sec), x0 + P, y, 'LONGARINA', nomeS); }
+      const gH = Math.max(...viz.map((v) => v.garraH)), secF = longCorte(TB, gH, -1), secT = longCorte(TB, gH, 1);
+      for (const y of niv) { m.put(clone(secF), x0, y, 'PP_LONGARINA', nomeBloco('PP_LONG_CORTE', 'TB' + TB, 'F')); m.put(clone(secT), x0 + P, y, 'PP_LONGARINA', nomeBloco('PP_LONG_CORTE', 'TB' + TB, 'T')); }
       m.cota(x0, yCota - 1, x0 + P, yCota - 1, 1, `${P}`, false, 'c');
     }
     const xa = 0, xb = inicios[inicios.length - 1] + P;
@@ -114,7 +141,7 @@
         if (MONT) m.put(clone(MONT).map((q) => ({ ...q, p: q.p && q.p.map((v) => [v[0], v[1] < -512.5 ? v[1] - (P - 1025) : v[1]]), c: q.c && [q.c[0], q.c[1] < -512.5 ? q.c[1] - (P - 1025) : q.c[1]] })), x, y0 + P, 'MONTANTE', nomeBloco('DI_PL_QUADRO', col, nb(P)));
         else { for (const y of [y0, y0 + P - 70]) m.put(m.caixa(-col / 2, 0, col / 2, 70, 'MONTANTE'), x, y, 'MONTANTE'); m.line(x, y0 + 70, x, y0 + P - 70, 'Contraventamento'); }
       }
-      r.modulos.forEach((md, i) => { for (const y of [y0 - 50, y0 + P]) m.put(m.caixa(0, 0, md.L, 50, 'LONGARINA'), xs[i] + col / 2, y, 'LONGARINA'); if (md.tunel) m.text(xs[i] + col / 2 + md.L / 2, y0 + P / 2 - 40, 90, 'TÚNEL', TXT); });
+      r.modulos.forEach((md, i) => { m.put(longTopo(md.L, -1), xs[i] + col / 2, y0, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F')); m.put(longTopo(md.L, 1), xs[i] + col / 2, y0 + P, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); if (md.tunel) m.text(xs[i] + col / 2 + md.L / 2, y0 + P / 2 - 40, 90, 'TÚNEL', TXT); });
     }
     const W = xs[xs.length - 1] + col / 2, D = E.fileiras * P + (E.fileiras - 1) * E.entreFileiras;
     m.cota(0, D + 50, W, D + 50, 300, `${Math.round(W)}`, false, 'g');
@@ -199,7 +226,7 @@
         let ant = null, n = 0;
         f.r.modulos.forEach((md, i) => {
           const x0 = xs[i] + col / 2, tp = f.rot[i].tipo; n = tp === ant ? n + 1 : 1; ant = tp;
-          for (const yl of [yF, yF - Pq - 50]) m.put(m.caixa(0, 0, md.L, 50, 'LONGARINA'), x0, yl, 'LONGARINA');
+          m.put(longTopo(md.L, 1), x0, yF, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); m.put(longTopo(md.L, -1), x0, yF - Pq, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F'));
           m.text(x0 + md.L / 2, yF - Pq / 2 - 50, Math.min(220, Pq / 4), `${tp} ${String(n).padStart(2, '0')}`, TXT, 0, 1, 'ROMANS');
         });
         if (f.dupla && lin === 0) for (const x of xs) m.line(x, yF - Pq, x, yF - Pq - Q.entreFileiras, 'FOLHA_NOTA'); // distanciador central

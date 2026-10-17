@@ -5,7 +5,7 @@
   'use strict';
   // cores para papel branco (o DXF usa as cores do AutoCAD, pensadas para fundo escuro)
   const COR = {
-    MONTANTE: [37, 99, 235], MONTANTE_HACHURA: [37, 99, 235], BRACO_HACHURA: [234, 88, 12], BRACO_LT: [234, 88, 12], LONGARINA_TUNEL: [234, 88, 12],
+    PP_LONGARINA: [234, 88, 12], MONTANTE: [37, 99, 235], MONTANTE_HACHURA: [37, 99, 235], BRACO_HACHURA: [234, 88, 12], BRACO_LT: [234, 88, 12], LONGARINA_TUNEL: [234, 88, 12],
     LONGARINA_FUNDO: [234, 88, 12], FOLHA_LOGO: [234, 88, 12], PALETE: [146, 64, 14], PALETE_HACHURA: [180, 83, 9], LONGARINA: [22, 163, 74],
     Contraventamento: [100, 116, 139], TRILHO: [202, 138, 4], CANELEIRA_HACHURA: [250, 204, 21], FOLHA_NOTA: [220, 38, 38],
   };

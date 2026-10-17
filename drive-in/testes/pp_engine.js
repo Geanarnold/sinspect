@@ -3,7 +3,7 @@
 const assert = require('assert'), path = require('path');
 const APP = path.join(__dirname, '..', 'app');
 global.window = {};
-for (const f of ['catalogo.js', 'blocos.js', 'folha.js']) require(path.join(APP, f));
+for (const f of ['catalogo.js', 'blocos.js', 'blocos_pp.js', 'folha.js']) require(path.join(APP, f));
 for (const [k, f] of [['Engine', 'engine.js'], ['DXF', 'dxf.js'], ['PPLongarina', 'pp_longarina.js'], ['PPEngine', 'pp_engine.js']]) global.window[k] = require(path.join(APP, f));
 const D = require(path.join(APP, 'pp_desenho.js')), E = global.window.PPEngine, cat = global.window.CATALOGO;
 let ok = 0;
