@@ -21,14 +21,14 @@ t('caso base: geometria, longarina e contagens', () => {
   const r = E.calcular(base, cat);
   assert.deepStrictEqual(r.erros, []);
   assert.strictEqual(r.longarina.L, 2300); assert.strictEqual(r.longarina.perfil, '90#1,5');
-  assert.deepStrictEqual(r.niveis, [1400, 2800, 4200, 5600]); assert.strictEqual(r.dimensoes.altura, 5700);
+  assert.deepStrictEqual(r.niveis, [1400, 2800, 4200, 5600]); assert.strictEqual(r.dimensoes.altura, 5850); // último nível + 250
   assert.strictEqual(r.posicoes, 4 * 2 * 5); assert.strictEqual(r.colunas, 10);
   assert.strictEqual(qtd(r, 'CO040011'), 2 * 4 * 4); assert.strictEqual(qtd(r, 'INT1556'), 2 * 2 * 4 * 4);
   assert.strictEqual(qtd(r, 'CO040212'), 10); assert.strictEqual(qtd(r, 'SA041046'), 20); assert.strictEqual(qtd(r, 'INT0654'), 20);
 });
 t('fileira dupla dobra quadros e longarinas', () => {
   const r = E.calcular({ ...base, fileiras: 2 }, cat);
-  assert.strictEqual(r.colunas, 20); assert.strictEqual(qtd(r, 'CO040011'), 64); assert.strictEqual(r.dimensoes.profundidade, 2200);
+  assert.strictEqual(r.colunas, 20); assert.strictEqual(qtd(r, 'CO040011'), 64); assert.strictEqual(r.dimensoes.profundidade, 2300); // 2 × 1000 + 300 (padrão entre fileiras)
 });
 t('perfil trocado que não suporta → atenção na lista', () => {
   const r = E.calcular({ ...base, perfilLongarina: '80#1,5' }, cat), l = r.pecas.find((p) => p.grupo === 'Longarinas');

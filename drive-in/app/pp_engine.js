@@ -10,8 +10,8 @@
   const MAX_PECA = 8500, DENS = 7.85e-6;
   const ESP_TRAV_OPCOES = [0.85, 1.2, 1.4, 1.8];
   const ESP_COLUNA = ['1.8', '2.0', '2.25', '2.65']; // F 382
-  // folgas operacionais (padrão do Drive-In; a confirmar para o PP): palete ↔ coluna e entre paletes 100 mm; palete ↔ longarina de cima 100 mm
-  const FOLGA_LATERAL = 100, FOLGA_VERTICAL = 100, SOBRA_COLUNA = 100;
+  // folgas operacionais (confirmadas pelo Gean, 17/10/2026): palete ↔ coluna e entre paletes 100 mm; palete ↔ longarina de cima 100 mm
+  const FOLGA_LATERAL = 100, FOLGA_VERTICAL = 100, SOBRA_COLUNA = 250; // coluna passa 250 mm do último nível (Gean, 17/10/2026)
   const PROF_MIN = 600, PROF_MAX = 1200, PROF_PASSO = 50;
   // sapata PP (des. 0004.0001.02.013 REV.01) + 2 placas niveladoras (des. 0004.0001.03.057) + fixadores por sapata (Gean, 17/10/2026)
   const SAPATA = { 80: ['CO040211', 'PP SAPATA COLUNA 80 – PERFIL "U"', 0.83], 101: ['CO040212', 'PP SAPATA COLUNA 101 – PERFIL "U"', 0.85], 122: ['CO040213', 'PP SAPATA COLUNA 122 – PERFIL "U"', 0.99] };
@@ -55,7 +55,7 @@
     const col = parseInt(inp.coluna, 10) || 80, esp = ESP_COLUNA.includes(String(inp.espessura)) ? String(inp.espessura) : '2.0';
     const frente = num('frentePalete', 1000), profPal = num('profPalete', 1200), hp = num('alturaPalete', 1200), carga = num('cargaPalete', 1000);
     const nPal = Math.max(1, Math.round(num('paletesNivel', 2))), nNiv = Math.max(1, Math.round(num('niveis', 3))), chao = inp.paleteChao !== false && inp.paleteChao !== 'nao';
-    const modulos = Math.max(1, Math.round(num('modulos', 4))), fileiras = Number(inp.fileiras) === 2 ? 2 : 1, entreFileiras = num('entreFileiras', 200);
+    const modulos = Math.max(1, Math.round(num('modulos', 4))), fileiras = Number(inp.fileiras) === 2 ? 2 : 1, entreFileiras = num('entreFileiras', 300);
     const P = num('profQuadro', 1000), modulacao = ['padrao', 'zigzag', 'misto'].includes(inp.modulacao) ? inp.modulacao : 'padrao';
     const espTrav = ESP_TRAV_OPCOES.includes(Number(inp.espTrav)) ? Number(inp.espTrav) : 1.4;
     if (P < PROF_MIN || P > PROF_MAX || P % PROF_PASSO) erros.push(`Profundidade do quadro ${P} mm fora da regra: ${PROF_MIN} a ${PROF_MAX} mm, de ${PROF_PASSO} em ${PROF_PASSO}.`);
