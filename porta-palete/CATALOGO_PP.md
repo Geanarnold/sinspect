@@ -50,4 +50,16 @@ Iguais às do Drive-In (COL 80/101/122, espessuras, SA por altura, peça máx. 8
 
 Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 mm, SA cadastrado ±3 mm): com SA para 600, 700, 750, 800, 850, 900, 950, 1.000, 1.050 e 1.200; **sem SA para 650, 1.100 e 1.150** (sairiam SA04XXXX, peso pelo kg/m). A confirmar se a regra de comprimento do DI vale para o quadro do PP.
 
-Pendente: padrão das travessas (altura da 1ª, passo, diagonal, topo) e variações de amarração.
+**Travessas do quadro (Gean, 17/10/2026):**
+- Comprimento: mesma regra do DI (horizontal = profundidade − 78,6 mm; diagonal pelo c/c).
+- 1ª horizontal a **100 mm** do piso.
+- Diagonal em **Z** (uma por vão, alternando o sentido).
+- Três modulações à escolha do operador:
+  | Modulação | Horizontais (do piso) |
+  |---|---|
+  | **Padrão** | 100, depois de **900 em 900** |
+  | **Zig-zag 600** | 100, depois de **600 em 600** em toda a altura |
+  | **Misto** | 100, as **3 primeiras a 600 em 600**, depois **900 em 900** (é a regra atual do Drive-In) |
+- Topo: se sobrarem **mais de 250 mm** de coluna acima da última horizontal, entra mais uma horizontal (posição exata a confirmar).
+- DXF das modulações: Gean envia depois.
+
