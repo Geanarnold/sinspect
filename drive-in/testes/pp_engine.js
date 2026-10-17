@@ -102,4 +102,27 @@ t('projeto SUPRA: tipos de módulo + planta (fileiras) definem quantidades e pe�
   assert.strictEqual(D.projetoPP(P, dd2).items.filter((it) => it.nome === 'FOLHA_A0_SUPRA').length, 2);
   assert.ok(D.planta(P).textos.some((x) => x.s === 'TUNEL 01'));
 });
+// nada pode sair da área útil da folha A0 (dentro da borda e à esquerda do carimbo) – Gean, 17/10/2026
+t('folha A0: geometria e textos dentro da área útil (projeto pequeno e grande)', () => {
+  const Fo = global.window.FOLHA, [bx0, by0, , by1] = Fo.borda, dd2 = [dd, { ...dd, folha: '2/2' }];
+  const casos = [
+    { quadro: { coluna: '80' }, tipos: [{ nome: 'A', modulo: MOD }], fileiras: [{ nome: 'F1', seq: [{ tipo: 'A', qtd: 4 }] }] },
+    { quadro: { coluna: '122', espessura: '2.65' }, tipos: [{ nome: 'A', modulo: { ...MOD, niveis: 7 } }, { nome: 'B', modulo: { ...MOD, niveis: 5, paletesNivel: 3 } }, { nome: 'C', modulo: { ...MOD, niveis: 6, frentePalete: 1200 } },
+      { nome: 'TUNEL', modulo: { ...MOD, tunel: true, niveis: 4, alturas: ['4000'], compLongarina: 3400 } }, { nome: 'D', modulo: { ...MOD, niveis: 3 } }],
+    fileiras: Array.from({ length: 8 }, (_, i) => ({ nome: 'F' + (i + 1), dupla: i % 3 !== 0, seq: [{ tipo: 'A', qtd: 17 }, { tipo: 'TUNEL', qtd: 1 }, { tipo: 'B', qtd: 19 }, { tipo: 'C', qtd: 3 }], corredor: 3000 })) },
+  ];
+  for (const p of casos) {
+    const m = D.projetoPP(E.calcularProjeto(p, cat), dd2), pts = [];
+    for (const q of m.prims.concat(m.linhas)) for (const v of q.p || [q.c]) pts.push(v);
+    for (const fo of m.items.filter((it) => it.nome === 'FOLHA_A0_SUPRA')) {
+      const S = fo.esc, x0 = fo.x + bx0 * S, xc = fo.x + Fo.carimbo_x * S, y0 = fo.y + by0 * S, y1 = fo.y + by1 * S, naFolha = (x) => x >= x0 - 1 && x <= fo.x + Fo.borda[2] * S + 1;
+      for (const [x, y] of pts) if (naFolha(x)) assert.ok(x >= x0 && x <= xc && y >= y0 && y <= y1, `ponto fora da área útil: ${Math.round(x)}, ${Math.round(y)}`);
+      for (const tx of m.textos) {
+        if (!naFolha(tx.x) || String(tx.l).startsWith('FOLHA') || tx.rot) continue;
+        const w = String(tx.s).length * tx.h * 0.85, xa = tx.just === 1 ? tx.x - w / 2 : tx.just === 2 ? tx.x - w : tx.x;
+        assert.ok(xa >= x0 && xa + w <= xc && tx.y >= y0 && tx.y + tx.h <= y1, `texto fora da área útil: ${tx.s}`);
+      }
+    }
+  }
+});
 console.log(`\n${ok} testes OK`);
