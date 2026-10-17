@@ -35,7 +35,7 @@ t('módulos diferentes: alturas digitadas, carga, túnel e coluna pelo vizinho m
   assert.deepStrictEqual(r.modulos.map((m) => m.perfil), ['90#1,5', '110#1,5', '80#1,5']); // 2000 / 2600 / 1200 kg no par
   assert.deepStrictEqual(r.colunasH, [3050, 4450, 4450, 4450]);
   assert.strictEqual(r.modulos[2].chao, false); assert.strictEqual(r.posicoes, 2 * 3 + 2 * 4 + 2 * 2);
-  assert.ok(r.alertas.some((a) => a.includes('túnel')));
+  assert.ok(!r.alertas.some((a) => a.includes('túnel'))); // túnel sem peças especiais (Gean)
   assert.ok(E.calcularCorte(corte({}, [{ ...MOD, tunel: true }]), cat).erros.some((e) => e.includes('túnel'))); // túnel sem alturas
 });
 t('altura de coluna editada só sobe', () => {
@@ -76,5 +76,7 @@ t('DXF de vários cortes sem NaN, nomes de bloco ≤ 31, tala de junção acima 
   const nomes = [...txt.matchAll(/\n0\nBLOCK\n8\n0\n2\n([^\n]+)/g)].map((m) => m[1]);
   assert.ok(nomes.length && nomes.every((n) => n.length <= 31) && nomes.some((n) => n.startsWith('PP_TALA_JUNCAO')));
   assert.strictEqual(D.projeto(lista, [dd, dd]).items.filter((it) => it.nome === 'FOLHA_A0_SUPRA').length, 2);
+  const mods = [{ ...MOD, niveis: 2 }, MOD, { ...MOD, niveis: 3 }], rr = E.calcularCorte(corte({}, mods), cat); // quadros 3050 / 5850 / 4450
+  assert.strictEqual(D.modelo(rr, 'A').textos.filter((x) => /^VISTA LATERAL CORTE A - QUADRO/.test(x.s)).length, new Set(rr.colunasH).size);
 });
 console.log(`\n${ok} testes OK`);

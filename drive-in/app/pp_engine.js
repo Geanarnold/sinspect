@@ -128,7 +128,7 @@
           if (base != null && y - base < minimo) alertas.push(`${nm}: ${k ? `entre ${base} e ${y}` : `do piso a ${y}`} mm não cabe o palete de ${hp} mm + 100 de folga + longarina TB ${TB} (mínimo ${minimo} mm).`);
         });
       }
-      if (tunel) alertas.push(`${nm} (túnel): proteção e travamento do túnel ainda não entram na lista – conferir com a engenharia.`);
+      // túnel (Gean, 17/10/2026): sem peças especiais – longarina maior (comprimento do vão do túnel) e 1º nível mais alto, ambos informados no módulo
       if (pd > 0 && niveis.length && niveis[niveis.length - 1] + hp + FOLGA_VERTICAL > pd) alertas.push(`${nm}: último palete (topo a ${niveis[niveis.length - 1] + hp} mm + folga) passa do pé-direito de ${pd} mm.`);
       return { i, nome: nm, tunel, frente, hp, carga, nPal, chao, L, Lcalc, cargaPar, lg, perfil: perfil ? perfil.id : null, TB, garraH: perfil && perfil.garra === LG.GARRA3 ? 150 : 250,
         capacidade: lg.capacidade, auto: lg.auto, atencao: !!lg.atencao, niveis, passo, digitado, posicoes: nPal * (niveis.length + (chao ? 1 : 0)) * fileiras };

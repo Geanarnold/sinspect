@@ -63,10 +63,10 @@
   }
 
   // ---- vista lateral: o quadro mais alto do corte, com as travessas da modulação; longarinas em corte e paletes dos módulos vizinhos
-  function lateral(r, titulo) {
+  function lateral(r, titulo, jqSel) {
     const m = novoModelo(), { coluna, sapata, travessaH, travessaD, recortaDiag, mirrorX, translate, clone, nomeBloco, nb, geoPalete } = X();
     const E = r.entradas, P = E.P, CW = 69.8;
-    const jq = r.colunasH.indexOf(Math.max(...r.colunasH)), { H, ys, nD } = r.quadros[jq];
+    const jq = jqSel != null ? jqSel : r.colunasH.indexOf(Math.max(...r.colunasH)), { H, ys, nD } = r.quadros[jq];
     const viz = [r.modulos[jq - 1], r.modulos[jq]].filter(Boolean), md = viz.reduce((a, b) => (b.niveis.length > a.niveis.length ? b : a));
     const niv = [...new Set([].concat(...viz.map((v) => v.niveis)))].sort((a, b) => a - b), TB = Math.max(...viz.map((v) => v.TB));
     const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50);
@@ -77,9 +77,8 @@
       m.put(coluna(H, false), xB, 0, 'MONTANTE', nomeBloco('DI_COLUNA', 'H' + H, 'E')); m.put(mirrorX(sapata()), xB + 7.35, 0, 'MONTANTE', nomeBloco('DI_SAPATA', 'E'));
       const cc = P - 109.1, xm = (xA + xB) / 2, hxL = xm - cc / 2, hxR = xm + cc / 2;
       ys.forEach((y) => m.put(travessaH(hxR - hxL), hxL, holeY(y), 'MONTANTE', nomeBloco('DI_TRAVESSA_H', 'CC' + nb(hxR - hxL))));
-      for (let k = 0; k < nD; k++) { // Z: alterna o sentido a cada vão
-        const sobe = k % 2 === 0, p1 = [sobe ? hxL : hxR, holeY(ys[k])], p2 = [sobe ? hxR : hxL, holeY(ys[k + 1])];
-        const a = p1[0] < p2[0] ? p1 : p2, b = p1[0] < p2[0] ? p2 : p1;
+      for (let k = 0; k < nD; k++) { // Z (des. 0004.0001.01.022 / .055): todas as diagonais no mesmo sentido, do alto à esquerda para baixo à direita
+        const a = [hxL, holeY(ys[k + 1])], b = [hxR, holeY(ys[k])];
         m.put(translate(recortaDiag(travessaD(a, b), xA + CW / 2, xB - CW / 2), -a[0], -a[1]), a[0], a[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(b[0] - a[0]) + 'X' + nb(b[1] - a[1])));
       }
       const sec = [...m.caixa(0, -TB, 50, 0, 'LONGARINA')], nomeS = nomeBloco('PP_LONG_CORTE', 'TB' + TB);
@@ -95,7 +94,8 @@
     for (let k = 0; k < marcas.length - 1; k++) m.cota(xa, marcas[k], xa, marcas[k + 1], 300, `${Math.round(marcas[k + 1] - marcas[k])}`, true, 'c');
     m.cota(xa, 0, xa, H + X().BASE_BARRA, 750, `${Math.round(H + X().BASE_BARRA)}`, true, 'g');
     m.text((xa + xb) / 2, -600, 120, titulo, TXT);
-    if (r.quadros.some((q) => q.H !== H)) m.text((xa + xb) / 2, -780, 80, `QUADRO DA COLUNA ${jq + 1} (MAIS ALTO); DEMAIS: ${[...new Set(r.colunasH)].filter((h) => h !== H).join(' / ')} mm`, TXT);
+    const iguais = r.colunasH.map((h, j) => (h === H ? j + 1 : null)).filter(Boolean);
+    if (r.quadros.some((q) => q.H !== H)) m.text((xa + xb) / 2, -780, 80, `QUADRO ${H} mm - COLUNA(S) ${iguais.join(', ')}`, TXT);
     return { ...m, bbox: [xa - 1900, -900, xb + 1200, H + 1150] };
   }
 
@@ -126,7 +126,11 @@
   // modelo completo: lateral à esquerda, frontal à direita, superior embaixo da frontal; com dd (dados da folha) monta a folha A0
   function modelo(r, corte = 'A', dd = null) {
     const { shiftModel, montarFolha } = X(), c = String(corte || r.nome || 'A').toUpperCase();
-    const mL = lateral(r, `VISTA LATERAL CORTE ${c}`), mF = frontal(r, `VISTA FRONTAL CORTE ${c}`), mS = superior(r, `VISTA SUPERIOR CORTE ${c}`);
+    // uma vista lateral por altura de quadro (Gean), da mais alta para a mais baixa, lado a lado
+    const alturas = [...new Set(r.colunasH)].sort((a, b) => b - a), varias = alturas.length > 1;
+    const laterais = alturas.map((h) => lateral(r, `VISTA LATERAL CORTE ${c}${varias ? ` - QUADRO ${h}` : ''}`, r.colunasH.indexOf(h)));
+    laterais.forEach((ml, k) => { if (k) shiftModel(ml, laterais[k - 1].bbox[2] + 400 - ml.bbox[0]); });
+    const mL = junta(laterais), mF = frontal(r, `VISTA FRONTAL CORTE ${c}`), mS = superior(r, `VISTA SUPERIOR CORTE ${c}`);
     shiftModel(mF, mL.bbox[2] + 1500 - mF.bbox[0]);
     shiftModel(mS, mF.bbox[0] - mS.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1200 - mS.bbox[3]);
     const aviso = root.PPEngine ? root.PPEngine.AVISO_ESTRUTURAL : '';

@@ -180,8 +180,9 @@ Premissas ainda abertas:
 - Sequência do operador: 1. Projeto → 2. Corte (nome, blocos iguais, **quantos módulos**) → 3. Quadro e palete → 4. **cada módulo** → 5. Colunas.
 - Projeto com vários cortes (chips + Novo / Duplicar / Remover); uma folha A0 por corte no PDF/DXF; Excel com aba consolidada (× blocos iguais) e uma aba por corte. Salvar/abrir arquivo `.pp.json`.
 - Cada módulo: paletes por nível, frente, altura e peso do palete, palete no chão, **túnel**, quantidade de níveis ou **caixa de alturas dos níveis** (o operador digita; em branco = calculado), longarina (automática por módulo) e comprimento. Botões "Igual ao módulo anterior", "Aplicar este módulo a todos", "Preencher alturas calculadas".
-- Túnel: sem palete no chão, alturas obrigatórias na caixa; proteção/travamento do túnel ainda fora da lista (alerta).
+- Túnel (Gean): sem peças especiais – longarina maior (comprimento informado no módulo) e 1º nível mais alto (caixa de alturas, obrigatória); sem palete no chão.
 - Colunas: cada linha termina **250 mm acima da última longarina** dos módulos vizinhos; o operador só edita pelo botão "Editar alturas das colunas" e **só para subir** (valor menor é recusado).
 - Coluna acima de 8.500 mm: emenda + **tala de junção** (SA040045) desenhada na vista frontal.
 - F 382 por linha de colunas: carga = ¼ da carga do par por nível de cada módulo vizinho; h pelos níveis dos dois lados.
 - Desenho: carga do palete escrita no bloco do palete (como no Drive-In); vista superior com o bloco DI_MONT_<col> do Drive-In.
+- Vista lateral corrigida (Gean, conferido nos des. 0004.0001.01.022 e .055): diagonais em Z, **todas no mesmo sentido** (do alto à esquerda para baixo à direita), não alternadas; **uma vista lateral por altura de quadro**.
