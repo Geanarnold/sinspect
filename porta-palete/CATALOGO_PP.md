@@ -154,3 +154,15 @@ Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
 - CAD MDP TB 90: CO 16,019 kg vs soma dos componentes 12,451 kg (2×4,829 + 2,011 + 2×0,391) – diferença de 3,57 kg. (Demais modelos fecham a soma em ±0,02 kg.)
 - TB 170 4,00 m: título diz 3.600 kg, perfil SA041030 descrito como "2,30 MT 2.400 KG TB 130 #18" – lista de componentes desatualizada.
 
+
+## App – Porta-Palete v1 (17/10/2026)
+Tela "Porta-Palete" (card da página inicial) → `drive-in/app/pp_engine.js` (cálculo e lista), `pp_desenho.js` (frontal, lateral, superior na folha A0; DXF e PDF), `pp_app.js` (tela). Testes: `node testes/pp_engine.js`, `node testes/pp_longarina.js`.
+
+Premissas adotadas sem regra confirmada (a validar com o Gean):
+1. Comprimento da longarina = paletes × frente + 100 mm entre paletes e até as colunas, para cima em 50 mm (2 × 1000 → 2.300).
+2. Passo entre níveis = altura do palete + 100 mm + altura da longarina (TB), para cima em 50 mm; 1º nível igual ao passo com palete no chão.
+3. Altura da coluna = último nível (apoio) + 100 mm, para cima em 50 mm.
+4. 2 longarinas por nível por módulo; colunas = 2 por quadro, quadros = módulos + 1 por fileira.
+5. Desenho usa a coluna frontal e a sapata do Drive-In (blocos DI); sapata PP só na lista de peças.
+6. Fileira dupla sem espaçador e sem travamentos (etapa 5); coluna sem verificação F 382 (etapa 7).
+7. Carimbo da folha mantém os títulos fixos "DESCRIÇÕES TÉCNICAS DRIVE IN" (folha padrão única).

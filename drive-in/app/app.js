@@ -922,8 +922,8 @@
   $('btnPrint').addEventListener('click', () => window.print());
   $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt();
   window.recalcular = () => { $('catVersao').textContent = catVersaoTxt(); if ($('treinCat')) $('treinCat').textContent = catVersaoTxt(); render(); };
-  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], orc: ['paginaOrc', 'navOrc'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'] };
-  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'orc') renderOrcamento(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
+  const PAGINAS = { inicio: ['paginaInicio', 'navInicio'], config: ['paginaConfig', null], orc: ['paginaOrc', 'navOrc'], proj: ['paginaProj', 'navProj'], cad: ['paginaCad', 'navCad'], trein: ['paginaTrein', 'navTrein'], pp: ['paginaPP', null] };
+  const mostrarPagina = (qual) => { for (const [k, [pg, nv]] of Object.entries(PAGINAS)) { $(pg).classList.toggle('hidden', k !== qual); if (nv) $(nv).classList.toggle('active', k === qual); } if (qual === 'proj') carregarPainel(); if (qual === 'orc') renderOrcamento(); if (qual === 'pp' && window.PPApp) PPApp.render(); if (qual === 'inicio') carregarPainel().then(renderRecentes); document.body.classList.toggle('pg-config', qual === 'config'); window.scrollTo(0, 0); };
   // ---------- página inicial: escolha do tipo de estrutura (por enquanto só o Drive-In) e projetos recentes da pasta ----------
   $('navInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   // treinamento (como preencher e usar o app): menu de cima e atalho na página inicial; o índice rola até a seção
@@ -937,6 +937,7 @@
   document.querySelectorAll('.trein-mini a').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const alvo = document.querySelector(a.getAttribute('href')); if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   $('irInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarPagina('inicio'); });
   $('iniContinuarDI').addEventListener('click', () => mostrarPagina('config'));
+  $('iniNovoPP').addEventListener('click', () => mostrarPagina('pp'));
   $('iniNovoDI').addEventListener('click', () => {
     const temDados = CAB.some((k) => k !== 'revisao' && $(k).value.trim()) || proj.cortes.some((c) => !vazioDados(c.dados));
     if (temDados) $('btnNovoProj').click(); // pede confirmação e limpa

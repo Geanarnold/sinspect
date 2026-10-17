@@ -796,6 +796,9 @@
     for (const t of m.textos) parts.push(`<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${t.h}" fill="${COR[t.l] || '#fff'}" text-anchor="${t.just === 1 ? 'middle' : 'start'}" transform="rotate(${-t.rot} ${X(t.x)} ${Y(t.y)})" font-family="Arial, sans-serif">${t.s}</text>`);
     return `<svg viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" style="background:#1f2430"><rect width="100%" height="100%" fill="#1f2430"/>${parts.join('')}</svg>`;
   }
-  const DXF = { svgPlanta, montarPlanta, dxfProjeto, projetoModelo, folhaPadrao: () => FOLHA(), tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
+  // primitivas e montagem reaproveitadas por outros tipos de estrutura (porta-palete: pp_desenho.js)
+  const base = { clone, translate, mirrorX, stretchX, nomeBloco, nb, coluna, colunaFrontal, furosFrontal, sapata, travessaH, travessaD, recortaDiag, piso, geoPalete, fazCota,
+    shiftModel, montarFolha, escalaFolha, svgModelo, HOLE_DX, BASE_BARRA, MAX_NOME };
+  const DXF = { base, svgModelo, svgPlanta, montarPlanta, dxfProjeto, projetoModelo, folhaPadrao: () => FOLHA(), tituloVista, bracoParam, dxfLateral, dxfCompleto, svgLateral, svgFrontal, montarLateral, montarFrontal, colunaFrontal };
   if (typeof module !== 'undefined' && module.exports) module.exports = DXF; else root.DXF = DXF;
 })(typeof window !== 'undefined' ? window : globalThis);
