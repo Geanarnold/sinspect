@@ -44,12 +44,17 @@
     return best ? best.it : null;
   }
 
-  // Posições das travessas horizontais (mm, do pé da coluna): 100, +600 x3, depois +900; a última no topo.
+  // Posições das travessas horizontais (mm, do pé da coluna): 100, +600 x3, depois +900 (modulação mista do Drive-In).
+  // Topo (Gean 17/10/2026, PP e DI; conferido no des. 0004.0001.01.022): se sobrarem mais de 250 mm acima da última horizontal,
+  // entra mais uma a 100 mm do topo, sem diagonal no último vão → devolve também 'topo' (true quando essa horizontal existe)
+  const SOBRA_TOPO = 250, TOPO_H = 100;
   function posicoesHorizontais(H) {
     const ys = [100];
     for (let i = 0; i < 3 && ys[ys.length - 1] + 600 <= H - 100; i++) ys.push(ys[ys.length - 1] + 600);
     while (ys[ys.length - 1] + 900 <= H - 100) ys.push(ys[ys.length - 1] + 900);
-    return ys; // a última fica no último passo que cabe; o vão até o topo fecha com o elemento de topo (DXF de referência)
+    let topo = false;
+    if (H - ys[ys.length - 1] > SOBRA_TOPO) { ys.push(H - TOPO_H); topo = true; }
+    return { ys, topo };
   }
 
   function calcular(inp, cat) {
@@ -149,8 +154,8 @@
     if (dup && !compSap.length) pend.push(`Sapata ${idSap}: composição e código CO não cadastrados no CATALOGO.xlsx (só o peso do conjunto, ${sap.peso} kg).`);
 
     // ---- laterais: travessas, diagonais, tubos, parafusos (por quadro de 2 colunas)
-    const ys = posicoesHorizontais(H);
-    const nH = ys.length, nD = nH - 1; // diagonais em todos os vãos entre horizontais; vão de topo (última → topo) sem diagonal
+    const { ys, topo: horizTopo } = posicoesHorizontais(H);
+    const nH = ys.length, nD = nH - 1 - (horizTopo ? 1 : 0); // diagonais nos vãos entre horizontais; o vão da horizontal de topo fica sem diagonal
     const porPasso = {};
     for (const a of passosQuadro) porPasso[a] = (porPasso[a] || 0) + 1;
     for (const [aStr, q] of Object.entries(porPasso)) {
@@ -172,7 +177,7 @@
     if (solteira) {
       // travessa união = kit PK (desenho 0004.0003.01.012 REV.04); comprimento total = A1 − 7,2 mm (A1 da face externa da coluna solteira
       // à face da coluna do quadro; modelo "1,025" = A1 1025 → total 1017,8). Fora dos modelos (±3 mm): PK04XXXX, peso pela reta da coluna
-      const a = passoSolteira, totU = r1(a - 7.2), q = nH * laterais * nM;
+      const a = passoSolteira, totU = r1(a - 7.2), q = (nH - (horizTopo ? 1 : 0)) * laterais * nM; // a horizontal de topo não leva união (orçamento Zanotti: 10 por lateral)
       const itU = (cat.uniao || []).filter((u) => u.col === col).find((u) => Math.abs(u.total - totU) <= TOL_SA);
       const reta = RETA_UNIAO[col];
       if (itU) add('Coluna solteira', 'UNIAO', `Travessa união COL ${col} – A1 ${a} mm (total ${totU} mm) – ${itU.co}`, itU.pk || SEM.PK, q, totU, itU.peso, itU.nome);
@@ -413,7 +418,7 @@
       dimensoes: { altura: H, alturaCalculada: Hcalc, largura, profundidade, laterais, colPorLateral, colunas, montantes: colunas * nM, colW, emendas },
       posicoes, paletesPorRua: P, ocupPalete, sobraProfundidade: sobra, pesoTotal, kgPorPosicao: posicoes ? pesoTotal / posicoes : null,
       planta: { eixos: eixosLat, faces, almaT, abreT, cw: CW_LAT, furoLg: { dentro: FURO_LG_DENTRO, fora: FURO_LG_FORA, x: FURO_LG_X }, profPalete: Number(inp.profPalete || 1000) },
-      lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
+      lateral: { niveis: niveisArm, lgU, juntasTunel, trilho: { comp: compTrilho, alt: TRILHO_ALT, frente: TRILHO_FRENTE }, ys, nH, nD, horizTopo, tubosPorVao: 2 * nH - 2 * nD, espacos, quadros, solteira },
       frontal: { peDireito: Number(inp.peDireito) || 0, cargaPalete: Number(inp.cargaPalete) || 0, zigzag: { ccZ, hx: HX, paineis: panZ }, lgFundo: { comp: compLgFundo, h: lgU.A }, escravo, passoNivel, niveis: niveisArm, modeloAlto, balBaixo, balAlto, perfilC, espU: ESP_U, uAlt: altU, alturaPalete: Number(inp.alturaPalete), larguraRua, frentePalete, folgaPalete: FOLGA_PALETE_COLUNA, laterais },
       pecas, alertas, erros, pendencias: pend,
     };

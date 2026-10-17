@@ -17,7 +17,7 @@
  ],
  "posicoes": 3969,
  "paletesPorRua": 9,
- "pesoTotalKg": 124350.977,
+ "pesoTotalKg": 124654.589,
  "erros": [],
  "alertas": [
   "1º nível 1450 mm ajustado para 1451.75 mm (furação de 50 mm da coluna).",
@@ -142,7 +142,7 @@
    "grupo": "Travessas",
    "codigo": "SA04XXXX",
    "desc": "Travessa horizontal – passo 788 mm (total 709.4 mm, c/c 678.9 mm)",
-   "qtd": 5824,
+   "qtd": 6272,
    "compr": 709.4,
    "pesoUnit": 0.624
   },
@@ -166,7 +166,7 @@
    "grupo": "Travessas",
    "codigo": "SA040046",
    "desc": "PP TUBO COMPLEMENTO TRAVESSA COL 122",
-   "qtd": 896,
+   "qtd": 1792,
    "compr": null,
    "pesoUnit": 0.027
   },
@@ -206,7 +206,7 @@
    "grupo": "Fixadores das travessas",
    "codigo": "INT0973",
    "desc": "Parafuso sextavado 5/16\" x 4\" ZNC",
-   "qtd": 11648,
+   "qtd": 12544,
    "compr": null,
    "pesoUnit": null
   },
@@ -214,7 +214,7 @@
    "grupo": "Fixadores das travessas",
    "codigo": "INT0650",
    "desc": "Porca sextavada 5/16\" zincada",
-   "qtd": 11648,
+   "qtd": 12544,
    "compr": null,
    "pesoUnit": null
   },
@@ -611,7 +611,7 @@
    "DI_PL": 3867,
    "DI_SAPATA": 30,
    "DI_TOPO": 28,
-   "DI_TRAVESSA": 350,
+   "DI_TRAVESSA": 364,
    "DI_TRILHO": 2,
    "DI_UNIAO": 26,
    "DI_ZIGZAG": 56,
