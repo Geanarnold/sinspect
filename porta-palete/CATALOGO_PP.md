@@ -54,7 +54,7 @@ Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 
 - Comprimento: mesma regra do DI (horizontal = profundidade − 78,6 mm; diagonal pelo c/c).
 - 1ª horizontal a **100 mm** do piso.
 - Diagonal em **Z** (uma por vão, alternando o sentido).
-- **Chapa da travessa diagonal** (Gean, 17/10/2026): padrão **#1,40** (como no desenho); opções **0,85 / 1,20 / 1,40 / 1,80 mm** escolhidas pelo operador. Vale para **horizontal e diagonal**, no **PP e no DI**; sliter mantém **80 mm**; o **SA se mantém** e a chapa sai na descrição da lista de peças (Gean). Aplicado no DI em 17/10/2026 (campo "Chapa das travessas", etapa Lateral; peso = 80 × chapa × 7,85 kg/m·mm). O zig-zag de topo/fundo continua em #1,40.
+- **Chapa da travessa diagonal** (Gean, 17/10/2026): padrão **#1,40** (como no desenho); opções **0,85 / 1,20 / 1,40 / 1,80 mm** escolhidas pelo operador. Vale para **horizontal e diagonal**, no **PP e no DI**; sliter mantém **80 mm**; o **SA se mantém** e a chapa sai na descrição da lista de peças (Gean). Aplicado no DI em 17/10/2026 (campo "Chapa das travessas", etapa Lateral; peso = 80 × chapa × 7,85 kg/m·mm). Zig-zag de topo e de fundo: chapa própria, mesmas opções (campo "Chapa do zig-zag", padrão #1,40), SA mantido e chapa na descrição (Gean, 17/10/2026).
 - Três modulações à escolha do operador:
   | Modulação | Horizontais (do piso) |
   |---|---|

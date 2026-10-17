@@ -4,7 +4,7 @@
 (function (root) {
   'use strict';
 
-  const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado – padrão; zig-zag e referências
+  const KG_M_TRAVESSA = 80 * 1.4 * 7.85e-6 * 1000; // sliter 80 x 1,40 (ACO0602), sliter fechado – referência (quadro e zig-zag usam a chapa escolhida)
   const ESP_TRAV_OPCOES = [0.85, 1.2, 1.4, 1.8]; // chapa das travessas do quadro (Gean 17/10/2026): sliter 80, SA mantido, chapa na descrição
   const AVISO_ESTRUTURAL = 'COLUNA SEM VALIDAÇÃO ESTRUTURAL — conferir com a engenharia antes de enviar ao cliente.';
   // nota fixa (Gean): o app é ferramenta de orçamento/desenho; verificações operacionais e estruturais ficam com os responsáveis
@@ -329,9 +329,11 @@
     for (const yb of basesU) { panZ.push([ySup, yb - 50]); ySup = yb + altU + 50; }
     panZ.push([ySup, LGTOPO_BASE - 50]);
     const diagZ = panZ.filter(([a1, b1]) => b1 > a1).map(([a1, b1]) => +(Math.hypot(ccZ, b1 - a1) + 30.5).toFixed(1));
+    // chapa do travamento zig-zag (topo e fundo), independente da do quadro (Gean 17/10/2026): mesmas opções, sliter 80, SA mantido
+    const espZZ = ESP_TRAV_OPCOES.includes(Number(inp.espZZ)) ? Number(inp.espZZ) : 1.4, kgmZZ = 80 * espZZ * 7.85e-6 * 1000, chZZ = ` #${espZZ.toFixed(2).replace('.', ',')}`;
     const addZ = (grupo, tipo, tot, qtd, obs) => {
       const it = buscaSA(tipo === 'H' ? cat.travessas : cat.diagonais, tot);
-      add(grupo, `ZZ-${tipo}-${r1(tot)}`, `${tipo === 'H' ? 'Travessa horizontal' : 'Travessa diagonal'} zig-zag – total ${r1(tot)} mm`, it ? it.sa : SEM.SA, qtd, r1(tot), KG_M_TRAVESSA * tot / 1000, (it ? it.nome + '; ' : 'sem SA no cadastro (±3 mm); ') + obs);
+      add(grupo, `ZZ-${tipo}-${r1(tot)}`, `${tipo === 'H' ? 'Travessa horizontal' : 'Travessa diagonal'} zig-zag${chZZ} – total ${r1(tot)} mm`, it ? it.sa : SEM.SA, qtd, r1(tot), kgmZZ * tot / 1000, (it ? it.nome + '; ' : 'sem SA no cadastro (±3 mm); ') + obs);
     };
     const porDZ = {}; for (const t of diagZ) porDZ[t] = (porDZ[t] || 0) + 1;
     for (const [t, q] of Object.entries(porDZ)) addZ('Travamento de fundo (zig-zag)', 'D', Number(t), q * R, `${q} por rua; 50 mm acima da sapata/suporte até 50 mm abaixo do suporte seguinte`);

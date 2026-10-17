@@ -3,7 +3,7 @@
   'use strict';
   const cat = window.CATALOGO;
   const $ = (id) => document.getElementById(id);
-  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'espU', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual', 'espTrav'];
+  const IDS = ['coluna', 'espessura', 'ruas', 'profPalete', 'paletesInformados', 'balancoBaixo', 'balancoAlto', 'cA', 'cB', 'cC', 'cD', 'uA', 'uB', 'uE', 'espU', 'peDireito', 'niveis', 'espacamentos', 'largura', 'frentePalete', 'cargaPalete', 'alturaPalete', 'alt1Nivel', 'alturaManual', 'espTrav', 'espZZ'];
   const fmt = (v, d = 1) => v == null ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt0 = (v) => v == null ? '–' : Number(v).toLocaleString('pt-BR');
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -808,7 +808,7 @@
   });
   // conferência final (Gean): todos os dados digitados, por corte e por etapa; valores fora do padrão destacados
   const NOMES_CONF = { espU: 'Suporte U – chapa', cA: 'Perfil C – A (altura)', cC: 'Perfil C – C (aba)', cB: 'Perfil C – B (dobra)', cD: 'Perfil C – D (espessura)',
-    balancoBaixo: 'Balanço do braço – 1º nível', coluna: 'Coluna – modelo', espessura: 'Coluna – espessura', frentePalete: 'Palete – frente', profPalete: 'Palete – profundidade', alturaPalete: 'Palete – altura', cargaPalete: 'Palete – carga', alt1Nivel: '1º nível (apoio)', alturaManual: 'Altura total (manual)', balancoAlto: 'Balanço do braço – 2º nível em diante', uA: 'Longarina de túnel – alma', uB: 'Longarina de túnel – aba', uE: 'Longarina de túnel – chapa', espTrav: 'Travessas – chapa' };
+    balancoBaixo: 'Balanço do braço – 1º nível', coluna: 'Coluna – modelo', espessura: 'Coluna – espessura', frentePalete: 'Palete – frente', profPalete: 'Palete – profundidade', alturaPalete: 'Palete – altura', cargaPalete: 'Palete – carga', alt1Nivel: '1º nível (apoio)', alturaManual: 'Altura total (manual)', balancoAlto: 'Balanço do braço – 2º nível em diante', uA: 'Longarina de túnel – alma', uB: 'Longarina de túnel – aba', uE: 'Longarina de túnel – chapa', espTrav: 'Travessas – chapa', espZZ: 'Zig-zag – chapa' };
   // dados da conferência: [{ titulo, linhas: [[rótulo, valor, personalizado]] }] — linhas "§..." são subtítulos (etapa)
   function conferenciaDados() {
     const nomeC = (id) => NOMES_CONF[id] || rotuloCampo(id), etapaDe = (id) => { const f = $(id).closest('[id^="passo-"]'); return f ? f.id.replace('passo-', '') : ''; };

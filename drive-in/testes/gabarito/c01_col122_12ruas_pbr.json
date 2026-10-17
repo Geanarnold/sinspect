@@ -329,7 +329,7 @@
   {
    "grupo": "Travamento de fundo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 2569 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 2569 mm",
    "qtd": 12,
    "compr": 2569,
    "pesoUnit": 2.259
@@ -337,7 +337,7 @@
   {
    "grupo": "Travamento de fundo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 2450.5 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 2450.5 mm",
    "qtd": 12,
    "compr": 2450.5,
    "pesoUnit": 2.154
@@ -345,7 +345,7 @@
   {
    "grupo": "Travamento de fundo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 2408.9 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 2408.9 mm",
    "qtd": 12,
    "compr": 2408.9,
    "pesoUnit": 2.118
@@ -385,7 +385,7 @@
   {
    "grupo": "Travamento de topo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 1615.6 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 1615.6 mm",
    "qtd": 12,
    "compr": 1615.6,
    "pesoUnit": 1.42
@@ -393,7 +393,7 @@
   {
    "grupo": "Travamento de topo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 1592.4 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 1592.4 mm",
    "qtd": 24,
    "compr": 1592.4,
    "pesoUnit": 1.4
@@ -401,7 +401,7 @@
   {
    "grupo": "Travamento de topo (zig-zag)",
    "codigo": "SA04XXXX",
-   "desc": "Travessa diagonal zig-zag – total 1639.5 mm",
+   "desc": "Travessa diagonal zig-zag #1,40 – total 1639.5 mm",
    "qtd": 12,
    "compr": 1639.5,
    "pesoUnit": 1.441
