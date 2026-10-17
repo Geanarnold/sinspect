@@ -120,7 +120,15 @@ def parse_pagina(L):
                 d['avisos'].append('campo CÓD. PRODUTO preenchido com "-" no carimbo (desenho genérico, ex.: perfil por altura)')
                 break
     else:
-        d['avisos'].append('peso não encontrado no carimbo')
+        d['avisos'].append('peso em branco no carimbo do desenho (campo PESO sem valor)')
+        # sem peso: o código do produto fica logo depois do título/material (antes de "m²"/"kg")
+        try:
+            it = next(i for i, l in enumerate(L) if l.startswith('CÓDIGO DESEN'))
+            for l in L[it + 1:it + 9]:
+                if RE_COD_LINHA.match(l):
+                    d['codigo'] = l.upper(); break
+        except StopIteration:
+            pass
     # título do produto: linhas após "CÓDIGO DESEN.:" até a linha do projeto ("dddd… - REV.xx")
     try:
         it = next(i for i, l in enumerate(L) if l.startswith('CÓDIGO DESEN'))
