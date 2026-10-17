@@ -70,4 +70,34 @@ Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 
 Pendente – adiado (Gean, 17/10/2026): seguir antes para as longarinas; os travamentos dependem da configuração final (altura, módulos, fileira dupla).
 
 ## 6. Longarinas
-Em andamento – aguardando PDFs dos desenhos e tabela de capacidade (carga por par × vão).
+Em andamento – dados extraídos dos desenhos; falta tabela de capacidade (carga por par × vão) e a lista de comprimentos padrão.
+
+### 6.1 Longarina simples (des. 0004.0001.02.001 REV.70) – conjunto CO = 2 perfis + 2 garras
+| Modelo | Comprimento | Carga (par) | Código CO | Peso CO (kg) | Perfil (2×) | kg/perfil | Garras |
+|---|---|---|---|---|---|---|---|
+| TB 80 | 2,30 m | 1.250 kg | CO040012 | 9,249 | SA040012 | 4,398 | SA040008 (3 encaixes) 0,226/0,227 |
+| TB 90 | 2,30 m | 2.000 kg | CO040011 | 10,441 | SA040010 | 4,829 | SA040006 (5 encaixes) 0,391 |
+| TB 100 | 2,30 m | 2.400 kg | CO040010 | 10,777 | SA040040 | 4,997 | SA040006 |
+| TB 110 | 2,30 m | 2.700 kg | CO040015 | 11,197 | SA040048 | 5,207 | SA040006 |
+| TB 130 | 2,30 m | 3.400 kg | CO040003 | 10,041 | sem SA (–) | 4,629 | SA040006 |
+| TB 150 #1,50 | 1,20 m | 7.200 kg | CO040626 | 8,778 | SA040107 | 9,490 (?) | SA040006 |
+| TB 170 | 4,00 m | 3.600 kg | CO040205 | 17,305 | SA041030 | – | SA040006 |
+
+### 6.2 Longarina com cadeirinha (des. 0004.0001.02.002 REV.36) – 2 perfis + perfil "CAD" + 2 garras
+| Modelo | Código CO | Peso CO (kg) | Perfil (2×) | Perfil CAD / apoio |
+|---|---|---|---|---|
+| CAD MDP 2,00 m 1.600 kg TB 80 | CO040210 | 9,840 | SA040226 (3,822) | SA041038 (1,742) |
+| CAD MDP 2,10 m 2.400 kg TB 90 | CO040138 | 16,019 | SA040010 (4,829) | SA040022 (2,011) |
+| CAD PL MET 2,30 m 2.400 kg TB 100 | CO040086 | 12,787 | SA040040 (4,997) | SA040022 (2,011) |
+| CAD PL MET 2,30 m 2.700 kg TB 110 | CO040043 | 13,193 | SA040048 (5,207) | SA040022 (2,011) |
+| CAD PL MET 2,30 m 3.400 kg TB 130 | CO040007 | 12,051 | SA040011 | SA040022 |
+| CAD PL MET 3,40 m 3.000 kg TB 150 | CO040284 | 22,744 | SA040210 | SA040855 |
+| CAD PL MET 2,30 m 4.300 kg TB 150-E | CO040732 | 18,173 | SA040238 | SA040022 |
+| CAD PL MET 1,20 m 4.800 kg TB 150-E | CO040731 | 9,815 | SA041805 | SA040030 |
+
+Inconsistências a confirmar com a engenharia (não aplicar sem resposta):
+- TB 130: peso do CO (10,041) **menor** que o TB 110 (11,197) com perfil 4,629 < 5,207 – perfil TB 130 sem código SA.
+- TB 150 1,20 m: perfil 9,490 kg × 2 = 18,98 kg > peso do CO 8,778 kg – peso unitário da lista parece errado (ou é o peso do par/barra).
+- CAD MDP TB 90: CO 16,019 kg vs soma dos componentes ≈ 12,05 kg (2×4,829 + 2,011 + 2×0,391) – diferença de ~4 kg.
+- TB 170 4,00 m: título diz 3.600 kg, perfil SA041030 descrito como "2,30 MT 2.400 KG TB 130 #18" – lista de componentes desatualizada.
+

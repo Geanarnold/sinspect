@@ -49,6 +49,10 @@ def parse_bom(L):
         i0 = next(i for i, l in enumerate(L) if l.startswith('QTD')) + 1
     except StopIteration:
         return []
+    # alguns desenhos (ex.: longarinas) têm a coluna extra "PESO (Kg)" depois da QTD.: cada linha termina em qtd + peso
+    com_peso = i0 < len(L) and L[i0].upper().startswith('PESO')
+    if com_peso:
+        i0 += 1
     i1 = next((i for i in range(i0, len(L)) if L[i].startswith('MATERIAL')), len(L))
     seg = L[i0:i1]
     # linha "10 0004.0003.01.001 PA042125" (número + desenho juntos) → separa
@@ -60,6 +64,23 @@ def parse_bom(L):
         else:
             toks.append(l)
     rows, n, i = [], 1, 0
+    if com_peso:
+        while i < len(toks):
+            if toks[i] != str(n):
+                i += 1; continue
+            j = i + 1
+            while j + 1 < len(toks) and not (re.fullmatch(r'\d+', toks[j]) and re.fullmatch(r'\d+[.,]\d+', toks[j + 1])):
+                j += 1
+            if j + 1 >= len(toks):
+                break
+            corpo, qtd, pu = toks[i + 1:j], int(toks[j]), num(toks[j + 1])
+            texto = ' | '.join(corpo); des = RE_DES.search(texto); cods = RE_COD.findall(texto); codigo = cods[0].upper() if cods else None
+            desc = ' '.join(c for c in corpo if c != '-' and not RE_DES.fullmatch(c) and not RE_COD_LINHA.match(c))
+            desc = re.sub(r'^\d{4}\.\d{4}\.\d{2}\.\d{3}\s*', '', desc)
+            if codigo: desc = re.sub(rf'^{re.escape(codigo)}\s*-?\s*', '', desc, flags=re.I)
+            rows.append({'n': n, 'desenho': des.group(1) if des else None, 'codigo': codigo, 'descricao': desc.strip(), 'qtd': qtd, 'peso_unit': pu})
+            n += 1; i = j + 2
+        return rows
     while i < len(toks):
         if toks[i] != str(n):
             i += 1
@@ -84,6 +105,32 @@ def parse_bom(L):
         rows.append({'n': n, 'desenho': des.group(1) if des else None, 'codigo': codigo, 'descricao': desc.strip(), 'qtd': qtd})
         n += 1
         i = j
+    return rows
+
+
+RE_LINHA_BOM = re.compile(r'^(\d{1,2})\s+(\d{4}\.\d{4}\.\d{2}\.\d{3}|-)?\s*(' + COD + r'|-)?\s*(.*?)\s+(\d+)(?:\s+(\d+[.,]\d+))?$', re.I)
+
+
+def parse_bom_ordenado(p):
+    """Lista de componentes lida em ordem de posição (linhas da tabela reconstruídas pelo PyMuPDF, sort=True).
+    Mais robusta que a ordem do texto quando a tabela tem a coluna extra de peso. Devolve [] se não reconhecer."""
+    L = [l.strip() for l in p.get_text('text', sort=True).split('\n') if l.strip()]
+    try:
+        i0 = next(i for i, l in enumerate(L) if re.search(r'C[ÓO]D\. DESENHO', l) and 'QTD' in l) + 1
+    except StopIteration:
+        return []
+    rows, n = [], 1
+    for l in L[i0:i0 + 40]:
+        if l.startswith('MATERIAL') or l.startswith('PROJETO'):
+            break
+        m = RE_LINHA_BOM.match(l)
+        if not m or int(m.group(1)) != n:
+            continue
+        cod = m.group(3) if m.group(3) and m.group(3) != '-' else None
+        desc = re.sub(rf'^{re.escape(cod)}\s*-?\s*', '', m.group(4), flags=re.I) if cod else m.group(4)
+        rows.append({'n': n, 'desenho': m.group(2) if m.group(2) and m.group(2) != '-' else None, 'codigo': cod.upper() if cod else None,
+                     'descricao': desc.strip(), 'qtd': int(m.group(5)), 'peso_unit': num(m.group(6)) if m.group(6) else None})
+        n += 1
     return rows
 
 
@@ -236,6 +283,9 @@ def main():
         out.append(f'# {Path(pdf).name}  ({len(doc)} folha(s))\n')
         for i, p in enumerate(doc):
             f = parse_pagina(linhas_pagina(p))
+            ordenado = parse_bom_ordenado(p)
+            if ordenado and (len(ordenado) >= len(f['componentes']) or any(r['qtd'] is None for r in f['componentes'])):
+                f['componentes'] = ordenado
             f['arquivo'], f['pagina'] = Path(pdf).name, i + 1
             if a.png:
                 Path(a.png).mkdir(parents=True, exist_ok=True)
@@ -249,9 +299,9 @@ def main():
             if f['material']:
                 out.append(f"- Material: {f['material']}")
             if f['componentes']:
-                out.append('\n| Nº | Desenho | Código | Descrição | Qtd |\n|---|---|---|---|---|')
+                out.append('\n| Nº | Desenho | Código | Descrição | Qtd | Peso unit. (kg) |\n|---|---|---|---|---|---|')
                 for r in f['componentes']:
-                    out.append(f"| {r['n']} | {r['desenho'] or '–'} | {r['codigo'] or '?'} | {r['descricao']} | {r['qtd'] if r['qtd'] is not None else '?'} |")
+                    out.append(f"| {r['n']} | {r['desenho'] or '–'} | {r['codigo'] or '?'} | {r['descricao']} | {r['qtd'] if r['qtd'] is not None else '?'} | {r.get('peso_unit') if r.get('peso_unit') is not None else '–'} |")
             for av in f['avisos']:
                 out.append(f'- ⚠ {av}')
             if idx is not None:
