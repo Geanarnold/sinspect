@@ -45,11 +45,10 @@
     box(s * (LG_PLACA + 1.5), -h + 1.5, s * (LG_PLACA + LG_TUBO - 1.5), -1.5); // parede #1,5
     return out;
   }
-  // vista superior: tubo de 40 entre as garras (chapa 3,6 × 60) – y = 0 na face da coluna, tubo para fora (sinal)
+  // vista superior (padrão SUPRA, MONTANTE_SUPERIOR.dxf): a longarina fica DENTRO da profundidade do quadro – linha da face (y = 0)
+  // de face a face das colunas e linha interna a 40 mm (tubo), avançando 15 mm em cada coluna (garra); sinal = lado para dentro do quadro
   function longTopo(L, sinal) {
-    const out = [], box = (x0, y0, x1, y1) => [[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]].forEach(([a, b, c, d]) => out.push({ t: 'p', l: 'PP_LONGARINA', p: [[a, b], [c, d]] }));
-    box(0, 0, LG_PLACA, sinal * 60); box(L - LG_PLACA, 0, L, sinal * 60); box(LG_PLACA, 0, L - LG_PLACA, sinal * LG_TUBO);
-    return out;
+    return [{ t: 'p', l: 'PP_LONGARINA', p: [[0, 0], [L, 0]] }, { t: 'p', l: 'PP_LONGARINA', p: [[-15, sinal * LG_TUBO], [L + 15, sinal * LG_TUBO]] }];
   }
   const piso = (m, x0, x1) => { const { piso: pz, nomeBloco } = X(), n = Math.ceil((x1 - x0) / 1000); for (let k = 0; k < n; k++) m.put(pz(k === 0, k === n - 1), x0 + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === n - 1 ? 'FIM' : '')); };
 
@@ -145,7 +144,7 @@
         if (MONT) m.put(clone(MONT).map((q) => ({ ...q, p: q.p && q.p.map((v) => [v[0], v[1] < -512.5 ? v[1] - (P - 1025) : v[1]]), c: q.c && [q.c[0], q.c[1] < -512.5 ? q.c[1] - (P - 1025) : q.c[1]] })), x, y0 + P, 'MONTANTE', nomeBloco('DI_PL_QUADRO', col, nb(P)));
         else { for (const y of [y0, y0 + P - 70]) m.put(m.caixa(-col / 2, 0, col / 2, 70, 'MONTANTE'), x, y, 'MONTANTE'); m.line(x, y0 + 70, x, y0 + P - 70, 'Contraventamento'); }
       }
-      r.modulos.forEach((md, i) => { m.put(longTopo(md.L, -1), xs[i] + col / 2, y0, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F')); m.put(longTopo(md.L, 1), xs[i] + col / 2, y0 + P, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); if (md.tunel) m.text(xs[i] + col / 2 + md.L / 2, y0 + P / 2 - 40, 90, 'TÚNEL', TXT); });
+      r.modulos.forEach((md, i) => { m.put(longTopo(md.L, 1), xs[i] + col / 2, y0, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F')); m.put(longTopo(md.L, -1), xs[i] + col / 2, y0 + P, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); if (md.tunel) m.text(xs[i] + col / 2 + md.L / 2, y0 + P / 2 - 40, 90, 'TÚNEL', TXT); });
     }
     const W = xs[xs.length - 1] + col / 2, D = E.fileiras * P + (E.fileiras - 1) * E.entreFileiras;
     m.cota(0, D + 50, W, D + 50, 300, `${Math.round(W)}`, false, 'g');
@@ -230,7 +229,7 @@
         let ant = null, n = 0;
         f.r.modulos.forEach((md, i) => {
           const x0 = xs[i] + col / 2, tp = f.rot[i].tipo; n = tp === ant ? n + 1 : 1; ant = tp;
-          m.put(longTopo(md.L, 1), x0, yF, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); m.put(longTopo(md.L, -1), x0, yF - Pq, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F'));
+          m.put(longTopo(md.L, -1), x0, yF, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'T')); m.put(longTopo(md.L, 1), x0, yF - Pq, 'PP_LONGARINA', nomeBloco('PP_LONG_TOPO', nb(md.L), 'F'));
           m.text(x0 + md.L / 2, yF - Pq / 2 - 50, Math.min(220, Pq / 4), `${tp} ${String(n).padStart(2, '0')}`, TXT, 0, 1, 'ROMANS');
         });
         if (f.dupla && lin === 0) for (const x of xs) m.line(x, yF - Pq, x, yF - Pq - Q.entreFileiras, 'FOLHA_NOTA'); // distanciador central
