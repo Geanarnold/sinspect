@@ -36,11 +36,11 @@
     '122#2,65': linha([24907, 24907, 24907, 24907, 24907, 24907, 24907, 24925, 24925, 24925, 24679, 24442, 23976, 23533, 23183, 22676, 21961, 21624, 21204, 20593, 20000, 19280]),
   };
   // verificação da coluna: h = maior distância entre níveis (piso → 1º nível e entre níveis), tabela no h imediatamente maior (a favor da segurança);
-  // carga na coluna mais carregada (interna) = níveis × carga do par ÷ 2 (cada quadro recebe meia carga de cada módulo vizinho; o palete do chão não carrega a coluna)
-  function verificarColuna(col, esp, niveis, cargaPar, H, P) {
+  // carga na coluna: 1/4 da carga do par em cada nível de cada módulo vizinho (o palete do chão não carrega a coluna) – somada por quem chama
+  function verificarColuna(col, esp, niveis, carga, H, P) {
     const id = `${col}#${String(Number(esp).toFixed(2)).replace(/0$/, '').replace('.', ',')}`, tab = F382[id];
     const vaos = niveis.map((y, k) => y - (k ? niveis[k - 1] : 0)), h = Math.max(...vaos);
-    const hRef = F382_H.find((x) => x >= h), carga = niveis.length * cargaPar / 2;
+    const hRef = F382_H.find((x) => x >= h);
     const cap = tab && hRef ? tab[hRef] : null;
     const r = { id, h, hRef: hRef || null, carga, capacidade: cap, uso: cap ? carga / cap : null, ok: cap != null && carga <= cap, motivo: '' };
     if (!tab) r.motivo = `COL ${col} #${String(esp).replace('.', ',')} não está na F 382.`;
@@ -78,58 +78,85 @@
     return best ? best.it : null;
   }
 
-  function calcular(inp, cat) {
+  const N = (v, d) => (v === '' || v == null || Number.isNaN(Number(v)) ? d : Number(v));
+  // alturas digitadas pelo operador ("1000; 2400 3800" ou lista): números positivos, em ordem
+  const lerAlturas = (v) => (Array.isArray(v) ? v : String(v || '').split(/[;,\s]+/)).map(Number).filter((x) => x > 0);
+
+  // ---- um corte = fileira(s) de módulos lado a lado; cada módulo tem palete, carga, níveis e longarina próprios (Gean, 17/10/2026)
+  // corte: { nome, qtd, coluna, espessura, profPalete, profQuadro, modulacao, espTrav, fileiras, entreFileiras, peDireito, alturasColunas: [por linha de colunas],
+  //          modulos: [{ paletesNivel, frentePalete, alturaPalete, cargaPalete, niveis, paleteChao, tunel, alturas, perfilLongarina, compLongarina }] }
+  function calcularCorte(c, cat) {
     const erros = [], alertas = [], pecas = [];
-    const add = (grupo, id, desc, codigo, qtd, compr, pesoUnit, obs, atencao) => pecas.push({ grupo, id, desc, codigo: codigo || '', qtd, compr: compr || null, pesoUnit: pesoUnit == null ? null : pesoUnit, pesoTotal: pesoUnit == null ? null : qtd * pesoUnit, obs: obs || '', atencao: !!atencao });
-    const num = (k, d) => (inp[k] === '' || inp[k] == null ? d : Number(inp[k]));
-
-    const col = parseInt(inp.coluna, 10) || 80, esp = ESP_COLUNA.includes(String(inp.espessura)) ? String(inp.espessura) : '2.0';
-    const frente = num('frentePalete', 1000), profPal = num('profPalete', 1200), hp = num('alturaPalete', 1200), carga = num('cargaPalete', 1000);
-    const nPal = Math.max(1, Math.round(num('paletesNivel', 2))), nNiv = Math.max(1, Math.round(num('niveis', 3))), chao = inp.paleteChao !== false && inp.paleteChao !== 'nao';
-    const modulos = Math.max(1, Math.round(num('modulos', 4))), fileiras = Number(inp.fileiras) === 2 ? 2 : 1, entreFileiras = num('entreFileiras', 300);
-    const P = num('profQuadro', 1000), modulacao = ['padrao', 'zigzag', 'misto'].includes(inp.modulacao) ? inp.modulacao : 'padrao';
-    const espTrav = ESP_TRAV_OPCOES.includes(Number(inp.espTrav)) ? Number(inp.espTrav) : 1.4;
+    const add = (grupo, id, desc, codigo, qtd, compr, pesoUnit, obs, atencao) => {
+      const ex = pecas.find((p) => p.grupo === grupo && p.id === id && p.desc === desc && p.compr === (compr || null));
+      if (ex) { ex.qtd += qtd; ex.pesoTotal = ex.pesoUnit == null ? null : ex.qtd * ex.pesoUnit; if (obs && !ex.obs.includes(obs)) ex.obs += '; ' + obs; ex.atencao = ex.atencao || !!atencao; return; }
+      pecas.push({ grupo, id, desc, codigo: codigo || '', qtd, compr: compr || null, pesoUnit: pesoUnit == null ? null : pesoUnit, pesoTotal: pesoUnit == null ? null : qtd * pesoUnit, obs: obs || '', atencao: !!atencao });
+    };
+    const col = parseInt(c.coluna, 10) || 80, esp = ESP_COLUNA.includes(String(c.espessura)) ? String(c.espessura) : '2.0';
+    const profPal = N(c.profPalete, 1200), P = N(c.profQuadro, 1000), fileiras = Number(c.fileiras) === 2 ? 2 : 1, entreFileiras = N(c.entreFileiras, 300);
+    const modulacao = ['padrao', 'zigzag', 'misto'].includes(c.modulacao) ? c.modulacao : 'padrao';
+    const espTrav = ESP_TRAV_OPCOES.includes(Number(c.espTrav)) ? Number(c.espTrav) : 1.4, pd = N(c.peDireito, 0);
     if (P < PROF_MIN || P > PROF_MAX || P % PROF_PASSO) erros.push(`Profundidade do quadro ${P} mm fora da regra: ${PROF_MIN} a ${PROF_MAX} mm, de ${PROF_PASSO} em ${PROF_PASSO}.`);
-    if (!(frente > 0 && profPal > 0 && hp > 0)) erros.push('Informe frente, profundidade e altura do palete.');
+    if (!(profPal > 0)) erros.push('Informe a profundidade do palete.');
     if (profPal - P > 400) alertas.push(`Palete ${profPal} mm avança ${profPal - P} mm além do quadro de ${P} mm (mais de 200 mm de cada lado): conferir apoio.`);
-    if (profPal < P) alertas.push(`Palete (${profPal} mm) menor que a profundidade do quadro (${P} mm): o palete não apoia nas duas longarinas com folga – conferir.`);
+    if (profPal > 0 && profPal < P) alertas.push(`Palete (${profPal} mm) menor que a profundidade do quadro (${P} mm): o palete não apoia nas duas longarinas com folga – conferir.`);
+    const lista = (c.modulos || []).length ? c.modulos : [{}];
 
-    // ---- longarina: comprimento = paletes + folgas de 100 (entre paletes e até as colunas), múltiplo de 50 → é o vão livre entre colunas
-    const Lcalc = ceil50(nPal * frente + (nPal + 1) * FOLGA_LATERAL);
-    const L = inp.compLongarina ? Number(inp.compLongarina) : Lcalc;
-    const cargaPar = nPal * carga;
-    const lg = LG.montar(L, cargaPar, inp.perfilLongarina || null);
-    if (lg.erro) erros.push(lg.erro);
-    const perfil = lg.erro ? null : LG.PERFIS.find((p) => p.id === lg.perfil);
-    const TB = perfil ? perfil.h : 80;
-    if (lg.alertas) alertas.push(...lg.alertas);
-    if (inp.compLongarina && Number(inp.compLongarina) < Lcalc) alertas.push(`Longarina de ${L} mm menor que a necessária para ${nPal} palete(s) de ${frente} mm com folgas de 100 mm (${Lcalc} mm).`);
+    // ---- módulos: longarina (F 237) e níveis de cada um
+    const mods = lista.map((m, i) => {
+      const nm = `Módulo ${i + 1}`, tunel = !!m.tunel;
+      const frente = N(m.frentePalete, 1000), hp = N(m.alturaPalete, 1200), carga = N(m.cargaPalete, 1000), nPal = Math.max(1, Math.round(N(m.paletesNivel, 2)));
+      const chao = !tunel && m.paleteChao !== false && m.paleteChao !== 'nao';
+      if (!(frente > 0 && hp > 0)) erros.push(`${nm}: informe frente e altura do palete.`);
+      const Lcalc = ceil50(nPal * frente + (nPal + 1) * FOLGA_LATERAL), L = m.compLongarina ? Number(m.compLongarina) : Lcalc, cargaPar = nPal * carga;
+      const lg = LG.montar(L, cargaPar, m.perfilLongarina || null);
+      if (lg.erro) erros.push(`${nm}: ${lg.erro}`);
+      (lg.alertas || []).forEach((a) => alertas.push(`${nm}: ${a}`));
+      if (m.compLongarina && L < Lcalc) alertas.push(`${nm}: longarina de ${L} mm menor que a necessária para ${nPal} palete(s) de ${frente} mm com folgas de 100 mm (${Lcalc} mm).`);
+      const perfil = lg.erro ? null : LG.PERFIS.find((p) => p.id === lg.perfil), TB = perfil ? perfil.h : 80;
+      const passo = ceil50(hp + FOLGA_VERTICAL + TB);
+      let niveis = lerAlturas(m.alturas), digitado = niveis.length > 0;
+      if (!digitado) {
+        if (tunel) erros.push(`${nm} (túnel): informe as alturas dos níveis na caixa do módulo.`);
+        const nNiv = Math.max(1, Math.round(N(m.niveis, 3))), alt1 = chao ? passo : ceil50(TB + 150);
+        niveis = []; for (let k = 0; k < nNiv; k++) niveis.push(alt1 + k * passo);
+      } else {
+        niveis.sort((a, b) => a - b);
+        niveis.forEach((y, k) => {
+          if (y % 50) alertas.push(`${nm}: nível ${y} mm fora da furação de 50 mm da coluna.`);
+          const base = k ? niveis[k - 1] : chao ? 0 : null, minimo = hp + FOLGA_VERTICAL + TB;
+          if (base != null && y - base < minimo) alertas.push(`${nm}: ${k ? `entre ${base} e ${y}` : `do piso a ${y}`} mm não cabe o palete de ${hp} mm + 100 de folga + longarina TB ${TB} (mínimo ${minimo} mm).`);
+        });
+      }
+      if (tunel) alertas.push(`${nm} (túnel): proteção e travamento do túnel ainda não entram na lista – conferir com a engenharia.`);
+      if (pd > 0 && niveis.length && niveis[niveis.length - 1] + hp + FOLGA_VERTICAL > pd) alertas.push(`${nm}: último palete (topo a ${niveis[niveis.length - 1] + hp} mm + folga) passa do pé-direito de ${pd} mm.`);
+      return { i, nome: nm, tunel, frente, hp, carga, nPal, chao, L, Lcalc, cargaPar, lg, perfil: perfil ? perfil.id : null, TB, garraH: perfil && perfil.garra === LG.GARRA3 ? 150 : 250,
+        capacidade: lg.capacidade, auto: lg.auto, atencao: !!lg.atencao, niveis, passo, digitado, posicoes: nPal * (niveis.length + (chao ? 1 : 0)) * fileiras };
+    });
+    const nMod = mods.length;
 
-    // ---- níveis: apoio = topo da longarina, medido do piso; passo = palete + folga + altura da longarina, múltiplo de 50 (furação)
-    const passo = ceil50(hp + FOLGA_VERTICAL + TB);
-    const alt1 = inp.alt1Nivel ? ceil50(Number(inp.alt1Nivel)) : chao ? passo : ceil50(TB + 150);
-    const niveis = []; for (let k = 0; k < nNiv; k++) niveis.push(alt1 + k * passo);
-    const Hcalc = ceil50(niveis[niveis.length - 1] + SOBRA_COLUNA);
-    const H = inp.alturaManual ? ceil50(Number(inp.alturaManual)) : Hcalc;
-    if (H < niveis[niveis.length - 1] + 50) erros.push(`Altura da coluna ${H} mm não comporta o último nível (${niveis[niveis.length - 1]} mm).`);
-    const pd = num('peDireito', 0);
-    if (pd > 0 && niveis[niveis.length - 1] + hp + FOLGA_VERTICAL > pd) alertas.push(`Último palete (topo a ${niveis[niveis.length - 1] + hp} mm + folga) passa do pé-direito de ${pd} mm.`);
-    if (H > 2 * MAX_PECA) erros.push(`Altura ${H} mm acima do máximo de ${2 * MAX_PECA} mm.`);
-    if (H > 12000) alertas.push('Altura acima de 12 m: fora da tabela F 382 dos montantes.');
-
-    // ---- dimensões
-    const quadros = fileiras * (modulos + 1), colunas = 2 * quadros;
-    const comprimento = modulos * L + (modulos + 1) * col;
-    const profundidade = fileiras * P + (fileiras - 1) * entreFileiras;
-    const camadas = nNiv + (chao ? 1 : 0), posicoes = fileiras * modulos * nPal * camadas;
-
-    // ---- colunas (iguais ao DI) + emenda
+    // ---- colunas: cada linha de colunas j (0…nMod) termina 250 mm acima da última longarina dos módulos vizinhos (Gean).
+    // O operador pode editar a altura de cada linha (botão na tela), mas só para SUBIR: valor menor que o calculado é ignorado
+    const topoMod = (m) => (m && m.niveis.length ? m.niveis[m.niveis.length - 1] : 0);
+    const Hcalc = [], Hs = [], editadas = Array.isArray(c.alturasColunas) ? c.alturasColunas : [];
+    for (let j = 0; j <= nMod; j++) {
+      const hc = ceil50(Math.max(topoMod(mods[j - 1]), topoMod(mods[j])) + SOBRA_COLUNA), ed = N(editadas[j], 0);
+      Hcalc.push(hc);
+      if (ed && ed < hc) alertas.push(`Coluna ${j + 1}: altura editada ${ed} mm menor que a calculada (${hc} mm = última longarina + ${SOBRA_COLUNA}). A coluna só pode subir; mantida em ${hc} mm.`);
+      Hs.push(ed > hc ? ceil50(ed) : hc);
+    }
+    Hs.forEach((H, j) => { if (H > 2 * MAX_PECA) erros.push(`Coluna ${j + 1}: altura ${H} mm acima do máximo de ${2 * MAX_PECA} mm.`); });
+    if (Math.max(...Hs) > 12000) alertas.push('Altura acima de 12 m: fora da tabela F 382 dos montantes.');
     const kgm = ((cat.colunas || {})[String(col)] || {})[esp];
     if (kgm == null) alertas.push(`Perfil COL ${col} #${esp} não encontrado no catálogo.`);
     const saCol = (h) => ((cat.colunas_sa || {})[String(col)] || {})[String(h)] || SEM.SA;
-    const trechos = H > MAX_PECA ? [MAX_PECA, H - MAX_PECA] : [H];
-    trechos.forEach((h, i) => { const sa = saCol(h); add('Colunas', `COL-${col}-${h}`, `AMPP COL ${col} C/ABA #${esp.replace('.', ',')} mm – ${h} mm${trechos.length > 1 ? (i ? ' (superior)' : ' (inferior)') : ''}`, sa, colunas, h, kgm != null ? kgm * h / 1000 : null, sa === SEM.SA ? 'altura sem SA cadastrado' : ''); });
-    if (H > MAX_PECA) for (const c of (cat.composicao || []).filter((x) => x.pai === 'EMENDA')) { const p = prod(cat, c.item); add('Emenda de coluna', c.item, p.desc, p.codigo, c.qtd * colunas, null, p.peso); }
+    const emendaComp = (cat.composicao || []).filter((x) => x.pai === 'EMENDA');
+    for (const H of Hs) {
+      const q = 2 * fileiras, trechos = H > MAX_PECA ? [MAX_PECA, H - MAX_PECA] : [H];
+      trechos.forEach((h, i) => { const sa = saCol(h); add('Colunas', `COL-${col}-${h}`, `AMPP COL ${col} C/ABA #${esp.replace('.', ',')} mm – ${h} mm${trechos.length > 1 ? (i ? ' (superior)' : ' (inferior)') : ''}`, sa, q, h, kgm != null ? kgm * h / 1000 : null, sa === SEM.SA ? 'altura sem SA cadastrado' : ''); });
+      if (H > MAX_PECA) for (const e of emendaComp) { const p = prod(cat, e.item); add('Emenda de coluna', e.item, p.desc, p.codigo, e.qtd * q, null, p.peso); }
+    }
+    const quadros = fileiras * (nMod + 1), colunas = 2 * quadros;
 
     // ---- sapatas PP + placas + fixadores
     const [sCod, sDesc, sPeso] = SAPATA[col], [pCod, pDesc, pPeso] = PLACA[col];
@@ -137,45 +164,65 @@
     add('Sapatas', pCod, pDesc, pCod, 2 * colunas, null, pPeso, '2 por sapata; peso da chapa cheia');
     for (const [id, q] of FIX_SAPATA) add('Fixadores das sapatas', id, prod(cat, id).desc, id, q * colunas, null, null, `${q} por sapata`);
 
-    // ---- quadro: horizontais e diagonais (regra do DI: total = P − 78,6; c/c = P − 109,1)
-    const { ys, topo } = horizontais(H, modulacao), nH = ys.length, nD = nH - 1 - (topo ? 1 : 0);
+    // ---- quadros: horizontais e diagonais pela altura de cada linha de colunas (regra do DI: total = P − 78,6; c/c = P − 109,1)
     const kgmTrav = 80 * espTrav * DENS * 1000, ch = ` #${espTrav.toFixed(2).replace('.', ',')}`;
-    const ccH = P - 109.1, totH = P - 78.6, itH = buscaSA(cat.travessas, totH);
-    add('Travessas', `TRAV-H-${P}`, `Travessa horizontal${ch} – quadro ${P} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * quadros, r1(totH), kgmTrav * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
-    const porV = {}; for (let i = 0; i < nD; i++) { const V = ys[i + 1] - ys[i]; porV[V] = (porV[V] || 0) + 1; }
-    for (const [V, q] of Object.entries(porV)) {
-      const cc = Math.hypot(ccH, Number(V)), tot = cc + 30.5, it = buscaSA(cat.diagonais, tot);
-      add('Travessas', `TRAV-D-${P}-${V}`, `Travessa diagonal${ch} – quadro ${P}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, q * quadros, r1(tot), kgmTrav * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
+    const ccH = P - 109.1, totH = P - 78.6, itH = buscaSA(cat.travessas, totH), tb = prod(cat, TUBO[col]), par = prod(cat, PARAFUSO_TRAV[col]);
+    const quadroInfo = Hs.map((H) => { const { ys, topo } = horizontais(H, modulacao); return { H, ys, topo, nD: ys.length - 1 - (topo ? 1 : 0) }; });
+    for (const qd of quadroInfo) {
+      const nH = qd.ys.length;
+      add('Travessas', `TRAV-H-${P}`, `Travessa horizontal${ch} – quadro ${P} mm (total ${r1(totH)} mm, c/c ${r1(ccH)} mm)`, itH ? itH.sa : SEM.SA, nH * fileiras, r1(totH), kgmTrav * totH / 1000, itH ? itH.nome : 'sem SA no cadastro (±3 mm)');
+      for (let i = 0; i < qd.nD; i++) {
+        const V = qd.ys[i + 1] - qd.ys[i], cc = Math.hypot(ccH, V), tot = cc + 30.5, it = buscaSA(cat.diagonais, tot);
+        add('Travessas', `TRAV-D-${P}-${V}`, `Travessa diagonal${ch} – quadro ${P}, vão ${V} mm (total ${r1(tot)} mm, c/c ${r1(cc)} mm)`, it ? it.sa : SEM.SA, fileiras, r1(tot), kgmTrav * tot / 1000, it ? it.nome : 'sem SA no cadastro (±3 mm)');
+      }
+      add('Travessas', TUBO[col], tb.desc, tb.codigo, (2 * nH - 2 * qd.nD) * fileiras, null, tb.peso, 'nós de travessa sem diagonal');
+      add('Fixadores das travessas', PARAFUSO_TRAV[col], par.desc, par.codigo, 2 * nH * fileiras, null, null);
+      add('Fixadores das travessas', 'INT0650', prod(cat, 'INT0650').desc, 'INT0650', 2 * nH * fileiras, null, null, 'diagonais usam o mesmo parafuso da horizontal');
     }
-    const tb = prod(cat, TUBO[col]);
-    add('Travessas', TUBO[col], tb.desc, tb.codigo, (2 * nH - 2 * nD) * quadros, null, tb.peso, 'nós de travessa sem diagonal');
-    const nPar = 2 * nH * quadros, par = prod(cat, PARAFUSO_TRAV[col]);
-    add('Fixadores das travessas', PARAFUSO_TRAV[col], par.desc, par.codigo, nPar, null, null);
-    add('Fixadores das travessas', 'INT0650', prod(cat, 'INT0650').desc, 'INT0650', nPar, null, null, 'diagonais usam o mesmo parafuso da horizontal');
 
-    // ---- longarinas: 2 por nível por módulo (frente e fundo) + 2 pinos por longarina
-    if (!lg.erro) {
-      const qL = 2 * nNiv * modulos * fileiras, [li, pino] = lg.itens;
-      add('Longarinas', 'LONG', li.desc, li.codigo, qL, L, li.pesoUnit, `${lg.trocado ? 'perfil trocado pelo operador; ' : ''}capacidade F 237: ${lg.capacidade != null ? lg.capacidade + ' kg no par' : 'sem capacidade tabelada'}; peso = kg/m F 237 × comprimento + 2 garras${li.cadastrado ? '' : '; sem CO cadastrado'}`, li.atencao);
+    // ---- longarinas: 2 por nível de cada módulo (frente e fundo) + 2 pinos por longarina
+    for (const m of mods) {
+      if (m.lg.erro) continue;
+      const qL = 2 * m.niveis.length * fileiras, [li, pino] = m.lg.itens;
+      add('Longarinas', `LONG-${li.codigo}-${m.L}-${m.perfil}`, li.desc, li.codigo, qL, m.L, li.pesoUnit, `${m.nome}${m.lg.trocado ? ' (perfil trocado pelo operador)' : ''}; F 237: ${m.capacidade != null ? m.capacidade + ' kg no par' : 'sem capacidade tabelada'}${li.cadastrado ? '' : '; sem CO cadastrado'}`, li.atencao);
       add('Fixadores das longarinas', pino.codigo, pino.desc, pino.codigo, pino.qtd * qL, null, null, '1 por garra (manual F 250)');
     }
 
+    // ---- colunas pela F 382: cada coluna recebe 1/4 da carga do par de cada nível dos módulos vizinhos; h pelos níveis dos dois lados
+    const verifs = Hs.map((H, j) => {
+      const viz = [mods[j - 1], mods[j]].filter(Boolean), carga = viz.reduce((s, m) => s + m.niveis.length * m.cargaPar / 4, 0);
+      const niv = [...new Set([].concat(...viz.map((m) => m.niveis)))].sort((a, b) => a - b);
+      return { j, ...verificarColuna(col, esp, niv, carga, H, P) };
+    });
+    const pior = verifs.reduce((a, v) => (!a || (v.uso || 0) > (a.uso || 0) || (a.ok && !v.ok && !v.motivo) ? v : a), null);
+    for (const v of verifs) {
+      if (v.motivo) alertas.push(`Coluna ${v.j + 1} sem verificação: ${v.motivo} Conferir com a engenharia.`);
+      else if (!v.ok) alertas.push(`COLUNA NÃO ATENDE (F 382) – coluna ${v.j + 1}: COL ${col} #${esp.replace('.', ',')} suporta ${Math.round(v.capacidade)} kgf com h = ${v.hRef} mm; carga ${Math.round(v.carga)} kg. Trocar coluna/espessura ou CONSULTAR ENGENHARIA.`);
+    }
+    if (verifs.some((v) => v.travSuperior)) alertas.push('Acima de 8 m com altura/profundidade ≥ 8: F 382 pede travamento superior a cada 3 montantes (etapa 5).');
     if (fileiras === 2) alertas.push('Fileira dupla: espaçadores entre quadros e travamentos (etapa 5) ainda não entram na lista.');
-    const vc = verificarColuna(col, esp, niveis, cargaPar, H, P);
-    if (vc.motivo) alertas.push(`Coluna sem verificação: ${vc.motivo} Conferir com a engenharia.`);
-    else if (!vc.ok) alertas.push(`COLUNA NÃO ATENDE (F 382): COL ${col} #${esp.replace('.', ',')} suporta ${Math.round(vc.capacidade)} kgf com h = ${vc.hRef} mm; carga na coluna ${Math.round(vc.carga)} kg. Trocar coluna/espessura ou CONSULTAR ENGENHARIA.`);
-    if (vc.travSuperior) alertas.push('Acima de 8 m com altura/profundidade ≥ 8: F 382 pede travamento superior a cada 3 montantes (etapa 5).');
 
+    const ORDEM = ['Colunas', 'Emenda de coluna', 'Sapatas', 'Fixadores das sapatas', 'Travessas', 'Fixadores das travessas', 'Longarinas', 'Fixadores das longarinas'];
+    pecas.sort((a, b) => ORDEM.indexOf(a.grupo) - ORDEM.indexOf(b.grupo));
+    const comprimento = mods.reduce((s, m) => s + m.L, 0) + (nMod + 1) * col, profundidade = fileiras * P + (fileiras - 1) * entreFileiras;
     return {
-      tipo: 'PP', erros, alertas, pecas,
-      entradas: { col, esp, frente, profPal, hp, carga, nPal, nNiv, chao, modulos, fileiras, entreFileiras, P, modulacao, espTrav, peDireito: pd },
-      dimensoes: { comprimento, profundidade, altura: H },
-      longarina: { L, Lcalc, perfil: perfil ? perfil.id : null, TB, garraH: perfil && perfil.garra === LG.GARRA3 ? 150 : 250, capacidade: lg.capacidade, cargaPar, atencao: !!lg.atencao, auto: lg.auto },
-      niveis, passo, lateral: { ys, topo, nD }, posicoes, quadros, colunas, verifColuna: vc,
+      tipo: 'PP', nome: String(c.nome || '').trim(), qtd: Math.max(1, Math.round(N(c.qtd, 1))), erros, alertas, pecas,
+      entradas: { col, esp, profPal, P, fileiras, entreFileiras, modulacao, espTrav, peDireito: pd, modulos: nMod },
+      modulos: mods, colunasH: Hs, colunasHcalc: Hcalc, emendaY: MAX_PECA, quadros: quadroInfo, verifColunas: verifs, verifColuna: pior,
+      dimensoes: { comprimento, profundidade, altura: Math.max(...Hs) },
+      posicoes: mods.reduce((s, m) => s + m.posicoes, 0), nQuadros: quadros, colunas,
       pesoTotal: pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0),
     };
   }
 
-  const PPEngine = { calcular, horizontais, verificarColuna, F382, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
+  // compatibilidade: corte com todos os módulos iguais (entrada "plana" da 1ª versão)
+  function calcular(inp, cat) {
+    const m = { paletesNivel: inp.paletesNivel, frentePalete: inp.frentePalete, alturaPalete: inp.alturaPalete, cargaPalete: inp.cargaPalete, niveis: inp.niveis, paleteChao: inp.paleteChao,
+      perfilLongarina: inp.perfilLongarina, compLongarina: inp.compLongarina, alturas: inp.alturas };
+    const n = Math.max(1, Math.round(N(inp.modulos, 4)));
+    return calcularCorte({ ...inp, modulos: Array.from({ length: n }, () => ({ ...m })) }, cat);
+  }
+
+  const PPEngine = { calcular, calcularCorte, lerAlturas, horizontais, verificarColuna, F382, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
   if (typeof module !== 'undefined' && module.exports) module.exports = PPEngine; else root.PPEngine = PPEngine;
 })(typeof window !== 'undefined' ? window : globalThis);

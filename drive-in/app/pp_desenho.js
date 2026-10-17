@@ -22,43 +22,53 @@
   }
   const piso = (m, x0, x1) => { const { piso: pz, nomeBloco } = X(), n = Math.ceil((x1 - x0) / 1000); for (let k = 0; k < n; k++) m.put(pz(k === 0, k === n - 1), x0 + k * 1000, 0, '0', nomeBloco('DI_PISO', k === 0 ? 'INI' : k === n - 1 ? 'FIM' : '')); };
 
-  // ---- vista frontal: módulos de longarina entre colunas (vão livre = comprimento da longarina), paletes em cada nível
+  // eixos das colunas: cada módulo tem a sua longarina (vão livre = comprimento da longarina)
+  const eixos = (r) => { const col = r.entradas.col, xs = [col / 2]; for (const md of r.modulos) xs.push(xs[xs.length - 1] + md.L + col); return xs; };
+
+  // ---- vista frontal: módulos lado a lado, cada um com níveis, longarina e paletes próprios; colunas com a altura de cada linha
   function frontal(r, titulo) {
-    const m = novoModelo(), { colunaFrontal, nomeBloco, nb, geoPalete } = X();
-    const E = r.entradas, Lg = r.longarina, H = r.dimensoes.altura, col = E.col, L = Lg.L, TB = Lg.TB;
-    const xs = []; for (let i = 0; i <= E.modulos; i++) xs.push(i * (L + col) + col / 2);
-    for (const x of xs) m.put(colunaFrontal(col, H), x, 0, 'MONTANTE', nomeBloco('PP_COLUNA_FRONTAL', col, 'H' + H));
-    // longarina (des. 0004.0001.02.001): perfil com altura TB − 3,5, garras de 3,7 mm nas pontas, 35 mm abaixo do perfil (150 ou 250 de altura)
-    const hP = TB - 3.5, gH = Lg.garraH, gE = 3.7;
-    const long = [...m.caixa(gE, -hP, L - gE, 0, 'LONGARINA'), { t: 'p', l: 'LONGARINA', p: [[gE, -hP + 3.5], [L - gE, -hP + 3.5]] }, { t: 'p', l: 'LONGARINA', p: [[gE, -3.5], [L - gE, -3.5]] },
-      ...m.caixa(0, -hP - 35, gE, -hP - 35 + gH, 'LONGARINA'), ...m.caixa(L - gE, -hP - 35, L, -hP - 35 + gH, 'LONGARINA')];
-    const nomeL = nomeBloco('PP_LONG_FRONTAL', 'TB' + TB, nb(L));
-    const pal = geoPalete(E.frente, E.hp, true), nomeP = nomeBloco('PP_PALETE_FR', nb(E.frente) + 'X' + nb(E.hp));
-    const camadas = (E.chao ? [0] : []).concat(r.niveis);
-    for (let i = 0; i < E.modulos; i++) {
-      const x0 = xs[i] + col / 2;
-      for (const y of r.niveis) m.put(X().clone(long), x0, y, 'LONGARINA', nomeL);
-      // paletes centrados no vão: folgas iguais entre paletes e até as colunas
-      const folga = (L - E.nPal * E.frente) / (E.nPal + 1);
-      for (const y of camadas) for (let k = 0; k < E.nPal; k++) m.put(X().clone(pal), x0 + folga + k * (E.frente + folga), y, 'PALETE', nomeP);
-    }
-    const xa = xs[0] - col / 2, xb = xs[E.modulos] + col / 2;
+    const m = novoModelo(), { colunaFrontal, nomeBloco, nb, geoPalete, clone } = X();
+    const E = r.entradas, col = E.col, xs = eixos(r), Hmax = r.dimensoes.altura;
+    xs.forEach((x, j) => m.put(colunaFrontal(col, r.colunasH[j]), x, 0, 'MONTANTE', nomeBloco('PP_COLUNA_FRONTAL', col, 'H' + r.colunasH[j])));
+    // tala de junção (SA040045, blank 99 x 227 #2,65) na emenda da coluna: barra inferior de 8500 + superior; tala centrada na junta
+    const yJ = r.emendaY + X().BASE_BARRA, tala = [...m.caixa(-col / 2 + 6, -113.5, col / 2 - 6, 113.5, 'CANELEIRA_HACHURA'), { t: 'p', l: 'CANELEIRA_HACHURA', p: [[-col / 2, 0], [col / 2, 0]] }];
+    xs.forEach((x, j) => { if (r.colunasH[j] > r.emendaY) { m.put(clone(tala), x, yJ, 'CANELEIRA_HACHURA', nomeBloco('PP_TALA_JUNCAO', col)); m.text(x + col / 2 + 40, yJ - 30, 70, 'TALA DE JUNÇÃO', 'COTAS', 0, 0, 'ROMANS'); } });
+    r.modulos.forEach((md, i) => {
+      // longarina (des. 0004.0001.02.001): perfil com altura TB − 3,5, garras de 3,7 mm nas pontas, 35 mm abaixo do perfil (150 ou 250 de altura)
+      const L = md.L, hP = md.TB - 3.5, gH = md.garraH, gE = 3.7, x0 = xs[i] + col / 2;
+      const long = [...m.caixa(gE, -hP, L - gE, 0, 'LONGARINA'), { t: 'p', l: 'LONGARINA', p: [[gE, -hP + 3.5], [L - gE, -hP + 3.5]] }, { t: 'p', l: 'LONGARINA', p: [[gE, -3.5], [L - gE, -3.5]] },
+        ...m.caixa(0, -hP - 35, gE, -hP - 35 + gH, 'LONGARINA'), ...m.caixa(L - gE, -hP - 35, L, -hP - 35 + gH, 'LONGARINA')];
+      const nomeL = nomeBloco('PP_LONG_FRONTAL', 'TB' + md.TB, nb(L)), pal = geoPalete(md.frente, md.hp, true), nomeP = nomeBloco('PP_PALETE_FR', nb(md.frente) + 'X' + nb(md.hp));
+      for (const y of md.niveis) m.put(clone(long), x0, y, 'LONGARINA', nomeL);
+      const folga = (L - md.nPal * md.frente) / (md.nPal + 1); // paletes centrados no vão: folgas iguais entre paletes e até as colunas
+      for (const y of (md.chao ? [0] : []).concat(md.niveis)) for (let k = 0; k < md.nPal; k++) {
+        const xp = x0 + folga + k * (md.frente + folga);
+        m.put(clone(pal), xp, y, 'PALETE', nomeP);
+        if (md.carga) m.text(xp + md.frente / 2, y + md.hp / 2, 110, `${md.carga} kg`, 'PALETE'); // carga no palete, como no Drive-In
+      }
+      m.cota(x0, Hmax, x0 + L, Hmax, 300, `${L}`, false, 'c');
+      if (md.tunel) m.text(x0 + L / 2, Math.min(md.niveis[0] || 1000, 2000) / 2, 150, 'TÚNEL', TXT);
+      // níveis do módulo: cota corrente na coluna da esquerda do módulo (piso → níveis)
+      const marcas = [0, ...md.niveis];
+      for (let k = 0; k < marcas.length - 1; k++) m.cota(x0 + 150, marcas[k], x0 + 150, marcas[k + 1], -120, `${marcas[k + 1] - marcas[k]}`, true, 'c');
+      md.niveis.forEach((y, k) => m.text(x0 + L - 60, y + 40, 70, `N${k + 1} ${y}`, 'COTAS', 0, 2, 'ROMANS'));
+    });
+    const xa = xs[0] - col / 2, xb = xs[xs.length - 1] + col / 2;
     piso(m, xa - 1000, xb + 1000);
-    // cotas: vão livre de cada módulo e total em cima; níveis (apoio) à esquerda; altura da coluna
-    for (let i = 0; i < E.modulos; i++) m.cota(xs[i] + col / 2, H, xs[i + 1] - col / 2, H, 300, `${L}`, false, 'c');
-    m.cota(xa, H, xb, H, 650, `${Math.round(xb - xa)}`, false, 'g');
-    const marcas = [0, ...r.niveis];
-    for (let k = 0; k < marcas.length - 1; k++) m.cota(xa, marcas[k], xa, marcas[k + 1], 300, `${marcas[k + 1] - marcas[k]}`, true, 'c');
-    m.cota(xa, 0, xa, H, 750, `${H}`, true, 'g');
-    r.niveis.forEach((y, k) => m.text(xb + 200, y - 40, 90, `N${k + 1} ${y}`, 'COTAS', 0, 0, 'ROMANS'));
+    m.cota(xa, Hmax, xb, Hmax, 650, `${Math.round(xb - xa)}`, false, 'g');
+    m.cota(xa, 0, xa, r.colunasH[0], 450, `${r.colunasH[0]}`, true, 'g');
+    if (r.colunasH.some((h) => h !== r.colunasH[0])) xs.forEach((x, j) => j && m.text(x, r.colunasH[j] + 120, 80, `H ${r.colunasH[j]}`, 'COTAS', 0, 1, 'ROMANS'));
     m.text((xa + xb) / 2, -600, 120, titulo, TXT);
-    return { ...m, bbox: [xa - 1900, -900, xb + 1400, H + 1150] };
+    return { ...m, bbox: [xa - 1500, -900, xb + 1000, Hmax + 1150] };
   }
 
-  // ---- vista lateral: quadro(s) com travessas pela modulação escolhida; corte das longarinas e paletes de lado
+  // ---- vista lateral: o quadro mais alto do corte, com as travessas da modulação; longarinas em corte e paletes dos módulos vizinhos
   function lateral(r, titulo) {
     const m = novoModelo(), { coluna, sapata, travessaH, travessaD, recortaDiag, mirrorX, translate, clone, nomeBloco, nb, geoPalete } = X();
-    const E = r.entradas, H = r.dimensoes.altura, P = E.P, CW = 69.8, { ys, nD } = r.lateral, TB = r.longarina.TB;
+    const E = r.entradas, P = E.P, CW = 69.8;
+    const jq = r.colunasH.indexOf(Math.max(...r.colunasH)), { H, ys, nD } = r.quadros[jq];
+    const viz = [r.modulos[jq - 1], r.modulos[jq]].filter(Boolean), md = viz.reduce((a, b) => (b.niveis.length > a.niveis.length ? b : a));
+    const niv = [...new Set([].concat(...viz.map((v) => v.niveis)))].sort((a, b) => a - b), TB = Math.max(...viz.map((v) => v.TB));
     const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50);
     const inicios = []; for (let f = 0; f < E.fileiras; f++) inicios.push(f * (P + E.entreFileiras));
     for (const x0 of inicios) {
@@ -72,11 +82,10 @@
         const a = p1[0] < p2[0] ? p1 : p2, b = p1[0] < p2[0] ? p2 : p1;
         m.put(translate(recortaDiag(travessaD(a, b), xA + CW / 2, xB - CW / 2), -a[0], -a[1]), a[0], a[1], 'MONTANTE', nomeBloco('DI_TRAVESSA_D', nb(b[0] - a[0]) + 'X' + nb(b[1] - a[1])));
       }
-      // longarinas em corte (frente e fundo, por fora das colunas) e palete de lado centrado no quadro
       const sec = [...m.caixa(0, -TB, 50, 0, 'LONGARINA')], nomeS = nomeBloco('PP_LONG_CORTE', 'TB' + TB);
-      for (const y of r.niveis) { m.put(clone(sec), x0 - 50, y, 'LONGARINA', nomeS); m.put(clone(sec), x0 + P, y, 'LONGARINA', nomeS); }
-      const pal = geoPalete(E.profPal, E.hp, true), xp = x0 + (P - E.profPal) / 2, nomeP = nomeBloco('PP_PALETE_LT', nb(E.profPal) + 'X' + nb(E.hp));
-      for (const y of (E.chao ? [0] : []).concat(r.niveis)) m.put(clone(pal), xp, y, 'PALETE', nomeP);
+      for (const y of niv) { m.put(clone(sec), x0 - 50, y, 'LONGARINA', nomeS); m.put(clone(sec), x0 + P, y, 'LONGARINA', nomeS); }
+      const pal = geoPalete(E.profPal, md.hp, true), xp = x0 + (P - E.profPal) / 2, nomeP = nomeBloco('PP_PALETE_LT', nb(E.profPal) + 'X' + nb(md.hp));
+      for (const y of (md.chao ? [0] : []).concat(md.niveis)) m.put(clone(pal), xp, y, 'PALETE', nomeP);
       m.cota(x0, H, x0 + P, H, 300, `${P}`, false, 'c');
     }
     const xa = 0, xb = inicios[inicios.length - 1] + P;
@@ -86,22 +95,24 @@
     for (let k = 0; k < marcas.length - 1; k++) m.cota(xa, marcas[k], xa, marcas[k + 1], 300, `${Math.round(marcas[k + 1] - marcas[k])}`, true, 'c');
     m.cota(xa, 0, xa, H + X().BASE_BARRA, 750, `${Math.round(H + X().BASE_BARRA)}`, true, 'g');
     m.text((xa + xb) / 2, -600, 120, titulo, TXT);
+    if (r.quadros.some((q) => q.H !== H)) m.text((xa + xb) / 2, -780, 80, `QUADRO DA COLUNA ${jq + 1} (MAIS ALTO); DEMAIS: ${[...new Set(r.colunasH)].filter((h) => h !== H).join(' / ')} mm`, TXT);
     return { ...m, bbox: [xa - 1900, -900, xb + 1200, H + 1150] };
   }
 
   // ---- vista superior: colunas, longarinas (frente e fundo) e travessas em cada fileira
   function superior(r, titulo) {
-    const m = novoModelo(), E = r.entradas, L = r.longarina.L, col = E.col, P = E.P;
-    const xs = []; for (let i = 0; i <= E.modulos; i++) xs.push(i * (L + col) + col / 2);
+    const m = novoModelo(), { clone, nomeBloco, nb } = X(), E = r.entradas, col = E.col, P = E.P, xs = eixos(r);
     for (let f = 0; f < E.fileiras; f++) {
       const y0 = f * (P + E.entreFileiras);
+      // quadro visto de cima: bloco DI_MONT_<col> do Drive-In (2 seções + contraventamento; alma de trás em y = 0, desenhado com 1025, esticado na profundidade)
+      const MONT = (root.BLOCOS || {})['DI_MONT_' + col];
       for (const x of xs) {
-        for (const y of [y0, y0 + P - 70]) m.put(m.caixa(-col / 2, 0, col / 2, 70, 'MONTANTE'), x, y, 'MONTANTE');
-        m.line(x, y0 + 70, x, y0 + P - 70, 'Contraventamento');
+        if (MONT) m.put(clone(MONT).map((q) => ({ ...q, p: q.p && q.p.map((v) => [v[0], v[1] < -512.5 ? v[1] - (P - 1025) : v[1]]), c: q.c && [q.c[0], q.c[1] < -512.5 ? q.c[1] - (P - 1025) : q.c[1]] })), x, y0 + P, 'MONTANTE', nomeBloco('DI_PL_QUADRO', col, nb(P)));
+        else { for (const y of [y0, y0 + P - 70]) m.put(m.caixa(-col / 2, 0, col / 2, 70, 'MONTANTE'), x, y, 'MONTANTE'); m.line(x, y0 + 70, x, y0 + P - 70, 'Contraventamento'); }
       }
-      for (let i = 0; i < E.modulos; i++) for (const y of [y0 - 50, y0 + P]) m.put(m.caixa(0, 0, L, 50, 'LONGARINA'), xs[i] + col / 2, y, 'LONGARINA');
+      r.modulos.forEach((md, i) => { for (const y of [y0 - 50, y0 + P]) m.put(m.caixa(0, 0, md.L, 50, 'LONGARINA'), xs[i] + col / 2, y, 'LONGARINA'); if (md.tunel) m.text(xs[i] + col / 2 + md.L / 2, y0 + P / 2 - 40, 90, 'TÚNEL', TXT); });
     }
-    const W = xs[E.modulos] + col / 2, D = E.fileiras * P + (E.fileiras - 1) * E.entreFileiras;
+    const W = xs[xs.length - 1] + col / 2, D = E.fileiras * P + (E.fileiras - 1) * E.entreFileiras;
     m.cota(0, D + 50, W, D + 50, 300, `${Math.round(W)}`, false, 'g');
     m.cota(0, 0, 0, D, 400, `${Math.round(D)}`, true, 'g');
     m.text(W / 2, -900, 120, titulo, TXT);
@@ -114,26 +125,38 @@
 
   // modelo completo: lateral à esquerda, frontal à direita, superior embaixo da frontal; com dd (dados da folha) monta a folha A0
   function modelo(r, corte = 'A', dd = null) {
-    const { shiftModel, montarFolha } = X(), c = String(corte || 'A').toUpperCase();
+    const { shiftModel, montarFolha } = X(), c = String(corte || r.nome || 'A').toUpperCase();
     const mL = lateral(r, `VISTA LATERAL CORTE ${c}`), mF = frontal(r, `VISTA FRONTAL CORTE ${c}`), mS = superior(r, `VISTA SUPERIOR CORTE ${c}`);
     shiftModel(mF, mL.bbox[2] + 1500 - mF.bbox[0]);
     shiftModel(mS, mF.bbox[0] - mS.bbox[0], Math.min(mL.bbox[1], mF.bbox[1]) - 1200 - mS.bbox[3]);
     const aviso = root.PPEngine ? root.PPEngine.AVISO_ESTRUTURAL : '';
     if (aviso) mL.textos.push({ x: mL.bbox[0] + 400, y: -1200, h: 90, s: aviso, l: TXT, rot: 0, just: 0 });
-    const info = [['POSIÇÕES', r.posicoes], ['MÓDULOS', `${r.entradas.modulos} x ${r.entradas.fileiras} FILEIRA(S)`], ['NÍVEIS', `${r.entradas.chao ? 'CHÃO + ' : ''}${r.niveis.length}`],
-      ['LONGARINA', `TB ${r.longarina.TB} - ${r.longarina.L} mm - ${r.longarina.capacidade != null ? r.longarina.capacidade + ' KG/PAR' : 'SEM CAP. TABELADA'}`],
-      ['CARGA POR PALETE', `${r.entradas.carga} kg`], ['PALETE', `${r.entradas.frente} x ${r.entradas.profPal} x ${r.entradas.hp} mm`]];
+    const info = [['POSIÇÕES', r.posicoes], ['MÓDULOS', `${r.entradas.modulos} x ${r.entradas.fileiras} FILEIRA(S)`], ['PROF. DO PALETE', `${r.entradas.profPal} mm`]]
+      .concat(r.modulos.map((md) => [`M${md.i + 1}${md.tunel ? ' (TÚNEL)' : ''}`, `${md.nPal} x ${md.frente}x${md.hp} - ${md.carga} kg - ${md.chao ? 'CHÃO + ' : ''}${md.niveis.length} NÍV. - TB ${md.TB} ${md.L} mm ${md.capacidade != null ? md.capacidade + ' KG/PAR' : 'SEM CAP.'}`]));
     const xI = mL.bbox[0] + 400, yI = -1600; // embaixo da lateral, abaixo do aviso
     mL.bbox[1] = Math.min(mL.bbox[1], yI - (info.length + 1) * 170 - 200);
     mL.textos.push({ x: xI, y: yI, h: 110, s: 'INFORMAÇÕES DO PORTA-PALETE', l: TXT, rot: 0, just: 0 });
     info.forEach(([k, v], i) => mL.textos.push({ x: xI, y: yI - (i + 1) * 170, h: 90, s: `${k}: ${v}`, l: TXT, rot: 0, just: 0 }));
     const mc = junta([mL, mF, mS]);
+    if (r.qtd > 1) mc.textos.push({ x: (mc.bbox[0] + mc.bbox[2]) / 2, y: mc.bbox[3] + 150, h: 120, s: `CORTE ${c} - ${r.qtd} BLOCOS IGUAIS`, l: TXT, rot: 0, just: 1 });
     if (dd) montarFolha(mc, dd);
     return mc;
   }
+  // projeto: uma folha A0 por corte, lado a lado (dds[i] = dados da folha do corte i)
+  function projeto(lista, dds) {
+    const { shiftModel } = X(), out = { prims: [], items: [], linhas: [], textos: [] };
+    let dir = 0;
+    lista.forEach((r, i) => {
+      const mc = modelo(r, r.nome || String.fromCharCode(65 + i), dds ? dds[i] : null);
+      shiftModel(mc, dir - mc.bbox[0], -mc.bbox[1]); dir = mc.bbox[2] + 0.1 * (mc.bbox[2] - mc.bbox[0]);
+      for (const k of ['prims', 'items', 'linhas', 'textos']) out[k] = out[k].concat(mc[k]);
+    });
+    return out;
+  }
   const dxf = (r, corte, dd) => DXF.dxfLateral(null, '', modelo(r, corte, dd));
+  const dxfProjeto = (lista, dds) => DXF.dxfLateral(null, '', projeto(lista, dds));
   const svg = (r, vista) => DXF.svgModelo(vista === 'lateral' ? lateral(r, 'VISTA LATERAL') : vista === 'superior' ? superior(r, 'VISTA SUPERIOR') : frontal(r, 'VISTA FRONTAL'));
 
-  const PPDesenho = { frontal, lateral, superior, modelo, dxf, svg };
+  const PPDesenho = { frontal, lateral, superior, modelo, projeto, dxf, dxfProjeto, svg };
   if (typeof module !== 'undefined' && module.exports) module.exports = PPDesenho; else root.PPDesenho = PPDesenho;
 })(typeof window !== 'undefined' ? window : globalThis);

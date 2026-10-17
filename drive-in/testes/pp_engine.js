@@ -8,53 +8,73 @@ for (const [k, f] of [['Engine', 'engine.js'], ['DXF', 'dxf.js'], ['PPLongarina'
 const D = require(path.join(APP, 'pp_desenho.js')), E = global.window.PPEngine, cat = global.window.CATALOGO;
 let ok = 0;
 const t = (nome, fn) => { fn(); ok++; console.log('OK  ', nome); };
-const base = { coluna: '101', espessura: '2.0', frentePalete: 1000, profPalete: 1200, alturaPalete: 1200, cargaPalete: 1000, paletesNivel: 2, niveis: 4, modulos: 4, profQuadro: 1000 };
+const MOD = { paletesNivel: 2, frentePalete: 1000, alturaPalete: 1200, cargaPalete: 1000, niveis: 4 };
+const corte = (extra = {}, mods = [MOD, MOD, MOD, MOD]) => ({ nome: 'A', qtd: 1, coluna: '101', espessura: '2.0', profPalete: 1200, profQuadro: 1000, ...extra, modulos: mods.map((m) => ({ ...m })) });
 const qtd = (r, cod) => r.pecas.filter((p) => p.codigo === cod).reduce((s, p) => s + p.qtd, 0);
+const dd = { cliente: 'C', cidade: 'X', uf: 'MG', rt: '', desenhista: 'T', processo: 'P', revisao: 'REV-00', data: '01/01/2026', folha: '1/1', rev: { num: '00', por: 'T', data: '01/01/2026', alteracao: 'EMISSÃO' }, capTotal: '1', paletes: [], descricao: {} };
 
 t('modulações das horizontais', () => {
   assert.deepStrictEqual(E.horizontais(5700, 'padrao').ys, [100, 1000, 1900, 2800, 3700, 4600, 5500]);
   assert.deepStrictEqual(E.horizontais(3000, 'zigzag').ys, [100, 700, 1300, 1900, 2500, 2900]);
   assert.deepStrictEqual(E.horizontais(5000, 'misto').ys.slice(0, 6), [100, 700, 1300, 1900, 2800, 3700]);
-  const t1 = E.horizontais(6700, 'padrao'); assert.ok(t1.topo); const t2 = E.horizontais(6550, 'padrao'); assert.ok(!t2.topo); // des. 0004.0001.01.022
+  assert.ok(E.horizontais(6700, 'padrao').topo); assert.ok(!E.horizontais(6550, 'padrao').topo); // des. 0004.0001.01.022
 });
-t('caso base: geometria, longarina e contagens', () => {
-  const r = E.calcular(base, cat);
+t('módulos iguais: geometria, longarina e contagens', () => {
+  const r = E.calcularCorte(corte(), cat), m = r.modulos[0];
   assert.deepStrictEqual(r.erros, []);
-  assert.strictEqual(r.longarina.L, 2300); assert.strictEqual(r.longarina.perfil, '90#1,5');
-  assert.deepStrictEqual(r.niveis, [1400, 2800, 4200, 5600]); assert.strictEqual(r.dimensoes.altura, 5850); // último nível + 250
+  assert.strictEqual(m.L, 2300); assert.strictEqual(m.perfil, '90#1,5');
+  assert.deepStrictEqual(m.niveis, [1400, 2800, 4200, 5600]); assert.deepStrictEqual(r.colunasH, [5850, 5850, 5850, 5850, 5850]); // último nível + 250
   assert.strictEqual(r.posicoes, 4 * 2 * 5); assert.strictEqual(r.colunas, 10);
   assert.strictEqual(qtd(r, 'CO040011'), 2 * 4 * 4); assert.strictEqual(qtd(r, 'INT1556'), 2 * 2 * 4 * 4);
   assert.strictEqual(qtd(r, 'CO040212'), 10); assert.strictEqual(qtd(r, 'SA041046'), 20); assert.strictEqual(qtd(r, 'INT0654'), 20);
 });
+t('módulos diferentes: alturas digitadas, carga, túnel e coluna pelo vizinho mais alto', () => {
+  const mods = [{ ...MOD, niveis: 2 }, { ...MOD, alturas: '1400 2800 4200', cargaPalete: 1300 }, { ...MOD, tunel: true, alturas: '2800; 4200', cargaPalete: 600 }];
+  const r = E.calcularCorte(corte({}, mods), cat);
+  assert.deepStrictEqual(r.erros, []);
+  assert.deepStrictEqual(r.modulos.map((m) => m.perfil), ['90#1,5', '110#1,5', '80#1,5']); // 2000 / 2600 / 1200 kg no par
+  assert.deepStrictEqual(r.colunasH, [3050, 4450, 4450, 4450]);
+  assert.strictEqual(r.modulos[2].chao, false); assert.strictEqual(r.posicoes, 2 * 3 + 2 * 4 + 2 * 2);
+  assert.ok(r.alertas.some((a) => a.includes('túnel')));
+  assert.ok(E.calcularCorte(corte({}, [{ ...MOD, tunel: true }]), cat).erros.some((e) => e.includes('túnel'))); // túnel sem alturas
+});
+t('altura de coluna editada só sobe', () => {
+  const r = E.calcularCorte(corte({ alturasColunas: [6000, 5000, '', 0, 7020] }), cat);
+  assert.deepStrictEqual(r.colunasH, [6000, 5850, 5850, 5850, 7050]);
+  assert.ok(r.alertas.some((a) => a.startsWith('Coluna 2: altura editada 5000')));
+});
 t('fileira dupla dobra quadros e longarinas', () => {
-  const r = E.calcular({ ...base, fileiras: 2 }, cat);
-  assert.strictEqual(r.colunas, 20); assert.strictEqual(qtd(r, 'CO040011'), 64); assert.strictEqual(r.dimensoes.profundidade, 2300); // 2 × 1000 + 300 (padrão entre fileiras)
+  const r = E.calcularCorte(corte({ fileiras: 2 }), cat);
+  assert.strictEqual(r.colunas, 20); assert.strictEqual(qtd(r, 'CO040011'), 64); assert.strictEqual(r.dimensoes.profundidade, 2300);
 });
 t('perfil trocado que não suporta → atenção na lista', () => {
-  const r = E.calcular({ ...base, perfilLongarina: '80#1,5' }, cat), l = r.pecas.find((p) => p.grupo === 'Longarinas');
-  assert.ok(l.atencao && l.desc.startsWith('⚠')); assert.ok(r.alertas.some((a) => a.includes('CONSULTAR ENGENHARIA')));
+  const r = E.calcularCorte(corte({}, [{ ...MOD, perfilLongarina: '80#1,5' }, MOD]), cat), l = r.pecas.find((p) => p.grupo === 'Longarinas' && p.atencao);
+  assert.ok(l && l.desc.startsWith('⚠')); assert.ok(r.alertas.some((a) => a.startsWith('Módulo 1') && a.includes('CONSULTAR ENGENHARIA')));
 });
 t('profundidade do quadro fora da regra → erro', () => {
-  assert.ok(E.calcular({ ...base, profQuadro: 1225 }, cat).erros.length);
-  assert.ok(E.calcular({ ...base, profQuadro: 550 }, cat).erros.length);
-});
-t('DXF e PDF-modelo sem NaN, com folha', () => {
-  const r = E.calcular({ ...base, fileiras: 2 }, cat);
-  const dd = { cliente: 'C', cidade: 'X', uf: 'MG', rt: '', desenhista: 'T', processo: 'P', revisao: 'REV-00', data: '01/01/2026', folha: '1/1', rev: { num: '00', por: 'T', data: '01/01/2026', alteracao: 'EMISSÃO' }, capTotal: '1', paletes: [], descricao: {} };
-  const txt = D.dxf(r, 'A', dd);
-  assert.ok(!/NaN|undefined|Infinity/.test(txt));
-  const nomes = [...txt.matchAll(/\n0\nBLOCK\n8\n0\n2\n([^\n]+)/g)].map((m) => m[1]);
-  assert.ok(nomes.length && nomes.every((n) => n.length <= 31));
-  assert.ok(D.modelo(r, 'A', dd).items.some((it) => it.nome === 'FOLHA_A0_SUPRA'));
+  assert.ok(E.calcularCorte(corte({ profQuadro: 1225 }), cat).erros.length);
+  assert.ok(E.calcularCorte(corte({ profQuadro: 550 }), cat).erros.length);
 });
 t('verificação da coluna pela F 382', () => {
-  const v = E.verificarColuna(80, '2.0', [1400, 2800, 4200], 2000, 4450, 1000);
-  assert.strictEqual(v.hRef, 1400); assert.strictEqual(v.capacidade, 10780); assert.strictEqual(v.carga, 3000); assert.ok(v.ok);
-  assert.strictEqual(E.verificarColuna(101, '2.25', [1150], 1000, 2000, 1000).hRef, 1200); // h intermediário usa o tabelado maior
-  assert.ok(!E.verificarColuna(80, '2.0', [1400, 2800, 4200, 5600, 7000, 8400], 5000, 8650, 1000).ok); // 15 t na coluna > 10,78 t
-  assert.ok(E.verificarColuna(80, '2.0', [2800], 1000, 3050, 1000).motivo.includes('2600'));
-  assert.ok(E.verificarColuna(80, '2.65', [1400], 1000, 1650, 1000).motivo); // COL 80 #2,65 fora da F 382
-  const r = E.calcular({ ...base, coluna: '80', espessura: '1.8', niveis: 8, cargaPalete: 1300, perfilLongarina: '130#1,5' }, cat);
-  assert.ok(r.alertas.some((a) => a.startsWith('COLUNA NÃO ATENDE'))); // 8 × 2600 ÷ 2 = 10.400 kg > 8.865 kgf (h 1500)
+  const v = E.verificarColuna(80, '2.0', [1400, 2800, 4200], 3000, 4450, 1000);
+  assert.strictEqual(v.hRef, 1400); assert.strictEqual(v.capacidade, 10780); assert.ok(v.ok);
+  assert.strictEqual(E.verificarColuna(101, '2.25', [1150], 500, 2000, 1000).hRef, 1200); // h intermediário usa o tabelado maior
+  assert.ok(!E.verificarColuna(80, '2.0', [1400, 2800, 4200], 15000, 4450, 1000).ok);
+  assert.ok(E.verificarColuna(80, '2.0', [2800], 500, 3050, 1000).motivo.includes('2600'));
+  assert.ok(E.verificarColuna(80, '2.65', [1400], 500, 1650, 1000).motivo); // COL 80 #2,65 fora da F 382
+  // coluna interna: 1/4 do par por nível de cada vizinho → 8 níveis × 2600 × 2/4 = 10.400 kg > 8.865 kgf (h 1500)
+  const r = E.calcularCorte({ ...corte({ coluna: '80', espessura: '1.8' }, [{ ...MOD, niveis: 8, cargaPalete: 1300, perfilLongarina: '130#1,5' }, { ...MOD, niveis: 8, cargaPalete: 1300, perfilLongarina: '130#1,5' }]) }, cat);
+  assert.strictEqual(r.verifColunas[1].carga, 10400); assert.strictEqual(r.verifColunas[0].carga, 5200);
+  assert.ok(r.alertas.some((a) => a.startsWith('COLUNA NÃO ATENDE (F 382) – coluna 2')));
+});
+t('DXF de vários cortes sem NaN, nomes de bloco ≤ 31, tala de junção acima de 8500', () => {
+  const alto = E.calcularCorte(corte({ nome: 'B', coluna: '122', espessura: '2.65' }, [{ ...MOD, niveis: 7 }, MOD]), cat);
+  assert.ok(alto.colunasH[0] > 8500 && qtd(alto, 'SA040045') > 0);
+  const lista = [E.calcularCorte(corte({ fileiras: 2 }), cat), alto];
+  const txt = D.dxfProjeto(lista, [dd, dd]);
+  assert.ok(!/NaN|undefined|Infinity/.test(txt));
+  const nomes = [...txt.matchAll(/\n0\nBLOCK\n8\n0\n2\n([^\n]+)/g)].map((m) => m[1]);
+  assert.ok(nomes.length && nomes.every((n) => n.length <= 31) && nomes.some((n) => n.startsWith('PP_TALA_JUNCAO')));
+  assert.strictEqual(D.projeto(lista, [dd, dd]).items.filter((it) => it.nome === 'FOLHA_A0_SUPRA').length, 2);
 });
 console.log(`\n${ok} testes OK`);

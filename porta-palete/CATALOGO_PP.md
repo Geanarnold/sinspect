@@ -175,3 +175,13 @@ Premissas ainda abertas:
 - Barra de botões: **Calcular** Longarina / Colunas; **Gerar** Lista de peças / Projeto (PDF) / Projeto (DXF) / Lista (Excel).
 - Calcular longarina: todos os perfis da F 237 no comprimento do projeto (capacidade, atende/não atende, peso) com botão "usar".
 - Calcular colunas (F 382): carga na coluna mais carregada = níveis × carga do par ÷ 2 (palete do chão não carrega a coluna); h = maior distância entre níveis (piso → 1º nível e entre níveis), tabela no h imediatamente maior; COL 80 só #1,8/#2,0 na tabela; acima de 12 m ou h > 2600 → sem verificação. Premissa de carga **a confirmar com a engenharia**.
+
+### Tela v3 – cortes e módulos (Gean, 17/10/2026)
+- Sequência do operador: 1. Projeto → 2. Corte (nome, blocos iguais, **quantos módulos**) → 3. Quadro e palete → 4. **cada módulo** → 5. Colunas.
+- Projeto com vários cortes (chips + Novo / Duplicar / Remover); uma folha A0 por corte no PDF/DXF; Excel com aba consolidada (× blocos iguais) e uma aba por corte. Salvar/abrir arquivo `.pp.json`.
+- Cada módulo: paletes por nível, frente, altura e peso do palete, palete no chão, **túnel**, quantidade de níveis ou **caixa de alturas dos níveis** (o operador digita; em branco = calculado), longarina (automática por módulo) e comprimento. Botões "Igual ao módulo anterior", "Aplicar este módulo a todos", "Preencher alturas calculadas".
+- Túnel: sem palete no chão, alturas obrigatórias na caixa; proteção/travamento do túnel ainda fora da lista (alerta).
+- Colunas: cada linha termina **250 mm acima da última longarina** dos módulos vizinhos; o operador só edita pelo botão "Editar alturas das colunas" e **só para subir** (valor menor é recusado).
+- Coluna acima de 8.500 mm: emenda + **tala de junção** (SA040045) desenhada na vista frontal.
+- F 382 por linha de colunas: carga = ¼ da carga do par por nível de cada módulo vizinho; h pelos níveis dos dois lados.
+- Desenho: carga do palete escrita no bloco do palete (como no Drive-In); vista superior com o bloco DI_MONT_<col> do Drive-In.
