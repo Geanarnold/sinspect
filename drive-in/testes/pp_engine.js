@@ -47,4 +47,14 @@ t('DXF e PDF-modelo sem NaN, com folha', () => {
   assert.ok(nomes.length && nomes.every((n) => n.length <= 31));
   assert.ok(D.modelo(r, 'A', dd).items.some((it) => it.nome === 'FOLHA_A0_SUPRA'));
 });
+t('verificação da coluna pela F 382', () => {
+  const v = E.verificarColuna(80, '2.0', [1400, 2800, 4200], 2000, 4450, 1000);
+  assert.strictEqual(v.hRef, 1400); assert.strictEqual(v.capacidade, 10780); assert.strictEqual(v.carga, 3000); assert.ok(v.ok);
+  assert.strictEqual(E.verificarColuna(101, '2.25', [1150], 1000, 2000, 1000).hRef, 1200); // h intermediário usa o tabelado maior
+  assert.ok(!E.verificarColuna(80, '2.0', [1400, 2800, 4200, 5600, 7000, 8400], 5000, 8650, 1000).ok); // 15 t na coluna > 10,78 t
+  assert.ok(E.verificarColuna(80, '2.0', [2800], 1000, 3050, 1000).motivo.includes('2600'));
+  assert.ok(E.verificarColuna(80, '2.65', [1400], 1000, 1650, 1000).motivo); // COL 80 #2,65 fora da F 382
+  const r = E.calcular({ ...base, coluna: '80', espessura: '1.8', niveis: 8, cargaPalete: 1300, perfilLongarina: '130#1,5' }, cat);
+  assert.ok(r.alertas.some((a) => a.startsWith('COLUNA NÃO ATENDE'))); // 8 × 2600 ÷ 2 = 10.400 kg > 8.865 kgf (h 1500)
+});
 console.log(`\n${ok} testes OK`);

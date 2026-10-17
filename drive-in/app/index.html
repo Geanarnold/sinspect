@@ -47,22 +47,24 @@
     </div>
   </section>
   <main class="wrap hidden" id="paginaPP">
-    <div class="pp-cab"><h2>Porta-Palete <small>seletivo · em validação</small></h2><p class="nota">Primeira versão: cálculo, lista de peças e desenho. Travamentos (etapa 5) e verificação da coluna pela F 382 (etapa 7) ainda não entram.</p></div>
+    <div class="pp-cab"><h2>Porta-Palete <small>seletivo · em validação</small></h2><p class="nota">Preencha as caixas da esquerda; os resultados se atualizam sozinhos. Travamentos e espaçador da fileira dupla (etapa 5) ainda não entram na lista.</p></div>
     <div class="pp-grid">
-      <aside class="card pp-form form">
-<h3 class="pp-sec">Projeto</h3>
+      <aside class="pp-form">
+        <details class="pp-box" open><summary>1. Projeto</summary><div class="pp-campos">
 <div class="campo"><label for="ppCliente">Cliente</label><div class="in"><input id="ppCliente" type="text" value=""/></div></div>
 <div class="campo"><label for="ppProjeto">Projeto</label><div class="in"><input id="ppProjeto" type="text" value=""/></div></div>
 <div class="campo"><label for="ppCidade">Cidade</label><div class="in"><input id="ppCidade" type="text" value=""/></div></div>
 <div class="campo"><label for="ppUf">UF</label><div class="in"><input id="ppUf" type="text" value="" maxlength="2"/></div></div>
 <div class="campo"><label for="ppDesenhista">Desenhista</label><div class="in"><input id="ppDesenhista" type="text" value=""/></div></div>
 <div class="campo"><label for="ppRevisao">Revisão</label><div class="in"><input id="ppRevisao" type="text" value="REV.00"/></div></div>
-<h3 class="pp-sec">Palete</h3>
+        </div></details>
+        <details class="pp-box" open><summary>2. Palete</summary><div class="pp-campos">
 <div class="campo"><label for="ppFrente">Frente</label><div class="in com-un"><input id="ppFrente" type="number" value="1000"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppProfPal">Profundidade</label><div class="in com-un"><input id="ppProfPal" type="number" value="1200"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppAltPal">Altura (com carga)</label><div class="in com-un"><input id="ppAltPal" type="number" value="1200"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppCarga">Peso</label><div class="in com-un"><input id="ppCarga" type="number" value="1000"/><span class=un>kg</span></div></div>
-<h3 class="pp-sec">Estrutura</h3>
+        </div></details>
+        <details class="pp-box" open><summary>3. Estrutura</summary><div class="pp-campos">
 <div class="campo"><label for="ppPalNivel">Paletes por nível</label><div class="in"><input id="ppPalNivel" type="number" value="2"/></div></div>
 <div class="campo"><label for="ppNiveis">Níveis de longarina</label><div class="in"><input id="ppNiveis" type="number" value="3"/></div></div>
 <div class="campo"><label class="chk"><input id="ppChao" type="checkbox" checked/> Palete no chão</label></div>
@@ -70,25 +72,33 @@
 <div class="campo"><label for="ppFileiras">Fileiras</label><div class="in"><select id="ppFileiras"><option value="1" selected>Simples</option><option value="2">Dupla</option></select></div></div>
 <div class="campo"><label for="ppEntre">Entre fileiras</label><div class="in com-un"><input id="ppEntre" type="number" value="300"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppPeDireito">Pé-direito (opcional)</label><div class="in com-un"><input id="ppPeDireito" type="number" value=""/><span class=un>mm</span></div></div>
-<h3 class="pp-sec">Quadro</h3>
+        </div></details>
+        <details class="pp-box" open><summary>4. Quadro (coluna e amarração)</summary><div class="pp-campos">
 <div class="campo"><label for="ppColuna">Coluna</label><div class="in"><select id="ppColuna"><option value="80" selected>AMPP COL 80</option><option value="101">AMPP COL 101</option><option value="122">AMPP COL 122</option></select></div></div>
 <div class="campo"><label for="ppEsp">Espessura</label><div class="in com-un"><select id="ppEsp"><option value="1.8">1,8</option><option value="2.0" selected>2,0</option><option value="2.25">2,25</option><option value="2.65">2,65</option></select><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppProfQ">Profundidade do quadro</label><div class="in com-un"><select id="ppProfQ"><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="750">750</option><option value="800">800</option><option value="850">850</option><option value="900">900</option><option value="950">950</option><option value="1000" selected>1000</option><option value="1050">1050</option><option value="1100">1100</option><option value="1150">1150</option><option value="1200">1200</option></select><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppModulacao">Amarração</label><div class="in"><select id="ppModulacao"><option value="padrao" selected>Padrão (900)</option><option value="zigzag">Zig-zag (600)</option><option value="misto">Misto (3×600 + 900)</option></select></div></div>
 <div class="campo"><label for="ppEspTrav">Chapa das travessas</label><div class="in com-un"><select id="ppEspTrav"><option value="0.85">0,85</option><option value="1.2">1,20</option><option value="1.4" selected>1,40</option><option value="1.8">1,80</option></select><span class=un>mm</span></div></div>
-<h3 class="pp-sec">Longarina e ajustes (opcional)</h3>
+        </div></details>
+        <details class="pp-box" open><summary>5. Longarina e ajustes (opcional)</summary><div class="pp-campos">
 <div class="campo"><label for="ppPerfil">Perfil da longarina</label><div class="in"><select id="ppPerfil"><option value="" selected>Automático (mais leve que atende)</option><option value="80#1,5">TB 80 #1,5</option><option value="90#1,5">TB 90 #1,5</option><option value="100#1,5">TB 100 #1,5</option><option value="110#1,5">TB 110 #1,5</option><option value="130#1,5">TB 130 #1,5</option><option value="150#1,5">TB 150 #1,5</option><option value="150#1,8">TB 150 #1,8</option><option value="150#2,0">TB 150 #2,0</option></select></div></div>
 <div class="campo"><label for="ppCompL">Comprimento da longarina</label><div class="in com-un"><input id="ppCompL" type="number" value="" step="50" placeholder="calculado"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppAlt1">1º nível (apoio)</label><div class="in com-un"><input id="ppAlt1" type="number" value="" step="50" placeholder="calculado"/><span class=un>mm</span></div></div>
 <div class="campo"><label for="ppAltura">Altura da coluna</label><div class="in com-un"><input id="ppAltura" type="number" value="" step="50" placeholder="calculada"/><span class=un>mm</span></div></div>
+        </div></details>
       </aside>
       <section class="pp-res">
+        <div class="card pp-barra">
+          <div class="pp-barra-g"><span>Calcular</span><button type="button" id="ppBtnLong"><svg class="ic"><use href="#i-calc"/></svg>Longarina</button><button type="button" id="ppBtnCol"><svg class="ic"><use href="#i-col"/></svg>Colunas</button></div>
+          <div class="pp-barra-g"><span>Gerar</span><button type="button" class="primario" id="ppBtnBom"><svg class="ic"><use href="#i-lista"/></svg>Lista de peças</button><button type="button" id="ppPdf"><svg class="ic"><use href="#i-print"/></svg>Projeto (PDF)</button><button type="button" id="ppDxf"><svg class="ic"><use href="#i-dxf"/></svg>Projeto (DXF)</button><button type="button" id="ppXlsx"><svg class="ic"><use href="#i-tabela"/></svg>Lista (Excel)</button></div>
+        </div>
         <div id="ppMsgs"></div>
         <div class="card pp-resumo" id="ppResumo"></div>
-        <div class="card pp-vistas"><div class="pp-abas"><button type="button" class="ativo" data-v="frontal">Frontal</button><button type="button" data-v="lateral">Lateral</button><button type="button" data-v="superior">Superior</button>
-          <span class="pp-acoes"><button type="button" id="ppDxf"><svg class="ic"><use href="#i-dxf"/></svg>DXF do projeto</button><button type="button" id="ppPdf"><svg class="ic"><use href="#i-print"/></svg>PDF do projeto</button><button type="button" id="ppXlsx"><svg class="ic"><use href="#i-tabela"/></svg>Lista (Excel)</button></span></div>
+        <div class="card pp-painel hidden" id="ppPainelLong"></div>
+        <div class="card pp-painel hidden" id="ppPainelCol"></div>
+        <div class="card pp-vistas"><div class="pp-abas"><button type="button" class="ativo" data-v="frontal">Frontal</button><button type="button" data-v="lateral">Lateral</button><button type="button" data-v="superior">Superior</button></div>
           <div id="ppVista" class="pp-vista"></div></div>
-        <div class="card pp-bom"><h3>Lista de peças</h3><div id="ppBom"></div></div>
+        <div class="card pp-bom hidden" id="ppBomCard"><h3>Lista de peças</h3><div id="ppBom"></div></div>
       </section>
     </div>
   </main>

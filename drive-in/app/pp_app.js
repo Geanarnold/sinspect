@@ -31,7 +31,7 @@
       ['Longarina', `TB ${Lg.TB} · ${Lg.L} mm · ${Lg.capacidade != null ? Lg.capacidade.toLocaleString('pt-BR') + ' kg/par' : 'sem capacidade tabelada'}`], ['Carga no par', `${Lg.cargaPar.toLocaleString('pt-BR')} kg`],
       ['Níveis (apoio)', r.niveis.join(' · ') + ' mm'], ['Peso total', `${kg(r.pesoTotal)} kg`]].map(([k, v]) => `<div>${esc(k)}<b>${esc(v)}</b></div>`).join('');
     const ok = !r.erros.length;
-    for (const id of ['ppDxf', 'ppPdf', 'ppXlsx']) $(id).disabled = !ok;
+    for (const id of ['ppDxf', 'ppPdf', 'ppXlsx', 'ppBtnBom']) $(id).disabled = !ok;
     $('ppVista').innerHTML = ok ? PPDesenho.svg(r, vista) : '<p class="nota">Corrija os erros para ver o desenho.</p>';
     let grupo = '', html = '<table><thead><tr><th>Código</th><th>Descrição</th><th class="n">Qtd</th><th class="n">Compr.</th><th class="n">Peso unit.</th><th class="n">Peso total</th><th>Obs.</th></tr></thead><tbody>';
     for (const p of r.pecas) {
@@ -39,7 +39,33 @@
       html += `<tr${p.atencao ? ' class="atencao"' : ''}><td>${esc(p.codigo)}</td><td>${esc(p.desc)}</td><td class="n">${p.qtd}</td><td class="n">${p.compr == null ? '' : Math.round(p.compr * 10) / 10}</td><td class="n">${kg(p.pesoUnit)}</td><td class="n">${kg(p.pesoTotal)}</td><td>${esc(p.obs)}</td></tr>`;
     }
     $('ppBom').innerHTML = html + `</tbody><tfoot><tr><td colspan="5">Total (itens com peso)</td><td class="n">${kg(r.pesoTotal)}</td><td></td></tr></tfoot></table>`;
+    painelLongarina(r); painelColuna(r);
   }
+  const fmtKg = (v) => v == null ? '–' : Math.round(v).toLocaleString('pt-BR');
+  // "Calcular longarina": capacidade de todos os perfis da F 237 no comprimento do projeto, com o escolhido marcado
+  function painelLongarina(r) {
+    const Lg = r.longarina, L = Lg.L, linhas = PPLongarina.PERFIS.map((p) => {
+      const cap = PPLongarina.capacidade(p, L), ok = cap != null && cap >= Lg.cargaPar, peso = p.kgm * L / 1000 + 2 * p.garra.kg;
+      return `<tr${p.id === Lg.perfil ? ' class="sel"' : ''}><td>TB ${p.h} #${p.esp.toFixed(2).replace('.', ',')}${p.id === Lg.auto ? ' (automático)' : ''}</td><td class="n">${fmtKg(cap)}</td><td class="${cap == null ? '' : ok ? 'pp-ok' : 'pp-nok'}">${cap == null ? 'sem tabela' : ok ? 'atende' : 'não atende'}</td><td class="n">${kg(peso)}</td><td>${p.id === Lg.perfil ? 'em uso' : `<button type="button" class="mini-btn" data-perfil="${p.id}">usar</button>`}</td></tr>`;
+    }).join('');
+    $('ppPainelLong').innerHTML = `<h3>Longarina – ${L} mm, carga no par ${fmtKg(Lg.cargaPar)} kg (${r.entradas.nPal} × ${fmtKg(r.entradas.carga)} kg)</h3>
+      <p class="nota">F 237 rev.006 – carga admissível no par, flecha &lt; L/200 (NBR 17150 / NBR 15524 / NBR 14762). Comprimento intermediário usa o tabelado maior seguinte.</p>
+      <table><thead><tr><th>Perfil</th><th class="n">Capacidade (kg/par)</th><th>Situação</th><th class="n">Peso (kg/un.)</th><th></th></tr></thead><tbody>${linhas}</tbody></table>`;
+    $('ppPainelLong').querySelectorAll('button[data-perfil]').forEach((b) => b.addEventListener('click', () => { $('ppPerfil').value = b.dataset.perfil; guardar(); render(); }));
+  }
+  // "Calcular colunas": F 382 – carga na coluna mais carregada × capacidade no maior vão entre níveis
+  function painelColuna(r) {
+    const v = r.verifColuna, E = r.entradas;
+    if (!v) { $('ppPainelCol').innerHTML = ''; return; }
+    const linhas = v.opcoes.map((o) => { const ok = o.capacidade != null && v.carga <= o.capacidade && !v.motivo;
+      return `<tr${o.id === v.id ? ' class="sel"' : ''}><td>COL ${o.id.replace('#', ' #')}</td><td class="n">${fmtKg(o.capacidade)}</td><td class="n">${o.capacidade ? Math.round(100 * v.carga / o.capacidade) + '%' : '–'}</td><td class="${o.capacidade == null ? '' : ok ? 'pp-ok' : 'pp-nok'}">${o.capacidade == null ? 'sem tabela' : ok ? 'atende' : 'não atende'}</td><td>${o.id === v.id ? 'em uso' : `<button type="button" class="mini-btn" data-esp="${o.id.split('#')[1].replace(',', '.')}">usar</button>`}</td></tr>`; }).join('');
+    $('ppPainelCol').innerHTML = `<h3>Colunas – COL ${E.col}: ${r.niveis.length} nível(is) × ${fmtKg(r.longarina.cargaPar)} kg ÷ 2 = ${fmtKg(v.carga)} kg na coluna mais carregada</h3>
+      <p class="nota">F 382 rev.00 – maior distância entre níveis h = ${v.h} mm (tabela em ${v.hRef || '–'} mm). Altura até 12 m. ${v.motivo ? '<b class="pp-nok">' + esc(v.motivo) + '</b>' : ''}${v.travSuperior ? ' <b class="pp-nok">Exige travamento superior a cada 3 montantes.</b>' : ''}</p>
+      <table><thead><tr><th>Coluna</th><th class="n">Capacidade (kgf)</th><th class="n">Uso</th><th>Situação</th><th></th></tr></thead><tbody>${linhas}</tbody></table>
+      <p class="nota">Para outro modelo de coluna (80/101/122), troque na caixa "4. Quadro".</p>`;
+    $('ppPainelCol').querySelectorAll('button[data-esp]').forEach((b) => b.addEventListener('click', () => { $('ppEsp').value = b.dataset.esp; guardar(); render(); }));
+  }
+  const abrir = (id) => { $(id).classList.remove('hidden'); $(id).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
   const maius = (id) => String($(id).value || '').trim().toUpperCase();
   const nomeArq = () => ($('ppProjeto').value || 'porta-palete').replace(/[^\w-]+/g, '_');
@@ -60,6 +86,9 @@
     document.querySelectorAll('.pp-abas button[data-v]').forEach((b) => b.addEventListener('click', () => {
       vista = b.dataset.v; document.querySelectorAll('.pp-abas button[data-v]').forEach((x) => x.classList.toggle('ativo', x === b)); render();
     }));
+    $('ppBtnLong').addEventListener('click', () => { render(); abrir('ppPainelLong'); });
+    $('ppBtnCol').addEventListener('click', () => { render(); abrir('ppPainelCol'); });
+    $('ppBtnBom').addEventListener('click', () => { render(); abrir('ppBomCard'); });
     // fora do Emitir (que o PP ainda não tem), DXF, PDF e lista saem como RASCUNHO, igual ao Drive-In
     $('ppDxf').addEventListener('click', () => { if (!ultimo) return; baixar(`${nomeArq()}-PP-projeto_RASCUNHO.dxf`, new Blob([PPDesenho.dxf(ultimo, 'A', dadosFolha(ultimo))], { type: 'application/dxf' })); });
     $('ppPdf').addEventListener('click', () => {

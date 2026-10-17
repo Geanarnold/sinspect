@@ -20,6 +20,37 @@
   const PARAFUSO_TRAV = { 80: 'INT0993', 101: 'INT0958', 122: 'INT0973' };
   const TUBO = { 80: 'TUBO-80', 101: 'TUBO-101', 122: 'TUBO-122' };
 
+  // F 382 rev.00 (20/02/2024) – capacidade da coluna (kgf) × distância entre níveis h, de 500 a 2600 mm (passo 100); até 12 m de altura
+  const F382_H = []; for (let h = 500; h <= 2600; h += 100) F382_H.push(h);
+  const linha = (v) => Object.fromEntries(F382_H.map((h, i) => [h, v[i]]));
+  const F382 = {
+    '80#1,8': linha([12586, 12102, 11509, 10789, 10105, 9886, 9731, 9540, 9321, 9120, 8865, 8618, 8317, 8044, 7734, 7469, 7187, 6858, 6576, 6220, 5910, 5636]),
+    '80#2,0': linha([15659, 14984, 14109, 13096, 12111, 11820, 11637, 11309, 11044, 10780, 10479, 10090, 9704, 9302, 8947, 8536, 8199, 7825, 7332, 6949, 6585, 6220]),
+    '101#1,8': linha([14829, 14829, 14829, 14829, 14683, 14556, 14419, 14136, 13890, 13780, 13388, 13169, 12713, 12531, 12130, 11765, 11382, 10962, 10625, 10342, 9822, 9467]),
+    '101#2,0': linha([16890, 16890, 16890, 16890, 16452, 16270, 15978, 15686, 15559, 15276, 14975, 14592, 14200, 13844, 13580, 13042, 12732, 12139, 11774, 11418, 10882, 10470]),
+    '101#2,25': linha([19370.9, 19370.9, 19370.9, 19370.9, 18449.8, 18240, 18112.3, 17784, 17437.4, 17291.5, 16780.8, 16525.4, 15914.4, 15675.5, 15212.2, 14619.4, 14263.7, 13734.7, 13297, 12795.4, 12193.4, 11837.8]),
+    '101#2,65': linha([23009.8, 23009.8, 23009.8, 23009.8, 21906.2, 21660, 21468.5, 21076.3, 20702.4, 20301.1, 19772.2, 19389.1, 18887.5, 18395, 18021.1, 17315.2, 16726.1, 16105.9, 15595.2, 15002.4, 14291, 13871.5]),
+    '122#1,8': linha([15267, 15267, 15267, 15267, 15267, 15267, 15267, 15230, 15230, 15230, 15230, 15230, 15230, 15230, 15230, 15230, 14866, 14647, 14291, 13862, 13589, 13096]),
+    '122#2,0': linha([17492, 17492, 17492, 17492, 17492, 17492, 17492, 17456, 17456, 17456, 17456, 17456, 17456, 17456, 17401, 17054, 16653, 16243, 15832, 15504, 15066, 14656]),
+    '122#2,25': linha([20283, 20283, 20283, 20283, 20283, 20283, 20283, 20246, 20246, 20246, 20246, 20246, 20246, 20046, 19517, 19128, 18678, 18422, 17948, 17383, 16890, 16434]),
+    '122#2,65': linha([24907, 24907, 24907, 24907, 24907, 24907, 24907, 24925, 24925, 24925, 24679, 24442, 23976, 23533, 23183, 22676, 21961, 21624, 21204, 20593, 20000, 19280]),
+  };
+  // verificação da coluna: h = maior distância entre níveis (piso → 1º nível e entre níveis), tabela no h imediatamente maior (a favor da segurança);
+  // carga na coluna mais carregada (interna) = níveis × carga do par ÷ 2 (cada quadro recebe meia carga de cada módulo vizinho; o palete do chão não carrega a coluna)
+  function verificarColuna(col, esp, niveis, cargaPar, H, P) {
+    const id = `${col}#${String(Number(esp).toFixed(2)).replace(/0$/, '').replace('.', ',')}`, tab = F382[id];
+    const vaos = niveis.map((y, k) => y - (k ? niveis[k - 1] : 0)), h = Math.max(...vaos);
+    const hRef = F382_H.find((x) => x >= h), carga = niveis.length * cargaPar / 2;
+    const cap = tab && hRef ? tab[hRef] : null;
+    const r = { id, h, hRef: hRef || null, carga, capacidade: cap, uso: cap ? carga / cap : null, ok: cap != null && carga <= cap, motivo: '' };
+    if (!tab) r.motivo = `COL ${col} #${String(esp).replace('.', ',')} não está na F 382.`;
+    else if (!hRef) r.motivo = `Distância entre níveis de ${h} mm acima de 2600 mm (fora da F 382).`;
+    else if (H > 12000) { r.ok = false; r.motivo = 'Altura acima de 12 m: fora da F 382.'; }
+    r.travSuperior = H > 8000 && H / P >= 8; // F 382, determinação 1
+    r.opcoes = Object.keys(F382).filter((k) => k.startsWith(col + '#')).map((k) => ({ id: k, capacidade: hRef ? F382[k][hRef] : null }));
+    return r;
+  }
+
   const ceil50 = (v) => Math.ceil(v / 50) * 50;
   const r1 = (v) => Math.round(v * 10) / 10;
 
@@ -130,18 +161,21 @@
     }
 
     if (fileiras === 2) alertas.push('Fileira dupla: espaçadores entre quadros e travamentos (etapa 5) ainda não entram na lista.');
-    alertas.push('Coluna sem verificação pela F 382 (etapa 7): conferir com a engenharia.');
+    const vc = verificarColuna(col, esp, niveis, cargaPar, H, P);
+    if (vc.motivo) alertas.push(`Coluna sem verificação: ${vc.motivo} Conferir com a engenharia.`);
+    else if (!vc.ok) alertas.push(`COLUNA NÃO ATENDE (F 382): COL ${col} #${esp.replace('.', ',')} suporta ${Math.round(vc.capacidade)} kgf com h = ${vc.hRef} mm; carga na coluna ${Math.round(vc.carga)} kg. Trocar coluna/espessura ou CONSULTAR ENGENHARIA.`);
+    if (vc.travSuperior) alertas.push('Acima de 8 m com altura/profundidade ≥ 8: F 382 pede travamento superior a cada 3 montantes (etapa 5).');
 
     return {
       tipo: 'PP', erros, alertas, pecas,
       entradas: { col, esp, frente, profPal, hp, carga, nPal, nNiv, chao, modulos, fileiras, entreFileiras, P, modulacao, espTrav, peDireito: pd },
       dimensoes: { comprimento, profundidade, altura: H },
       longarina: { L, Lcalc, perfil: perfil ? perfil.id : null, TB, garraH: perfil && perfil.garra === LG.GARRA3 ? 150 : 250, capacidade: lg.capacidade, cargaPar, atencao: !!lg.atencao, auto: lg.auto },
-      niveis, passo, lateral: { ys, topo, nD }, posicoes, quadros, colunas,
+      niveis, passo, lateral: { ys, topo, nD }, posicoes, quadros, colunas, verifColuna: vc,
       pesoTotal: pecas.reduce((s, p) => s + (p.pesoTotal || 0), 0),
     };
   }
 
-  const PPEngine = { calcular, horizontais, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
+  const PPEngine = { calcular, horizontais, verificarColuna, F382, AVISO_ESTRUTURAL: DI ? DI.AVISO_ESTRUTURAL : '', NOTA_RESPONSABILIDADE: DI ? DI.NOTA_RESPONSABILIDADE : '' };
   if (typeof module !== 'undefined' && module.exports) module.exports = PPEngine; else root.PPEngine = PPEngine;
 })(typeof window !== 'undefined' ? window : globalThis);

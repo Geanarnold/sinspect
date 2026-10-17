@@ -169,3 +169,9 @@ Premissas ainda abertas:
 - 2 longarinas por nível por módulo; colunas = 2 por quadro, quadros = módulos + 1 por fileira.
 - Desenho usa a coluna frontal e a sapata do Drive-In (blocos DI); sapata PP só na lista de peças.
 - Fileira dupla sem espaçador e sem travamentos (etapa 5); coluna sem verificação F 382 (etapa 7).
+
+### Tela v2 (17/10/2026) – caixas organizadas e botões
+- Formulário em 5 caixas recolhíveis: Projeto, Palete, Estrutura, Quadro, Longarina e ajustes.
+- Barra de botões: **Calcular** Longarina / Colunas; **Gerar** Lista de peças / Projeto (PDF) / Projeto (DXF) / Lista (Excel).
+- Calcular longarina: todos os perfis da F 237 no comprimento do projeto (capacidade, atende/não atende, peso) com botão "usar".
+- Calcular colunas (F 382): carga na coluna mais carregada = níveis × carga do par ÷ 2 (palete do chão não carrega a coluna); h = maior distância entre níveis (piso → 1º nível e entre níveis), tabela no h imediatamente maior; COL 80 só #1,8/#2,0 na tabela; acima de 12 m ou h > 2600 → sem verificação. Premissa de carga **a confirmar com a engenharia**.
