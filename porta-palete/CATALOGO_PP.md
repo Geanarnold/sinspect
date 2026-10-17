@@ -41,3 +41,13 @@ Blocos de desenho recebidos (vista frontal, sapata montada com fixadores, layer 
 | SA041150 | PP PERFIL "U" PROTETOR COLUNA – 400 mm PL | 1,817 kg |
 | SA041080 | PP PERFIL "U" PROTETOR COLUNA – 450 mm PL | 1,990 kg |
 | SA041100 | PP PERFIL "U" PROTETOR COLUNA – 600 mm PL | 2,691 kg |
+
+## 3. Colunas e tala de junção
+Iguais às do Drive-In (COL 80/101/122, espessuras, SA por altura, peça máx. 8.500 mm, emenda) – Gean, 17/10/2026.
+
+## 4. Quadro (lateral) – amarração
+**Profundidade do quadro (Gean, 17/10/2026):** de 600 a 1.200 mm, de 50 em 50 mm (600, 650, …, 1.200), escolhida pelo operador; o ideal é o padrão, mas o cliente pode pedir outra medida dentro da faixa. Medida **face externa a face externa das colunas** (mesma convenção do A do Drive-In).
+
+Travessa horizontal pela regra do DI (comprimento total = profundidade − 78,6 mm, SA cadastrado ±3 mm): com SA para 600, 700, 750, 800, 850, 900, 950, 1.000, 1.050 e 1.200; **sem SA para 650, 1.100 e 1.150** (sairiam SA04XXXX, peso pelo kg/m). A confirmar se a regra de comprimento do DI vale para o quadro do PP.
+
+Pendente: padrão das travessas (altura da 1ª, passo, diagonal, topo) e variações de amarração.
