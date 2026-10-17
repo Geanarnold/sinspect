@@ -186,3 +186,6 @@ Premissas ainda abertas:
 - F 382 por linha de colunas: carga = ¼ da carga do par por nível de cada módulo vizinho; h pelos níveis dos dois lados.
 - Desenho: carga do palete escrita no bloco do palete (como no Drive-In); vista superior com o bloco DI_MONT_<col> do Drive-In.
 - Vista lateral corrigida (Gean, conferido nos des. 0004.0001.01.022 e .055): diagonais em Z, **todas no mesmo sentido** (do alto à esquerda para baixo à direita), não alternadas; **uma vista lateral por altura de quadro**.
+- Entrada dos níveis (Gean, 17/10/2026): o operador informa a **quantidade de níveis** e cada nível tem a sua caixa (N1, N2…). Caixa em branco = calculada pelo nível de baixo (palete + 100 + TB, múltiplo de 50) e mostrada em cinza; mudar o N1 empurra os de cima que estão em branco. Túnel: N1 obrigatório. Erro se um nível for menor ou igual ao de baixo.
+- Cotas de comprimento (cada longarina e total do corte) e da profundidade do quadro: **500 mm acima do palete mais alto** (Gean).
+- Vista lateral: foco na montante – paletes só em contorno, sem hachura, desenhados por baixo do quadro.

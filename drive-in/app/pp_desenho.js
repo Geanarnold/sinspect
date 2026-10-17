@@ -29,6 +29,8 @@
   function frontal(r, titulo) {
     const m = novoModelo(), { colunaFrontal, nomeBloco, nb, geoPalete, clone } = X();
     const E = r.entradas, col = E.col, xs = eixos(r), Hmax = r.dimensoes.altura;
+    // cotas de comprimento (cada longarina e total) sempre 500 mm acima do palete mais alto (Gean) — não cruzam paletes nem colunas
+    const yCota = Math.max(Hmax, ...r.modulos.map((md) => (md.niveis.length ? md.niveis[md.niveis.length - 1] : 0) + md.hp)) + 500;
     xs.forEach((x, j) => m.put(colunaFrontal(col, r.colunasH[j]), x, 0, 'MONTANTE', nomeBloco('PP_COLUNA_FRONTAL', col, 'H' + r.colunasH[j])));
     // tala de junção (SA040045, blank 99 x 227 #2,65) na emenda da coluna: barra inferior de 8500 + superior; tala centrada na junta
     const yJ = r.emendaY + X().BASE_BARRA, tala = [...m.caixa(-col / 2 + 6, -113.5, col / 2 - 6, 113.5, 'CANELEIRA_HACHURA'), { t: 'p', l: 'CANELEIRA_HACHURA', p: [[-col / 2, 0], [col / 2, 0]] }];
@@ -46,7 +48,7 @@
         m.put(clone(pal), xp, y, 'PALETE', nomeP);
         if (md.carga) m.text(xp + md.frente / 2, y + md.hp / 2, 110, `${md.carga} kg`, 'PALETE'); // carga no palete, como no Drive-In
       }
-      m.cota(x0, Hmax, x0 + L, Hmax, 300, `${L}`, false, 'c');
+      m.cota(x0, yCota - 1, x0 + L, yCota - 1, 1, `${L}`, false, 'c');
       if (md.tunel) m.text(x0 + L / 2, Math.min(md.niveis[0] || 1000, 2000) / 2, 150, 'TÚNEL', TXT);
       // níveis do módulo: cota corrente na coluna da esquerda do módulo (piso → níveis)
       const marcas = [0, ...md.niveis];
@@ -55,11 +57,11 @@
     });
     const xa = xs[0] - col / 2, xb = xs[xs.length - 1] + col / 2;
     piso(m, xa - 1000, xb + 1000);
-    m.cota(xa, Hmax, xb, Hmax, 650, `${Math.round(xb - xa)}`, false, 'g');
+    m.cota(xa, yCota - 1, xb, yCota - 1, 351, `${Math.round(xb - xa)}`, false, 'g');
     m.cota(xa, 0, xa, r.colunasH[0], 450, `${r.colunasH[0]}`, true, 'g');
     if (r.colunasH.some((h) => h !== r.colunasH[0])) xs.forEach((x, j) => j && m.text(x, r.colunasH[j] + 120, 80, `H ${r.colunasH[j]}`, 'COTAS', 0, 1, 'ROMANS'));
     m.text((xa + xb) / 2, -600, 120, titulo, TXT);
-    return { ...m, bbox: [xa - 1500, -900, xb + 1000, Hmax + 1150] };
+    return { ...m, bbox: [xa - 1500, -900, xb + 1000, yCota + 800] };
   }
 
   // ---- vista lateral: o quadro mais alto do corte, com as travessas da modulação; longarinas em corte e paletes dos módulos vizinhos
@@ -71,6 +73,10 @@
     const niv = [...new Set([].concat(...viz.map((v) => v.niveis)))].sort((a, b) => a - b), TB = Math.max(...viz.map((v) => v.TB));
     const holeY = (y) => 54.75 + 50 * Math.round((y - 54.75) / 50);
     const inicios = []; for (let f = 0; f < E.fileiras; f++) inicios.push(f * (P + E.entreFileiras));
+    // foco na montante (Gean): paletes só em contorno, sem hachura, desenhados primeiro (o quadro fica por cima)
+    const palL = geoPalete(E.profPal, md.hp, false), nomeP = nomeBloco('PP_PALETE_LT', nb(E.profPal) + 'X' + nb(md.hp), 'C');
+    for (const x0 of inicios) for (const y of (md.chao ? [0] : []).concat(md.niveis)) m.put(clone(palL), x0 + (P - E.profPal) / 2, y, 'PALETE', nomeP);
+    const yCota = Math.max(H, (md.niveis.length ? md.niveis[md.niveis.length - 1] : 0) + md.hp) + 500;
     for (const x0 of inicios) {
       const xA = x0 + CW / 2, xB = x0 + P - CW / 2; // eixos das 2 colunas (P = face externa a face externa)
       m.put(coluna(H, true), xA, 0, 'MONTANTE', nomeBloco('DI_COLUNA', 'H' + H, 'D')); m.put(sapata(), xA - 7.35, 0, 'MONTANTE', nomeBloco('DI_SAPATA', 'D'));
@@ -83,12 +89,10 @@
       }
       const sec = [...m.caixa(0, -TB, 50, 0, 'LONGARINA')], nomeS = nomeBloco('PP_LONG_CORTE', 'TB' + TB);
       for (const y of niv) { m.put(clone(sec), x0 - 50, y, 'LONGARINA', nomeS); m.put(clone(sec), x0 + P, y, 'LONGARINA', nomeS); }
-      const pal = geoPalete(E.profPal, md.hp, true), xp = x0 + (P - E.profPal) / 2, nomeP = nomeBloco('PP_PALETE_LT', nb(E.profPal) + 'X' + nb(md.hp));
-      for (const y of (md.chao ? [0] : []).concat(md.niveis)) m.put(clone(pal), xp, y, 'PALETE', nomeP);
-      m.cota(x0, H, x0 + P, H, 300, `${P}`, false, 'c');
+      m.cota(x0, yCota - 1, x0 + P, yCota - 1, 1, `${P}`, false, 'c');
     }
     const xa = 0, xb = inicios[inicios.length - 1] + P;
-    if (E.fileiras === 2) m.cota(P, H, P + E.entreFileiras, H, 300, `${E.entreFileiras}`, false, 'c');
+    if (E.fileiras === 2) m.cota(P, yCota - 1, P + E.entreFileiras, yCota - 1, 1, `${E.entreFileiras}`, false, 'c');
     piso(m, xa - 1500, xb + 1500);
     const marcas = [0, ...ys, H + X().BASE_BARRA].filter((v, k, a) => k === 0 || v - a[k - 1] > 1);
     for (let k = 0; k < marcas.length - 1; k++) m.cota(xa, marcas[k], xa, marcas[k + 1], 300, `${Math.round(marcas[k + 1] - marcas[k])}`, true, 'c');
@@ -96,7 +100,7 @@
     m.text((xa + xb) / 2, -600, 120, titulo, TXT);
     const iguais = r.colunasH.map((h, j) => (h === H ? j + 1 : null)).filter(Boolean);
     if (r.quadros.some((q) => q.H !== H)) m.text((xa + xb) / 2, -780, 80, `QUADRO ${H} mm - COLUNA(S) ${iguais.join(', ')}`, TXT);
-    return { ...m, bbox: [xa - 1900, -900, xb + 1200, H + 1150] };
+    return { ...m, bbox: [xa - 1900, -900, xb + 1200, yCota + 700] };
   }
 
   // ---- vista superior: colunas, longarinas (frente e fundo) e travessas em cada fileira

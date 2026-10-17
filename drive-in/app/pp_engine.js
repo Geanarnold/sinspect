@@ -115,18 +115,22 @@
       if (m.compLongarina && L < Lcalc) alertas.push(`${nm}: longarina de ${L} mm menor que a necessária para ${nPal} palete(s) de ${frente} mm com folgas de 100 mm (${Lcalc} mm).`);
       const perfil = lg.erro ? null : LG.PERFIS.find((p) => p.id === lg.perfil), TB = perfil ? perfil.h : 80;
       const passo = ceil50(hp + FOLGA_VERTICAL + TB);
-      let niveis = lerAlturas(m.alturas), digitado = niveis.length > 0;
-      if (!digitado) {
-        if (tunel) erros.push(`${nm} (túnel): informe as alturas dos níveis na caixa do módulo.`);
-        const nNiv = Math.max(1, Math.round(N(m.niveis, 3))), alt1 = chao ? passo : ceil50(TB + 150);
-        niveis = []; for (let k = 0; k < nNiv; k++) niveis.push(alt1 + k * passo);
-      } else {
-        niveis.sort((a, b) => a - b);
-        niveis.forEach((y, k) => {
-          if (y % 50) alertas.push(`${nm}: nível ${y} mm fora da furação de 50 mm da coluna.`);
-          const base = k ? niveis[k - 1] : chao ? 0 : null, minimo = hp + FOLGA_VERTICAL + TB;
-          if (base != null && y - base < minimo) alertas.push(`${nm}: ${k ? `entre ${base} e ${y}` : `do piso a ${y}`} mm não cabe o palete de ${hp} mm + 100 de folga + longarina TB ${TB} (mínimo ${minimo} mm).`);
-        });
+      // níveis (Gean): o operador informa a QUANTIDADE e, se quiser, a altura de cada nível numa caixa própria (N1, N2…).
+      // Caixa vazia = calculado a partir do nível de baixo (palete + 100 + TB, múltiplo de 50); mudar o N1 empurra os de cima que estão em branco.
+      // Túnel: N1 obrigatório (1º nível mais alto). Aceita também o formato antigo (texto "1000 2400 3800").
+      const dados = Array.isArray(m.alturas) ? m.alturas.map((v) => (v === '' || v == null ? 0 : Number(v))) : lerAlturas(m.alturas);
+      const nNiv = !Array.isArray(m.alturas) && dados.length ? dados.length : Math.max(1, Math.round(N(m.niveis, 3))); // texto antigo: a lista define os níveis
+      const niveis = [], digitado = [], minimo = hp + FOLGA_VERTICAL + TB;
+      for (let k = 0; k < nNiv; k++) {
+        const v = dados[k] > 0 ? dados[k] : 0;
+        digitado.push(!!v);
+        const auto = k ? niveis[k - 1] + passo : chao ? passo : ceil50(TB + 150);
+        if (!v && !k && tunel) erros.push(`${nm} (túnel): informe a altura do 1º nível (N1) na caixa do módulo.`);
+        niveis.push(v || auto);
+        const y = niveis[k], base = k ? niveis[k - 1] : chao ? 0 : null;
+        if (v && v % 50) alertas.push(`${nm}: N${k + 1} = ${v} mm fora da furação de 50 mm da coluna.`);
+        if (k && y <= niveis[k - 1]) erros.push(`${nm}: N${k + 1} (${y} mm) tem de ser maior que N${k} (${niveis[k - 1]} mm).`);
+        else if (base != null && y - base < minimo) alertas.push(`${nm}: ${k ? `entre N${k} (${base}) e N${k + 1} (${y})` : `do piso ao N1 (${y})`} não cabe o palete de ${hp} mm + 100 de folga + longarina TB ${TB} (mínimo ${minimo} mm).`);
       }
       // túnel (Gean, 17/10/2026): sem peças especiais – longarina maior (comprimento do vão do túnel) e 1º nível mais alto, ambos informados no módulo
       if (pd > 0 && niveis.length && niveis[niveis.length - 1] + hp + FOLGA_VERTICAL > pd) alertas.push(`${nm}: último palete (topo a ${niveis[niveis.length - 1] + hp} mm + folga) passa do pé-direito de ${pd} mm.`);

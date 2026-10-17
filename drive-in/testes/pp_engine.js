@@ -38,6 +38,14 @@ t('módulos diferentes: alturas digitadas, carga, túnel e coluna pelo vizinho m
   assert.ok(!r.alertas.some((a) => a.includes('túnel'))); // túnel sem peças especiais (Gean)
   assert.ok(E.calcularCorte(corte({}, [{ ...MOD, tunel: true }]), cat).erros.some((e) => e.includes('túnel'))); // túnel sem alturas
 });
+t('caixas de nível: vazio = calculado a partir do de baixo; N1 empurra os de cima', () => {
+  const r = E.calcularCorte(corte({}, [{ ...MOD, niveis: 4, alturas: ['1000', '', '', '5000'] }, { ...MOD, niveis: 3, alturas: ['', '2000', ''] }, { ...MOD, tunel: true, niveis: 2, alturas: ['', ''] }]), cat);
+  assert.deepStrictEqual(r.modulos[0].niveis, [1000, 2400, 3800, 5000]); assert.deepStrictEqual(r.modulos[0].digitado, [true, false, false, true]);
+  assert.deepStrictEqual(r.modulos[1].niveis, [1400, 2000, 3400]);
+  assert.ok(r.alertas.some((a) => a.startsWith('Módulo 1: do piso ao N1 (1000)'))); assert.ok(r.alertas.some((a) => a.startsWith('Módulo 2: entre N1 (1400) e N2 (2000)')));
+  assert.ok(r.erros.some((e) => e.startsWith('Módulo 3 (túnel): informe a altura do 1º nível')));
+  assert.ok(E.calcularCorte(corte({}, [{ ...MOD, niveis: 2, alturas: ['3000', '2000'] }]), cat).erros.some((e) => e.includes('N2 (2000 mm) tem de ser maior')));
+});
 t('altura de coluna editada só sobe', () => {
   const r = E.calcularCorte(corte({ alturasColunas: [6000, 5000, '', 0, 7020] }), cat);
   assert.deepStrictEqual(r.colunasH, [6000, 5850, 5850, 5850, 7050]);

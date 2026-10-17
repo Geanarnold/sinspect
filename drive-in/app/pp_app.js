@@ -10,7 +10,7 @@
   const CAB = ['ppCliente', 'ppProjeto', 'ppCidade', 'ppUf', 'ppDesenhista', 'ppRevisao'];
   const CHAVE = 'paletcad_pp_projeto';
   const PERFIS = ['80#1,5', '90#1,5', '100#1,5', '110#1,5', '130#1,5', '150#1,5', '150#1,8', '150#2,0'];
-  const MOD0 = { paletesNivel: 2, frentePalete: 1000, alturaPalete: 1200, cargaPalete: 1000, niveis: 3, paleteChao: true, tunel: false, alturas: '', perfilLongarina: '', compLongarina: '' };
+  const MOD0 = { paletesNivel: 2, frentePalete: 1000, alturaPalete: 1200, cargaPalete: 1000, niveis: 3, paleteChao: true, tunel: false, alturas: [], perfilLongarina: '', compLongarina: '' };
   const novoCorte = (nome) => ({ nome: nome || '', qtd: 1, coluna: '80', espessura: '2.0', profPalete: 1200, profQuadro: 1000, modulacao: 'padrao', espTrav: '1.4', fileiras: '1', entreFileiras: 300, peDireito: '',
     alturasColunas: [], editarColunas: false, modulos: [1, 2, 3, 4].map(() => ({ ...MOD0 })) });
   let proj = { cab: {}, atual: 0, cortes: [novoCorte('A')] }, vista = 'frontal', ultimo = null, lista = [];
@@ -32,6 +32,14 @@
   const chk = (id, rot, v) => `<div class="campo"><label class="chk"><input id="${id}" type="checkbox"${v ? ' checked' : ''}/> ${rot}</label></div>`;
   const prof = []; for (let v = 600; v <= 1200; v += 50) prof.push([v, v]);
 
+  // caixas de nível do módulo: lista com uma posição por nível (aceita o formato antigo em texto)
+  function alturasArr(m) {
+    let a = Array.isArray(m.alturas) ? m.alturas.slice() : String(m.alturas || '').split(/[;,\s]+/).filter(Boolean);
+    if (!Array.isArray(m.alturas) && a.length) m.niveis = Math.max(Number(m.niveis) || 0, a.length);
+    const n = Math.max(1, Math.round(Number(m.niveis) || 1));
+    a = a.slice(0, n); while (a.length < n) a.push('');
+    m.alturas = a; return a;
+  }
   function formCorte() {
     const c = C();
     const mods = c.modulos.map((m, i) => `
@@ -39,10 +47,11 @@
         ${campo(`m${i}_paletesNivel`, 'Paletes por nível', m.paletesNivel)}${campo(`m${i}_cargaPalete`, 'Peso do palete', m.cargaPalete, { un: 'kg' })}
         ${campo(`m${i}_frentePalete`, 'Frente do palete', m.frentePalete, { un: 'mm' })}${campo(`m${i}_alturaPalete`, 'Altura do palete', m.alturaPalete, { un: 'mm' })}
         ${chk(`m${i}_paleteChao`, 'Palete no chão', m.paleteChao && !m.tunel)}${chk(`m${i}_tunel`, 'Túnel (passagem embaixo)', m.tunel)}
-        ${campo(`m${i}_niveis`, 'Níveis (se as alturas ficarem em branco)', m.niveis)}
-        ${campo(`m${i}_alturas`, 'Alturas dos níveis – apoio da longarina', m.alturas, { tipo: 'text', un: 'mm', full: true, extra: ` placeholder="em branco = calculado; ex.: 1000 2400 3800"` })}
+        ${campo(`m${i}_niveis`, 'Níveis de longarina', m.niveis, { extra: ' min="1" max="20"' })}
+        <div class="full pp-niv"><label>Altura de cada nível (topo da longarina, medido do piso, em mm)</label><div class="pp-niv-g">${alturasArr(m).map((v, k) => `<div class="pp-niv-c"><span>N${k + 1}</span><input type="number" step="50" min="0" id="m${i}_n${k}" data-m="${i}" data-k="${k}" value="${esc(v)}"/></div>`).join('')}</div>
+          <p class="nota">Em branco = calculado pelo nível de baixo (palete + 100 + longarina). Digite só o que for diferente${m.tunel ? '; no túnel o N1 é obrigatório' : ''}.</p></div>
         ${sel(`m${i}_perfilLongarina`, 'Longarina', [['', 'Automática'], ...PERFIS.map((p) => [p, 'TB ' + p.replace('#', ' #')])], m.perfilLongarina)}${campo(`m${i}_compLongarina`, 'Comprimento', m.compLongarina, { un: 'mm', extra: ' step="50" placeholder="calculado"' })}
-        <div class="full pp-mod-acoes">${i ? `<button type="button" class="mini-btn" data-copiar="${i}">Igual ao módulo ${i}</button>` : '<button type="button" class="mini-btn" id="ppAplicarTodos">Aplicar este módulo a todos</button>'}<button type="button" class="mini-btn" data-alturas="${i}">Preencher alturas calculadas</button></div>
+        <div class="full pp-mod-acoes">${i ? `<button type="button" class="mini-btn" data-copiar="${i}">Igual ao módulo ${i}</button>` : '<button type="button" class="mini-btn" id="ppAplicarTodos">Aplicar este módulo a todos</button>'}<button type="button" class="mini-btn" data-limpar="${i}">Limpar alturas (voltar ao calculado)</button></div>
       </div></details>`).join('');
     $('ppFormCorte').innerHTML = `
       <details class="pp-box" open><summary>2. Corte</summary><div class="pp-campos">
@@ -67,26 +76,25 @@
     for (const [id, k] of Object.entries(MAPA_CORTE)) $(id).addEventListener($(id).tagName === 'SELECT' ? 'change' : 'input', () => { c[k] = $(id).value; if (id === 'cNome') renderCortes(); mudou(); });
     $('cNmod').addEventListener('change', () => {
       const n = Math.max(1, Math.min(60, Math.round(Number($('cNmod').value) || 1)));
-      while (c.modulos.length < n) c.modulos.push({ ...c.modulos[c.modulos.length - 1] }); // módulo novo = cópia do último
+      while (c.modulos.length < n) c.modulos.push(JSON.parse(JSON.stringify(c.modulos[c.modulos.length - 1]))); // módulo novo = cópia do último
       c.modulos.length = n; c.alturasColunas.length = Math.min(c.alturasColunas.length, n + 1);
       formCorte(); mudou();
     });
     c.modulos.forEach((m, i) => {
       for (const k of Object.keys(MOD0)) {
         const el = $(`m${i}_${k}`); if (!el) continue;
-        el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', () => {
+        el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' || k === 'niveis' ? 'change' : 'input', () => {
           m[k] = el.type === 'checkbox' ? el.checked : el.value;
           if (k === 'tunel') { if (m.tunel) m.paleteChao = false; formCorte(); }
+          if (k === 'niveis') { alturasArr(m); formCorte(); }
           mudou();
         });
       }
     });
-    document.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.dataset.copiar); c.modulos[i] = { ...c.modulos[i - 1] }; formCorte(); mudou(); }));
-    document.querySelectorAll('[data-alturas]').forEach((b) => b.addEventListener('click', () => {
-      const i = Number(b.dataset.alturas); if (!ultimo || !ultimo.modulos[i]) return;
-      c.modulos[i].alturas = ultimo.modulos[i].niveis.join(' '); formCorte(); mudou();
-    }));
-    if ($('ppAplicarTodos')) $('ppAplicarTodos').addEventListener('click', () => { c.modulos = c.modulos.map(() => ({ ...c.modulos[0] })); formCorte(); mudou(); });
+    document.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', () => { const i = Number(b.dataset.copiar); c.modulos[i] = JSON.parse(JSON.stringify(c.modulos[i - 1])); formCorte(); mudou(); }));
+    document.querySelectorAll('[data-limpar]').forEach((b) => b.addEventListener('click', () => { const m = c.modulos[Number(b.dataset.limpar)]; m.alturas = []; alturasArr(m); formCorte(); mudou(); }));
+    document.querySelectorAll('.pp-niv input[data-k]').forEach((el) => el.addEventListener('input', () => { c.modulos[Number(el.dataset.m)].alturas[Number(el.dataset.k)] = el.value; mudou(); }));
+    if ($('ppAplicarTodos')) $('ppAplicarTodos').addEventListener('click', () => { c.modulos = c.modulos.map(() => JSON.parse(JSON.stringify(c.modulos[0]))); formCorte(); mudou(); });
   }
 
   // caixa 5: alturas das colunas (calculadas = última longarina + 250); edição só pelo botão e só para subir
@@ -126,6 +134,7 @@
     const d = r.dimensoes, totPos = lista.reduce((s, x) => s + x.posicoes * x.qtd, 0), totPeso = lista.reduce((s, x) => s + x.pesoTotal * x.qtd, 0);
     $('ppResumo').innerHTML = [[`Corte ${r.nome || ''}`, `${r.posicoes} posições${r.qtd > 1 ? ` × ${r.qtd}` : ''}`], ['Comprimento × prof. × altura', `${Math.round(d.comprimento)} × ${Math.round(d.profundidade)} × ${d.altura} mm`],
       ['Peso do corte', `${kg(r.pesoTotal)} kg`], ['Projeto', `${proj.cortes.length} corte(s) · ${totPos} posições · ${kg(totPeso)} kg`]].map(([k, v]) => `<div>${esc(k)}<b>${esc(v)}</b></div>`).join('');
+    r.modulos.forEach((m, i) => m.niveis.forEach((y, k) => { const el = $(`m${i}_n${k}`); if (el) { el.placeholder = y; el.classList.toggle('calc', !m.digitado[k]); } }));
     r.modulos.forEach((m, i) => { const el = $(`ppModRes${i}`); if (el) el.innerHTML = `TB ${m.TB} · ${m.L} · ${m.niveis.join('/')}${m.atencao ? ' <b class="pp-nok">⚠</b>' : ''}`; });
     const ok = !r.erros.length && !errosProj.length && !outros.length;
     for (const id of ['ppDxf', 'ppPdf', 'ppXlsx', 'ppBtnBom']) $(id).disabled = !ok;
