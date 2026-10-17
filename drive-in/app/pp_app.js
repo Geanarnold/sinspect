@@ -15,7 +15,7 @@
   const QUADRO0 = { coluna: '80', espessura: '2.0', profPalete: 1200, profQuadro: 1000, modulacao: 'padrao', espTrav: '1.4', entreFileiras: 300, peDireito: '' };
   const novoTipo = (nome) => ({ nome, modulo: { ...MOD0, alturas: [] } });
   const novoProjeto = () => ({ cab: {}, quadro: { ...QUADRO0 }, tipos: [novoTipo('A')], atual: 0, fileiras: [{ nome: 'F1', dupla: false, seq: [{ tipo: 'A', qtd: 4 }], corredor: 3000 }] });
-  let proj = novoProjeto(), vista = 'frontal', ultimo = null;
+  let proj = novoProjeto(), vista = 'frontal', ultimo = null, etapa = 0;
   const T = () => proj.tipos[proj.atual] || proj.tipos[0];
   const copia = (o) => JSON.parse(JSON.stringify(o));
 
@@ -135,6 +135,25 @@
     $('ppAddFil').addEventListener('click', () => { const ult = F[F.length - 1]; if (ult && !ult.corredor) ult.corredor = 3000; F.push({ nome: `F${F.length + 1}`, dupla: false, seq: [{ tipo: T().nome || 'A', qtd: 4 }], corredor: '' }); formPlanta(); mudou(); });
   }
 
+  // ---------- etapas (abas como no Drive-In): 1 Projeto · 2 Quadro e palete · 3 Tipos de módulo · 4 Planta ----------
+  const NETAPAS = 4;
+  function mostrarEtapa(k) {
+    etapa = Math.max(0, Math.min(NETAPAS - 1, k));
+    document.querySelectorAll('[data-pp-etapa]').forEach((el) => el.classList.toggle('hidden', Number(el.dataset.ppEtapa) !== etapa));
+    document.querySelectorAll('[data-pp-passo]').forEach((el) => { const i = Number(el.dataset.ppPasso); el.classList.toggle('active', i === etapa); el.classList.toggle('feito', i < etapa); });
+    $('ppVoltar').disabled = etapa === 0; $('ppAvancar').textContent = etapa === NETAPAS - 1 ? 'Gerar lista de peças' : 'Avançar';
+    // a vista acompanha a etapa: tipos → frontal do tipo; planta → planta baixa
+    const v = etapa === 3 ? 'planta' : etapa === 2 && vista === 'planta' ? 'frontal' : null;
+    if (v) document.querySelector(`.pp-abas button[data-v="${v}"]`).click();
+  }
+  // pendências (erros) por etapa, no número da aba
+  function marcarPendencias(P) {
+    const n = [0, 0, 0, 0];
+    for (const e of P.erros) n[/^Tipo|tipos? de módulo/i.test(e) ? 2 : /^Fileira|planta/i.test(e) ? 3 : 1]++;
+    document.querySelectorAll('[data-pp-passo]').forEach((el) => { let b = el.querySelector('.pend'); const q = n[Number(el.dataset.ppPasso)];
+      if (!q) { if (b) b.remove(); return; } if (!b) { b = document.createElement('span'); b.className = 'pend'; el.appendChild(b); } b.textContent = q; });
+  }
+
   // ---------- cálculo e resultado ----------
   function mudou() { guardar(); render(); }
   function render() {
@@ -143,9 +162,11 @@
     $('ppMsgs').innerHTML = P.erros.map((m) => `<div class="pp-msg pp-erro">${esc(m)}</div>`).join('') + P.alertas.map((m) => `<div class="pp-msg pp-alerta">${esc(m)}</div>`).join('');
     $('ppResumo').innerHTML = [['Módulos', `${P.modulos}`], ['Posições', `${P.posicoes} pallets`], ['Peso total', `${kg(P.pesoTotal)} kg`],
       ...P.tipos.map((x) => [`Tipo ${x.nome}`, `${x.qtdModulos} mód. · ${x.posicoes} pos. · TB ${x.r.modulos[0].TB} ${x.r.modulos[0].L}`])].map(([k, v]) => `<div>${esc(k)}<b>${esc(v)}</b></div>`).join('');
-    P.fileiras.forEach((f, i) => { const el = $(`ppFilRes${i}`); if (el) el.textContent = `${f.r.modulos.length} mód. · ${Math.round(f.r.dimensoes.comprimento)} mm · ${f.r.posicoes} pos.`; });
+    document.querySelectorAll('.pp-fil-res').forEach((el) => { el.textContent = ''; });
+    P.fileiras.forEach((f) => { const i = proj.fileiras.findIndex((x, k) => String(x.nome || `F${k + 1}`).trim() === f.nome), el = $(`ppFilRes${i}`); if (el) el.textContent = `${f.r.modulos.length} mód. · ${Math.round(f.r.dimensoes.comprimento)} mm · ${f.r.posicoes} pos.`; });
     const ok = !P.erros.length;
     for (const id of ['ppDxf', 'ppPdf', 'ppXlsx', 'ppBtnBom']) $(id).disabled = !ok;
+    marcarPendencias(P);
     try {
       $('ppVista').innerHTML = vista === 'planta' ? (P.fileiras.length ? PPDesenho.svgPlanta(P) : '<p class="nota">Monte a planta (caixa 4).</p>') : t && !t.r.erros.length ? PPDesenho.svgTipo(t, vista) : '<p class="nota">Corrija os erros do tipo para ver o desenho.</p>';
     } catch (e) { $('ppVista').innerHTML = `<p class="nota">Desenho indisponível: ${esc(e.message)}</p>`; }
@@ -241,6 +262,9 @@
     document.querySelectorAll('.pp-abas button[data-v]').forEach((b) => b.addEventListener('click', () => {
       vista = b.dataset.v; document.querySelectorAll('.pp-abas button[data-v]').forEach((x) => x.classList.toggle('ativo', x === b)); render();
     }));
+    document.querySelectorAll('[data-pp-passo]').forEach((el) => el.addEventListener('click', () => mostrarEtapa(Number(el.dataset.ppPasso))));
+    $('ppVoltar').addEventListener('click', () => mostrarEtapa(etapa - 1));
+    $('ppAvancar').addEventListener('click', () => { if (etapa === NETAPAS - 1) $('ppBtnBom').click(); else mostrarEtapa(etapa + 1); });
     $('ppBtnLong').addEventListener('click', () => { render(); abrir('ppPainelLong'); });
     $('ppBtnCol').addEventListener('click', () => { render(); abrir('ppPainelCol'); });
     $('ppBtnBom').addEventListener('click', () => { render(); abrir('ppBomCard'); });

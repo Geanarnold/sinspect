@@ -50,6 +50,9 @@
     <div class="pp-cab"><h2>Porta-Palete <small>seletivo · em validação</small></h2><p class="nota">Padrão SUPRA: 1. Projeto · 2. Quadro e palete · 3. Tipos de módulo (cada tipo é um corte: A, B, TÚNEL…) · 4. Planta: fileiras simples ou duplas com a sequência de tipos e o corredor. A planta define a quantidade de módulos. Travamentos (etapa 5) ainda não entram na lista.</p></div>
     <div class="pp-grid">
       <aside class="pp-form">
+        <div class="pp-passos"><div class="pp-passo active" data-pp-passo="0"><span class="n">1</span><span class="t">Projeto</span></div><div class="pp-passo" data-pp-passo="1"><span class="n">2</span><span class="t">Quadro e palete</span></div><div class="pp-passo" data-pp-passo="2"><span class="n">3</span><span class="t">Tipos de módulo</span></div><div class="pp-passo" data-pp-passo="3"><span class="n">4</span><span class="t">Planta</span></div></div>
+        <div class="pp-box pp-cortes"><div class="pp-cortes-acoes"><button type="button" id="ppSalvar"><svg class="ic"><use href="#i-down"/></svg>Salvar arquivo</button><label class="btn-arquivo"><svg class="ic"><use href="#i-proj"/></svg>Abrir arquivo<input id="ppAbrir" type="file" accept=".json" hidden/></label><button type="button" id="ppNovoProj" class="discreto"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div></div>
+        <div class="pp-etapa" data-pp-etapa="0">
         <details class="pp-box" open><summary>1. Projeto</summary><div class="pp-campos">
 <div class="campo"><label for="ppCliente">Cliente</label><div class="in"><input id="ppCliente" type="text" value=""/></div></div>
 <div class="campo"><label for="ppProjeto">Projeto</label><div class="in"><input id="ppProjeto" type="text" value=""/></div></div>
@@ -58,12 +61,19 @@
 <div class="campo"><label for="ppDesenhista">Desenhista</label><div class="in"><input id="ppDesenhista" type="text" value=""/></div></div>
 <div class="campo"><label for="ppRevisao">Revisão</label><div class="in"><input id="ppRevisao" type="text" value="REV.00"/></div></div>
         </div></details>
-        <div class="pp-box pp-cortes"><div class="pp-cortes-acoes"><button type="button" id="ppSalvar"><svg class="ic"><use href="#i-down"/></svg>Salvar arquivo</button><label class="btn-arquivo"><svg class="ic"><use href="#i-proj"/></svg>Abrir arquivo<input id="ppAbrir" type="file" accept=".json" hidden/></label><button type="button" id="ppNovoProj" class="discreto"><svg class="ic"><use href="#i-plus"/></svg>Novo</button></div></div>
+        </div>
+        <div class="pp-etapa hidden" data-pp-etapa="1">
         <div id="ppFormQuadro"></div>
+        </div>
+        <div class="pp-etapa hidden" data-pp-etapa="2">
         <details class="pp-box" open><summary>3. Tipos de módulo (cortes)</summary><div class="pp-cortes"><div id="ppListaTipos" class="pp-chips"></div>
           <div class="pp-cortes-acoes"><button type="button" id="ppNovoTipo"><svg class="ic"><use href="#i-plus"/></svg>Novo tipo</button><button type="button" id="ppDupTipo"><svg class="ic"><use href="#i-proj"/></svg>Duplicar</button><button type="button" id="ppRemTipo" class="discreto"><svg class="ic"><use href="#i-trash"/></svg>Remover</button></div></div>
           <div id="ppFormTipo"></div></details>
+        </div>
+        <div class="pp-etapa hidden" data-pp-etapa="3">
         <details class="pp-box" open><summary>4. Planta – fileiras</summary><div id="ppFormPlanta"></div></details>
+        </div>
+        <div class="pp-nav"><button type="button" id="ppVoltar">Voltar</button><button type="button" id="ppAvancar" class="primario">Avançar</button></div>
       </aside>
       <section class="pp-res">
         <div class="card pp-barra">

@@ -197,3 +197,4 @@ Premissas ainda abertas:
 - **Folhas**: 1/2 = tipos (lateral + frontal de cada um, em grade) + quadro "DESCRIÇÕES TÉCNICAS PORTA PALLETS" (tipo, dimensão do módulo, empilhamento, carga por plano, qtd. de módulos, capacidade); 2/2 = planta baixa com os módulos rotulados (A 01…), comprimento de cada fileira, profundidades e corredores.
 - Altura da coluna por tipo: calculada (última longarina + 250); botão "Editar altura da coluna", só para subir.
 - Pendentes vistos nos projetos: detalhes padrão (chumbação, protetor, guard rail, distanciador, longarina tubo/cadeirinha), distanciador central (até 4 m 2 / 6 m 3 / 9 m 4 / 11 m 5), travamento superior, carga por plano escrita no nível (plano MDP/metálico), cargas não paletizadas (bobina) – depois.
+- Tela em **4 abas** como no Drive-In (Projeto · Quadro e palete · Tipos de módulo · Planta), com Voltar/Avançar, número de pendências (erros) em cada aba e a vista acompanhando a aba (tipos → frontal; planta → planta baixa).
